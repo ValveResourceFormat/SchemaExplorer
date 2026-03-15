@@ -1,128 +1,75 @@
-export const themeOriginal = {
-  background: "#4d5658",
-  highlight: "#455a64",
-  text: "#ffffff",
-  textDim: "#b0bec5",
+export const themeLight = {
+  colorScheme: "light",
+  background: "#f8f9fb",
+  highlight: "#4a8c2a",
+  text: "#1a1d21",
+  textDim: "#5f6672",
 
-  authorEpitaph: "#89a62e",
-
-  navbar: "#607d8b",
-  navbarLinkShadow: "#000000c0",
-  navbarShadow: "transparent",
-  sidebar: "#607d8b",
-  group: "#050f14",
-  groupMembers: "#455a64",
-  groupHighlight: "#455a64",
-  groupShadow: "none",
-  groupSeparator: "#000000",
-  groupBorder: "#000000",
-
-  syntax: {
-    literal: "#74f2ca",
-    interface: "#74f2ca",
-    parameter: "#adebff",
-    nil: "#ead0ff",
-  },
-
-  scrollbar: {
-    track: "#464e50",
-    thumb: "#7a888b",
-  },
-
-  searchbox: {
-    background: "#546e7a",
-    placeholder: "#cccccc",
-    border: "1px solid #000000",
-    button: "#2196f3",
-    buttonFill: "#000000",
-    buttonFillUpdated: "#000000",
-  },
-};
-
-export const themeModdotaLight = {
-  ...themeOriginal,
-
-  authorEpitaph: "#89a62e",
-
-  background: "#ffffff",
-  highlight: "#89a62e",
-  text: "#101010",
-  textDim: "#606060",
-
-  navbar: "#ffffff",
-  navbarLinkShadow: "transparent",
-  navbarShadow: "#00000030",
-  sidebar: "#ebedf0",
+  sidebar: "#eceef3",
   group: "#ffffff",
-  groupMembers: "#f8f8fa",
-  groupHighlight: "#f0f0f0",
-  groupShadow: "#00000030",
-  groupSeparator: "#cccccc",
-  groupBorder: "#cccccc",
+  groupMembers: "#f0f1f5",
+  groupShadow: "0 1px 3px #0000000a, 0 1px 2px #0000000f",
+  groupSeparator: "#e0e2e8",
+  groupBorder: "#e0e2e8",
+  searchHighlight: "#fef9c3",
 
   syntax: {
-    literal: "#116e51",
-    interface: "#116e51",
-    parameter: "#0b5872",
-    nil: "#752a7e",
+    literal: "#0e7555",
+    interface: "#0e7555",
+    parameter: "#0a5e7a",
+    nil: "#7c2d8e",
   },
 
   scrollbar: {
-    track: "#ebedf0",
-    thumb: "#cfd4db",
+    track: "transparent",
+    thumb: "#cdd0d6",
   },
 
   searchbox: {
-    background: "#ebedf0",
-    placeholder: "#888888",
+    background: "#eceef3",
+    placeholder: "#9ca3af",
     border: "none",
     button: "transparent",
-    buttonFill: "#888888",
-    buttonFillUpdated: "#000000",
+    buttonFill: "#777c85",
+    buttonFillUpdated: "#1a1d21",
   },
 };
 
-export const themeModdotaDark = {
-  ...themeOriginal,
+export const themeDark = {
+  colorScheme: "dark",
+  background: "#0c131d",
+  highlight: "#6dbf3a",
+  text: "#e4e6ea",
+  textDim: "#8b909a",
 
-  authorEpitaph: "#89a62e",
-
-  background: "#101010",
-  highlight: "#89a62e",
-  text: "#d0d0d0",
-  textDim: "#808080",
-
-  navbar: "#202020",
-  navbarLinkShadow: "transparent",
-  navbarShadow: "#00000030",
-  sidebar: "#202020",
-  group: "#202020",
-  groupMembers: "#303030",
-  groupHighlight: "#282828",
-  groupShadow: "#00000030",
-  groupSeparator: "#303030",
-  groupBorder: "#303030",
+  sidebar: "#090e15",
+  group: "#181a21",
+  groupMembers: "#1e2028",
+  groupShadow: "0 1px 3px #00000033, 0 1px 2px #00000044",
+  groupSeparator: "#262930",
+  groupBorder: "#262930",
+  searchHighlight: "#6dbf3a20",
 
   syntax: {
-    literal: "#74f2ca",
-    interface: "#74f2ca",
-    parameter: "#adebff",
-    nil: "#ead0ff",
+    literal: "#5ee6b8",
+    interface: "#5ee6b8",
+    parameter: "#7dcfed",
+    nil: "#d4a0f7",
   },
 
   scrollbar: {
-    track: "#202020",
-    thumb: "#505050",
+    track: "transparent",
+    thumb: "#363a42",
   },
 
   searchbox: {
-    background: "#404040",
-    placeholder: "#888888",
+    background: "#090e15",
+    placeholder: "#6b7280",
     border: "none",
     button: "transparent",
-    buttonFill: "#888888",
-    buttonFillUpdated: "#000000",
+    buttonFill: "#8b909a",
+    buttonFillUpdated: "#e4e6ea",
   },
 };
 
-export type Theme = typeof themeOriginal;
+export type Theme = typeof themeLight;

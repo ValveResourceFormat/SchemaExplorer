@@ -1,23 +1,15 @@
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
-import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-  base: "/api/",
+  base: "/SchemaExplorer/",
+  assetsInclude: ["schemas/*.json.gz"],
   plugins: [
-    react(),
-    svgr({
-      svgrOptions: { dimensions: false },
+    react({
+      plugins: [["@swc/plugin-styled-components", { displayName: true, fileName: true }]],
     }),
   ],
   build: {
-    outDir: "../build/api",
     emptyOutDir: true,
-  },
-  resolve: {
-    alias: {
-      "~utils": "/src/utils",
-      "~components": "/src/components",
-    },
   },
 });

@@ -1,9 +1,35 @@
 import { createContext } from "react";
-import { Declaration } from "~components/Docs/api";
+import { Declaration } from "./api";
+import { SchemaMetadata } from "../data";
+import { GameId } from "../../games";
 
-export type DeclarationsContextType = {
-  root: string;
-  declarations: Declaration[];
+export type ReferenceEntry = {
+  declarationName: string;
+  declarationModule: string;
+  fieldName?: string;
+  relation: "field" | "class";
 };
 
-export const DeclarationsContext = createContext<DeclarationsContextType>({ root: "", declarations: [] });
+export type DeclarationsContextType = {
+  game: GameId;
+  root: string;
+  declarations: Declaration[];
+  metadata: SchemaMetadata;
+  references: Map<string, ReferenceEntry[]>;
+  otherGames: Map<GameId, Declaration[]>;
+  otherGamesLookup: Map<GameId, Map<string, Declaration>>;
+  loading: boolean;
+  error: string | null;
+};
+
+export const DeclarationsContext = createContext<DeclarationsContextType>({
+  game: "cs2",
+  root: "",
+  declarations: [],
+  metadata: { revision: 0, versionDate: "", versionTime: "" },
+  references: new Map(),
+  otherGames: new Map(),
+  otherGamesLookup: new Map(),
+  loading: false,
+  error: null,
+});

@@ -1,60 +1,163 @@
 import React, { useContext } from "react";
-import { ContentWrapper, ListItem, StyledSearchBox, TextMessage } from "~components/layout/Content";
-import { Author } from "~components/Author";
-import { LazyList, ScrollableList } from "~components/Lists";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
+import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData } from "./utils/filtering";
-import { ClassDeclaration } from "./ClassDeclaration";
-import { Constant } from "./Constant";
-import { Enum } from "./Enum";
-import { FunctionDeclaration } from "./FunctionDeclaration";
-import { Declaration } from "~components/Docs/api";
-import { DeclarationsContext } from "~components/Docs/DeclarationsContext";
+import { SchemaClassView } from "./SchemaClass";
+import { SchemaEnumView } from "./SchemaEnum";
+import { Declaration } from "./api";
+import { DeclarationsContext } from "./DeclarationsContext";
+import { SearchContext } from "../Search/SearchContext";
+import { GAMES } from "../../games";
 
-function renderItem(declaration: Declaration, style?: React.CSSProperties) {
-  let children: React.JSX.Element;
-  switch (declaration.kind) {
-    case "class":
-      children = <ClassDeclaration declaration={declaration} />;
-      break;
-    case "enum":
-      children = <Enum element={declaration} />;
-      break;
-    case "constant":
-      children = <Constant element={declaration} />;
-      break;
-    case "function":
-      children = <FunctionDeclaration context="functions" declaration={declaration} />;
-      break;
+const InfoBlock = styled.div`
+  max-width: 560px;
+  margin: 24px auto 0;
+  padding: 16px 20px;
+  background: ${(props) => props.theme.group};
+  border: 1px solid ${(props) => props.theme.groupBorder};
+  border-radius: 10px;
+  color: ${(props) => props.theme.textDim};
+  font-size: 16px;
+  line-height: 1.6;
+
+  p {
+    margin: 0;
   }
 
+  p + p {
+    margin-top: 8px;
+  }
+`;
+
+const GameChip = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font: inherit;
+  background: ${(props) => props.theme.groupMembers};
+  border: 1px solid ${(props) => props.theme.groupBorder};
+  color: ${(props) => props.theme.text};
+  cursor: pointer;
+  vertical-align: middle;
+  transition: border-color 0.1s;
+
+  &:hover {
+    border-color: ${(props) => props.theme.highlight};
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+`;
+
+function GameList() {
+  const navigate = useNavigate();
   return (
-    <ListItem style={style} key={declaration.name}>
-      {children}
-    </ListItem>
+    <>
+      {GAMES.map((g, i) => (
+        <React.Fragment key={g.id}>
+          {i > 0 && " "}
+          <GameChip onClick={() => navigate(`/${g.id}`)}>
+            {g.icon} {g.name}
+          </GameChip>
+        </React.Fragment>
+      ))}
+    </>
   );
 }
 
+const InfoLink = styled.a`
+  color: ${(props) => props.theme.highlight};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const OffsetsNote = styled.div`
+  font-size: 14px;
+  color: ${(props) => props.theme.textDim};
+  text-align: center;
+  padding: 8px 4px 0;
+`;
+
+function renderItem(declaration: Declaration) {
+  let children: React.JSX.Element;
+  switch (declaration.kind) {
+    case "class":
+      children = <SchemaClassView declaration={declaration} />;
+      break;
+    case "enum":
+      children = <SchemaEnumView declaration={declaration} />;
+      break;
+  }
+
+  return <ListItem key={`${declaration.module}/${declaration.name}`}>{children}</ListItem>;
+}
+
 export function ContentList() {
-  const { root, declarations } = useContext(DeclarationsContext);
+  const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
+  const { search } = useContext(SearchContext);
   const { data, isSearching } = useFilteredData(declarations);
 
   return (
     <ContentWrapper>
-      <StyledSearchBox baseUrl={root} />
-
       {data.length > 0 ? (
         isSearching ? (
-          <LazyList data={data} render={renderItem} />
+          <LazyList key={search} data={data} render={renderItem} />
         ) : (
           <ScrollableList data={data} render={renderItem} />
         )
       ) : isSearching ? (
         <TextMessage>No results found</TextMessage>
       ) : (
-        <TextMessage>Choose a category or use the search bar...</TextMessage>
+        <>
+          <TextMessage>
+            {error
+              ? `Failed to load schemas: ${error}`
+              : loading
+                ? "Loading schemas..."
+                : "Choose a class or enum from the sidebar, or use search..."}
+          </TextMessage>
+          <InfoBlock>
+            <p>
+              Source 2 includes a schema system that describes the engine's classes, fields, and
+              enumerations along with their types, offsets, and metadata. These schemas
+              comprehensively map engine internals, making them useful for modding and reverse
+              engineering.
+            </p>
+            <p>
+              Currently tracking: <GameList />
+            </p>
+            <p>
+              The schemas displayed here are generated by{" "}
+              <InfoLink href="https://github.com/ValveResourceFormat/DumpSource2">
+                DumpSource2
+              </InfoLink>{" "}
+              and automatically updated by{" "}
+              <InfoLink href="https://github.com/SteamTracking/GameTracking">GameTracking</InfoLink>
+              . The code for this site is on{" "}
+              <InfoLink href="https://github.com/ValveResourceFormat/SchemaExplorer">
+                GitHub
+              </InfoLink>
+              .
+            </p>
+          </InfoBlock>
+        </>
       )}
-
-      {!isSearching && !data.length && <Author />}
+      {data.length > 0 && metadata.revision > 0 && (
+        <OffsetsNote>
+          Offsets are from Windows. Source revision {metadata.revision} built on{" "}
+          {metadata.versionDate}.
+        </OffsetsNote>
+      )}
     </ContentWrapper>
   );
 }
