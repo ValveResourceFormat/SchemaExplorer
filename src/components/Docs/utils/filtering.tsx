@@ -1,141 +1,121 @@
-import apiTypes from "@moddota/dota-data/files/vscripts/api-types";
-import { getFuncDeepTypes } from "@moddota/dota-data/lib/helpers/vscripts";
+import { useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { composeFilters, useRouterSearch } from "~components/Search";
-import { isNotNil } from "~utils/types";
-import * as api from "~components/Docs/api";
+import { SearchContext } from "../../Search/SearchContext";
+import * as api from "../api";
 
 export function useFilteredData(declarations: api.Declaration[]) {
-  const search = useRouterSearch();
-  const { scope = "" } = useParams();
+  const { search } = useContext(SearchContext);
+  const { module = "", scope = "" } = useParams();
 
-  if (search) {
-    return { data: doSearch(declarations, search.toLowerCase().split(" ")), isSearching: true };
-  }
-
-  switch (scope) {
-    case "functions":
-      declarations = declarations.filter((x) => x.kind === "function");
-      break;
-    case "constants":
-      declarations = declarations.filter((x) => x.kind === "constant");
-      break;
-    default:
-      declarations = declarations.filter((x) => x.name === scope);
-  }
-
-  return { data: declarations, isSearching: false };
-}
-
-const overrideReferences: Partial<Record<string, string[]>> = {
-  TraceCollideable: ["TraceCollideableOutputs"],
-  TraceHull: ["TraceHullOutputs"],
-  TraceLine: ["TraceLineOutputs"],
-};
-
-export function getReferencesForFunction(func: api.FunctionDeclaration) {
-  const allReferences = new Set<apiTypes.Object>();
-
-  function addReference(name: string) {
-    const reference = apiTypes.find((t) => t.name === name);
-    if (!reference || reference.kind !== "object") return;
-
-    allReferences.add(reference);
-    for (const extendedType of reference.extend ?? []) {
-      addReference(extendedType);
+  return useMemo(() => {
+    if (search) {
+      return {
+        data: doSearch(declarations, search.toLowerCase().split(" ").filter(Boolean)),
+        isSearching: true,
+      };
     }
-  }
 
-  (overrideReferences[func.name] ?? getFuncDeepTypes(func)).forEach(addReference);
+    if (module && scope) {
+      return {
+        data: declarations.filter((x) => x.module === module && x.name === scope),
+        isSearching: false,
+      };
+    }
 
-  return [...allReferences];
+    return { data: [] as api.Declaration[], isSearching: false };
+  }, [declarations, search, module, scope]);
 }
 
-const AVAILABILITY_PATTERN = /^-?on:(client|server)$/;
-const ABSTRACT_METHOD_PATTERN = /^-?is:abstract$/;
+function isFilterPrefix(word: string): boolean {
+  return word.startsWith("module:") || word.startsWith("offset:");
+}
 
-export function doSearch(declarations: api.Declaration[], words: string[]): api.Declaration[] {
-  const availabilityWords = words.filter((x) => AVAILABILITY_PATTERN.test(x));
-  const abstractMethodWords = words.filter((x) => ABSTRACT_METHOD_PATTERN.test(x));
-  const typeWords = words.filter((x) => x.startsWith("type:")).map((x) => x.replace(/^type:/, ""));
-  const nameWords = words.filter(
-    (x) => !x.startsWith("type:") && !AVAILABILITY_PATTERN.test(x) && !ABSTRACT_METHOD_PATTERN.test(x),
+export function useSearchWords(): string[] {
+  const { search } = useContext(SearchContext);
+  return useMemo(
+    () =>
+      search
+        ? search
+            .toLowerCase()
+            .split(" ")
+            .filter((x) => x && !isFilterPrefix(x))
+        : [],
+    [search],
   );
+}
 
-  function filterAvailability(member: { available: api.Availability } | object) {
-    if (availabilityWords.length === 0) return undefined;
-    if (!("available" in member)) return false;
+export function useSearchOffsets(): Set<number> {
+  const { search } = useContext(SearchContext);
+  return useMemo(() => {
+    if (!search) return new Set<number>();
+    const values = search
+      .toLowerCase()
+      .split(" ")
+      .filter((x): x is string => x !== "" && x.startsWith("offset:"))
+      .map((x) => parseOffset(x.replace(/^offset:/, "")))
+      .filter((x): x is number => x !== null);
+    return new Set(values);
+  }, [search]);
+}
 
-    if (member.available === "server") {
-      return availabilityWords.includes("on:server");
+function parseOffset(value: string): number | null {
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  const n = trimmed.startsWith("0x") ? parseInt(trimmed, 16) : parseInt(trimmed, 10);
+  return Number.isNaN(n) ? null : n;
+}
+
+export function matchesWords(name: string, words: string[]): boolean {
+  const lower = name.toLowerCase();
+  return words.every((w) => lower.includes(w));
+}
+
+function doSearch(declarations: api.Declaration[], words: string[]): api.Declaration[] {
+  const moduleWords = words
+    .filter((x) => x.startsWith("module:"))
+    .map((x) => x.replace(/^module:/, ""));
+  const offsetValues = words
+    .filter((x) => x.startsWith("offset:"))
+    .map((x) => parseOffset(x.replace(/^offset:/, "")));
+  const offsetSet = new Set(offsetValues.filter((x): x is number => x !== null));
+  const nameWords = words.filter((x) => !isFilterPrefix(x));
+
+  function filterModule(declaration: api.Declaration): boolean {
+    if (moduleWords.length === 0) return true;
+    const module = declaration.module.toLowerCase();
+    return moduleWords.some((w) => module.includes(w));
+  }
+
+  function matchesName(name: string): boolean {
+    const lower = name.toLowerCase();
+    return nameWords.every((word) => lower.includes(word));
+  }
+
+  function matchesOffset(declaration: api.Declaration): boolean {
+    if (declaration.kind !== "class") return false;
+    return declaration.fields.some((f) => offsetSet.has(f.offset));
+  }
+
+  const hasNameFilter = nameWords.length > 0;
+  const hasOffsetFilter = offsetSet.size > 0;
+
+  return declarations.filter((declaration) => {
+    if (!filterModule(declaration)) return false;
+
+    let nameMatch = false;
+    if (hasNameFilter) {
+      nameMatch =
+        matchesName(declaration.name) ||
+        (declaration.kind === "class" && declaration.fields.some((f) => matchesName(f.name))) ||
+        (declaration.kind === "enum" && declaration.members.some((m) => matchesName(m.name)));
     }
 
-    if (member.available === "client") {
-      return availabilityWords.includes("on:client");
-    }
+    const offsetMatch = hasOffsetFilter && matchesOffset(declaration);
 
-    return !availabilityWords.includes("-on:server") && !availabilityWords.includes("-on:client");
-  }
-
-  function filterAbstractMethod(member: api.ClassMember) {
-    if (abstractMethodWords.length === 0) return undefined;
-
-    const isAbstract = member.kind === "function" && member.abstract === true;
-    return abstractMethodWords.includes("-is:abstract") ? !isAbstract : isAbstract;
-  }
-
-  function filterMemberType(member: api.ClassMember) {
-    if (typeWords.length === 0) return undefined;
-
-    const types = (member.kind === "function" ? getFuncDeepTypes(member) : member.types).map((type) =>
-      type.toLowerCase(),
-    );
-    return typeWords.every((type) => types.some((x) => x.includes(type)));
-  }
-
-  function filterDeclarationType(declaration: api.Declaration) {
-    if (typeWords.length === 0) return undefined;
-
-    return (
-      declaration.kind === "class" &&
-      declaration.extend !== undefined &&
-      typeWords.includes(declaration.extend.toLowerCase())
-    );
-  }
-
-  function filterName(member: { name: string }) {
-    if (nameWords.length === 0) return undefined;
-
-    const name = member.name.toLowerCase();
-    return nameWords.every((word) => name.includes(word));
-  }
-
-  return declarations
-    .map((declaration) => {
-      const partialDeclaration: api.Declaration | undefined =
-        declaration.kind === "class"
-          ? {
-              ...declaration,
-              members: declaration.members.filter(
-                composeFilters([filterName, filterAbstractMethod, filterAvailability, filterMemberType]),
-              ),
-            }
-          : declaration.kind === "enum"
-            ? {
-                ...declaration,
-                members: declaration.members.filter(composeFilters([filterName, filterAvailability])),
-              }
-            : undefined;
-
-      if (partialDeclaration && partialDeclaration.members.length > 0) {
-        return partialDeclaration;
-      }
-
-      if (composeFilters([filterName, filterAvailability, filterDeclarationType])(declaration)) {
-        const element = { ...declaration };
-        if (element.kind === "class" || element.kind === "enum") element.members = [];
-        return element;
-      }
-    })
-    .filter(isNotNil);
+    if (hasNameFilter && hasOffsetFilter) return nameMatch && offsetMatch;
+    if (hasNameFilter) return nameMatch;
+    if (hasOffsetFilter) return offsetMatch;
+    // Module-only filter: already passed filterModule() above
+    return moduleWords.length > 0;
+  });
 }

@@ -1,84 +1,47 @@
-export type Declaration = (FunctionDeclaration | ClassDeclaration | Constant | Enum) & { isStarred: boolean };
-export type Availability = "server" | "client" | "both";
+// Structured C++ type from the JSON dump
+export type SchemaFieldType =
+  | { category: "builtin"; name: string }
+  | { category: "ptr"; inner: SchemaFieldType }
+  | { category: "fixed_array"; inner: SchemaFieldType; count: number }
+  | { category: "atomic"; name: string; inner?: SchemaFieldType; inner2?: SchemaFieldType }
+  | { category: "declared_class"; name: string; module: string }
+  | { category: "declared_enum"; name: string; module: string }
+  | { category: "bitfield"; count: number };
 
-export type Type = string | LiteralType | TableType | ArrayType | FunctionType;
-
-export interface LiteralType {
-  kind: "literal";
-  value: number;
-}
-
-export interface TableType {
-  kind: "table";
-  key: Type[];
-  value: Type[];
-}
-
-export interface ArrayType {
-  kind: "array";
-  types: Type[];
-}
-
-export interface FunctionType {
-  kind: "function";
-  returns: Type[];
-  args: FunctionParameter[];
-}
-
-export interface FunctionParameter {
+export interface SchemaMetadataEntry {
   name: string;
-  types: Type[];
-  description?: string;
+  value?: string;
 }
 
-export interface FunctionDeclaration extends FunctionType {
+export interface SchemaField {
   name: string;
-  available?: Availability;
-  description?: string;
-  deprecated?: string;
+  offset: number;
+  type: SchemaFieldType;
+  metadata: SchemaMetadataEntry[];
 }
 
-export interface Field {
-  kind: "field";
-  name: string;
-  description?: string;
-  types: string[];
-}
-
-export interface ClassMethod extends FunctionDeclaration {
-  abstract?: true;
-}
-
-export type ClassMember = ClassMethod | Field;
-export interface ClassDeclaration {
+export interface SchemaClass {
   kind: "class";
   name: string;
-  clientName?: string;
-  description?: string;
-  extend?: string;
-  instance?: string;
-  call?: FunctionType;
-  members: ClassMember[];
+  module: string;
+  parents: { name: string; module: string }[];
+  fields: SchemaField[];
+  metadata: SchemaMetadataEntry[];
 }
 
-export interface Constant {
-  kind: "constant";
+export interface SchemaEnumMember {
   name: string;
-  description?: string;
   value: number;
-  available?: Availability;
+  metadata?: SchemaMetadataEntry[];
 }
 
-export interface Enum {
+export interface SchemaEnum {
   kind: "enum";
   name: string;
-  description?: string;
-  available?: Availability;
-  members: EnumMember[];
+  module: string;
+  alignment: string;
+  members: SchemaEnumMember[];
+  metadata: SchemaMetadataEntry[];
 }
 
-export interface EnumMember {
-  name: string;
-  description?: string;
-  value: number;
-}
+export type Declaration = SchemaClass | SchemaEnum;

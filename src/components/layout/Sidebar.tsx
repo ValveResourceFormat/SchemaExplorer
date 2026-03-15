@@ -1,80 +1,113 @@
-import { darken } from "polished";
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { IconKind, KindIcon } from "~components/KindIcon";
-import { Declaration } from "~components/Docs/api";
-import { DeclarationsContext } from "~components/Docs/DeclarationsContext";
-import { Star } from "../Docs/Star";
+import { IconKind, KindIcon } from "../KindIcon";
+import { Declaration } from "../Docs/api";
+import { DeclarationsContext } from "../Docs/DeclarationsContext";
 
 const SidebarLink = styled(NavLink)`
-  background: ${(props) => props.theme.sidebar};
-  border-bottom: 3px solid transparent;
-  border-radius: 3px;
-  padding: 2px 2px 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border-left: 2px solid transparent;
+  padding: 0 8px;
+  height: 28px;
   text-decoration: none;
   color: ${(props) => props.theme.text};
-  word-break: break-all;
+  white-space: nowrap;
 
-  :not(:last-child) {
-    margin-bottom: 3px;
+  > svg {
+    flex-shrink: 0;
   }
 
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  box-sizing: border-box;
+  font-size: 14px;
+  transition:
+    background 0.1s,
+    color 0.1s;
+
   &:hover {
-    background: ${(props) => darken(0.09, props.theme.sidebar)};
+    background: ${(props) => props.theme.groupMembers};
   }
 
   &.active {
     font-weight: 600;
-    background: ${(props) => darken(0.09, props.theme.sidebar)};
-    border-bottom: 3px solid ${(props) => props.theme.highlight};
+    background: ${(props) => props.theme.highlight}18;
+    border-left: 2px solid ${(props) => props.theme.highlight};
+    color: ${(props) => props.theme.highlight};
   }
-`;
-
-const SidebarKindIcon = styled(KindIcon)`
-  vertical-align: ${({ kind }) => (kind === "interface" ? "middle" : "baseline")};
-`;
-
-const SidebarElementStar = styled(Star)`
-  float: right;
 `;
 
 export const SidebarElement: React.FC<{
   to: string;
   icon: IconKind;
   text: string;
-  extra?: React.ReactNode;
-}> = React.memo(({ to, icon, text, extra }) => (
+}> = React.memo(({ to, icon, text }) => (
   <SidebarLink to={to}>
-    <SidebarKindIcon kind={icon} size="small" /> {text}
-    {extra}
+    <KindIcon kind={icon} size="small" />
+    <span>{text}</span>
   </SidebarLink>
 ));
 
-export const DeclarationSidebarElement: React.FC<{ declaration: Declaration }> = React.memo(({ declaration }) => {
-  const { root } = useContext(DeclarationsContext);
-  return (
-    <SidebarElement
-      to={`${root}/${declaration.name}`}
-      icon={declaration.kind}
-      text={declaration.name}
-      extra={declaration.isStarred && <SidebarElementStar />}
-    />
-  );
-});
+export const DeclarationSidebarElement: React.FC<{ declaration: Declaration }> = React.memo(
+  ({ declaration }) => {
+    const { root } = useContext(DeclarationsContext);
+    return (
+      <SidebarElement
+        to={`${root}/${declaration.module}/${declaration.name}`}
+        icon={declaration.kind}
+        text={declaration.name}
+      />
+    );
+  },
+);
+
+export const SidebarGroupHeader = styled.button<{ $collapsed: boolean }>`
+  background: ${(props) => props.theme.sidebar};
+  border: none;
+  width: 100%;
+  padding: 0 8px;
+  height: 30px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: ${(props) => props.theme.textDim};
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.1s;
+
+  &:hover {
+    color: ${(props) => props.theme.text};
+  }
+
+  &::before {
+    content: "${(props) => (props.$collapsed ? "\\25B6" : "\\25BC")}";
+    font-size: 9px;
+    opacity: 0.6;
+  }
+`;
 
 export const SidebarWrapper = styled.div`
-  width: 340px;
-  height: 100%;
-  box-sizing: border-box;
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
-  flex-flow: column;
-  overflow-y: scroll;
-  padding: 2px 12px;
-
-  @media (max-width: 1100px) {
-    width: 200px;
-  }
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 6px 8px 4px 10px;
+  background-color: ${(props) => props.theme.sidebar};
 
   @media (max-width: 768px) {
     display: none;

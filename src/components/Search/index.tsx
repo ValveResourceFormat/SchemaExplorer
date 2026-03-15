@@ -1,65 +1,13 @@
-import { darken } from "polished";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import SearchIcon from "./search.svg?react";
-
-const SearchBoxWrapper = styled.div`
-  display: flex;
-  flex-flow: row;
-  flex-shrink: 0;
-  background-color: ${(props) => props.theme.searchbox.background};
-  border: ${(props) => props.theme.searchbox.border};
-  border-radius: 32px;
-  padding-left: 6px;
-`;
-
-const SearchBoxInput = styled.input`
-  flex: 1;
-  padding: 8px;
-  background: none;
-  border: none;
-  outline: none;
-  color: ${(props) => props.theme.text};
-  font-size: 14px;
-
-  ::placeholder {
-    color: ${(props) => props.theme.searchbox.placeholder};
-  }
-`;
-
-const SearchButton = styled.button<{ $isUpdated: boolean }>`
-  border: none;
-  background-color: ${(props) => darken(props.$isUpdated ? 0 : 0.1, props.theme.searchbox.button)};
-
-  path {
-    fill: ${(props) => (props.$isUpdated ? props.theme.searchbox.buttonFillUpdated : props.theme.searchbox.buttonFill)};
-  }
-
-  > * {
-    vertical-align: middle;
-  }
-`;
-
-export const composeFilters =
-  <T,>(filters: ((member: T) => boolean | undefined)[]) =>
-  (value: T) => {
-    const results = filters.map((fn) => fn(value));
-    if (results.includes(false)) return false;
-    if (results.includes(true)) return true;
-    return false;
-  };
-
-export function useRouterSearch() {
-  const location = useLocation();
-  return new URLSearchParams(location.search).get("search") ?? "";
-}
+import { SearchContext } from "./SearchContext";
 
 export function useCtrlFHook<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (ref.current && event.ctrlKey && event.key === "f") {
+      if (ref.current && (event.ctrlKey || event.metaKey) && event.key === "f") {
         // Use default CTRL+F only when element already has focus
         if (document.activeElement !== ref.current) event.preventDefault();
         ref.current.focus();
@@ -73,63 +21,93 @@ export function useCtrlFHook<T extends HTMLElement>() {
   return ref;
 }
 
-export function SearchBox({ baseUrl, className }: { baseUrl: string; className?: string }) {
-  const routerSearch = useRouterSearch();
-  const [search, setSearch] = useState(routerSearch);
-  useEffect(() => setSearch(routerSearch), [routerSearch]);
+export const SearchInput = styled.input.attrs({ type: "search" })`
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: ${(props) => props.theme.searchbox.background};
+  color: ${(props) => props.theme.text};
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+  transition: box-shadow 0.15s;
 
+  &:hover {
+    box-shadow: 0 0 0 2px ${(props) => props.theme.highlight}30;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px ${(props) => props.theme.highlight};
+  }
+
+  &::placeholder {
+    color: ${(props) => props.theme.searchbox.placeholder};
+  }
+`;
+
+export function SearchBox({
+  baseUrl,
+  className,
+  placeholder = "Search...",
+}: {
+  baseUrl: string;
+  className?: string;
+  placeholder?: string;
+}) {
+  const { search, setSearch } = useContext(SearchContext);
+  const [inputValue, setInputValue] = useState(search);
   const navigate = useNavigate();
+  const location = useLocation();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const ownNavigateRef = useRef(false);
 
-  const setSearchQuery = useCallback(
-    (query: string) => {
-      if (query === "") {
-        navigate(baseUrl);
-      } else {
-        navigate(`${baseUrl}?search=${encodeURIComponent(query)}`);
-      }
+  // Sync from URL (back/forward navigation, clicking links)
+  useEffect(() => {
+    if (ownNavigateRef.current) {
+      ownNavigateRef.current = false;
+      return;
+    }
+    const urlSearch = new URLSearchParams(location.search).get("search") ?? "";
+    setSearch(urlSearch);
+    setInputValue(urlSearch);
+    clearTimeout(timerRef.current);
+    // Intentionally depends only on location.search — we sync *from* the URL.
+    // search/setSearch are omitted because including them would create an
+    // infinite loop: setSearch triggers a navigate which changes location.search.
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+    ({ target: { value } }) => {
+      setInputValue(value);
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setSearch(value);
+        ownNavigateRef.current = true;
+        if (value === "") {
+          navigate(baseUrl, { replace: true });
+        } else {
+          navigate(`${baseUrl}?search=${encodeURIComponent(value)}`, { replace: true });
+        }
+      }, 150);
     },
-    [navigate, baseUrl],
-  );
-
-  const handleSearchButton = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
-    () => setSearchQuery(search),
-    [search, setSearchQuery],
-  );
-  const handleSearchButtonMouseDown = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
-    (event) => event.preventDefault(),
-    [],
-  );
-
-  const updateCurrentSearch = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-    ({ target: { value } }) => setSearch(value),
-    [],
-  );
-  const handleKey = useCallback<React.KeyboardEventHandler<HTMLInputElement>>(
-    (event) => event.key === "Enter" && setSearchQuery(search),
-    [search, setSearchQuery],
+    [setSearch, navigate, baseUrl],
   );
 
   const ref = useCtrlFHook<HTMLInputElement>();
 
   return (
-    <SearchBoxWrapper className={className}>
-      <SearchButton
-        $isUpdated={search !== routerSearch}
-        onClick={handleSearchButton}
-        onMouseDown={handleSearchButtonMouseDown}
-        title="Search"
-      >
-        <SearchIcon width={16} height={16} />
-      </SearchButton>
-
-      <SearchBoxInput
-        placeholder="Search..."
-        ref={ref}
-        value={search}
-        onChange={updateCurrentSearch}
-        onKeyUp={handleKey}
-        aria-label="Search"
-      />
-    </SearchBoxWrapper>
+    <SearchInput
+      className={className}
+      placeholder={placeholder}
+      ref={ref}
+      value={inputValue}
+      onChange={onChange}
+      aria-label="Search"
+    />
   );
 }

@@ -1,48 +1,46 @@
-import React, { useCallback, useMemo } from "react";
-import { AutoSizer, CellMeasurer, CellMeasurerCache, List, ListRowRenderer } from "react-virtualized";
+import React, { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface Props<T> {
   className?: string;
   data: T[];
-  render(element: T, style?: React.CSSProperties): React.ReactNode;
+  render(element: T): React.ReactNode;
 }
 
 export function LazyList<T>({ className, data, render }: Props<T>) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- recreate cache when data changes to remeasure row heights
-  const cache = useMemo(() => new CellMeasurerCache({ fixedWidth: true }), [data]);
-  const renderRow = useCallback<ListRowRenderer>(
-    ({ key, parent, style, index }) => (
-      <CellMeasurer cache={cache} key={key} parent={parent} rowIndex={index}>
-        {render(data[index], style)}
-      </CellMeasurer>
-    ),
-    [cache, render, data],
-  );
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: data.length,
+    getScrollElement: () => parentRef.current?.parentElement ?? null,
+    estimateSize: () => 80,
+    overscan: 10,
+  });
 
   return (
-    <div className={className} style={{ flex: 1, overflowX: "hidden" }}>
-      <AutoSizer>
-        {(size) => (
-          <List
-            style={{ overflowX: "hidden" }}
-            {...size}
-            deferredMeasurementCache={cache}
-            tabIndex={null}
-            overscanRowCount={2}
-            rowCount={data.length}
-            rowHeight={cache.rowHeight}
-            rowRenderer={renderRow}
-          />
-        )}
-      </AutoSizer>
+    <div ref={parentRef} className={className}>
+      <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        {virtualizer.getVirtualItems().map((virtualRow) => (
+          <div
+            key={virtualRow.key}
+            ref={virtualizer.measureElement}
+            data-index={virtualRow.index}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            {render(data[virtualRow.index])}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 export function ScrollableList<T>({ className, data, render }: Props<T>) {
-  return (
-    <div className={className} style={{ flex: 1, overflowX: "hidden", overflowY: "scroll" }}>
-      {data.map((x) => render(x))}
-    </div>
-  );
+  return <div className={className}>{data.map((x) => render(x))}</div>;
 }
