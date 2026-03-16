@@ -8,6 +8,7 @@ interface ParsedSearch {
   moduleWords: string[];
   offsets: Set<number>;
   metadataKeys: string[];
+  metadataValues: string[];
 }
 
 const EMPTY_PARSED: ParsedSearch = {
@@ -15,10 +16,16 @@ const EMPTY_PARSED: ParsedSearch = {
   moduleWords: [],
   offsets: new Set(),
   metadataKeys: [],
+  metadataValues: [],
 };
 
 function isFilterPrefix(word: string): boolean {
-  return word.startsWith("module:") || word.startsWith("offset:") || word.startsWith("metadata:");
+  return (
+    word.startsWith("module:") ||
+    word.startsWith("offset:") ||
+    word.startsWith("metadata:") ||
+    word.startsWith("metadatavalue:")
+  );
 }
 
 function parseSearch(search: string): ParsedSearch {
@@ -30,10 +37,14 @@ function parseSearch(search: string): ParsedSearch {
     .map((x) => parseOffset(x.slice(7)))
     .filter((x): x is number => x !== null);
   const metadataKeys = words
-    .filter((x) => x.startsWith("metadata:"))
+    .filter((x) => x.startsWith("metadata:") && !x.startsWith("metadatavalue:"))
     .map((x) => x.slice(9))
     .filter(Boolean);
-  return { nameWords, moduleWords, offsets: new Set(offsetValues), metadataKeys };
+  const metadataValues = words
+    .filter((x) => x.startsWith("metadatavalue:"))
+    .map((x) => x.slice(14))
+    .filter(Boolean);
+  return { nameWords, moduleWords, offsets: new Set(offsetValues), metadataKeys, metadataValues };
 }
 
 export function useParsedSearch(): ParsedSearch {
@@ -87,12 +98,16 @@ export function matchesMetadataKeys(
   keys: string[],
 ): boolean {
   if (!metadata || metadata.length === 0 || keys.length === 0) return false;
-  return keys.every((key) =>
-    metadata.some(
-      (m) =>
-        m.name.toLowerCase().includes(key) ||
-        (m.value != null && m.value.toLowerCase().includes(key)),
-    ),
+  return keys.every((key) => metadata.some((m) => m.name.toLowerCase().includes(key)));
+}
+
+export function matchesMetadataValues(
+  metadata: api.SchemaMetadataEntry[] | undefined,
+  values: string[],
+): boolean {
+  if (!metadata || metadata.length === 0 || values.length === 0) return false;
+  return values.every((val) =>
+    metadata.some((m) => m.value != null && m.value.toLowerCase().includes(val)),
   );
 }
 
@@ -108,7 +123,7 @@ export function filterItems<T extends HasNameAndMetadata>(
   collapseNonMatching: boolean,
   extraMatch?: (item: T) => boolean,
 ): { visible: T[]; highlighted: Set<T>; hiddenCount: number } {
-  const { nameWords, metadataKeys } = parsed;
+  const { nameWords, metadataKeys, metadataValues } = parsed;
   // Words not already matched by the declaration name must match at the field level
   const declLower = declarationName.toLowerCase();
   const remainingWords = nameWords.filter((w) => !declLower.includes(w));
@@ -119,12 +134,16 @@ export function filterItems<T extends HasNameAndMetadata>(
         matchesWords(item.name, remainingWords) ||
         matchesMetadataKeys(item.metadata, remainingWords)) &&
       (metadataKeys.length === 0 || matchesMetadataKeys(item.metadata, metadataKeys)) &&
+      (metadataValues.length === 0 || matchesMetadataValues(item.metadata, metadataValues)) &&
       (extraMatch == null || extraMatch(item))
     );
   }
 
   const hasFieldFilter =
-    remainingWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
+    remainingWords.length > 0 ||
+    metadataKeys.length > 0 ||
+    metadataValues.length > 0 ||
+    parsed.offsets.size > 0;
 
   if (!collapseNonMatching) {
     return {
@@ -142,7 +161,7 @@ export function filterItems<T extends HasNameAndMetadata>(
 }
 
 function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.Declaration[] {
-  const { nameWords, moduleWords, offsets: offsetSet, metadataKeys } = parsed;
+  const { nameWords, moduleWords, offsets: offsetSet, metadataKeys, metadataValues } = parsed;
 
   function filterModule(declaration: api.Declaration): boolean {
     if (moduleWords.length === 0) return true;
@@ -158,12 +177,7 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
     ): boolean {
       return (
         name.includes(word) ||
-        (metadata?.some(
-          (m) =>
-            m.name.toLowerCase().includes(word) ||
-            (m.value != null && m.value.toLowerCase().includes(word)),
-        ) ??
-          false)
+        (metadata?.some((m) => m.name.toLowerCase().includes(word)) ?? false)
       );
     }
 
@@ -180,12 +194,16 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
   }
 
   function matchesMetadata(declaration: api.Declaration): boolean {
-    if (matchesMetadataKeys(declaration.metadata, metadataKeys)) return true;
-    if (declaration.kind === "class")
-      return declaration.fields.some((f) => matchesMetadataKeys(f.metadata, metadataKeys));
-    if (declaration.kind === "enum")
-      return declaration.members.some((m) => matchesMetadataKeys(m.metadata, metadataKeys));
-    return false;
+    const allMetadata: (api.SchemaMetadataEntry[] | undefined)[] = [declaration.metadata];
+    if (declaration.kind === "class") declaration.fields.forEach((f) => allMetadata.push(f.metadata));
+    else if (declaration.kind === "enum") declaration.members.forEach((m) => allMetadata.push(m.metadata));
+
+    const keysMatch =
+      metadataKeys.length === 0 || allMetadata.some((md) => matchesMetadataKeys(md, metadataKeys));
+    const valuesMatch =
+      metadataValues.length === 0 ||
+      allMetadata.some((md) => matchesMetadataValues(md, metadataValues));
+    return keysMatch && valuesMatch;
   }
 
   function matchesOffset(declaration: api.Declaration): boolean {
@@ -195,7 +213,7 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
 
   const hasNameFilter = nameWords.length > 0;
   const hasOffsetFilter = offsetSet.size > 0;
-  const hasMetadataFilter = metadataKeys.length > 0;
+  const hasMetadataFilter = metadataKeys.length > 0 || metadataValues.length > 0;
 
   return declarations.filter((declaration) => {
     if (!filterModule(declaration)) return false;
