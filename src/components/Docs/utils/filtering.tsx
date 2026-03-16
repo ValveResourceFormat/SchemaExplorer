@@ -87,7 +87,57 @@ export function matchesMetadataKeys(
   keys: string[],
 ): boolean {
   if (!metadata || metadata.length === 0 || keys.length === 0) return false;
-  return keys.every((key) => metadata.some((m) => m.name.toLowerCase().includes(key)));
+  return keys.every((key) =>
+    metadata.some(
+      (m) =>
+        m.name.toLowerCase().includes(key) ||
+        (m.value != null && m.value.toLowerCase().includes(key)),
+    ),
+  );
+}
+
+interface HasNameAndMetadata {
+  name: string;
+  metadata?: api.SchemaMetadataEntry[];
+}
+
+export function filterItems<T extends HasNameAndMetadata>(
+  items: T[],
+  parsed: ParsedSearch,
+  declarationName: string,
+  collapseNonMatching: boolean,
+  extraMatch?: (item: T) => boolean,
+): { visible: T[]; highlighted: Set<T>; hiddenCount: number } {
+  const { nameWords, metadataKeys } = parsed;
+  // Words not already matched by the declaration name must match at the field level
+  const declLower = declarationName.toLowerCase();
+  const remainingWords = nameWords.filter((w) => !declLower.includes(w));
+
+  function isMatch(item: T): boolean {
+    return (
+      (remainingWords.length === 0 ||
+        matchesWords(item.name, remainingWords) ||
+        matchesMetadataKeys(item.metadata, remainingWords)) &&
+      (metadataKeys.length === 0 || matchesMetadataKeys(item.metadata, metadataKeys)) &&
+      (extraMatch == null || extraMatch(item))
+    );
+  }
+
+  const isSearching = nameWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
+
+  if (!collapseNonMatching) {
+    return {
+      visible: items,
+      highlighted: isSearching ? new Set(items.filter(isMatch)) : new Set(),
+      hiddenCount: 0,
+    };
+  }
+  const matching = items.filter(isMatch);
+  return {
+    visible: matching,
+    highlighted: new Set(matching),
+    hiddenCount: items.length - matching.length,
+  };
 }
 
 function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.Declaration[] {
@@ -99,25 +149,47 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
     return moduleWords.some((w) => module.includes(w));
   }
 
-  function matchesName(name: string): boolean {
-    const lower = name.toLowerCase();
-    return nameWords.every((word) => lower.includes(word));
+  function matchesNameWords(declaration: api.Declaration): boolean {
+    function wordMatchesScope(
+      word: string,
+      name: string,
+      metadata?: api.SchemaMetadataEntry[],
+    ): boolean {
+      return (
+        name.includes(word) ||
+        (metadata?.some(
+          (m) =>
+            m.name.toLowerCase().includes(word) ||
+            (m.value != null && m.value.toLowerCase().includes(word)),
+        ) ??
+          false)
+      );
+    }
+
+    const declLower = declaration.name.toLowerCase();
+    let items: { name: string; metadata?: api.SchemaMetadataEntry[] }[] = [];
+    if (declaration.kind === "class") items = declaration.fields;
+    else if (declaration.kind === "enum") items = declaration.members;
+
+    return nameWords.every(
+      (word) =>
+        wordMatchesScope(word, declLower, declaration.metadata) ||
+        items.some((item) => wordMatchesScope(word, item.name.toLowerCase(), item.metadata)),
+    );
+  }
+
+  function matchesMetadata(declaration: api.Declaration): boolean {
+    if (matchesMetadataKeys(declaration.metadata, metadataKeys)) return true;
+    if (declaration.kind === "class")
+      return declaration.fields.some((f) => matchesMetadataKeys(f.metadata, metadataKeys));
+    if (declaration.kind === "enum")
+      return declaration.members.some((m) => matchesMetadataKeys(m.metadata, metadataKeys));
+    return false;
   }
 
   function matchesOffset(declaration: api.Declaration): boolean {
     if (declaration.kind !== "class") return false;
     return declaration.fields.some((f) => offsetSet.has(f.offset));
-  }
-
-  function matchesMetadata(declaration: api.Declaration): boolean {
-    if (matchesMetadataKeys(declaration.metadata, metadataKeys)) return true;
-    if (declaration.kind === "class") {
-      return declaration.fields.some((f) => matchesMetadataKeys(f.metadata, metadataKeys));
-    }
-    if (declaration.kind === "enum") {
-      return declaration.members.some((m) => matchesMetadataKeys(m.metadata, metadataKeys));
-    }
-    return false;
   }
 
   const hasNameFilter = nameWords.length > 0;
@@ -127,25 +199,11 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
   return declarations.filter((declaration) => {
     if (!filterModule(declaration)) return false;
 
-    let nameMatch = false;
-    if (hasNameFilter) {
-      nameMatch =
-        matchesName(declaration.name) ||
-        (declaration.kind === "class" && declaration.fields.some((f) => matchesName(f.name))) ||
-        (declaration.kind === "enum" && declaration.members.some((m) => matchesName(m.name)));
-    }
+    const nameMatch = !hasNameFilter || matchesNameWords(declaration);
+    const metadataMatch = !hasMetadataFilter || matchesMetadata(declaration);
+    const offsetMatch = !hasOffsetFilter || matchesOffset(declaration);
 
-    const offsetMatch = hasOffsetFilter && matchesOffset(declaration);
-    const metadataMatch = hasMetadataFilter && matchesMetadata(declaration);
-
-    // AND all active filters together
-    const filters: boolean[] = [];
-    if (hasNameFilter) filters.push(nameMatch);
-    if (hasOffsetFilter) filters.push(offsetMatch);
-    if (hasMetadataFilter) filters.push(metadataMatch);
-
-    if (filters.length > 0) return filters.every(Boolean);
-    // Module-only filter: already passed filterModule() above
-    return moduleWords.length > 0;
+    if (!hasNameFilter && !hasOffsetFilter && !hasMetadataFilter) return moduleWords.length > 0;
+    return nameMatch && metadataMatch && offsetMatch;
   });
 }

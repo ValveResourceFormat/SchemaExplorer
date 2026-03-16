@@ -11,6 +11,7 @@ import { getGame } from "../../games";
 import {
   matchesWords,
   matchesMetadataKeys,
+  filterItems,
   useParsedSearch,
   useFieldParam,
 } from "./utils/filtering";
@@ -134,11 +135,8 @@ export const SchemaClassView: React.FC<{
 }> = ({ declaration }) => {
   const { root, classesByKey } = useContext(DeclarationsContext);
   const navigate = useNavigate();
-  const {
-    nameWords: searchWords,
-    offsets: searchOffsets,
-    metadataKeys: searchMetadata,
-  } = useParsedSearch();
+  const parsed = useParsedSearch();
+  const { nameWords: searchWords, offsets: searchOffsets, metadataKeys: searchMetadata } = parsed;
   const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0;
@@ -167,18 +165,21 @@ export const SchemaClassView: React.FC<{
   const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
   const collapseNonMatching = isSearching && !nameMatches;
 
-  const { matchingFields, hiddenCount } = useMemo(() => {
-    if (!collapseNonMatching) {
-      return { matchingFields: declaration.fields, hiddenCount: 0 };
-    }
-    const matching = declaration.fields.filter(
-      (f) =>
-        (searchWords.length > 0 && matchesWords(f.name, searchWords)) ||
-        (searchOffsets.size > 0 && searchOffsets.has(f.offset)) ||
-        (searchMetadata.length > 0 && matchesMetadataKeys(f.metadata, searchMetadata)),
-    );
-    return { matchingFields: matching, hiddenCount: declaration.fields.length - matching.length };
-  }, [declaration.fields, searchWords, searchOffsets, searchMetadata, collapseNonMatching]);
+  const {
+    visible: matchingFields,
+    highlighted: highlightedFields,
+    hiddenCount,
+  } = useMemo(
+    () =>
+      filterItems(
+        declaration.fields,
+        parsed,
+        declaration.name,
+        collapseNonMatching,
+        (f) => searchOffsets.size === 0 || searchOffsets.has(f.offset),
+      ),
+    [declaration.fields, parsed, declaration.name, collapseNonMatching, searchOffsets],
+  );
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
   const declPath = declarationPath(root, declaration.module, declaration.name);
@@ -194,8 +195,8 @@ export const SchemaClassView: React.FC<{
         </CommonGroupSignature>
       </DeclarationHeader>
       {(!collapseNonMatching ||
-        (searchMetadata.length > 0 &&
-          matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
+        (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
+        (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
         <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}
       {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
@@ -209,12 +210,7 @@ export const SchemaClassView: React.FC<{
               root={root}
               navigate={navigate}
               bitfield={bitfieldInfo.get(field)}
-              highlighted={
-                collapseNonMatching ||
-                (searchWords.length > 0 && matchesWords(field.name, searchWords)) ||
-                (searchOffsets.size > 0 && searchOffsets.has(field.offset)) ||
-                (searchMetadata.length > 0 && matchesMetadataKeys(field.metadata, searchMetadata))
-              }
+              highlighted={highlightedFields.has(field)}
               anchored={fieldParam === field.name}
             />
           ))}
