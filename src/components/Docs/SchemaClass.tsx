@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import * as api from "./api";
@@ -14,10 +14,12 @@ import {
   useSearchWords,
   useSearchOffsets,
   useSearchMetadata,
+  useFieldParam,
 } from "./utils/filtering";
 import { formatHexOffset } from "./utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "./utils/bitfields";
 import {
+  AnchorName,
   CollapsedItemsLink,
   CommonGroupMembers,
   CommonGroupSignature,
@@ -49,6 +51,11 @@ const FieldRow = styled.div`
 
   &[data-highlighted] {
     background-color: var(--search-highlight);
+  }
+
+  &[data-anchored] {
+    background-color: var(--search-highlight);
+    border-color: var(--highlight);
   }
 `;
 
@@ -147,6 +154,7 @@ export const SchemaClassView: React.FC<{
   const searchWords = useSearchWords();
   const searchOffsets = useSearchOffsets();
   const searchMetadata = useSearchMetadata();
+  const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0;
 
@@ -213,6 +221,7 @@ export const SchemaClassView: React.FC<{
             <SchemaFieldView
               key={`${field.name}-${field.offset}`}
               field={field}
+              fieldUrlBase={`${root}/${declaration.module}/${declaration.name}`}
               bitfield={bitfieldInfo.get(field)}
               highlighted={
                 collapseNonMatching ||
@@ -220,6 +229,7 @@ export const SchemaClassView: React.FC<{
                 (searchOffsets.size > 0 && searchOffsets.has(field.offset)) ||
                 (searchMetadata.length > 0 && matchesMetadataKeys(field.metadata, searchMetadata))
               }
+              anchored={fieldParam === field.name}
             />
           ))}
           {hiddenCount > 0 && (
@@ -365,25 +375,52 @@ const BitfieldPadding = styled.div`
 
 function SchemaFieldView({
   field,
+  fieldUrlBase,
   bitfield,
   highlighted,
+  anchored,
 }: {
   field: api.SchemaField;
+  fieldUrlBase: string;
   bitfield?: BitfieldInfo;
   highlighted: boolean;
+  anchored: boolean;
 }) {
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
   const offsetHex = formatHexOffset(field.offset);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (anchored && rowRef.current) {
+      rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [anchored]);
+
+  const copyAnchorLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const fieldUrl = `${fieldUrlBase}?field=${encodeURIComponent(field.name)}`;
+    const fullUrl = `${window.location.origin}${window.location.pathname}#${fieldUrl}`;
+    navigator.clipboard.writeText(fullUrl);
+    navigate(fieldUrl, { replace: true });
+  };
+
   return (
     <>
-      <FieldRow data-highlighted={highlighted || undefined}>
+      <FieldRow
+        ref={rowRef}
+        data-highlighted={highlighted || undefined}
+        data-anchored={anchored || undefined}
+      >
         <FieldIcon>
           <KindIcon kind="field" size="small" />
         </FieldIcon>
         <FieldContent>
           <FieldSignature>
-            {field.name}: <SchemaTypeView type={field.type} />
+            <AnchorName onClick={copyAnchorLink} title="Copy link to field">
+              {field.name}
+            </AnchorName>
+            : <SchemaTypeView type={field.type} />
             {bitfield && (
               <BitRange>
                 bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}

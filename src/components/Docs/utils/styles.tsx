@@ -105,6 +105,15 @@ export const SectionToggle = styled.button`
   }
 `;
 
+export const AnchorName = styled.span`
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--text-dim);
+  }
+`;
+
 export const CollapsedItemsLink = styled(Link)`
   display: block;
   padding: 4px 8px;

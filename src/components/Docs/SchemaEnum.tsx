@@ -1,5 +1,6 @@
 import * as api from "./api";
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "../KindIcon";
@@ -14,8 +15,10 @@ import {
   matchesMetadataKeys,
   useSearchWords,
   useSearchMetadata,
+  useFieldParam,
 } from "./utils/filtering";
 import {
+  AnchorName,
   CollapsedItemsLink,
   CommonGroupMembers,
   CommonGroupSignature,
@@ -46,6 +49,10 @@ const EnumMemberWrapper = styled.div`
   gap: 0 6px;
 
   &[data-highlighted] {
+    background-color: var(--search-highlight);
+  }
+
+  &[data-anchored] {
     background-color: var(--search-highlight);
   }
 `;
@@ -85,6 +92,7 @@ export const SchemaEnumView: React.FC<{
   const { root } = useContext(DeclarationsContext);
   const searchWords = useSearchWords();
   const searchMetadata = useSearchMetadata();
+  const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchMetadata.length > 0;
   const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
@@ -126,11 +134,13 @@ export const SchemaEnumView: React.FC<{
             <EnumMemberView
               key={`${member.name}-${member.value}`}
               member={member}
+              fieldUrlBase={`${root}/${declaration.module}/${declaration.name}`}
               highlighted={
                 collapseNonMatching ||
                 (searchWords.length > 0 && matchesWords(member.name, searchWords)) ||
                 (searchMetadata.length > 0 && matchesMetadataKeys(member.metadata, searchMetadata))
               }
+              anchored={fieldParam === member.name}
             />
           ))}
           {hiddenCount > 0 && (
@@ -148,21 +158,47 @@ export const SchemaEnumView: React.FC<{
 
 function EnumMemberView({
   member,
+  fieldUrlBase,
   highlighted,
+  anchored,
 }: {
   member: api.SchemaEnumMember;
+  fieldUrlBase: string;
   highlighted: boolean;
+  anchored: boolean;
 }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (anchored && rowRef.current) {
+      rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [anchored]);
+
+  const navigate = useNavigate();
+  const copyAnchorLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const fieldUrl = `${fieldUrlBase}?field=${encodeURIComponent(member.name)}`;
+    const fullUrl = `${window.location.origin}${window.location.pathname}#${fieldUrl}`;
+    navigator.clipboard.writeText(fullUrl);
+    navigate(fieldUrl, { replace: true });
+  };
+
   return (
-    <EnumMemberWrapper data-highlighted={highlighted || undefined}>
+    <EnumMemberWrapper
+      ref={rowRef}
+      data-highlighted={highlighted || undefined}
+      data-anchored={anchored || undefined}
+    >
       <EnumMemberIcon>
         <KindIcon kind="enum-member" size="small" />
       </EnumMemberIcon>
       <EnumMemberContent>
         <EnumMemberSignature>
-          <span>
-            {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-          </span>
+          <AnchorName onClick={copyAnchorLink} title="Copy link to member">
+            {member.name}
+          </AnchorName>{" "}
+          = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
           <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
         </EnumMemberSignature>
         {member.metadata && <MetadataTags metadata={member.metadata} />}
