@@ -11,6 +11,7 @@ import { getGame } from "../../games";
 import {
   matchesWords,
   matchesMetadataKeys,
+  matchesMetadataValues,
   filterItems,
   useParsedSearch,
   useFieldParam,
@@ -136,10 +137,10 @@ export const SchemaClassView: React.FC<{
   const { root, classesByKey } = useContext(DeclarationsContext);
   const navigate = useNavigate();
   const parsed = useParsedSearch();
-  const { nameWords: searchWords, offsets: searchOffsets, metadataKeys: searchMetadata } = parsed;
+  const { nameWords: searchWords, offsets: searchOffsets, metadataKeys: searchMetadata, metadataValues: searchMetadataValues } = parsed;
   const fieldParam = useFieldParam();
 
-  const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0;
+  const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0 || searchMetadataValues.length > 0;
 
   const inheritedGroups = useMemo(() => {
     if (isSearching) return [];
@@ -196,6 +197,7 @@ export const SchemaClassView: React.FC<{
       </DeclarationHeader>
       {(!collapseNonMatching ||
         (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
+        (searchMetadataValues.length > 0 && matchesMetadataValues(declaration.metadata, searchMetadataValues)) ||
         (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
         <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}

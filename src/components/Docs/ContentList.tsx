@@ -247,6 +247,13 @@ export function ContentList() {
                 Matches classes, fields, or enum members that have a metadata key. Example:{" "}
                 <SearchExample query="metadata:MNetworkEnable" />
               </dd>
+              <dt>
+                <code>metadatavalue:</code> — find by metadata value
+              </dt>
+              <dd>
+                Matches classes, fields, or enum members by their metadata value. Example:{" "}
+                <SearchExample query="metadatavalue:water" />
+              </dd>
             </dl>
             Filters can be combined: <SearchExample query="module:client metadata:MNetworkEnable" />
           </SearchFiltersBlock>
