@@ -123,7 +123,8 @@ export function filterItems<T extends HasNameAndMetadata>(
     );
   }
 
-  const hasFieldFilter = remainingWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
+  const hasFieldFilter =
+    remainingWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
 
   if (!collapseNonMatching) {
     return {

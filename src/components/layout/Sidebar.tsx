@@ -115,6 +115,7 @@ export const SidebarWrapper = styled.div`
   overflow: hidden;
   min-width: 0;
   padding: 6px 8px 4px 10px;
+  margin-right: 32px;
   background-color: var(--sidebar);
   position: sticky;
   top: 0;

@@ -1,12 +1,12 @@
 import { styled } from "@linaria/react";
 
 export const ContentWrapper = styled.main`
-  padding: 0 24px 24px 24px;
+  padding-bottom: 24px;
   min-width: 0;
 
   @media (max-width: 768px) {
     grid-column: 1;
-    padding: 0 8px 16px;
+    padding-bottom: 16px;
   }
 `;
 
