@@ -86,16 +86,20 @@ export function SearchBox({
       setInputValue(value);
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
+        const wasSearching = search !== "";
         setSearch(value);
         ownNavigateRef.current = true;
+        // Push a history entry when starting a new search so back button works.
+        // Replace while typing to avoid polluting history with every keystroke.
+        const replace = wasSearching || value === "";
         if (value === "") {
-          navigate(baseUrl, { replace: true });
+          navigate(baseUrl, { replace });
         } else {
-          navigate(`${baseUrl}?search=${encodeURIComponent(value)}`, { replace: true });
+          navigate(`${baseUrl}?search=${encodeURIComponent(value)}`, { replace });
         }
       }, 150);
     },
-    [setSearch, navigate, baseUrl],
+    [search, setSearch, navigate, baseUrl],
   );
 
   const ref = useCtrlFHook<HTMLInputElement>();
