@@ -33,7 +33,7 @@ export const CommonGroupSignature = styled.div`
   flex: 1;
   font-weight: 600;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0 4px;
 `;
@@ -88,6 +88,20 @@ export const SectionLink = styled(Link)`
 
   &:hover {
     border-color: var(--highlight);
+  }
+`;
+
+export const SectionToggle = styled.button`
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+
+  &:hover {
+    color: var(--text);
   }
 `;
 

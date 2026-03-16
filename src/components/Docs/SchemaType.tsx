@@ -269,9 +269,7 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
               <MetadataEntry key={group.name}>
                 <MetadataName
                   onClick={() =>
-                    navigate(
-                      `${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`,
-                    )
+                    navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
                   }
                 >
                   {group.name}
@@ -287,9 +285,7 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
             <MetadataGroup key={group.name}>
               <MetadataGroupName
                 onClick={() =>
-                  navigate(
-                    `${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`,
-                  )
+                  navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
                 }
               >
                 {group.name}
