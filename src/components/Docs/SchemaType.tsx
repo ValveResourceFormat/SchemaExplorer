@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
-import styled, { useTheme } from "styled-components";
+import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "./api";
-import { ColoredSyntax, getSyntaxColorFor } from "../ColoredSyntax";
+import { ColoredSyntax } from "../ColoredSyntax";
 import { DeclarationsContext } from "./DeclarationsContext";
 
 const TypeLink = styled(NavLink)`
   font-weight: 600;
+  text-decoration-color: var(--syntax-interface);
 
   &.active {
     text-decoration: none;
@@ -56,12 +57,10 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
 
 function DeclarationLink({ name, module }: { name: string; module: string }) {
   const { root } = useContext(DeclarationsContext);
-  const theme = useTheme();
-  const style: React.CSSProperties = { textDecorationColor: getSyntaxColorFor(theme, "interface") };
   const to = `${root}/${module}/${name}`;
 
   return (
-    <TypeLink to={to} style={style}>
+    <TypeLink to={to}>
       <ColoredSyntax kind="interface">{name}</ColoredSyntax>
     </TypeLink>
   );
@@ -69,7 +68,7 @@ function DeclarationLink({ name, module }: { name: string; module: string }) {
 
 const MetadataList = styled.div`
   font-size: 14px;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   margin-top: 4px;
   margin-bottom: 4px;
   margin-left: 20px;
@@ -81,7 +80,7 @@ const MetadataList = styled.div`
 const MetadataGroup = styled.div``;
 
 const MetadataGroupName = styled.div`
-  color: ${(props) => props.theme.text};
+  color: var(--text);
   opacity: 0.6;
 
   &::before {
@@ -106,12 +105,12 @@ const MetadataEntry = styled.div`
 `;
 
 const MetadataName = styled.span`
-  color: ${(props) => props.theme.text};
+  color: var(--text);
   opacity: 0.6;
 `;
 
 const MetadataValue = styled.span`
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   white-space: pre-wrap;
 `;
 

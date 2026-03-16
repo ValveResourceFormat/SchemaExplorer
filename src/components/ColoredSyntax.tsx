@@ -1,11 +1,11 @@
 import React from "react";
-import { DefaultTheme, useTheme } from "styled-components";
-import { Theme } from "./Themes";
 
-export type ColoredSyntaxKind = keyof Theme["syntax"];
+export type ColoredSyntaxKind = "literal" | "interface";
 
-export const getSyntaxColorFor = (theme: DefaultTheme, kind: ColoredSyntaxKind) =>
-  theme.syntax[kind];
+const syntaxStyles: Record<ColoredSyntaxKind, React.CSSProperties> = {
+  literal: { color: "var(--syntax-literal)" },
+  interface: { color: "var(--syntax-interface)" },
+};
 
 export function ColoredSyntax({
   kind,
@@ -14,6 +14,5 @@ export function ColoredSyntax({
   kind: ColoredSyntaxKind;
   children: React.ReactNode;
 }) {
-  const theme = useTheme();
-  return <span style={{ color: getSyntaxColorFor(theme, kind) }}>{children}</span>;
+  return <span style={syntaxStyles[kind]}>{children}</span>;
 }

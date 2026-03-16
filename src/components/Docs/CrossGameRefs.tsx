@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { Declaration, SchemaClass, SchemaEnum, SchemaFieldType, SchemaMetadataEntry } from "./api";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { GAMES, GameId } from "../../games";
@@ -7,12 +7,14 @@ import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./utils/
 
 type DiffStatus = "identical" | "offsets_only" | "differs";
 
-const statusColor = (status: DiffStatus) =>
-  status === "identical" ? "#4a8c2a" : status === "offsets_only" ? "#5b8ab5" : "#c97a1e";
+const GameLink = styled(SectionLink)`
+  &[data-status="offsets_only"] {
+    border-color: #5b8ab5;
+  }
 
-const GameLink = styled(SectionLink)<{ $status: DiffStatus }>`
-  border-color: ${(props) =>
-    props.$status === "identical" ? props.theme.groupBorder : statusColor(props.$status)};
+  &[data-status="differs"] {
+    border-color: #c97a1e;
+  }
 `;
 
 const GameIconWrapper = styled.span`
@@ -132,7 +134,7 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
           <GameLink
             key={gameId}
             to={`/${gameId}/${otherModule}/${declaration.name}`}
-            $status={status}
+            data-status={status === "identical" ? undefined : status}
             title={
               status === "identical"
                 ? "Identical"

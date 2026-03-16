@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
 import { DeclarationsContext } from "./Docs/DeclarationsContext";
@@ -163,6 +163,7 @@ export const DeclarationsSidebar = () => {
           {game && <GameSwitcher currentGame={game} />}
         </SidebarBrandRow>
         <SidebarSearchInput
+          type="search"
           placeholder="Filter sidebar..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -197,7 +198,7 @@ export const DeclarationsSidebar = () => {
                     }}
                   >
                     <SidebarGroupHeader
-                      $collapsed={collapsed.has(row.module)}
+                      data-collapsed={collapsed.has(row.module) || undefined}
                       onClick={() => toggleModule(row.module)}
                     >
                       {row.module} ({row.count})
@@ -236,10 +237,10 @@ const SidebarBrand = styled.a`
   font-weight: 700;
   font-size: 16px;
   text-decoration: none;
-  color: ${(props) => props.theme.text};
+  color: var(--text);
   white-space: nowrap;
 `;
 
 const SidebarSearchInput = styled(SearchInput)`
-  background: ${(props) => props.theme.background};
+  background: var(--background);
 `;

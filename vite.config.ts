@@ -1,15 +1,23 @@
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
+import wyw from "@wyw-in-js/vite";
 import { defineConfig } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: "/SchemaExplorer/",
   assetsInclude: ["schemas/*.json.gz"],
   plugins: [
-    react({
-      plugins: [["@swc/plugin-styled-components", { displayName: true, fileName: true }]],
+    react(),
+    wyw({
+      include: "src/**/*.tsx",
+      classNameSlug: mode === "development" ? "[title]" : "[title]_[hash]",
+      sourceMap: true,
+      babelOptions: {
+        presets: ["@babel/preset-typescript"],
+      },
     }),
   ],
   build: {
     emptyOutDir: true,
+    sourcemap: true,
   },
-});
+}));

@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import * as api from "./api";
 import { SchemaTypeView, MetadataTags } from "./SchemaType";
 import { ReferencedBy } from "./ReferencedBy";
@@ -20,7 +20,7 @@ import {
 const ClassExtendsWrapper = styled.span`
   font-size: 16px;
   font-weight: normal;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
 
   @media (max-width: 768px) {
     display: block;
@@ -33,12 +33,15 @@ const ClassMembers = styled(CommonGroupMembers)`
   }
 `;
 
-const FieldRow = styled.div<{ $highlighted?: boolean }>`
+const FieldRow = styled.div`
   padding: 6px 10px;
-  background-color: ${(props) =>
-    props.$highlighted ? props.theme.searchHighlight : props.theme.group};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  background-color: var(--group);
+  border: 1px solid var(--group-border);
   border-radius: 8px;
+
+  &[data-highlighted] {
+    background-color: var(--search-highlight);
+  }
 `;
 
 const FieldSignature = styled.div`
@@ -56,12 +59,12 @@ const FieldOffset = styled.button`
   font: inherit;
   font-size: 14px;
   font-weight: 500;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
 
   &:hover {
-    color: ${(props) => props.theme.highlight};
+    color: var(--highlight);
   }
 `;
 
@@ -81,24 +84,22 @@ const StyledModuleBadge = styled.button`
   font: inherit;
   font-size: 14px;
   font-weight: 500;
-  color: ${(props) => props.theme.textDim};
-  background-color: ${(props) => props.theme.groupMembers};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  color: var(--text-dim);
+  background-color: var(--group-members);
+  border: 1px solid var(--group-border);
   padding: 2px 8px;
   border-radius: 6px;
   margin-left: 8px;
   cursor: pointer;
 
   &:hover {
-    border-color: ${(props) => props.theme.highlight};
+    border-color: var(--highlight);
   }
 `;
 
 export const SchemaClassView: React.FC<{
-  className?: string;
-  style?: React.CSSProperties;
   declaration: api.SchemaClass;
-}> = ({ className, style, declaration }) => {
+}> = ({ declaration }) => {
   const { root } = useContext(DeclarationsContext);
   const searchWords = useSearchWords();
   const searchOffsets = useSearchOffsets();
@@ -120,7 +121,7 @@ export const SchemaClassView: React.FC<{
   }, [declaration.fields, searchWords, searchOffsets, collapseNonMatching]);
 
   return (
-    <CommonGroupWrapper className={className} style={style}>
+    <CommonGroupWrapper>
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="class" size="big" />
@@ -175,7 +176,7 @@ function SchemaFieldView({ field, highlighted }: { field: api.SchemaField; highl
   const navigate = useNavigate();
   const offsetHex = `0x${field.offset.toString(16).toUpperCase()}`;
   return (
-    <FieldRow $highlighted={highlighted}>
+    <FieldRow data-highlighted={highlighted || undefined}>
       <FieldSignature>
         <KindIcon kind="field" size="small" />
         <FieldOffset
