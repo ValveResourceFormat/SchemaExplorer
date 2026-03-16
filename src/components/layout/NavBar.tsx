@@ -196,7 +196,7 @@ const NavBarContentCell = styled.div`
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 14px 10px 24px;
+  padding: 10px 0;
   min-width: 0;
   flex-shrink: 0;
   position: sticky;
@@ -206,7 +206,6 @@ const NavBarContentCell = styled.div`
 
   @media (max-width: 768px) {
     grid-column: 1;
-    padding: 10px 14px;
   }
 `;
 

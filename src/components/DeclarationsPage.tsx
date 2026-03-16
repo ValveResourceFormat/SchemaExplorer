@@ -139,6 +139,11 @@ const ContentColumn = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding-right: 32px;
+
+  @media (max-width: 768px) {
+    padding: 0 8px;
+  }
 `;
 
 const MobileSidebarOverlay = styled.div`
@@ -181,7 +186,7 @@ const SidebarPanel = styled.div`
 
 const PageGrid = styled.div`
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 372px 1fr;
   min-height: 100dvh;
 
   @media (max-width: 768px) {
