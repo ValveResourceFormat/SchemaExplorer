@@ -7,6 +7,7 @@ import { KindIcon } from "../KindIcon";
 import { metadataIconMap } from "../KindIcon/metadataIconMap";
 import { DeclarationsContext } from "./DeclarationsContext";
 
+// @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
   font-weight: 600;
   text-decoration-color: var(--syntax-interface);

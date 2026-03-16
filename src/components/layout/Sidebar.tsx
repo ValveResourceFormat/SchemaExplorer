@@ -5,6 +5,7 @@ import { IconKind, KindIcon } from "../KindIcon";
 import { Declaration } from "../Docs/api";
 import { DeclarationsContext } from "../Docs/DeclarationsContext";
 
+// @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const SidebarLink = styled(NavLink)`
   display: flex;
   align-items: center;
