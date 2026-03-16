@@ -177,6 +177,9 @@ export function ClassTree() {
           placeholder={`Filter ${totalClasses} classes...`}
           value={filter}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value)}
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
         />
       </TreeHeader>
       <RootList>
