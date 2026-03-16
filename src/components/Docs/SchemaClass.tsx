@@ -11,9 +11,7 @@ import { getGame } from "../../games";
 import {
   matchesWords,
   matchesMetadataKeys,
-  useSearchWords,
-  useSearchOffsets,
-  useSearchMetadata,
+  useParsedSearch,
   useFieldParam,
 } from "./utils/filtering";
 import { formatHexOffset } from "./utils/format";
@@ -135,9 +133,12 @@ export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
 }> = ({ declaration }) => {
   const { root, classesByKey } = useContext(DeclarationsContext);
-  const searchWords = useSearchWords();
-  const searchOffsets = useSearchOffsets();
-  const searchMetadata = useSearchMetadata();
+  const navigate = useNavigate();
+  const {
+    nameWords: searchWords,
+    offsets: searchOffsets,
+    metadataKeys: searchMetadata,
+  } = useParsedSearch();
   const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0;
@@ -195,7 +196,7 @@ export const SchemaClassView: React.FC<{
       {(!collapseNonMatching ||
         (searchMetadata.length > 0 &&
           matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
-        <MetadataTags metadata={declaration.metadata} />
+        <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}
       {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
       {(matchingFields.length > 0 || hiddenCount > 0) && (
@@ -205,6 +206,8 @@ export const SchemaClassView: React.FC<{
               key={`${field.name}-${field.offset}`}
               field={field}
               fieldUrlBase={declPath}
+              root={root}
+              navigate={navigate}
               bitfield={bitfieldInfo.get(field)}
               highlighted={
                 collapseNonMatching ||
@@ -359,20 +362,22 @@ const BitfieldPadding = styled.div`
 function SchemaFieldView({
   field,
   fieldUrlBase,
+  root,
+  navigate,
   bitfield,
   highlighted,
   anchored,
 }: {
   field: api.SchemaField;
   fieldUrlBase: string;
+  root: string;
+  navigate: ReturnType<typeof useNavigate>;
   bitfield?: BitfieldInfo;
   highlighted: boolean;
   anchored: boolean;
 }) {
-  const { root } = useContext(DeclarationsContext);
-  const navigate = useNavigate();
   const offsetHex = formatHexOffset(field.offset);
-  const { rowRef, copyAnchorLink } = useAnchoredRow(fieldUrlBase, field.name, anchored);
+  const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, field.name, anchored);
 
   return (
     <>
@@ -404,7 +409,7 @@ function SchemaFieldView({
               {field.offset} ({offsetHex})
             </FieldOffset>
           </MemberSignature>
-          <MetadataTags metadata={field.metadata} />
+          <MetadataTags metadata={field.metadata} root={root} navigate={navigate} />
         </GridContent>
       </FieldRow>
       {bitfield && bitfield.totalBits > 0 && (

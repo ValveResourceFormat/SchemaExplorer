@@ -36,7 +36,7 @@ function parseSearch(search: string): ParsedSearch {
   return { nameWords, moduleWords, offsets: new Set(offsetValues), metadataKeys };
 }
 
-function useParsedSearch(): ParsedSearch {
+export function useParsedSearch(): ParsedSearch {
   const { search } = useContext(SearchContext);
   return useMemo(() => (search ? parseSearch(search) : EMPTY_PARSED), [search]);
 }
@@ -65,24 +65,9 @@ export function useFilteredData(declarations: api.Declaration[]) {
   }, [declarations, search, parsed, module, scope]);
 }
 
-export function useSearchWords(): string[] {
-  const { nameWords } = useParsedSearch();
-  return nameWords;
-}
-
-export function useSearchOffsets(): Set<number> {
-  const { offsets } = useParsedSearch();
-  return offsets;
-}
-
 export function useFieldParam(): string | null {
   const location = useLocation();
   return useMemo(() => new URLSearchParams(location.search).get("field"), [location.search]);
-}
-
-export function useSearchMetadata(): string[] {
-  const { metadataKeys } = useParsedSearch();
-  return metadataKeys;
 }
 
 function parseOffset(value: string): number | null {

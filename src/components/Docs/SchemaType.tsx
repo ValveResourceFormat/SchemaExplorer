@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, type NavigateFunction } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "./api";
 import { ColoredSyntax } from "../ColoredSyntax";
@@ -237,9 +237,15 @@ function truncateGroups(
   return result;
 }
 
-export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) {
-  const { root } = useContext(DeclarationsContext);
-  const navigate = useNavigate();
+export function MetadataTags({
+  metadata,
+  root,
+  navigate,
+}: {
+  metadata: SchemaMetadataEntry[];
+  root: string;
+  navigate: NavigateFunction;
+}) {
   const grouped = useMemo(() => {
     const groups: { name: string; values: (string | undefined)[] }[] = [];
     const map = new Map<string, { name: string; values: (string | undefined)[] }>();
