@@ -123,19 +123,19 @@ export function filterItems<T extends HasNameAndMetadata>(
     );
   }
 
-  const isSearching = nameWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
+  const hasFieldFilter = remainingWords.length > 0 || metadataKeys.length > 0 || parsed.offsets.size > 0;
 
   if (!collapseNonMatching) {
     return {
       visible: items,
-      highlighted: isSearching ? new Set(items.filter(isMatch)) : new Set(),
+      highlighted: hasFieldFilter ? new Set(items.filter(isMatch)) : new Set(),
       hiddenCount: 0,
     };
   }
   const matching = items.filter(isMatch);
   return {
     visible: matching,
-    highlighted: new Set(matching),
+    highlighted: hasFieldFilter ? new Set(matching) : new Set(),
     hiddenCount: items.length - matching.length,
   };
 }
