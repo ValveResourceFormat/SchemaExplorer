@@ -168,7 +168,11 @@ export const SchemaClassView: React.FC<{
           <ModuleBadge module={declaration.module} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      {!collapseNonMatching && <MetadataTags metadata={declaration.metadata} />}
+      {(!collapseNonMatching ||
+        (searchMetadata.length > 0 &&
+          matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
+        <MetadataTags metadata={declaration.metadata} />
+      )}
       {(matchingFields.length > 0 || hiddenCount > 0) && (
         <ClassMembers>
           {matchingFields.map((field) => (

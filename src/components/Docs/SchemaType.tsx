@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "./api";
 import { ColoredSyntax } from "../ColoredSyntax";
@@ -79,9 +79,20 @@ const MetadataList = styled.div`
 
 const MetadataGroup = styled.div``;
 
-const MetadataGroupName = styled.div`
+const MetadataGroupName = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
   color: var(--text);
   opacity: 0.6;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: var(--highlight);
+    opacity: 1;
+  }
 
   &::before {
     content: "·";
@@ -104,9 +115,19 @@ const MetadataEntry = styled.div`
   }
 `;
 
-const MetadataName = styled.span`
+const MetadataName = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
   color: var(--text);
   opacity: 0.6;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--highlight);
+    opacity: 1;
+  }
 `;
 
 const MetadataValue = styled.span`
@@ -209,6 +230,8 @@ function truncateGroups(
 }
 
 export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) {
+  const { root } = useContext(DeclarationsContext);
+  const navigate = useNavigate();
   const grouped = useMemo(() => {
     const groups: { name: string; values: (string | undefined)[] }[] = [];
     const map = new Map<string, { name: string; values: (string | undefined)[] }>();
@@ -244,7 +267,15 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
           if (group.values.length === 1) {
             return (
               <MetadataEntry key={group.name}>
-                <MetadataName>{group.name}</MetadataName>
+                <MetadataName
+                  onClick={() =>
+                    navigate(
+                      `${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`,
+                    )
+                  }
+                >
+                  {group.name}
+                </MetadataName>
                 {group.values[0] !== undefined && (
                   <MetadataValue>: {group.values[0]}</MetadataValue>
                 )}
@@ -254,7 +285,15 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
 
           return (
             <MetadataGroup key={group.name}>
-              <MetadataGroupName>{group.name}</MetadataGroupName>
+              <MetadataGroupName
+                onClick={() =>
+                  navigate(
+                    `${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`,
+                  )
+                }
+              >
+                {group.name}
+              </MetadataGroupName>
               <MetadataGroupValues>
                 {group.values.map((v, i) => (
                   <MetadataValue key={i}>{v}</MetadataValue>
