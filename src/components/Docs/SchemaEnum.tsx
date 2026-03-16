@@ -41,10 +41,23 @@ const EnumMemberWrapper = styled.div`
   padding: 3px 8px;
   background-color: transparent;
   border-radius: 6px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 6px;
 
   &[data-highlighted] {
     background-color: var(--search-highlight);
   }
+`;
+
+const EnumMemberIcon = styled.div`
+  grid-column: 1;
+  grid-row: 1 / -1;
+`;
+
+const EnumMemberContent = styled.div`
+  grid-column: 2;
+  min-width: 0;
 `;
 
 const EnumMemberSignature = styled.div`
@@ -52,6 +65,7 @@ const EnumMemberSignature = styled.div`
   font-size: 16px;
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 6px;
 `;
 
@@ -139,12 +153,18 @@ function EnumMemberView({
 }) {
   return (
     <EnumMemberWrapper data-highlighted={highlighted || undefined}>
-      <EnumMemberSignature>
+      <EnumMemberIcon>
         <KindIcon kind="enum-member" size="small" />
-        {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-        <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
-      </EnumMemberSignature>
-      {member.metadata && <MetadataTags metadata={member.metadata} />}
+      </EnumMemberIcon>
+      <EnumMemberContent>
+        <EnumMemberSignature>
+          <span>
+            {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
+          </span>
+          <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
+        </EnumMemberSignature>
+        {member.metadata && <MetadataTags metadata={member.metadata} />}
+      </EnumMemberContent>
     </EnumMemberWrapper>
   );
 }
