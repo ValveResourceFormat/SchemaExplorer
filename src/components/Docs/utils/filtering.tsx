@@ -27,7 +27,7 @@ export function useFilteredData(declarations: api.Declaration[]) {
 }
 
 function isFilterPrefix(word: string): boolean {
-  return word.startsWith("module:") || word.startsWith("offset:");
+  return word.startsWith("module:") || word.startsWith("offset:") || word.startsWith("metadata:");
 }
 
 export function useSearchWords(): string[] {
@@ -58,6 +58,22 @@ export function useSearchOffsets(): Set<number> {
   }, [search]);
 }
 
+export function useSearchMetadata(): string[] {
+  const { search } = useContext(SearchContext);
+  return useMemo(
+    () =>
+      search
+        ? search
+            .toLowerCase()
+            .split(" ")
+            .filter((x) => x.startsWith("metadata:"))
+            .map((x) => x.replace(/^metadata:/, ""))
+            .filter(Boolean)
+        : [],
+    [search],
+  );
+}
+
 function parseOffset(value: string): number | null {
   const trimmed = value.trim();
   if (trimmed === "") return null;
@@ -70,6 +86,14 @@ export function matchesWords(name: string, words: string[]): boolean {
   return words.every((w) => lower.includes(w));
 }
 
+export function matchesMetadataKeys(
+  metadata: api.SchemaMetadataEntry[] | undefined,
+  keys: string[],
+): boolean {
+  if (!metadata || metadata.length === 0 || keys.length === 0) return false;
+  return keys.every((key) => metadata.some((m) => m.name.toLowerCase().includes(key)));
+}
+
 function doSearch(declarations: api.Declaration[], words: string[]): api.Declaration[] {
   const moduleWords = words
     .filter((x) => x.startsWith("module:"))
@@ -78,6 +102,10 @@ function doSearch(declarations: api.Declaration[], words: string[]): api.Declara
     .filter((x) => x.startsWith("offset:"))
     .map((x) => parseOffset(x.replace(/^offset:/, "")));
   const offsetSet = new Set(offsetValues.filter((x): x is number => x !== null));
+  const metadataKeys = words
+    .filter((x) => x.startsWith("metadata:"))
+    .map((x) => x.replace(/^metadata:/, ""))
+    .filter(Boolean);
   const nameWords = words.filter((x) => !isFilterPrefix(x));
 
   function filterModule(declaration: api.Declaration): boolean {
@@ -96,8 +124,20 @@ function doSearch(declarations: api.Declaration[], words: string[]): api.Declara
     return declaration.fields.some((f) => offsetSet.has(f.offset));
   }
 
+  function matchesMetadata(declaration: api.Declaration): boolean {
+    if (matchesMetadataKeys(declaration.metadata, metadataKeys)) return true;
+    if (declaration.kind === "class") {
+      return declaration.fields.some((f) => matchesMetadataKeys(f.metadata, metadataKeys));
+    }
+    if (declaration.kind === "enum") {
+      return declaration.members.some((m) => matchesMetadataKeys(m.metadata, metadataKeys));
+    }
+    return false;
+  }
+
   const hasNameFilter = nameWords.length > 0;
   const hasOffsetFilter = offsetSet.size > 0;
+  const hasMetadataFilter = metadataKeys.length > 0;
 
   return declarations.filter((declaration) => {
     if (!filterModule(declaration)) return false;
@@ -111,10 +151,15 @@ function doSearch(declarations: api.Declaration[], words: string[]): api.Declara
     }
 
     const offsetMatch = hasOffsetFilter && matchesOffset(declaration);
+    const metadataMatch = hasMetadataFilter && matchesMetadata(declaration);
 
-    if (hasNameFilter && hasOffsetFilter) return nameMatch && offsetMatch;
-    if (hasNameFilter) return nameMatch;
-    if (hasOffsetFilter) return offsetMatch;
+    // AND all active filters together
+    const filters: boolean[] = [];
+    if (hasNameFilter) filters.push(nameMatch);
+    if (hasOffsetFilter) filters.push(offsetMatch);
+    if (hasMetadataFilter) filters.push(metadataMatch);
+
+    if (filters.length > 0) return filters.every(Boolean);
     // Module-only filter: already passed filterModule() above
     return moduleWords.length > 0;
   });

@@ -81,6 +81,63 @@ const InfoLink = styled.a`
   }
 `;
 
+const SearchFiltersBlock = styled.div`
+  max-width: 560px;
+  margin: 16px auto 0;
+  padding: 16px 20px;
+  background: var(--group);
+  border: 1px solid var(--group-border);
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.6;
+
+  dt {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  dd {
+    margin: 0 0 8px 12px;
+  }
+
+  dd:last-child {
+    margin-bottom: 0;
+  }
+
+  code {
+    background: var(--group-members);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 15px;
+  }
+`;
+
+const SearchExampleButton = styled.button`
+  background: var(--group-members);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 15px;
+  border: 1px solid transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--highlight);
+  }
+`;
+
+function SearchExample({ query }: { query: string }) {
+  const { root } = useContext(DeclarationsContext);
+  const navigate = useNavigate();
+  return (
+    <SearchExampleButton onClick={() => navigate(`${root}?search=${encodeURIComponent(query)}`)}>
+      {query}
+    </SearchExampleButton>
+  );
+}
+
 const OffsetsNote = styled.div`
   font-size: 14px;
   color: var(--text-dim);
@@ -150,6 +207,35 @@ export function ContentList() {
               .
             </p>
           </InfoBlock>
+          <SearchFiltersBlock>
+            <dl>
+              <dt>Search by name</dt>
+              <dd>
+                Type any text to match class, field, or enum names. Example:{" "}
+                <SearchExample query="m_vecOrigin" />
+              </dd>
+              <dt>
+                <code>module:</code> — filter by module
+              </dt>
+              <dd>
+                Example: <SearchExample query="module:client" />
+              </dd>
+              <dt>
+                <code>offset:</code> — find fields at a byte offset
+              </dt>
+              <dd>
+                Hex or decimal. Example: <SearchExample query="offset:0x100" />
+              </dd>
+              <dt>
+                <code>metadata:</code> — find by metadata key
+              </dt>
+              <dd>
+                Matches classes, fields, or enum members that have a metadata key. Example:{" "}
+                <SearchExample query="metadata:MNetworkEnable" />
+              </dd>
+            </dl>
+            Filters can be combined: <SearchExample query="module:client metadata:MNetworkEnable" />
+          </SearchFiltersBlock>
         </>
       )}
       {data.length > 0 && metadata.revision > 0 && (

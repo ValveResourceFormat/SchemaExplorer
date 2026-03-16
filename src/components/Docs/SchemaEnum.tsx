@@ -8,7 +8,12 @@ import { MetadataTags } from "./SchemaType";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge } from "./SchemaClass";
-import { matchesWords, useSearchWords } from "./utils/filtering";
+import {
+  matchesWords,
+  matchesMetadataKeys,
+  useSearchWords,
+  useSearchMetadata,
+} from "./utils/filtering";
 import {
   CollapsedItemsLink,
   CommonGroupMembers,
@@ -51,18 +56,23 @@ export const SchemaEnumView: React.FC<{
 }> = ({ declaration }) => {
   const { root } = useContext(DeclarationsContext);
   const searchWords = useSearchWords();
+  const searchMetadata = useSearchMetadata();
 
-  const isSearching = searchWords.length > 0;
-  const nameMatches = isSearching && matchesWords(declaration.name, searchWords);
+  const isSearching = searchWords.length > 0 || searchMetadata.length > 0;
+  const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
   const collapseNonMatching = isSearching && !nameMatches;
 
   const { matchingMembers, hiddenCount } = useMemo(() => {
     if (!collapseNonMatching) {
       return { matchingMembers: declaration.members, hiddenCount: 0 };
     }
-    const matching = declaration.members.filter((m) => matchesWords(m.name, searchWords));
+    const matching = declaration.members.filter(
+      (m) =>
+        (searchWords.length > 0 && matchesWords(m.name, searchWords)) ||
+        (searchMetadata.length > 0 && matchesMetadataKeys(m.metadata, searchMetadata)),
+    );
     return { matchingMembers: matching, hiddenCount: declaration.members.length - matching.length };
-  }, [declaration.members, searchWords, collapseNonMatching]);
+  }, [declaration.members, searchWords, searchMetadata, collapseNonMatching]);
 
   return (
     <CommonGroupWrapper>
@@ -84,7 +94,9 @@ export const SchemaEnumView: React.FC<{
               key={`${member.name}-${member.value}`}
               member={member}
               highlighted={
-                collapseNonMatching || (isSearching && matchesWords(member.name, searchWords))
+                collapseNonMatching ||
+                (searchWords.length > 0 && matchesWords(member.name, searchWords)) ||
+                (searchMetadata.length > 0 && matchesMetadataKeys(member.metadata, searchMetadata))
               }
             />
           ))}
