@@ -49,6 +49,17 @@ const EnumMemberWrapper = styled.div`
 const EnumMemberSignature = styled.div`
   font-weight: 600;
   font-size: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+`;
+
+const EnumMemberHex = styled.span`
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
 `;
 
 export const SchemaEnumView: React.FC<{
@@ -120,11 +131,14 @@ function EnumMemberView({
   member: api.SchemaEnumMember;
   highlighted: boolean;
 }) {
+  const hexDigits = member.value.toString(16).toUpperCase();
+  const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
   return (
     <EnumMemberWrapper data-highlighted={highlighted || undefined}>
       <EnumMemberSignature>
         <KindIcon kind="enum-member" size="small" />
         {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
+        <EnumMemberHex>0x{paddedHex}</EnumMemberHex>
       </EnumMemberSignature>
       {member.metadata && <MetadataTags metadata={member.metadata} />}
     </EnumMemberWrapper>
