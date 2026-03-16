@@ -328,7 +328,8 @@ const InheritedRow = styled.div`
   border: 1px solid var(--group-border);
   border-radius: 8px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  flex-wrap: wrap;
   gap: 6px;
   font-size: 13px;
   opacity: 0.6;

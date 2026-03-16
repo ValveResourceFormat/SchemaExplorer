@@ -114,6 +114,7 @@ const MetadataGroupValues = styled.div`
 const MetadataEntry = styled.div`
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
 `;
 
 const MetadataIcon = styled.span`
@@ -131,6 +132,7 @@ const MetadataName = styled.button`
   color: var(--text);
   opacity: 0.6;
   cursor: pointer;
+  flex-shrink: 0;
 
   &:hover {
     color: var(--highlight);
