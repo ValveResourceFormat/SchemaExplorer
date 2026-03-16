@@ -1,5 +1,4 @@
-import type { Declaration, SchemaFieldType, SchemaMetadataEntry } from "./Docs/api";
-import { declarationKey } from "./Docs/DeclarationsContext";
+import type { Declaration, SchemaFieldType, SchemaMetadataEntry } from "./Docs/api.ts";
 
 export interface RawSchemaClass {
   name: string;
@@ -68,7 +67,7 @@ export function parseSchemas(data: SchemasJson) {
   const all: Declaration[] = [];
   for (const arr of [classes, enums]) {
     for (const d of arr) {
-      const key = declarationKey(d.module, d.name);
+      const key = `${d.module}/${d.name}`;
       if (!seen.has(key)) {
         seen.add(key);
         all.push(d);
