@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 
 export const ContentWrapper = styled.main`
   flex: 1;
@@ -17,7 +17,7 @@ export const TextMessage = styled.div`
   align-self: center;
   font-size: 36px;
   font-weight: 300;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   text-align: center;
 
   @media (max-width: 768px) {

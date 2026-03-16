@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
 
 export function useCtrlFHook<T extends HTMLElement>() {
@@ -21,29 +21,29 @@ export function useCtrlFHook<T extends HTMLElement>() {
   return ref;
 }
 
-export const SearchInput = styled.input.attrs({ type: "search" })`
+export const SearchInput = styled.input`
   width: 100%;
   box-sizing: border-box;
   padding: 8px 14px;
   border: none;
   border-radius: 8px;
-  background: ${(props) => props.theme.searchbox.background};
-  color: ${(props) => props.theme.text};
+  background: var(--searchbox-background);
+  color: var(--text);
   font-family: inherit;
   font-size: 16px;
   outline: none;
   transition: box-shadow 0.15s;
 
   &:hover {
-    box-shadow: 0 0 0 2px ${(props) => props.theme.highlight}30;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--highlight) 19%, transparent);
   }
 
   &:focus {
-    box-shadow: 0 0 0 2px ${(props) => props.theme.highlight};
+    box-shadow: 0 0 0 2px var(--highlight);
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.searchbox.placeholder};
+    color: var(--searchbox-placeholder);
   }
 `;
 
@@ -102,6 +102,7 @@ export function SearchBox({
 
   return (
     <SearchInput
+      type="search"
       className={className}
       placeholder={placeholder}
       ref={ref}

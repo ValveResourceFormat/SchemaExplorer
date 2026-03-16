@@ -8,6 +8,11 @@
     <meta property="og:title" content="Source 2 Schema Explorer" />
     <meta property="og:description" content="Browse and explore Valve Source 2 engine schemas, classes, enums, and types for Counter-Strike 2, Dota 2, and Deadlock." />
     <meta property="og:type" content="website" />
+    <script>
+      var t = localStorage.getItem("theme");
+      if (t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches))
+        document.documentElement.setAttribute("data-theme", "dark");
+    </script>
   </head>
 
   <body>

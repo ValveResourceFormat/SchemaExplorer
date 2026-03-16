@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData } from "./utils/filtering";
@@ -15,10 +15,10 @@ const InfoBlock = styled.div`
   max-width: 560px;
   margin: 24px auto 0;
   padding: 16px 20px;
-  background: ${(props) => props.theme.group};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  background: var(--group);
+  border: 1px solid var(--group-border);
   border-radius: 10px;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   font-size: 16px;
   line-height: 1.6;
 
@@ -38,15 +38,15 @@ const GameChip = styled.button`
   padding: 2px 8px;
   border-radius: 6px;
   font: inherit;
-  background: ${(props) => props.theme.groupMembers};
-  border: 1px solid ${(props) => props.theme.groupBorder};
-  color: ${(props) => props.theme.text};
+  background: var(--group-members);
+  border: 1px solid var(--group-border);
+  color: var(--text);
   cursor: pointer;
   vertical-align: middle;
   transition: border-color 0.1s;
 
   &:hover {
-    border-color: ${(props) => props.theme.highlight};
+    border-color: var(--highlight);
   }
 
   svg {
@@ -73,7 +73,7 @@ function GameList() {
 }
 
 const InfoLink = styled.a`
-  color: ${(props) => props.theme.highlight};
+  color: var(--highlight);
   text-decoration: none;
 
   &:hover {
@@ -83,7 +83,7 @@ const InfoLink = styled.a`
 
 const OffsetsNote = styled.div`
   font-size: 14px;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   text-align: center;
   padding: 8px 4px 0;
 `;

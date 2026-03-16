@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 
 export const CommonGroupWrapper = styled.div`
   display: flex;
   flex-flow: column;
-  background-color: ${(props) => props.theme.group};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  background-color: var(--group);
+  border: 1px solid var(--group-border);
   border-radius: 10px;
-  box-shadow: ${(props) => props.theme.groupShadow};
+  box-shadow: var(--group-shadow);
   overflow: hidden;
   word-break: break-all;
 `;
 
 export const CommonGroupMembers = styled.div`
-  background-color: ${(props) => props.theme.groupMembers};
+  background-color: var(--group-members);
   padding: 10px 12px;
 
   > :not(:last-child) {
@@ -55,7 +55,7 @@ export const DeclarationNameLink = styled(Link)`
 
 export const SectionWrapper = styled.div`
   padding: 10px 14px;
-  border-top: 1px solid ${(props) => props.theme.groupSeparator};
+  border-top: 1px solid var(--group-separator);
 `;
 
 export const SectionTitle = styled.div`
@@ -63,7 +63,7 @@ export const SectionTitle = styled.div`
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   margin-bottom: 6px;
 `;
 
@@ -81,13 +81,13 @@ export const SectionLink = styled(Link)`
   border-radius: 6px;
   font-size: 14px;
   text-decoration: none;
-  color: ${(props) => props.theme.text};
-  background: ${(props) => props.theme.groupMembers};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  color: var(--text);
+  background: var(--group-members);
+  border: 1px solid var(--group-border);
   transition: border-color 0.1s;
 
   &:hover {
-    border-color: ${(props) => props.theme.highlight};
+    border-color: var(--highlight);
   }
 `;
 
@@ -95,7 +95,7 @@ export const CollapsedItemsLink = styled(Link)`
   display: block;
   padding: 4px 8px;
   font-size: 14px;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   text-decoration: none;
 
   &:hover {

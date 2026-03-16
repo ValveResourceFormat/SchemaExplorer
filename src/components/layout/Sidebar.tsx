@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { IconKind, KindIcon } from "../KindIcon";
 import { Declaration } from "../Docs/api";
 import { DeclarationsContext } from "../Docs/DeclarationsContext";
@@ -14,7 +14,7 @@ const SidebarLink = styled(NavLink)`
   padding: 0 8px;
   height: 28px;
   text-decoration: none;
-  color: ${(props) => props.theme.text};
+  color: var(--text);
   white-space: nowrap;
 
   > svg {
@@ -32,14 +32,14 @@ const SidebarLink = styled(NavLink)`
     color 0.1s;
 
   &:hover {
-    background: ${(props) => props.theme.groupMembers};
+    background: var(--group-members);
   }
 
   &.active {
     font-weight: 600;
-    background: ${(props) => props.theme.highlight}18;
-    border-left: 2px solid ${(props) => props.theme.highlight};
-    color: ${(props) => props.theme.highlight};
+    background: color-mix(in srgb, var(--highlight) 9%, transparent);
+    border-left: 2px solid var(--highlight);
+    color: var(--highlight);
   }
 `;
 
@@ -48,7 +48,7 @@ export const SidebarElement: React.FC<{
   icon: IconKind;
   text: string;
 }> = React.memo(({ to, icon, text }) => (
-  <SidebarLink to={to}>
+  <SidebarLink to={to} prefetch="none">
     <KindIcon kind={icon} size="small" />
     <span>{text}</span>
   </SidebarLink>
@@ -67,8 +67,8 @@ export const DeclarationSidebarElement: React.FC<{ declaration: Declaration }> =
   },
 );
 
-export const SidebarGroupHeader = styled.button<{ $collapsed: boolean }>`
-  background: ${(props) => props.theme.sidebar};
+export const SidebarGroupHeader = styled.button`
+  background: var(--sidebar);
   border: none;
   width: 100%;
   padding: 0 8px;
@@ -80,7 +80,7 @@ export const SidebarGroupHeader = styled.button<{ $collapsed: boolean }>`
   text-transform: uppercase;
   letter-spacing: 0.04em;
   text-align: left;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -89,13 +89,17 @@ export const SidebarGroupHeader = styled.button<{ $collapsed: boolean }>`
   transition: color 0.1s;
 
   &:hover {
-    color: ${(props) => props.theme.text};
+    color: var(--text);
   }
 
   &::before {
-    content: "${(props) => (props.$collapsed ? "\\25B6" : "\\25BC")}";
+    content: "\\25BC";
     font-size: 9px;
     opacity: 0.6;
+  }
+
+  &[data-collapsed]::before {
+    content: "\\25B6";
   }
 `;
 
@@ -107,7 +111,7 @@ export const SidebarWrapper = styled.div`
   overflow: hidden;
   min-width: 0;
   padding: 6px 8px 4px 10px;
-  background-color: ${(props) => props.theme.sidebar};
+  background-color: var(--sidebar);
 
   @media (max-width: 768px) {
     display: none;

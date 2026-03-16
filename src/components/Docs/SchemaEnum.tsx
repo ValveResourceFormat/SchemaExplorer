@@ -1,6 +1,6 @@
 import * as api from "./api";
 import React, { useContext, useMemo } from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "./utils/components";
 import { DeclarationsContext } from "./DeclarationsContext";
@@ -21,7 +21,7 @@ import {
 const EnumTypeWrapper = styled.span`
   font-size: 16px;
   font-weight: normal;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   margin-left: 8px;
 `;
 
@@ -31,11 +31,14 @@ const EnumMembers = styled(CommonGroupMembers)`
   }
 `;
 
-const EnumMemberWrapper = styled.div<{ $highlighted?: boolean }>`
+const EnumMemberWrapper = styled.div`
   padding: 3px 8px;
-  background-color: ${(props) =>
-    props.$highlighted ? props.theme.searchHighlight : "transparent"};
+  background-color: transparent;
   border-radius: 6px;
+
+  &[data-highlighted] {
+    background-color: var(--search-highlight);
+  }
 `;
 
 const EnumMemberSignature = styled.div`
@@ -44,10 +47,8 @@ const EnumMemberSignature = styled.div`
 `;
 
 export const SchemaEnumView: React.FC<{
-  className?: string;
-  style?: React.CSSProperties;
   declaration: api.SchemaEnum;
-}> = ({ className, style, declaration }) => {
+}> = ({ declaration }) => {
   const { root } = useContext(DeclarationsContext);
   const searchWords = useSearchWords();
 
@@ -64,7 +65,7 @@ export const SchemaEnumView: React.FC<{
   }, [declaration.members, searchWords, collapseNonMatching]);
 
   return (
-    <CommonGroupWrapper className={className} style={style}>
+    <CommonGroupWrapper>
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="enum" size="big" />
@@ -108,7 +109,7 @@ function EnumMemberView({
   highlighted: boolean;
 }) {
   return (
-    <EnumMemberWrapper $highlighted={highlighted}>
+    <EnumMemberWrapper data-highlighted={highlighted || undefined}>
       <EnumMemberSignature>
         <KindIcon kind="enum-member" size="small" />
         {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>

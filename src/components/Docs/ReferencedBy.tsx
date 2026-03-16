@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { KindIcon } from "../KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./utils/styles";
@@ -7,7 +7,7 @@ import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./utils/
 const COLLAPSE_THRESHOLD = 8;
 
 const RefField = styled.span`
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
 
   &::before {
     content: ".";
@@ -17,13 +17,13 @@ const RefField = styled.span`
 const ToggleButton = styled.button`
   background: none;
   border: none;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
   font-size: 14px;
   cursor: pointer;
   padding: 2px 4px;
 
   &:hover {
-    color: ${(props) => props.theme.text};
+    color: var(--text);
   }
 `;
 

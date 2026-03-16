@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import { styled } from "@linaria/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../AppContext";
 import { SearchBox } from "../Search";
@@ -84,7 +84,7 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
             <SwitcherOption
               key={g.id}
               onClick={() => switchTo(g.id)}
-              $active={g.id === currentGame}
+              data-active={g.id === currentGame || undefined}
             >
               {g.icon}
               <span>{g.name}</span>
@@ -110,10 +110,10 @@ const SwitcherToggle = styled.button`
   border: none;
   background: none;
   cursor: pointer;
-  color: ${(props) => props.theme.textDim};
+  color: var(--text-dim);
 
   &:hover > span {
-    box-shadow: 0 0 0 2px ${(props) => props.theme.highlight}30;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--highlight) 19%, transparent);
   }
 `;
 
@@ -140,30 +140,31 @@ const SwitcherDropdown = styled.div`
   top: 100%;
   right: 0;
   margin-top: 4px;
-  background: ${(props) => props.theme.group};
-  border: 1px solid ${(props) => props.theme.groupBorder};
+  background: var(--group);
+  border: 1px solid var(--group-border);
   border-radius: 8px;
-  box-shadow: ${(props) => props.theme.groupShadow};
+  box-shadow: var(--group-shadow);
   z-index: 200;
   overflow: hidden;
   min-width: 200px;
 `;
 
-const SwitcherOption = styled.button<{ $active: boolean }>`
+const SwitcherOption = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
   padding: 10px 14px;
   border: none;
-  background: ${(props) => (props.$active ? props.theme.groupMembers : "transparent")};
-  color: ${(props) => props.theme.text};
+  background: transparent;
+  color: var(--text);
   font-size: 14px;
   cursor: pointer;
   text-align: left;
 
+  &[data-active],
   &:hover {
-    background: ${(props) => props.theme.groupMembers};
+    background: var(--group-members);
   }
 `;
 
@@ -174,7 +175,7 @@ const NavBarContentCell = styled.div`
   padding: 10px 14px 10px 24px;
   min-width: 0;
   flex-shrink: 0;
-  background-color: ${(props) => props.theme.background};
+  background-color: var(--background);
 
   @media (max-width: 768px) {
     grid-column: 1;
@@ -195,20 +196,24 @@ const NavBarSimple = styled.nav`
   justify-content: flex-end;
   gap: 14px;
   padding: 10px 14px;
-  background-color: ${(props) => props.theme.background};
+  background-color: var(--background);
 `;
 
-const ToggleTrack = styled.label<{ $active: boolean }>`
+const ToggleTrack = styled.label`
   display: flex;
   align-items: center;
   width: 44px;
   height: 22px;
   border-radius: 11px;
-  background-color: ${(props) => (props.$active ? "#2a2d33" : "#d1d5db")};
+  background-color: #d1d5db;
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s;
   flex-shrink: 0;
+
+  &:has(input:checked) {
+    background-color: #2a2d33;
+  }
 
   input {
     position: absolute;
@@ -218,16 +223,21 @@ const ToggleTrack = styled.label<{ $active: boolean }>`
   }
 `;
 
-const ToggleThumb = styled.span<{ $active: boolean }>`
+const ToggleThumb = styled.span`
   position: absolute;
-  left: ${(props) => (props.$active ? "22px" : "2px")};
+  left: 2px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background-color: ${(props) => (props.$active ? "#7a7f88" : "#ffffff")};
+  background-color: #ffffff;
   transition:
     left 0.2s,
     background-color 0.2s;
+
+  input:checked ~ & {
+    left: 22px;
+    background-color: #7a7f88;
+  }
 `;
 
 const ToggleLabel = styled.span`
@@ -273,7 +283,7 @@ function NavBarThemeSwitcher() {
   const appContext = React.useContext(AppContext);
 
   return (
-    <ToggleTrack $active={appContext.darkmode}>
+    <ToggleTrack>
       <input
         type="checkbox"
         checked={appContext.darkmode}
@@ -282,7 +292,7 @@ function NavBarThemeSwitcher() {
       />
       <ToggleLabelLeft>{appContext.darkmode ? "\u{1F31C}" : ""}</ToggleLabelLeft>
       <ToggleLabelRight>{appContext.darkmode ? "" : "\u{1F31E}"}</ToggleLabelRight>
-      <ToggleThumb $active={appContext.darkmode} />
+      <ToggleThumb />
     </ToggleTrack>
   );
 }

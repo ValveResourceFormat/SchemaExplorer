@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
-import styled, { ThemeProvider } from "styled-components";
-import { themeDark, themeLight } from "./components/Themes";
-import { GlobalStyle } from "./components/GlobalStyle";
+import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
 import { Declaration } from "./components/Docs/api";
 import { isGameId, GameId, GAMES } from "./games";
 import { loadGameSchemas, type SchemaMetadata } from "./components/data";
 import DeclarationsPage from "./components/DeclarationsPage";
+import "./global.css";
 
 const AppWrapper = styled.div`
   display: flex;
@@ -16,8 +15,8 @@ const AppWrapper = styled.div`
   min-height: 100dvh;
   max-width: 1440px;
   margin: 0 auto;
-  background-color: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.text};
+  background-color: var(--background);
+  color: var(--text);
 `;
 
 const EMPTY_DECLARATIONS: Declaration[] = [];
@@ -92,6 +91,10 @@ function SchemasPage() {
   return <DeclarationsPage context={context} />;
 }
 
+function applyTheme(dark: boolean) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+}
+
 function App() {
   const [darkmode, setDarkmode] = React.useState(() => {
     const themeName = window.localStorage.getItem("theme");
@@ -106,6 +109,7 @@ function App() {
       darkmode,
       setDarkmode(dark: boolean) {
         window.localStorage.setItem("theme", dark ? "dark" : "light");
+        applyTheme(dark);
         setDarkmode(dark);
       },
     }),
@@ -114,17 +118,14 @@ function App() {
 
   return (
     <AppContext.Provider value={appContext}>
-      <ThemeProvider theme={darkmode ? themeDark : themeLight}>
-        <AppWrapper>
-          <GlobalStyle />
-          <HashRouter>
-            <Routes>
-              <Route path="/:game/:module?/:scope?" element={<SchemasPage />} />
-              <Route path="*" element={<Navigate to="/cs2" replace />} />
-            </Routes>
-          </HashRouter>
-        </AppWrapper>
-      </ThemeProvider>
+      <AppWrapper>
+        <HashRouter>
+          <Routes>
+            <Route path="/:game/:module?/:scope?" element={<SchemasPage />} />
+            <Route path="*" element={<Navigate to="/cs2" replace />} />
+          </Routes>
+        </HashRouter>
+      </AppWrapper>
     </AppContext.Provider>
   );
 }
