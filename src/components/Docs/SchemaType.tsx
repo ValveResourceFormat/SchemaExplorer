@@ -111,13 +111,10 @@ const MetadataGroupValues = styled.div`
 
 const MetadataEntry = styled.div`
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
 `;
 
 const MetadataIcon = styled.span`
   display: inline-flex;
-  align-self: center;
   margin-right: 4px;
   flex-shrink: 0;
 `;
@@ -130,7 +127,6 @@ const MetadataName = styled.button`
   color: var(--text);
   opacity: 0.6;
   cursor: pointer;
-  flex-shrink: 0;
 
   &:hover {
     color: var(--highlight);
@@ -258,6 +254,16 @@ export function MetadataTags({
       }
       group.values.push(entry.value);
     }
+    const priority = (name: string) => {
+      if (name === "MPropertyFriendlyName" || name === "MPropertyDescription") return -1;
+      if (name === "MGetKV3ClassDefaults") return 1;
+      return 0;
+    };
+    groups.sort((a, b) => {
+      const p = priority(a.name) - priority(b.name);
+      if (p !== 0) return p;
+      return a.name.localeCompare(b.name);
+    });
     return groups;
   }, [metadata]);
 
@@ -281,16 +287,18 @@ export function MetadataTags({
                 <MetadataIcon>
                   <KindIcon kind={iconKind} size="small" />
                 </MetadataIcon>
-                <MetadataName
-                  onClick={() =>
-                    navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
-                  }
-                >
-                  {group.name}
-                </MetadataName>
-                {group.values[0] !== undefined && (
-                  <MetadataValue>: {group.values[0]}</MetadataValue>
-                )}
+                <span>
+                  <MetadataName
+                    onClick={() =>
+                      navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
+                    }
+                  >
+                    {group.name}
+                  </MetadataName>
+                  {group.values[0] !== undefined && (
+                    <MetadataValue>: {group.values[0]}</MetadataValue>
+                  )}
+                </span>
               </MetadataEntry>
             );
           }
