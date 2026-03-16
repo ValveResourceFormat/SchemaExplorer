@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useTransition } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
@@ -60,7 +60,7 @@ export function SearchBox({
   const [inputValue, setInputValue] = useState(search);
   const navigate = useNavigate();
   const location = useLocation();
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [, startTransition] = useTransition();
   const ownNavigateRef = useRef(false);
 
   // Sync from URL (back/forward navigation, clicking links)
@@ -70,37 +70,27 @@ export function SearchBox({
       return;
     }
     const urlSearch = new URLSearchParams(location.search).get("search") ?? "";
-    setSearch(urlSearch);
     setInputValue(urlSearch);
-    clearTimeout(timerRef.current);
+    startTransition(() => setSearch(urlSearch));
     // Intentionally depends only on location.search — we sync *from* the URL.
     // search/setSearch are omitted because including them would create an
     // infinite loop: setSearch triggers a navigate which changes location.search.
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cleanup debounce timer on unmount
-  useEffect(() => () => clearTimeout(timerRef.current), []);
-
-  const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-    ({ target: { value } }) => {
-      setInputValue(value);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        const wasSearching = search !== "";
-        setSearch(value);
-        ownNavigateRef.current = true;
-        // Push a history entry when starting a new search so back button works.
-        // Replace while typing to avoid polluting history with every keystroke.
-        const replace = wasSearching || value === "";
-        if (value === "") {
-          navigate(baseUrl, { replace });
-        } else {
-          navigate(`${baseUrl}?search=${encodeURIComponent(value)}`, { replace });
-        }
-      }, 150);
-    },
-    [search, setSearch, navigate, baseUrl],
-  );
+  const onChange: React.ChangeEventHandler<HTMLInputElement> = ({ target: { value } }) => {
+    const wasSearching = inputValue !== "";
+    setInputValue(value);
+    ownNavigateRef.current = true;
+    // Push a history entry when starting a new search so back button works.
+    // Replace while typing to avoid polluting history with every keystroke.
+    const replace = wasSearching || value === "";
+    startTransition(() => {
+      setSearch(value);
+      navigate(value === "" ? baseUrl : `${baseUrl}?search=${encodeURIComponent(value)}`, {
+        replace,
+      });
+    });
+  };
 
   const ref = useCtrlFHook<HTMLInputElement>();
 

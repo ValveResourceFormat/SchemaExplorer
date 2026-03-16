@@ -9,7 +9,6 @@ import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
 import { Declaration } from "./api";
 import { DeclarationsContext, declarationKey } from "./DeclarationsContext";
-import { SearchContext } from "../Search/SearchContext";
 import { GAMES } from "../../games";
 
 const CardBlock = styled.div`
@@ -176,7 +175,6 @@ function renderItem(declaration: Declaration) {
 
 export function ContentList() {
   const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
-  const { search } = useContext(SearchContext);
   const { data, isSearching } = useFilteredData(declarations);
   const [showTree, setShowTree] = useState(
     () => /bot|crawl|spider|slurp/i.test(navigator.userAgent) || navigator.webdriver,
@@ -186,7 +184,7 @@ export function ContentList() {
     <ContentWrapper>
       {data.length > 0 ? (
         isSearching ? (
-          <LazyList key={search} data={data} render={renderItem} />
+          <LazyList data={data} render={renderItem} />
         ) : (
           <ScrollableList data={data} render={renderItem} />
         )

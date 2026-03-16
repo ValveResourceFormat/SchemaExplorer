@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
+import React, { useEffect, useRef } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface Props<T> {
   data: T[];
@@ -13,7 +13,7 @@ export function LazyList<T>({ data, render }: Props<T>) {
   const virtualizer = useWindowVirtualizer({
     count: data.length,
     estimateSize: () => 80,
-    overscan: 10,
+    overscan: 2,
     scrollMargin: parentOffsetRef.current,
   });
 
@@ -23,6 +23,15 @@ export function LazyList<T>({ data, render }: Props<T>) {
       parentOffsetRef.current = parentRef.current.getBoundingClientRect().top + window.scrollY;
     }
   }, []);
+
+  // Scroll to top when search results change (skip initial mount)
+  const prevDataRef = useRef(data);
+  useEffect(() => {
+    if (prevDataRef.current !== data) {
+      prevDataRef.current = data;
+      window.scrollTo(0, 0);
+    }
+  }, [data]);
 
   return (
     <div ref={parentRef}>
