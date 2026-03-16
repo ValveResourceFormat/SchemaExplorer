@@ -70,6 +70,8 @@ const EnumMemberSignature = styled.div`
 `;
 
 const EnumMemberHex = styled.span`
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-dim);
