@@ -7,7 +7,13 @@ import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon } from "./utils/components";
 import { DeclarationsContext } from "./DeclarationsContext";
-import { matchesWords, useSearchWords, useSearchOffsets } from "./utils/filtering";
+import {
+  matchesWords,
+  matchesMetadataKeys,
+  useSearchWords,
+  useSearchOffsets,
+  useSearchMetadata,
+} from "./utils/filtering";
 import {
   CollapsedItemsLink,
   CommonGroupMembers,
@@ -103,8 +109,9 @@ export const SchemaClassView: React.FC<{
   const { root } = useContext(DeclarationsContext);
   const searchWords = useSearchWords();
   const searchOffsets = useSearchOffsets();
+  const searchMetadata = useSearchMetadata();
 
-  const isSearching = searchWords.length > 0 || searchOffsets.size > 0;
+  const isSearching = searchWords.length > 0 || searchOffsets.size > 0 || searchMetadata.length > 0;
   const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
   const collapseNonMatching = isSearching && !nameMatches;
 
@@ -115,10 +122,11 @@ export const SchemaClassView: React.FC<{
     const matching = declaration.fields.filter(
       (f) =>
         (searchWords.length > 0 && matchesWords(f.name, searchWords)) ||
-        (searchOffsets.size > 0 && searchOffsets.has(f.offset)),
+        (searchOffsets.size > 0 && searchOffsets.has(f.offset)) ||
+        (searchMetadata.length > 0 && matchesMetadataKeys(f.metadata, searchMetadata)),
     );
     return { matchingFields: matching, hiddenCount: declaration.fields.length - matching.length };
-  }, [declaration.fields, searchWords, searchOffsets, collapseNonMatching]);
+  }, [declaration.fields, searchWords, searchOffsets, searchMetadata, collapseNonMatching]);
 
   return (
     <CommonGroupWrapper>
@@ -154,7 +162,8 @@ export const SchemaClassView: React.FC<{
               highlighted={
                 collapseNonMatching ||
                 (searchWords.length > 0 && matchesWords(field.name, searchWords)) ||
-                (searchOffsets.size > 0 && searchOffsets.has(field.offset))
+                (searchOffsets.size > 0 && searchOffsets.has(field.offset)) ||
+                (searchMetadata.length > 0 && matchesMetadataKeys(field.metadata, searchMetadata))
               }
             />
           ))}
