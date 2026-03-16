@@ -1,10 +1,8 @@
 import { styled } from "@linaria/react";
 
 export const ContentWrapper = styled.main`
-  flex: 1;
   padding: 0 24px 24px 24px;
   min-width: 0;
-  overflow-y: auto;
 
   @media (max-width: 768px) {
     grid-column: 1;

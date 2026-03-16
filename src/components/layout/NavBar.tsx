@@ -199,6 +199,9 @@ const NavBarContentCell = styled.div`
   padding: 10px 14px 10px 24px;
   min-width: 0;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background-color: var(--background);
 
   @media (max-width: 768px) {

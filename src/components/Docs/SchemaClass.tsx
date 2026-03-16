@@ -63,7 +63,6 @@ const FieldRow = styled.div`
   }
 `;
 
-
 const FieldOffset = styled.button`
   background: none;
   border: none;
@@ -410,8 +409,9 @@ function SchemaFieldView({
       </FieldRow>
       {bitfield && bitfield.totalBits > 0 && (
         <BitfieldPadding>
-          {Math.ceil(bitfield.totalBits / 8)} byte{Math.ceil(bitfield.totalBits / 8) !== 1 ? "s" : ""}{" "}
-          ({bitfield.totalBits} bit{bitfield.totalBits !== 1 ? "s" : ""}
+          {Math.ceil(bitfield.totalBits / 8)} byte
+          {Math.ceil(bitfield.totalBits / 8) !== 1 ? "s" : ""} ({bitfield.totalBits} bit
+          {bitfield.totalBits !== 1 ? "s" : ""}
           {bitfield.padding > 0 ? ` + ${bitfield.padding} padding` : ""})
         </BitfieldPadding>
       )}

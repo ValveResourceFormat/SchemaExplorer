@@ -138,7 +138,7 @@ export default function DeclarationsPage({
 const ContentColumn = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
 `;
 
 const MobileSidebarOverlay = styled.div`
@@ -182,7 +182,7 @@ const SidebarPanel = styled.div`
 const PageGrid = styled.div`
   display: grid;
   grid-template-columns: 340px 1fr;
-  height: 100dvh;
+  min-height: 100dvh;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
