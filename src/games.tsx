@@ -2,10 +2,11 @@ import React from "react";
 
 export type GameId = "cs2" | "dota2" | "deadlock";
 
-export const GAMES: { id: GameId; name: string; icon: React.ReactNode }[] = [
+export const GAMES: { id: GameId; name: string; repo: string; icon: React.ReactNode }[] = [
   {
     id: "cs2",
     name: "Counter-Strike 2",
+    repo: "SteamTracking/GameTracking-CS2",
 
     icon: (
       <svg viewBox="0 0 32 32" width="24" height="24">
@@ -21,6 +22,7 @@ export const GAMES: { id: GameId; name: string; icon: React.ReactNode }[] = [
   {
     id: "dota2",
     name: "Dota 2",
+    repo: "SteamTracking/GameTracking-Dota2",
 
     icon: (
       <svg viewBox="0 0 32 32" width="24" height="24">
@@ -36,6 +38,7 @@ export const GAMES: { id: GameId; name: string; icon: React.ReactNode }[] = [
   {
     id: "deadlock",
     name: "Deadlock",
+    repo: "SteamTracking/GameTracking-Deadlock",
 
     icon: (
       <svg viewBox="0 0 32 32" width="24" height="24">
