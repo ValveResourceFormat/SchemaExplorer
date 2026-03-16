@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { SearchContext } from "../../Search/SearchContext";
 import * as api from "../api";
 
@@ -56,6 +56,11 @@ export function useSearchOffsets(): Set<number> {
       .filter((x): x is number => x !== null);
     return new Set(values);
   }, [search]);
+}
+
+export function useFieldParam(): string | null {
+  const location = useLocation();
+  return useMemo(() => new URLSearchParams(location.search).get("field"), [location.search]);
 }
 
 export function useSearchMetadata(): string[] {
