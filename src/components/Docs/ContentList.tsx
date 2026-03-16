@@ -142,7 +142,7 @@ const OffsetsNote = styled.div`
   font-size: 14px;
   color: var(--text-dim);
   text-align: center;
-  padding: 8px 4px 0;
+  padding: 8px 4px;
 `;
 
 function renderItem(declaration: Declaration) {

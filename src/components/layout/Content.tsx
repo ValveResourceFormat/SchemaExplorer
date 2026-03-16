@@ -2,13 +2,13 @@ import { styled } from "@linaria/react";
 
 export const ContentWrapper = styled.main`
   flex: 1;
-  padding: 0 0 0 24px;
+  padding: 0 24px 24px 24px;
   min-width: 0;
   overflow-y: auto;
 
   @media (max-width: 768px) {
     grid-column: 1;
-    padding: 0;
+    padding: 0 8px 16px;
   }
 `;
 
@@ -27,5 +27,5 @@ export const TextMessage = styled.div`
 `;
 
 export const ListItem = styled.div`
-  padding: 5px 14px 5px 0;
+  padding: 5px 0;
 `;

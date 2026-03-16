@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { styled } from "@linaria/react";
 import {
   DeclarationsContext,
@@ -83,6 +83,7 @@ export default function DeclarationsPage({
 }) {
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const references = useMemo(() => buildReferences(context.declarations), [context.declarations]);
 
@@ -104,14 +105,20 @@ export default function DeclarationsPage({
   const searchCtx = useMemo(() => ({ search, setSearch }), [search, setSearch]);
   const filterCtx = useMemo(() => ({ filter, setFilter }), [filter, setFilter]);
 
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const openSidebar = useCallback(() => setSidebarOpen(true), []);
+
   return (
     <DeclarationsContext.Provider value={fullContext}>
       <SearchContext.Provider value={searchCtx}>
         <SidebarFilterContext.Provider value={filterCtx}>
           <PageGrid>
-            <DeclarationsSidebar />
+            <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
+            <SidebarPanel data-open={sidebarOpen || undefined}>
+              <DeclarationsSidebar onNavigate={closeSidebar} />
+            </SidebarPanel>
             <ContentColumn>
-              <NavBar baseUrl={context.root} />
+              <NavBar baseUrl={context.root} onMenuClick={openSidebar} />
               <ContentList />
             </ContentColumn>
           </PageGrid>
@@ -127,14 +134,48 @@ const ContentColumn = styled.div`
   overflow: hidden;
 `;
 
+const MobileSidebarOverlay = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    &[data-open] {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 300;
+    }
+  }
+`;
+
+const SidebarPanel = styled.div`
+  display: contents;
+
+  @media (max-width: 768px) {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 300px;
+    z-index: 301;
+    background: var(--sidebar);
+
+    &[data-open] {
+      display: flex;
+    }
+
+    > * {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+`;
+
 const PageGrid = styled.div`
   display: grid;
   grid-template-columns: 340px 1fr;
   height: 100dvh;
-
-  @media (max-width: 1100px) {
-    grid-template-columns: 200px 1fr;
-  }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
