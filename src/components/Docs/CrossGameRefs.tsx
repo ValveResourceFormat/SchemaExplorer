@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { styled } from "@linaria/react";
 import { Declaration, SchemaClass, SchemaEnum, SchemaFieldType, SchemaMetadataEntry } from "./api";
-import { DeclarationsContext } from "./DeclarationsContext";
+import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { GAMES, GameId } from "../../games";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./utils/styles";
 
@@ -86,7 +86,7 @@ function areEnumsEqual(a: SchemaEnum, b: SchemaEnum): boolean {
   for (let i = 0; i < a.members.length; i++) {
     if (a.members[i].name !== b.members[i].name || a.members[i].value !== b.members[i].value)
       return false;
-    if (!metadataEqual(a.members[i].metadata ?? [], b.members[i].metadata ?? [])) return false;
+    if (!metadataEqual(a.members[i].metadata, b.members[i].metadata)) return false;
   }
   if (!metadataEqual(a.metadata, b.metadata)) return false;
   return true;
@@ -133,7 +133,7 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
         {matches.map(({ gameId, gameIcon, gameName, status, module: otherModule }) => (
           <GameLink
             key={gameId}
-            to={`/${gameId}/${otherModule}/${declaration.name}`}
+            to={declarationPath(`/${gameId}`, otherModule, declaration.name)}
             data-status={status === "identical" ? undefined : status}
             title={
               status === "identical"

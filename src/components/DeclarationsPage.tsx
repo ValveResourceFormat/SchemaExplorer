@@ -18,7 +18,7 @@ function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   switch (type.category) {
     case "declared_class":
     case "declared_enum":
-      out.add(`${type.module}/${type.name}`);
+      out.add(declarationKey(type.module, type.name));
       break;
     case "ptr":
     case "fixed_array":
@@ -76,7 +76,9 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
 export default function DeclarationsPage({
   context,
 }: {
-  context: Omit<DeclarationsContextType, "references" | "otherGamesLookup" | "classesByKey">;
+  context: Omit<DeclarationsContextType, "references" | "otherGamesLookup" | "classesByKey"> & {
+    otherGames: Map<GameId, Declaration[]>;
+  };
 }) {
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -102,13 +104,13 @@ export default function DeclarationsPage({
     return lookup;
   }, [context.otherGames]);
 
-  const fullContext = useMemo(
-    () => ({ ...context, references, classesByKey, otherGamesLookup }),
-    [context, references, classesByKey, otherGamesLookup],
-  );
+  const fullContext = useMemo(() => {
+    const { otherGames: _, ...rest } = context;
+    return { ...rest, references, classesByKey, otherGamesLookup };
+  }, [context, references, classesByKey, otherGamesLookup]);
 
-  const searchCtx = useMemo(() => ({ search, setSearch }), [search, setSearch]);
-  const filterCtx = useMemo(() => ({ filter, setFilter }), [filter, setFilter]);
+  const searchCtx = useMemo(() => ({ search, setSearch }), [search]);
+  const filterCtx = useMemo(() => ({ filter, setFilter }), [filter]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);

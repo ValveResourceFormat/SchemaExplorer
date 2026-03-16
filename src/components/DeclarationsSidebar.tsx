@@ -164,7 +164,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
             <S2VLogo />
             Source 2 Viewer
           </SidebarBrand>
-          {game && <GameSwitcher currentGame={game} />}
+          <GameSwitcher currentGame={game} />
         </SidebarBrandRow>
         <SidebarSearchInput
           type="search"

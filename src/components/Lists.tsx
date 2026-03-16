@@ -2,12 +2,11 @@ import React, { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface Props<T> {
-  className?: string;
   data: T[];
   render(element: T): React.ReactNode;
 }
 
-export function LazyList<T>({ className, data, render }: Props<T>) {
+export function LazyList<T>({ data, render }: Props<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
@@ -18,7 +17,7 @@ export function LazyList<T>({ className, data, render }: Props<T>) {
   });
 
   return (
-    <div ref={parentRef} className={className}>
+    <div ref={parentRef}>
       <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
         {virtualizer.getVirtualItems().map((virtualRow) => (
           <div
@@ -41,6 +40,6 @@ export function LazyList<T>({ className, data, render }: Props<T>) {
   );
 }
 
-export function ScrollableList<T>({ className, data, render }: Props<T>) {
-  return <div className={className}>{data.map((x) => render(x))}</div>;
+export function ScrollableList<T>({ data, render }: Props<T>) {
+  return <div>{data.map((x) => render(x))}</div>;
 }

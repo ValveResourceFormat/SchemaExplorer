@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import * as api from "./api";
@@ -6,7 +6,7 @@ import { SchemaTypeView, MetadataTags } from "./SchemaType";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon } from "../KindIcon";
-import { DeclarationsContext, declarationKey } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 import { getGame } from "../../games";
 import {
   matchesWords,
@@ -18,6 +18,7 @@ import {
 } from "./utils/filtering";
 import { formatHexOffset } from "./utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "./utils/bitfields";
+import { useAnchoredRow } from "./utils/useAnchoredRow";
 import {
   AnchorName,
   CollapsedItemsLink,
@@ -26,6 +27,9 @@ import {
   CommonGroupWrapper,
   DeclarationHeader,
   DeclarationNameLink,
+  GridContent,
+  GridIcon,
+  MemberSignature,
   SectionLink,
   SectionList,
   SectionTitle,
@@ -59,31 +63,12 @@ const FieldRow = styled.div`
   }
 `;
 
-const FieldIcon = styled.div`
-  grid-column: 1;
-  grid-row: 1 / -1;
-`;
-
-const FieldContent = styled.div`
-  grid-column: 2;
-  min-width: 0;
-`;
-
-const FieldSignature = styled.div`
-  font-weight: 600;
-  font-size: 16px;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-`;
 
 const FieldOffset = styled.button`
   background: none;
   border: none;
   padding: 0;
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-dim);
@@ -196,15 +181,14 @@ export const SchemaClassView: React.FC<{
   }, [declaration.fields, searchWords, searchOffsets, searchMetadata, collapseNonMatching]);
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
+  const declPath = declarationPath(root, declaration.module, declaration.name);
 
   return (
     <CommonGroupWrapper>
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="class" size="big" />
-          <DeclarationNameLink to={`${root}/${declaration.module}/${declaration.name}`}>
-            {declaration.name}
-          </DeclarationNameLink>
+          <DeclarationNameLink to={declPath}>{declaration.name}</DeclarationNameLink>
           <ModuleBadge module={declaration.module} />
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
@@ -221,7 +205,7 @@ export const SchemaClassView: React.FC<{
             <SchemaFieldView
               key={`${field.name}-${field.offset}`}
               field={field}
-              fieldUrlBase={`${root}/${declaration.module}/${declaration.name}`}
+              fieldUrlBase={declPath}
               bitfield={bitfieldInfo.get(field)}
               highlighted={
                 collapseNonMatching ||
@@ -233,7 +217,7 @@ export const SchemaClassView: React.FC<{
             />
           ))}
           {hiddenCount > 0 && (
-            <CollapsedItemsLink to={`${root}/${declaration.module}/${declaration.name}`}>
+            <CollapsedItemsLink to={declPath}>
               {hiddenCount} more field{hiddenCount !== 1 ? "s" : ""}…
             </CollapsedItemsLink>
           )}
@@ -261,10 +245,10 @@ function InheritedSection({
           Inherits from ({totalFields} field{totalFields !== 1 ? "s" : ""})
         </SectionTitle>
         <SectionList>
-          {[...groups].reverse().map((group) => (
+          {groups.toReversed().map((group) => (
             <SectionLink
               key={`inherited-${group.parent.module}/${group.parent.name}`}
-              to={`${root}/${group.parent.module}/${group.parent.name}`}
+              to={declarationPath(root, group.parent.module, group.parent.name)}
             >
               <KindIcon kind="inherited-class" size="small" />
               {group.parent.name}
@@ -357,8 +341,7 @@ function InheritedFieldView({ field }: { field: api.SchemaField }) {
 }
 
 const BitRange = styled.span`
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-dim);
@@ -390,21 +373,7 @@ function SchemaFieldView({
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
   const offsetHex = formatHexOffset(field.offset);
-  const rowRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (anchored && rowRef.current) {
-      rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [anchored]);
-
-  const copyAnchorLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const fieldUrl = `${fieldUrlBase}?field=${encodeURIComponent(field.name)}`;
-    const fullUrl = `${window.location.origin}${window.location.pathname}#${fieldUrl}`;
-    navigator.clipboard.writeText(fullUrl);
-    navigate(fieldUrl, { replace: true });
-  };
+  const { rowRef, copyAnchorLink } = useAnchoredRow(fieldUrlBase, field.name, anchored);
 
   return (
     <>
@@ -413,11 +382,11 @@ function SchemaFieldView({
         data-highlighted={highlighted || undefined}
         data-anchored={anchored || undefined}
       >
-        <FieldIcon>
+        <GridIcon>
           <KindIcon kind="field" size="small" />
-        </FieldIcon>
-        <FieldContent>
-          <FieldSignature>
+        </GridIcon>
+        <GridContent>
+          <MemberSignature>
             <AnchorName onClick={copyAnchorLink} title="Copy link to field">
               {field.name}
             </AnchorName>
@@ -435,22 +404,17 @@ function SchemaFieldView({
             >
               {field.offset} ({offsetHex})
             </FieldOffset>
-          </FieldSignature>
+          </MemberSignature>
           <MetadataTags metadata={field.metadata} />
-        </FieldContent>
+        </GridContent>
       </FieldRow>
-      {bitfield &&
-        bitfield.totalBits > 0 &&
-        (() => {
-          const totalBytes = Math.ceil(bitfield.totalBits / 8);
-          return (
-            <BitfieldPadding>
-              {totalBytes} byte{totalBytes !== 1 ? "s" : ""} ({bitfield.totalBits} bit
-              {bitfield.totalBits !== 1 ? "s" : ""}
-              {bitfield.padding > 0 ? ` + ${bitfield.padding} padding` : ""})
-            </BitfieldPadding>
-          );
-        })()}
+      {bitfield && bitfield.totalBits > 0 && (
+        <BitfieldPadding>
+          {Math.ceil(bitfield.totalBits / 8)} byte{Math.ceil(bitfield.totalBits / 8) !== 1 ? "s" : ""}{" "}
+          ({bitfield.totalBits} bit{bitfield.totalBits !== 1 ? "s" : ""}
+          {bitfield.padding > 0 ? ` + ${bitfield.padding} padding` : ""})
+        </BitfieldPadding>
+      )}
     </>
   );
 }

@@ -1,10 +1,9 @@
 import * as api from "./api";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useMemo } from "react";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "../KindIcon";
-import { DeclarationsContext } from "./DeclarationsContext";
+import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
 import { formatHexOffset } from "./utils/format";
 import { ReferencedBy } from "./ReferencedBy";
@@ -17,6 +16,7 @@ import {
   useSearchMetadata,
   useFieldParam,
 } from "./utils/filtering";
+import { useAnchoredRow } from "./utils/useAnchoredRow";
 import {
   AnchorName,
   CollapsedItemsLink,
@@ -25,6 +25,9 @@ import {
   CommonGroupWrapper,
   DeclarationHeader,
   DeclarationNameLink,
+  GridContent,
+  GridIcon,
+  MemberSignature,
 } from "./utils/styles";
 
 const EnumTypeWrapper = styled.span`
@@ -57,28 +60,9 @@ const EnumMemberWrapper = styled.div`
   }
 `;
 
-const EnumMemberIcon = styled.div`
-  grid-column: 1;
-  grid-row: 1 / -1;
-`;
-
-const EnumMemberContent = styled.div`
-  grid-column: 2;
-  min-width: 0;
-`;
-
-const EnumMemberSignature = styled.div`
-  font-weight: 600;
-  font-size: 16px;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-`;
 
 const EnumMemberHex = styled.span`
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-dim);
@@ -110,14 +94,14 @@ export const SchemaEnumView: React.FC<{
     return { matchingMembers: matching, hiddenCount: declaration.members.length - matching.length };
   }, [declaration.members, searchWords, searchMetadata, collapseNonMatching]);
 
+  const declPath = declarationPath(root, declaration.module, declaration.name);
+
   return (
     <CommonGroupWrapper>
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="enum" size="big" />
-          <DeclarationNameLink to={`${root}/${declaration.module}/${declaration.name}`}>
-            {declaration.name}
-          </DeclarationNameLink>
+          <DeclarationNameLink to={declPath}>{declaration.name}</DeclarationNameLink>
           <EnumTypeWrapper>: {declaration.alignment}</EnumTypeWrapper>
           <ModuleBadge module={declaration.module} />
           <GitHubFileLink module={declaration.module} name={declaration.name} />
@@ -134,7 +118,7 @@ export const SchemaEnumView: React.FC<{
             <EnumMemberView
               key={`${member.name}-${member.value}`}
               member={member}
-              fieldUrlBase={`${root}/${declaration.module}/${declaration.name}`}
+              fieldUrlBase={declPath}
               highlighted={
                 collapseNonMatching ||
                 (searchWords.length > 0 && matchesWords(member.name, searchWords)) ||
@@ -144,7 +128,7 @@ export const SchemaEnumView: React.FC<{
             />
           ))}
           {hiddenCount > 0 && (
-            <CollapsedItemsLink to={`${root}/${declaration.module}/${declaration.name}`}>
+            <CollapsedItemsLink to={declPath}>
               {hiddenCount} more member{hiddenCount !== 1 ? "s" : ""}…
             </CollapsedItemsLink>
           )}
@@ -167,22 +151,7 @@ function EnumMemberView({
   highlighted: boolean;
   anchored: boolean;
 }) {
-  const rowRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (anchored && rowRef.current) {
-      rowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [anchored]);
-
-  const navigate = useNavigate();
-  const copyAnchorLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const fieldUrl = `${fieldUrlBase}?field=${encodeURIComponent(member.name)}`;
-    const fullUrl = `${window.location.origin}${window.location.pathname}#${fieldUrl}`;
-    navigator.clipboard.writeText(fullUrl);
-    navigate(fieldUrl, { replace: true });
-  };
+  const { rowRef, copyAnchorLink } = useAnchoredRow(fieldUrlBase, member.name, anchored);
 
   return (
     <EnumMemberWrapper
@@ -190,19 +159,19 @@ function EnumMemberView({
       data-highlighted={highlighted || undefined}
       data-anchored={anchored || undefined}
     >
-      <EnumMemberIcon>
+      <GridIcon>
         <KindIcon kind="enum-member" size="small" />
-      </EnumMemberIcon>
-      <EnumMemberContent>
-        <EnumMemberSignature>
+      </GridIcon>
+      <GridContent>
+        <MemberSignature>
           <AnchorName onClick={copyAnchorLink} title="Copy link to member">
             {member.name}
           </AnchorName>{" "}
           = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
           <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
-        </EnumMemberSignature>
-        {member.metadata && <MetadataTags metadata={member.metadata} />}
-      </EnumMemberContent>
+        </MemberSignature>
+        <MetadataTags metadata={member.metadata} />
+      </GridContent>
     </EnumMemberWrapper>
   );
 }
