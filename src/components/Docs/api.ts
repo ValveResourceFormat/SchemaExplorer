@@ -32,7 +32,7 @@ export interface SchemaClass {
 export interface SchemaEnumMember {
   name: string;
   value: number;
-  metadata?: SchemaMetadataEntry[];
+  metadata: SchemaMetadataEntry[];
 }
 
 export interface SchemaEnum {

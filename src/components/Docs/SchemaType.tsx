@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "./api";
 import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "../KindIcon";
 import { metadataIconMap } from "../KindIcon/metadataIconMap";
-import { DeclarationsContext } from "./DeclarationsContext";
+import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 
 const AngleBracket = styled.span`
   color: var(--text-dim);
@@ -65,7 +65,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
 
 function DeclarationLink({ name, module }: { name: string; module: string }) {
   const { root } = useContext(DeclarationsContext);
-  const to = `${root}/${module}/${name}`;
+  const to = declarationPath(root, module, name);
 
   return (
     <TypeLink to={to}>
@@ -84,8 +84,6 @@ const MetadataList = styled.div`
   flex-direction: column;
   gap: 2px;
 `;
-
-const MetadataGroup = styled.div``;
 
 const MetadataGroupName = styled.button`
   background: none;
@@ -264,11 +262,7 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
 
   const totalLines = countLines(grouped);
   const hasMore = totalLines > MAX_COLLAPSED_LINES;
-  const visible = expanded
-    ? grouped
-    : hasMore
-      ? truncateGroups(grouped, MAX_COLLAPSED_LINES)
-      : grouped;
+  const visible = expanded || !hasMore ? grouped : truncateGroups(grouped, MAX_COLLAPSED_LINES);
 
   return (
     <>
@@ -296,7 +290,7 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
           }
 
           return (
-            <MetadataGroup key={group.name}>
+            <div key={group.name}>
               <MetadataGroupName
                 onClick={() =>
                   navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
@@ -312,7 +306,7 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
                   <MetadataValue key={i}>{v}</MetadataValue>
                 ))}
               </MetadataGroupValues>
-            </MetadataGroup>
+            </div>
           );
         })}
       </MetadataList>

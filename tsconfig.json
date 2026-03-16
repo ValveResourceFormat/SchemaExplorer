@@ -5,8 +5,12 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "scripts"
+  ]
 }

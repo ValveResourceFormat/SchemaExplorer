@@ -8,13 +8,13 @@ import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
 import { Declaration } from "./api";
-import { DeclarationsContext } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey } from "./DeclarationsContext";
 import { SearchContext } from "../Search/SearchContext";
 import { GAMES } from "../../games";
 
-const InfoBlock = styled.div`
+const CardBlock = styled.div`
   max-width: 560px;
-  margin: 24px auto 0;
+  margin: 16px auto 0;
   padding: 16px 20px;
   background: var(--group);
   border: 1px solid var(--group-border);
@@ -22,6 +22,10 @@ const InfoBlock = styled.div`
   color: var(--text-dim);
   font-size: 16px;
   line-height: 1.6;
+`;
+
+const InfoBlock = styled(CardBlock)`
+  margin-top: 24px;
 
   p {
     margin: 0;
@@ -82,17 +86,7 @@ const InfoLink = styled.a`
   }
 `;
 
-const SearchFiltersBlock = styled.div`
-  max-width: 560px;
-  margin: 16px auto 0;
-  padding: 16px 20px;
-  background: var(--group);
-  border: 1px solid var(--group-border);
-  border-radius: 10px;
-  color: var(--text-dim);
-  font-size: 16px;
-  line-height: 1.6;
-
+const SearchFiltersBlock = styled(CardBlock)`
   dt {
     font-weight: 600;
     color: var(--text);
@@ -177,7 +171,7 @@ function renderItem(declaration: Declaration) {
       break;
   }
 
-  return <ListItem key={`${declaration.module}/${declaration.name}`}>{children}</ListItem>;
+  return <ListItem key={declarationKey(declaration.module, declaration.name)}>{children}</ListItem>;
 }
 
 export function ContentList() {

@@ -6,9 +6,10 @@
     "tsc": "tsc",
     "dev": "vite",
     "build": "vite build",
+    "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",
-    "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin src",
-    "fmt": "oxfmt src"
+    "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin src scripts",
+    "fmt": "oxfmt src scripts"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.22",

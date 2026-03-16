@@ -2,7 +2,7 @@ import { useContext, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SchemaClass } from "./api";
-import { DeclarationsContext, declarationKey } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 
 interface TreeNode {
   cls: SchemaClass;
@@ -138,7 +138,9 @@ const TreeFilterInput = styled.input`
 function TreeNodeView({ node, root }: { node: TreeNode; root: string }) {
   return (
     <li>
-      <ClassLink to={`${root}/${node.cls.module}/${node.cls.name}`}>{node.cls.name}</ClassLink>
+      <ClassLink to={declarationPath(root, node.cls.module, node.cls.name)}>
+        {node.cls.name}
+      </ClassLink>
       {node.children.length > 0 && (
         <TreeList>
           {node.children.map((child) => (

@@ -3,14 +3,53 @@ import { useLocation, useParams } from "react-router-dom";
 import { SearchContext } from "../../Search/SearchContext";
 import * as api from "../api";
 
+interface ParsedSearch {
+  nameWords: string[];
+  moduleWords: string[];
+  offsets: Set<number>;
+  metadataKeys: string[];
+}
+
+const EMPTY_PARSED: ParsedSearch = {
+  nameWords: [],
+  moduleWords: [],
+  offsets: new Set(),
+  metadataKeys: [],
+};
+
+function isFilterPrefix(word: string): boolean {
+  return word.startsWith("module:") || word.startsWith("offset:") || word.startsWith("metadata:");
+}
+
+function parseSearch(search: string): ParsedSearch {
+  const words = search.toLowerCase().split(" ").filter(Boolean);
+  const nameWords = words.filter((x) => !isFilterPrefix(x));
+  const moduleWords = words.filter((x) => x.startsWith("module:")).map((x) => x.slice(7));
+  const offsetValues = words
+    .filter((x) => x.startsWith("offset:"))
+    .map((x) => parseOffset(x.slice(7)))
+    .filter((x): x is number => x !== null);
+  const metadataKeys = words
+    .filter((x) => x.startsWith("metadata:"))
+    .map((x) => x.slice(9))
+    .filter(Boolean);
+  return { nameWords, moduleWords, offsets: new Set(offsetValues), metadataKeys };
+}
+
+function useParsedSearch(): ParsedSearch {
+  const { search } = useContext(SearchContext);
+  return useMemo(() => (search ? parseSearch(search) : EMPTY_PARSED), [search]);
+}
+
 export function useFilteredData(declarations: api.Declaration[]) {
   const { search } = useContext(SearchContext);
+  const parsed = useParsedSearch();
   const { module = "", scope = "" } = useParams();
 
   return useMemo(() => {
     if (search) {
       return {
-        data: doSearch(declarations, search.toLowerCase().split(" ").filter(Boolean)),
+        data: doSearch(declarations, parsed),
         isSearching: true,
       };
     }
@@ -23,39 +62,17 @@ export function useFilteredData(declarations: api.Declaration[]) {
     }
 
     return { data: [] as api.Declaration[], isSearching: false };
-  }, [declarations, search, module, scope]);
-}
-
-function isFilterPrefix(word: string): boolean {
-  return word.startsWith("module:") || word.startsWith("offset:") || word.startsWith("metadata:");
+  }, [declarations, search, parsed, module, scope]);
 }
 
 export function useSearchWords(): string[] {
-  const { search } = useContext(SearchContext);
-  return useMemo(
-    () =>
-      search
-        ? search
-            .toLowerCase()
-            .split(" ")
-            .filter((x) => x && !isFilterPrefix(x))
-        : [],
-    [search],
-  );
+  const { nameWords } = useParsedSearch();
+  return nameWords;
 }
 
 export function useSearchOffsets(): Set<number> {
-  const { search } = useContext(SearchContext);
-  return useMemo(() => {
-    if (!search) return new Set<number>();
-    const values = search
-      .toLowerCase()
-      .split(" ")
-      .filter((x): x is string => x !== "" && x.startsWith("offset:"))
-      .map((x) => parseOffset(x.replace(/^offset:/, "")))
-      .filter((x): x is number => x !== null);
-    return new Set(values);
-  }, [search]);
+  const { offsets } = useParsedSearch();
+  return offsets;
 }
 
 export function useFieldParam(): string | null {
@@ -64,19 +81,8 @@ export function useFieldParam(): string | null {
 }
 
 export function useSearchMetadata(): string[] {
-  const { search } = useContext(SearchContext);
-  return useMemo(
-    () =>
-      search
-        ? search
-            .toLowerCase()
-            .split(" ")
-            .filter((x) => x.startsWith("metadata:"))
-            .map((x) => x.replace(/^metadata:/, ""))
-            .filter(Boolean)
-        : [],
-    [search],
-  );
+  const { metadataKeys } = useParsedSearch();
+  return metadataKeys;
 }
 
 function parseOffset(value: string): number | null {
@@ -99,19 +105,8 @@ export function matchesMetadataKeys(
   return keys.every((key) => metadata.some((m) => m.name.toLowerCase().includes(key)));
 }
 
-function doSearch(declarations: api.Declaration[], words: string[]): api.Declaration[] {
-  const moduleWords = words
-    .filter((x) => x.startsWith("module:"))
-    .map((x) => x.replace(/^module:/, ""));
-  const offsetValues = words
-    .filter((x) => x.startsWith("offset:"))
-    .map((x) => parseOffset(x.replace(/^offset:/, "")));
-  const offsetSet = new Set(offsetValues.filter((x): x is number => x !== null));
-  const metadataKeys = words
-    .filter((x) => x.startsWith("metadata:"))
-    .map((x) => x.replace(/^metadata:/, ""))
-    .filter(Boolean);
-  const nameWords = words.filter((x) => !isFilterPrefix(x));
+function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.Declaration[] {
+  const { nameWords, moduleWords, offsets: offsetSet, metadataKeys } = parsed;
 
   function filterModule(declaration: api.Declaration): boolean {
     if (moduleWords.length === 0) return true;

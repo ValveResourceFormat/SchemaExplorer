@@ -48,6 +48,11 @@
   --searchbox-placeholder: #6b7280;
 }
 
+:root {
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
 html,
 body,
 #root {

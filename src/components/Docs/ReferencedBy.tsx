@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { styled } from "@linaria/react";
-import { DeclarationsContext } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 import { KindIcon } from "../KindIcon";
 import {
   SectionWrapper,
@@ -25,7 +25,7 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
   const [expanded, setExpanded] = useState(false);
   useEffect(() => setExpanded(false), [name, module]);
 
-  const refs = references.get(`${module}/${name}`);
+  const refs = references.get(declarationKey(module, name));
   if (!refs || refs.length === 0) return null;
 
   const collapsible = refs.length > COLLAPSE_THRESHOLD;
@@ -38,7 +38,7 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
         {visible.map((ref, i) => (
           <SectionLink
             key={`${ref.declarationModule}/${ref.declarationName}-${ref.fieldName ?? ""}-${i}`}
-            to={`${root}/${ref.declarationModule}/${ref.declarationName}`}
+            to={declarationPath(root, ref.declarationModule, ref.declarationName)}
           >
             <KindIcon kind={ref.relation} size={18} />
             <span>

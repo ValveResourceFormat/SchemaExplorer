@@ -5,21 +5,7 @@ import { AppContext } from "../AppContext";
 import { SearchBox } from "../Search";
 import { GAMES, GameId, getGame } from "../../games";
 
-export const NavBar = ({
-  baseUrl,
-  onMenuClick,
-}: {
-  baseUrl?: string;
-  onMenuClick?: () => void;
-}) => {
-  if (!baseUrl) {
-    return (
-      <NavBarSimple>
-        <NavBarThemeSwitcher />
-      </NavBarSimple>
-    );
-  }
-
+export const NavBar = ({ baseUrl, onMenuClick }: { baseUrl: string; onMenuClick?: () => void }) => {
   return (
     <NavBarContentCell>
       {onMenuClick && (
@@ -224,17 +210,6 @@ const NavBarContentCell = styled.div`
 const NavBarSearchBox = styled(SearchBox)`
   flex: 1;
   min-width: 0;
-`;
-
-const NavBarSimple = styled.nav`
-  grid-column: 1 / -1;
-  grid-row: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
-  padding: 10px 14px;
-  background-color: var(--background);
 `;
 
 const ToggleTrack = styled.label`

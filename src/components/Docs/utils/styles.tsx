@@ -21,14 +21,6 @@ export const CommonGroupMembers = styled.div`
   }
 `;
 
-export const CommonGroupHeader = styled.div`
-  display: flex;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
 export const CommonGroupSignature = styled.div`
   flex: 1;
   font-weight: 600;
@@ -38,8 +30,13 @@ export const CommonGroupSignature = styled.div`
   gap: 0 4px;
 `;
 
-export const DeclarationHeader = styled(CommonGroupHeader)`
+export const DeclarationHeader = styled.div`
+  display: flex;
   padding: 12px 14px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 export const DeclarationNameLink = styled(Link)`
@@ -103,6 +100,25 @@ export const SectionToggle = styled.button`
   &:hover {
     color: var(--text);
   }
+`;
+
+export const GridIcon = styled.div`
+  grid-column: 1;
+  grid-row: 1 / -1;
+`;
+
+export const GridContent = styled.div`
+  grid-column: 2;
+  min-width: 0;
+`;
+
+export const MemberSignature = styled.div`
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
 `;
 
 export const AnchorName = styled.span`
