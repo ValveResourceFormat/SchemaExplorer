@@ -2,7 +2,7 @@ import * as api from "./api";
 import React, { useContext, useMemo } from "react";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
-import { KindIcon } from "./utils/components";
+import { KindIcon } from "../KindIcon";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
 import { formatHexOffset } from "./utils/format";
