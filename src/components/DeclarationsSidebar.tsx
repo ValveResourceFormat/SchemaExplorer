@@ -50,6 +50,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
   const parentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeStickyIndexRef = useRef(0);
+  const navigatedFromSidebarRef = useRef(false);
 
   const groups = useMemo(() => {
     let filtered = declarations;
@@ -138,9 +139,13 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     });
   }, [activeModule, scope]);
 
-  // Scroll to active item on navigation
+  // Scroll to active item on navigation (skip if the click came from the sidebar)
   useEffect(() => {
     if (!scope || !activeModule) return;
+    if (navigatedFromSidebarRef.current) {
+      navigatedFromSidebarRef.current = false;
+      return;
+    }
     const idx = rows.findIndex(
       (r) =>
         r.type === "item" && r.declaration.name === scope && r.declaration.module === activeModule,
@@ -153,6 +158,11 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
       wrapperRef.current.scrollTop = 0;
     }
   }, [activeModule, scope, rows, virtualizer]);
+
+  const handleSidebarNavigate = useCallback(() => {
+    navigatedFromSidebarRef.current = true;
+    onNavigate?.();
+  }, [onNavigate]);
 
   const { game } = useContext(DeclarationsContext);
 
@@ -209,7 +219,10 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
                     </SidebarGroupHeader>
                   </div>
                 ) : (
-                  <DeclarationSidebarElement declaration={row.declaration} onClick={onNavigate} />
+                  <DeclarationSidebarElement
+                    declaration={row.declaration}
+                    onClick={handleSidebarNavigate}
+                  />
                 )}
               </div>
             );
