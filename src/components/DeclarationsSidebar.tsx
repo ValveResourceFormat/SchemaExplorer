@@ -29,9 +29,13 @@ function groupByModule(declarations: Declaration[]): ModuleGroup[] {
     }
     items.push(d);
   }
-  return Array.from(map, ([module, items]) => ({ module, items })).sort((a, b) =>
-    a.module.localeCompare(b.module),
-  );
+  const priority = ["client", "server"];
+  return Array.from(map, ([module, items]) => ({ module, items })).sort((a, b) => {
+    const ai = priority.indexOf(a.module);
+    const bi = priority.indexOf(b.module);
+    if (ai !== bi) return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+    return a.module.localeCompare(b.module);
+  });
 }
 
 const HEADER_HEIGHT = 28;
