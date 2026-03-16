@@ -45,10 +45,23 @@ const FieldRow = styled.div`
   border: 1px solid var(--group-border);
   border-radius: 8px;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 6px;
 
   &[data-highlighted] {
     background-color: var(--search-highlight);
   }
+`;
+
+const FieldIcon = styled.div`
+  grid-column: 1;
+  grid-row: 1 / -1;
+`;
+
+const FieldContent = styled.div`
+  grid-column: 2;
+  min-width: 0;
 `;
 
 const FieldSignature = styled.div`
@@ -70,6 +83,7 @@ const FieldOffset = styled.button`
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
+  margin-left: auto;
 
   &:hover {
     color: var(--highlight);
@@ -185,19 +199,25 @@ export const SchemaClassView: React.FC<{
 function SchemaFieldView({ field, highlighted }: { field: api.SchemaField; highlighted: boolean }) {
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
-  const offsetHex = `0x${field.offset.toString(16).toUpperCase()}`;
+  const hexDigits = field.offset.toString(16).toUpperCase();
+  const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
+  const offsetHex = `0x${paddedHex}`;
   return (
     <FieldRow data-highlighted={highlighted || undefined}>
-      <FieldSignature>
+      <FieldIcon>
         <KindIcon kind="field" size="small" />
-        <FieldOffset
-          onClick={() => navigate(`${root}?search=${encodeURIComponent(`offset:${offsetHex}`)}`)}
-        >
-          {offsetHex}
-        </FieldOffset>
-        {field.name}: <SchemaTypeView type={field.type} />
-      </FieldSignature>
-      <MetadataTags metadata={field.metadata} />
+      </FieldIcon>
+      <FieldContent>
+        <FieldSignature>
+          {field.name}: <SchemaTypeView type={field.type} />
+          <FieldOffset
+            onClick={() => navigate(`${root}?search=${encodeURIComponent(`offset:${offsetHex}`)}`)}
+          >
+            {field.offset} ({offsetHex})
+          </FieldOffset>
+        </FieldSignature>
+        <MetadataTags metadata={field.metadata} />
+      </FieldContent>
     </FieldRow>
   );
 }
