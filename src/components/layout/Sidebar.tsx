@@ -116,4 +116,8 @@ export const SidebarWrapper = styled.div`
   min-width: 0;
   padding: 6px 8px 4px 10px;
   background-color: var(--sidebar);
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  align-self: start;
 `;

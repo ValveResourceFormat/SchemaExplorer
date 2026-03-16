@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
 
 interface Props<T> {
   data: T[];
@@ -8,13 +8,21 @@ interface Props<T> {
 
 export function LazyList<T>({ data, render }: Props<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const parentOffsetRef = useRef(0);
 
-  const virtualizer = useVirtualizer({
+  const virtualizer = useWindowVirtualizer({
     count: data.length,
-    getScrollElement: () => parentRef.current?.parentElement ?? null,
     estimateSize: () => 80,
     overscan: 10,
+    scrollMargin: parentOffsetRef.current,
   });
+
+  // Capture offset once on mount
+  React.useLayoutEffect(() => {
+    if (parentRef.current) {
+      parentOffsetRef.current = parentRef.current.getBoundingClientRect().top + window.scrollY;
+    }
+  }, []);
 
   return (
     <div ref={parentRef}>
@@ -29,7 +37,7 @@ export function LazyList<T>({ data, render }: Props<T>) {
               top: 0,
               left: 0,
               width: "100%",
-              transform: `translateY(${virtualRow.start}px)`,
+              transform: `translateY(${virtualRow.start - parentOffsetRef.current}px)`,
             }}
           >
             {render(data[virtualRow.index])}

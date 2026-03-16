@@ -60,7 +60,6 @@ const EnumMemberWrapper = styled.div`
   }
 `;
 
-
 const EnumMemberHex = styled.span`
   font-family: var(--font-mono);
   font-size: 14px;
