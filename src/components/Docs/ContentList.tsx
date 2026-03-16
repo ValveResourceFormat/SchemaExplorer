@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
@@ -6,6 +6,7 @@ import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData } from "./utils/filtering";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
+import { ClassTree } from "./ClassTree";
 import { Declaration } from "./api";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { SearchContext } from "../Search/SearchContext";
@@ -138,6 +139,26 @@ function SearchExample({ query }: { query: string }) {
   );
 }
 
+const TreeToggle = styled.button`
+  display: block;
+  max-width: 560px;
+  margin: 16px auto 0;
+  padding: 10px 20px;
+  background: var(--group);
+  border: 1px solid var(--group-border);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+
+  &:hover {
+    border-color: var(--highlight);
+  }
+`;
+
 const OffsetsNote = styled.div`
   font-size: 14px;
   color: var(--text-dim);
@@ -163,6 +184,9 @@ export function ContentList() {
   const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
   const { search } = useContext(SearchContext);
   const { data, isSearching } = useFilteredData(declarations);
+  const [showTree, setShowTree] = useState(
+    () => /bot|crawl|spider|slurp/i.test(navigator.userAgent) || navigator.webdriver,
+  );
 
   return (
     <ContentWrapper>
@@ -174,15 +198,13 @@ export function ContentList() {
         )
       ) : isSearching ? (
         <TextMessage>No results found</TextMessage>
+      ) : error ? (
+        <TextMessage>{`Failed to load schemas: ${error}`}</TextMessage>
+      ) : loading ? (
+        <TextMessage>Loading schemas...</TextMessage>
       ) : (
         <>
-          <TextMessage>
-            {error
-              ? `Failed to load schemas: ${error}`
-              : loading
-                ? "Loading schemas..."
-                : "Choose a class or enum from the sidebar, or use search..."}
-          </TextMessage>
+          <TextMessage>Choose a class or enum from the sidebar, or use search...</TextMessage>
           <InfoBlock>
             <p>
               Source 2 includes a schema system that describes the engine's classes, fields, and
@@ -236,6 +258,11 @@ export function ContentList() {
             </dl>
             Filters can be combined: <SearchExample query="module:client metadata:MNetworkEnable" />
           </SearchFiltersBlock>
+          {showTree ? (
+            <ClassTree />
+          ) : (
+            <TreeToggle onClick={() => setShowTree(true)}>View class inheritance tree</TreeToggle>
+          )}
         </>
       )}
       {data.length > 0 && metadata.revision > 0 && (
