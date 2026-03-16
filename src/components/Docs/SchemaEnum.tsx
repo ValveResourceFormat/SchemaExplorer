@@ -97,7 +97,11 @@ export const SchemaEnumView: React.FC<{
           <ModuleBadge module={declaration.module} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      {!collapseNonMatching && <MetadataTags metadata={declaration.metadata} />}
+      {(!collapseNonMatching ||
+        (searchMetadata.length > 0 &&
+          matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
+        <MetadataTags metadata={declaration.metadata} />
+      )}
       {(matchingMembers.length > 0 || hiddenCount > 0) && (
         <EnumMembers>
           {matchingMembers.map((member) => (
