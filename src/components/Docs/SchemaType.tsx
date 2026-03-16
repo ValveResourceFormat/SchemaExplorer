@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "./api";
 import { ColoredSyntax } from "../ColoredSyntax";
+import { KindIcon } from "../KindIcon";
+import { metadataIconMap } from "../KindIcon/metadataIconMap";
 import { DeclarationsContext } from "./DeclarationsContext";
 
 const TypeLink = styled(NavLink)`
@@ -88,16 +90,12 @@ const MetadataGroupName = styled.button`
   opacity: 0.6;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  align-items: center;
 
   &:hover {
     color: var(--highlight);
     opacity: 1;
-  }
-
-  &::before {
-    content: "·";
-    margin-right: 4px;
-    opacity: 0.5;
   }
 `;
 
@@ -108,11 +106,15 @@ const MetadataGroupValues = styled.div`
 `;
 
 const MetadataEntry = styled.div`
-  &::before {
-    content: "·";
-    margin-right: 4px;
-    opacity: 0.5;
-  }
+  display: flex;
+  align-items: baseline;
+`;
+
+const MetadataIcon = styled.span`
+  display: inline-flex;
+  align-self: center;
+  margin-right: 4px;
+  flex-shrink: 0;
 `;
 
 const MetadataName = styled.button`
@@ -264,9 +266,13 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
     <>
       <MetadataList>
         {visible.map((group) => {
+          const iconKind = metadataIconMap[group.name] ?? "meta-default";
           if (group.values.length === 1) {
             return (
               <MetadataEntry key={group.name}>
+                <MetadataIcon>
+                  <KindIcon kind={iconKind} size="small" />
+                </MetadataIcon>
                 <MetadataName
                   onClick={() =>
                     navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
@@ -288,6 +294,9 @@ export function MetadataTags({ metadata }: { metadata: SchemaMetadataEntry[] }) 
                   navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
                 }
               >
+                <MetadataIcon>
+                  <KindIcon kind={iconKind} size="small" />
+                </MetadataIcon>
                 {group.name}
               </MetadataGroupName>
               <MetadataGroupValues>
