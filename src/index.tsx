@@ -4,7 +4,7 @@ import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
 import { Declaration } from "./components/Docs/api";
-import { isGameId, GameId, GAMES } from "./games";
+import { isGameId, GameId, GAMES, getGame } from "./games";
 import { loadGameSchemas, type SchemaMetadata } from "./components/data";
 import DeclarationsPage from "./components/DeclarationsPage";
 import "./global.css";
@@ -23,7 +23,7 @@ const EMPTY_DECLARATIONS: Declaration[] = [];
 const EMPTY_OTHER_GAMES = new Map<GameId, Declaration[]>();
 
 function SchemasPage() {
-  const { game } = useParams<{ game: string }>();
+  const { game, module, scope } = useParams<{ game: string; module: string; scope: string }>();
   const [declarations, setDeclarations] = useState<Declaration[] | null>(null);
   const [metadata, setMetadata] = useState<SchemaMetadata>({
     revision: 0,
@@ -67,6 +67,12 @@ function SchemasPage() {
       stale = true;
     };
   }, [validGame]);
+
+  useEffect(() => {
+    const gameName = validGame ? getGame(validGame)?.name : null;
+    const parts = [scope, module, gameName, "Source 2 Schema Explorer"].filter(Boolean);
+    document.title = parts.join(" - ");
+  }, [validGame, module, scope]);
 
   const resolvedDeclarations = declarations ?? EMPTY_DECLARATIONS;
   const loading = !declarations && !error;
