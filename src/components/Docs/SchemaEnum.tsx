@@ -13,6 +13,7 @@ import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
 import {
   matchesWords,
   matchesMetadataKeys,
+  filterItems,
   useParsedSearch,
   useFieldParam,
 } from "./utils/filtering";
@@ -74,24 +75,22 @@ export const SchemaEnumView: React.FC<{
 }> = ({ declaration }) => {
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
-  const { nameWords: searchWords, metadataKeys: searchMetadata } = useParsedSearch();
+  const parsed = useParsedSearch();
+  const { nameWords: searchWords, metadataKeys: searchMetadata } = parsed;
   const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchMetadata.length > 0;
   const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
   const collapseNonMatching = isSearching && !nameMatches;
 
-  const { matchingMembers, hiddenCount } = useMemo(() => {
-    if (!collapseNonMatching) {
-      return { matchingMembers: declaration.members, hiddenCount: 0 };
-    }
-    const matching = declaration.members.filter(
-      (m) =>
-        (searchWords.length > 0 && matchesWords(m.name, searchWords)) ||
-        (searchMetadata.length > 0 && matchesMetadataKeys(m.metadata, searchMetadata)),
-    );
-    return { matchingMembers: matching, hiddenCount: declaration.members.length - matching.length };
-  }, [declaration.members, searchWords, searchMetadata, collapseNonMatching]);
+  const {
+    visible: matchingMembers,
+    highlighted: highlightedMembers,
+    hiddenCount,
+  } = useMemo(
+    () => filterItems(declaration.members, parsed, declaration.name, collapseNonMatching),
+    [declaration.members, parsed, declaration.name, collapseNonMatching],
+  );
 
   const declPath = declarationPath(root, declaration.module, declaration.name);
 
@@ -107,8 +106,8 @@ export const SchemaEnumView: React.FC<{
         </CommonGroupSignature>
       </DeclarationHeader>
       {(!collapseNonMatching ||
-        (searchMetadata.length > 0 &&
-          matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
+        (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
+        (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
         <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}
       {(matchingMembers.length > 0 || hiddenCount > 0) && (
@@ -120,11 +119,7 @@ export const SchemaEnumView: React.FC<{
               fieldUrlBase={declPath}
               root={root}
               navigate={navigate}
-              highlighted={
-                collapseNonMatching ||
-                (searchWords.length > 0 && matchesWords(member.name, searchWords)) ||
-                (searchMetadata.length > 0 && matchesMetadataKeys(member.metadata, searchMetadata))
-              }
+              highlighted={highlightedMembers.has(member)}
               anchored={fieldParam === member.name}
             />
           ))}
