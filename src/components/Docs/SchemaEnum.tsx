@@ -151,6 +151,7 @@ function EnumMemberView({
   anchored: boolean;
 }) {
   const { rowRef, copyAnchorLink } = useAnchoredRow(fieldUrlBase, member.name, anchored);
+  const hex = member.value >= 0 ? formatHexOffset(member.value) : null;
 
   return (
     <EnumMemberWrapper
@@ -167,7 +168,7 @@ function EnumMemberView({
             {member.name}
           </AnchorName>{" "}
           = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-          <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
+          {hex && <EnumMemberHex>{hex}</EnumMemberHex>}
         </MemberSignature>
         <MetadataTags metadata={member.metadata} />
       </GridContent>
