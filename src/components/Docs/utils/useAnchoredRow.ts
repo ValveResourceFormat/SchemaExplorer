@@ -1,9 +1,13 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import type { NavigateFunction } from "react-router-dom";
 
-export function useAnchoredRow(fieldUrlBase: string, name: string, anchored: boolean) {
+export function useAnchoredRow(
+  navigate: NavigateFunction,
+  fieldUrlBase: string,
+  name: string,
+  anchored: boolean,
+) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (anchored && rowRef.current) {

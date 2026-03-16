@@ -1,5 +1,6 @@
 import * as api from "./api";
 import React, { useContext, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "../KindIcon";
@@ -12,8 +13,7 @@ import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
 import {
   matchesWords,
   matchesMetadataKeys,
-  useSearchWords,
-  useSearchMetadata,
+  useParsedSearch,
   useFieldParam,
 } from "./utils/filtering";
 import { useAnchoredRow } from "./utils/useAnchoredRow";
@@ -73,8 +73,8 @@ export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
 }> = ({ declaration }) => {
   const { root } = useContext(DeclarationsContext);
-  const searchWords = useSearchWords();
-  const searchMetadata = useSearchMetadata();
+  const navigate = useNavigate();
+  const { nameWords: searchWords, metadataKeys: searchMetadata } = useParsedSearch();
   const fieldParam = useFieldParam();
 
   const isSearching = searchWords.length > 0 || searchMetadata.length > 0;
@@ -109,7 +109,7 @@ export const SchemaEnumView: React.FC<{
       {(!collapseNonMatching ||
         (searchMetadata.length > 0 &&
           matchesMetadataKeys(declaration.metadata, searchMetadata))) && (
-        <MetadataTags metadata={declaration.metadata} />
+        <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}
       {(matchingMembers.length > 0 || hiddenCount > 0) && (
         <EnumMembers>
@@ -118,6 +118,8 @@ export const SchemaEnumView: React.FC<{
               key={`${member.name}-${member.value}`}
               member={member}
               fieldUrlBase={declPath}
+              root={root}
+              navigate={navigate}
               highlighted={
                 collapseNonMatching ||
                 (searchWords.length > 0 && matchesWords(member.name, searchWords)) ||
@@ -142,15 +144,19 @@ export const SchemaEnumView: React.FC<{
 function EnumMemberView({
   member,
   fieldUrlBase,
+  root,
+  navigate,
   highlighted,
   anchored,
 }: {
   member: api.SchemaEnumMember;
   fieldUrlBase: string;
+  root: string;
+  navigate: ReturnType<typeof useNavigate>;
   highlighted: boolean;
   anchored: boolean;
 }) {
-  const { rowRef, copyAnchorLink } = useAnchoredRow(fieldUrlBase, member.name, anchored);
+  const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, member.name, anchored);
   const hex = member.value >= 0 ? formatHexOffset(member.value) : null;
 
   return (
@@ -170,7 +176,7 @@ function EnumMemberView({
           = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
           {hex && <EnumMemberHex>{hex}</EnumMemberHex>}
         </MemberSignature>
-        <MetadataTags metadata={member.metadata} />
+        <MetadataTags metadata={member.metadata} root={root} navigate={navigate} />
       </GridContent>
     </EnumMemberWrapper>
   );
