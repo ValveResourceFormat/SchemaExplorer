@@ -16,6 +16,7 @@ import {
   useSearchMetadata,
 } from "./utils/filtering";
 import { formatHexOffset } from "./utils/format";
+import { computeBitfieldInfo, type BitfieldInfo } from "./utils/bitfields";
 import {
   CollapsedItemsLink,
   CommonGroupMembers,
@@ -186,6 +187,8 @@ export const SchemaClassView: React.FC<{
     return { matchingFields: matching, hiddenCount: declaration.fields.length - matching.length };
   }, [declaration.fields, searchWords, searchOffsets, searchMetadata, collapseNonMatching]);
 
+  const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
+
   return (
     <CommonGroupWrapper>
       <DeclarationHeader>
@@ -210,6 +213,7 @@ export const SchemaClassView: React.FC<{
             <SchemaFieldView
               key={`${field.name}-${field.offset}`}
               field={field}
+              bitfield={bitfieldInfo.get(field)}
               highlighted={
                 collapseNonMatching ||
                 (searchWords.length > 0 && matchesWords(field.name, searchWords)) ||
@@ -341,26 +345,74 @@ function InheritedFieldView({ field }: { field: api.SchemaField }) {
   );
 }
 
-function SchemaFieldView({ field, highlighted }: { field: api.SchemaField; highlighted: boolean }) {
+const BitRange = styled.span`
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+`;
+
+const BitfieldPadding = styled.div`
+  padding: 3px 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  opacity: 0.5;
+  font-style: italic;
+  text-align: right;
+`;
+
+function SchemaFieldView({
+  field,
+  bitfield,
+  highlighted,
+}: {
+  field: api.SchemaField;
+  bitfield?: BitfieldInfo;
+  highlighted: boolean;
+}) {
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
   const offsetHex = formatHexOffset(field.offset);
   return (
-    <FieldRow data-highlighted={highlighted || undefined}>
-      <FieldIcon>
-        <KindIcon kind="field" size="small" />
-      </FieldIcon>
-      <FieldContent>
-        <FieldSignature>
-          {field.name}: <SchemaTypeView type={field.type} />
-          <FieldOffset
-            onClick={() => navigate(`${root}?search=${encodeURIComponent(`offset:${offsetHex}`)}`)}
-          >
-            {field.offset} ({offsetHex})
-          </FieldOffset>
-        </FieldSignature>
-        <MetadataTags metadata={field.metadata} />
-      </FieldContent>
-    </FieldRow>
+    <>
+      <FieldRow data-highlighted={highlighted || undefined}>
+        <FieldIcon>
+          <KindIcon kind="field" size="small" />
+        </FieldIcon>
+        <FieldContent>
+          <FieldSignature>
+            {field.name}: <SchemaTypeView type={field.type} />
+            {bitfield && (
+              <BitRange>
+                bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}
+                {bitfield.bitCount !== 1 ? `..${bitfield.bitOffset + bitfield.bitCount - 1}` : ""}
+              </BitRange>
+            )}
+            <FieldOffset
+              onClick={() =>
+                navigate(`${root}?search=${encodeURIComponent(`offset:${offsetHex}`)}`)
+              }
+            >
+              {field.offset} ({offsetHex})
+            </FieldOffset>
+          </FieldSignature>
+          <MetadataTags metadata={field.metadata} />
+        </FieldContent>
+      </FieldRow>
+      {bitfield &&
+        bitfield.totalBits > 0 &&
+        (() => {
+          const totalBytes = Math.ceil(bitfield.totalBits / 8);
+          return (
+            <BitfieldPadding>
+              {totalBytes} byte{totalBytes !== 1 ? "s" : ""} ({bitfield.totalBits} bit
+              {bitfield.totalBits !== 1 ? "s" : ""}
+              {bitfield.padding > 0 ? ` + ${bitfield.padding} padding` : ""})
+            </BitfieldPadding>
+          );
+        })()}
+    </>
   );
 }
