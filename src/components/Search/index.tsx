@@ -103,6 +103,9 @@ export function SearchBox({
       value={inputValue}
       onChange={onChange}
       aria-label="Search"
+      spellCheck={false}
+      autoCorrect="off"
+      autoCapitalize="off"
     />
   );
 }

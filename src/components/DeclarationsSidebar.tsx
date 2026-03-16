@@ -182,6 +182,9 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           aria-label="Filter sidebar"
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
         />
       </SidebarHeader>
       <div ref={parentRef} style={{ flex: 1, overflow: "auto" }}>
