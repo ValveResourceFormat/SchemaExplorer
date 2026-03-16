@@ -7,6 +7,11 @@ import { KindIcon } from "../KindIcon";
 import { metadataIconMap } from "../KindIcon/metadataIconMap";
 import { DeclarationsContext } from "./DeclarationsContext";
 
+const AngleBracket = styled.span`
+  color: var(--text-dim);
+  font-weight: 400;
+`;
+
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
   font-weight: 600;
@@ -39,17 +44,17 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
     case "atomic":
       if (type.inner) {
         return (
-          <>
+          <span>
             <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>
-            {"< "}
+            <AngleBracket>&lt; </AngleBracket>
             <SchemaTypeView type={type.inner} />
             {type.inner2 && (
               <>
                 , <SchemaTypeView type={type.inner2} />
               </>
             )}
-            {" >"}
-          </>
+            <AngleBracket> &gt;</AngleBracket>
+          </span>
         );
       }
       return <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>;
