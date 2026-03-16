@@ -8,7 +8,7 @@ import { MetadataTags } from "./SchemaType";
 import { formatHexOffset } from "./utils/format";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
-import { ModuleBadge } from "./SchemaClass";
+import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
 import {
   matchesWords,
   matchesMetadataKeys,
@@ -96,6 +96,7 @@ export const SchemaEnumView: React.FC<{
           </DeclarationNameLink>
           <EnumTypeWrapper>: {declaration.alignment}</EnumTypeWrapper>
           <ModuleBadge module={declaration.module} />
+          <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
       {(!collapseNonMatching ||
