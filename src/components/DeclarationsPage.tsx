@@ -4,8 +4,9 @@ import {
   DeclarationsContext,
   DeclarationsContextType,
   ReferenceEntry,
+  declarationKey,
 } from "./Docs/DeclarationsContext";
-import { Declaration, SchemaFieldType } from "./Docs/api";
+import { Declaration, SchemaClass, SchemaFieldType } from "./Docs/api";
 import { GameId } from "../games";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./Docs/ContentList";
@@ -30,10 +31,6 @@ function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   }
 }
 
-function refKey(module: string, name: string): string {
-  return `${module}/${name}`;
-}
-
 function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntry[]> {
   const refs = new Map<string, ReferenceEntry[]>();
 
@@ -49,7 +46,7 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
   for (const decl of declarations) {
     if (decl.kind === "class") {
       for (const parent of decl.parents) {
-        addRef(refKey(parent.module, parent.name), {
+        addRef(declarationKey(parent.module, parent.name), {
           declarationName: decl.name,
           declarationModule: decl.module,
           relation: "class",
@@ -58,7 +55,7 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
       for (const field of decl.fields) {
         const keys = new Set<string>();
         collectTypeKeys(field.type, keys);
-        const declKey = refKey(decl.module, decl.name);
+        const declKey = declarationKey(decl.module, decl.name);
         for (const key of keys) {
           if (key !== declKey) {
             addRef(key, {
@@ -79,13 +76,21 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
 export default function DeclarationsPage({
   context,
 }: {
-  context: Omit<DeclarationsContextType, "references" | "otherGamesLookup">;
+  context: Omit<DeclarationsContextType, "references" | "otherGamesLookup" | "classesByKey">;
 }) {
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const references = useMemo(() => buildReferences(context.declarations), [context.declarations]);
+
+  const classesByKey = useMemo(() => {
+    const map = new Map<string, SchemaClass>();
+    for (const d of context.declarations) {
+      if (d.kind === "class") map.set(declarationKey(d.module, d.name), d);
+    }
+    return map;
+  }, [context.declarations]);
 
   const otherGamesLookup = useMemo(() => {
     const lookup = new Map<GameId, Map<string, Declaration>>();
@@ -98,8 +103,8 @@ export default function DeclarationsPage({
   }, [context.otherGames]);
 
   const fullContext = useMemo(
-    () => ({ ...context, references, otherGamesLookup }),
-    [context, references, otherGamesLookup],
+    () => ({ ...context, references, classesByKey, otherGamesLookup }),
+    [context, references, classesByKey, otherGamesLookup],
   );
 
   const searchCtx = useMemo(() => ({ search, setSearch }), [search, setSearch]);

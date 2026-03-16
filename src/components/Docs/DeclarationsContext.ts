@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Declaration } from "./api";
+import { Declaration, SchemaClass } from "./api";
 import { SchemaMetadata } from "../data";
 import { GameId } from "../../games";
 
@@ -10,10 +10,15 @@ export type ReferenceEntry = {
   relation: "field" | "class";
 };
 
+export function declarationKey(module: string, name: string): string {
+  return `${module}/${name}`;
+}
+
 export type DeclarationsContextType = {
   game: GameId;
   root: string;
   declarations: Declaration[];
+  classesByKey: Map<string, SchemaClass>;
   metadata: SchemaMetadata;
   references: Map<string, ReferenceEntry[]>;
   otherGames: Map<GameId, Declaration[]>;
@@ -26,6 +31,7 @@ export const DeclarationsContext = createContext<DeclarationsContextType>({
   game: "cs2",
   root: "",
   declarations: [],
+  classesByKey: new Map(),
   metadata: { revision: 0, versionDate: "", versionTime: "" },
   references: new Map(),
   otherGames: new Map(),

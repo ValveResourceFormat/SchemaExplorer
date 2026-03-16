@@ -5,6 +5,7 @@ import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "./utils/components";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
+import { formatHexOffset } from "./utils/format";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge } from "./SchemaClass";
@@ -135,14 +136,12 @@ function EnumMemberView({
   member: api.SchemaEnumMember;
   highlighted: boolean;
 }) {
-  const hexDigits = member.value.toString(16).toUpperCase();
-  const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
   return (
     <EnumMemberWrapper data-highlighted={highlighted || undefined}>
       <EnumMemberSignature>
         <KindIcon kind="enum-member" size="small" />
         {member.name} = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-        <EnumMemberHex>0x{paddedHex}</EnumMemberHex>
+        <EnumMemberHex>{formatHexOffset(member.value)}</EnumMemberHex>
       </EnumMemberSignature>
       {member.metadata && <MetadataTags metadata={member.metadata} />}
     </EnumMemberWrapper>

@@ -2,7 +2,13 @@ import React, { useContext, useEffect, useState } from "react";
 import { styled } from "@linaria/react";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { KindIcon } from "../KindIcon";
-import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./utils/styles";
+import {
+  SectionWrapper,
+  SectionTitle,
+  SectionList,
+  SectionLink,
+  SectionToggle,
+} from "./utils/styles";
 
 const COLLAPSE_THRESHOLD = 8;
 
@@ -11,19 +17,6 @@ const RefField = styled.span`
 
   &::before {
     content: ".";
-  }
-`;
-
-const ToggleButton = styled.button`
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 4px;
-
-  &:hover {
-    color: var(--text);
   }
 `;
 
@@ -55,13 +48,13 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
           </SectionLink>
         ))}
         {collapsible && (
-          <ToggleButton
+          <SectionToggle
             onClick={() => setExpanded(!expanded)}
             aria-label={expanded ? "Show fewer references" : "Show all references"}
             aria-expanded={expanded}
           >
             {expanded ? "show less" : `+${refs.length - COLLAPSE_THRESHOLD} more…`}
-          </ToggleButton>
+          </SectionToggle>
         )}
       </SectionList>
     </SectionWrapper>
