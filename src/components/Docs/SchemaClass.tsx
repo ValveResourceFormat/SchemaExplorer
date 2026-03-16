@@ -44,6 +44,7 @@ const FieldRow = styled.div`
   background-color: var(--group);
   border: 1px solid var(--group-border);
   border-radius: 8px;
+  overflow: hidden;
 
   &[data-highlighted] {
     background-color: var(--search-highlight);
@@ -55,6 +56,7 @@ const FieldSignature = styled.div`
   font-size: 16px;
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 6px;
 `;
 

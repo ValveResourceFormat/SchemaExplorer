@@ -38,7 +38,7 @@ const HEADER_HEIGHT = 28;
 const HEADER_GAP = 8;
 const ITEM_HEIGHT = 28;
 
-export const DeclarationsSidebar = () => {
+export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { declarations } = useContext(DeclarationsContext);
   const { filter, setFilter } = useContext(SidebarFilterContext);
   const { module: activeModule = "", scope = "" } = useParams();
@@ -205,7 +205,7 @@ export const DeclarationsSidebar = () => {
                     </SidebarGroupHeader>
                   </div>
                 ) : (
-                  <DeclarationSidebarElement declaration={row.declaration} />
+                  <DeclarationSidebarElement declaration={row.declaration} onClick={onNavigate} />
                 )}
               </div>
             );

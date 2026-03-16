@@ -5,7 +5,13 @@ import { AppContext } from "../AppContext";
 import { SearchBox } from "../Search";
 import { GAMES, GameId, getGame } from "../../games";
 
-export const NavBar = ({ baseUrl }: { baseUrl?: string }) => {
+export const NavBar = ({
+  baseUrl,
+  onMenuClick,
+}: {
+  baseUrl?: string;
+  onMenuClick?: () => void;
+}) => {
   if (!baseUrl) {
     return (
       <NavBarSimple>
@@ -16,6 +22,23 @@ export const NavBar = ({ baseUrl }: { baseUrl?: string }) => {
 
   return (
     <NavBarContentCell>
+      {onMenuClick && (
+        <MenuButton onClick={onMenuClick} aria-label="Open sidebar">
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </MenuButton>
+      )}
       <NavBarSearchBox baseUrl={baseUrl} placeholder="Search... (module: or offset: to filter)" />
       <NavBarThemeSwitcher />
     </NavBarContentCell>
@@ -165,6 +188,21 @@ const SwitcherOption = styled.button`
   &[data-active],
   &:hover {
     background: var(--group-members);
+  }
+`;
+
+const MenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--text);
+  cursor: pointer;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
   }
 `;
 

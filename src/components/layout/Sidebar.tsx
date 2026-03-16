@@ -47,25 +47,28 @@ export const SidebarElement: React.FC<{
   to: string;
   icon: IconKind;
   text: string;
-}> = React.memo(({ to, icon, text }) => (
-  <SidebarLink to={to} prefetch="none">
+  onClick?: () => void;
+}> = React.memo(({ to, icon, text, onClick }) => (
+  <SidebarLink to={to} prefetch="none" onClick={onClick}>
     <KindIcon kind={icon} size="small" />
     <span>{text}</span>
   </SidebarLink>
 ));
 
-export const DeclarationSidebarElement: React.FC<{ declaration: Declaration }> = React.memo(
-  ({ declaration }) => {
-    const { root } = useContext(DeclarationsContext);
-    return (
-      <SidebarElement
-        to={`${root}/${declaration.module}/${declaration.name}`}
-        icon={declaration.kind}
-        text={declaration.name}
-      />
-    );
-  },
-);
+export const DeclarationSidebarElement: React.FC<{
+  declaration: Declaration;
+  onClick?: () => void;
+}> = React.memo(({ declaration, onClick }) => {
+  const { root } = useContext(DeclarationsContext);
+  return (
+    <SidebarElement
+      to={`${root}/${declaration.module}/${declaration.name}`}
+      icon={declaration.kind}
+      text={declaration.name}
+      onClick={onClick}
+    />
+  );
+});
 
 export const SidebarGroupHeader = styled.button`
   background: var(--sidebar);
@@ -112,8 +115,4 @@ export const SidebarWrapper = styled.div`
   min-width: 0;
   padding: 6px 8px 4px 10px;
   background-color: var(--sidebar);
-
-  @media (max-width: 768px) {
-    display: none;
-  }
 `;
