@@ -220,6 +220,7 @@ function ValueSuggestPopup({
         {values.map((v, i) => (
           <TagItem
             key={v}
+            ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
             role="option"
             aria-selected={i === activeIndex}
             data-active={i === activeIndex || undefined}
@@ -251,6 +252,7 @@ function SearchTagPopup({
       {tags.map((t, i) => (
         <TagItem
           key={t.tag}
+          ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
           role="option"
           aria-selected={i === activeIndex}
           data-active={i === activeIndex || undefined}
