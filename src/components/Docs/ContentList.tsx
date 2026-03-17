@@ -14,6 +14,8 @@ import {
   declarationKey,
 } from "./DeclarationsContext";
 import { GAMES, GameId } from "../../games";
+import { SEARCH_TAGS } from "../Search";
+import { KindIcon } from "../KindIcon";
 
 const CardBlock = styled.div`
   max-width: 560px;
@@ -110,31 +112,6 @@ const SearchFiltersBlock = styled(CardBlock)`
     font-size: 15px;
   }
 `;
-
-const SearchExampleButton = styled.button`
-  background: var(--group-members);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font: inherit;
-  font-size: 15px;
-  border: 1px solid transparent;
-  color: inherit;
-  cursor: pointer;
-
-  &:hover {
-    border-color: var(--highlight);
-  }
-`;
-
-function SearchExample({ query }: { query: string }) {
-  const { root } = useContext(DeclarationsContext);
-  const navigate = useNavigate();
-  return (
-    <SearchExampleButton onClick={() => navigate(`${root}?search=${encodeURIComponent(query)}`)}>
-      {query}
-    </SearchExampleButton>
-  );
-}
 
 const TreeToggle = styled.button`
   display: block;
@@ -290,38 +267,18 @@ export function ContentList() {
           <SearchFiltersBlock>
             <dl>
               <dt>Search by name</dt>
-              <dd>
-                Type any text to match class, field, or enum names. Example:{" "}
-                <SearchExample query="m_vecOrigin" />
-              </dd>
-              <dt>
-                <code>module:</code> — filter by module
-              </dt>
-              <dd>
-                Example: <SearchExample query="module:client" />
-              </dd>
-              <dt>
-                <code>offset:</code> — find fields at a byte offset
-              </dt>
-              <dd>
-                Hex or decimal. Example: <SearchExample query="offset:0x100" />
-              </dd>
-              <dt>
-                <code>metadata:</code> — find by metadata key
-              </dt>
-              <dd>
-                Matches classes, fields, or enum members that have a metadata key. Example:{" "}
-                <SearchExample query="metadata:MNetworkEnable" />
-              </dd>
-              <dt>
-                <code>metadatavalue:</code> — find by metadata value
-              </dt>
-              <dd>
-                Matches classes, fields, or enum members by their metadata value. Example:{" "}
-                <SearchExample query="metadatavalue:water" />
-              </dd>
+              <dd>Type any text to match class, field, or enum names.</dd>
+              {SEARCH_TAGS.map((t) => (
+                <React.Fragment key={t.tag}>
+                  <dt>
+                    <KindIcon kind={t.icon} size="small" /> <code>{t.tag}</code> —{" "}
+                    {t.description.toLowerCase()}
+                  </dt>
+                  <dd>{t.example}</dd>
+                </React.Fragment>
+              ))}
             </dl>
-            Filters can be combined: <SearchExample query="module:client metadata:MNetworkEnable" />
+            Filters can be combined.
           </SearchFiltersBlock>
           {showTree ? (
             <ClassTree />
