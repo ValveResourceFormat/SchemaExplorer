@@ -341,10 +341,19 @@ describe("searchDeclarations — declaration matching", () => {
       expect(result.every((d) => d.module === "client")).toBe(true);
     });
 
-    it("module filter is partial match", () => {
+    it("module filter is partial match (prefix)", () => {
       const result = searchDeclarations(declarations, parseSearch("module:pulse"));
       expect(result.length).toBeGreaterThan(0);
       expect(result.every((d) => d.module.includes("pulse"))).toBe(true);
+    });
+
+    it("module filter is partial match (mid-string)", () => {
+      // "lib" appears mid-string in animgraphlib, mapdoclib, navlib, physicslib, pulse_runtime_lib
+      const result = searchDeclarations(declarations, parseSearch("module:lib"));
+      expect(result.length).toBeGreaterThan(0);
+      expect(result.every((d) => d.module.includes("lib"))).toBe(true);
+      // Shouldn't include client or server
+      expect(result.every((d) => d.module !== "client" && d.module !== "server")).toBe(true);
     });
 
     it("module:server excludes client-only classes", () => {

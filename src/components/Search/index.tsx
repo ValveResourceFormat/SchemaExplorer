@@ -93,12 +93,13 @@ function getLastWord(input: string): string {
 }
 
 function shouldShowFirstLevelPopup(input: string): boolean {
+  if (input.endsWith(" ")) return false;
   return !getLastWord(input).includes(":");
 }
 
 function filterTags(lastWord: string) {
   if (lastWord === "") return SEARCH_TAGS;
-  return SEARCH_TAGS.filter((t) => t.tag.startsWith(lastWord.toLowerCase()));
+  return SEARCH_TAGS.filter((t) => t.tag.includes(lastWord.toLowerCase()));
 }
 
 function insertTag(inputValue: string, tag: string): string {
@@ -333,7 +334,7 @@ export function SearchBox({
     const list = secondLevel.type === "module" ? uniqueModules : uniqueMetadataKeys;
     if (secondLevel.value === "") return list;
     const lower = secondLevel.value.toLowerCase();
-    return list.filter((v) => v.toLowerCase().startsWith(lower));
+    return list.filter((v) => v.toLowerCase().includes(lower));
   }, [secondLevel?.type, secondLevel?.value, uniqueModules, uniqueMetadataKeys]);
   const isExactMatch =
     secondLevel != null &&
@@ -373,6 +374,7 @@ export function SearchBox({
     const wasSearching = inputValue !== "";
     setInputValue(value);
     setActiveIndex(0);
+    setIsFocused(true);
     ownNavigateRef.current = true;
     // Push a history entry when starting a new search so back button works.
     // Replace while typing to avoid polluting history with every keystroke.
@@ -386,6 +388,15 @@ export function SearchBox({
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      if (showPopup) {
+        setIsFocused(false);
+      } else {
+        ref.current?.blur();
+      }
+      return;
+    }
     if (!showPopup) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -399,8 +410,6 @@ export function SearchBox({
         handleTagSelect(filteredTags[activeIndex].tag);
       else if (showSecondLevel && secondLevelValues[activeIndex])
         handleValueSelect(secondLevelValues[activeIndex]);
-    } else if (e.key === "Escape") {
-      setIsFocused(false);
     }
   };
 
