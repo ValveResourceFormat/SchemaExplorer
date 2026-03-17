@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
-import { useFilteredData, useParsedSearch, doSearch } from "./utils/filtering";
+import { useFilteredData, useParsedSearch, searchDeclarations } from "./utils/filtering";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
@@ -187,7 +187,7 @@ function OtherGamesResults() {
     for (const [gameId, lookup] of ctx.otherGamesLookup) {
       if (gameId === ctx.game) continue;
       const decls = Array.from(lookup.values());
-      const found = doSearch(decls, parsed);
+      const found = searchDeclarations(decls, parsed);
       if (found.length > 0) {
         result.push({ gameId, declarations: found });
       }
@@ -213,7 +213,7 @@ function OtherGamesResults() {
               {gameInfo?.icon} {gameInfo?.name}
             </OtherGameHeader>
             <DeclarationsContext.Provider value={overrideCtx}>
-              <LazyList data={declarations} render={renderItem} />
+              <LazyList data={declarations} render={renderSearchResult} />
             </DeclarationsContext.Provider>
           </React.Fragment>
         );
@@ -222,19 +222,19 @@ function OtherGamesResults() {
   );
 }
 
-function renderItem(declaration: Declaration) {
-  let children: React.JSX.Element;
-  switch (declaration.kind) {
-    case "class":
-      children = <SchemaClassView declaration={declaration} />;
-      break;
-    case "enum":
-      children = <SchemaEnumView declaration={declaration} />;
-      break;
-  }
-
-  return <ListItem key={declarationKey(declaration.module, declaration.name)}>{children}</ListItem>;
+function renderItem(declaration: Declaration, isSearchResult?: boolean) {
+  return (
+    <ListItem key={declarationKey(declaration.module, declaration.name)}>
+      {declaration.kind === "class" ? (
+        <SchemaClassView declaration={declaration} isSearchResult={isSearchResult} />
+      ) : (
+        <SchemaEnumView declaration={declaration} isSearchResult={isSearchResult} />
+      )}
+    </ListItem>
+  );
 }
+
+const renderSearchResult = (declaration: Declaration) => renderItem(declaration, true);
 
 export function ContentList() {
   const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
@@ -247,7 +247,7 @@ export function ContentList() {
     <ContentWrapper>
       {data.length > 0 ? (
         isSearching ? (
-          <LazyList data={data} render={renderItem} />
+          <LazyList data={data} render={renderSearchResult} />
         ) : (
           <ScrollableList data={data} render={renderItem} />
         )

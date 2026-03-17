@@ -129,15 +129,3 @@ export const AnchorName = styled.span`
     text-decoration-color: var(--text-dim);
   }
 `;
-
-export const CollapsedItemsLink = styled(Link)`
-  display: block;
-  padding: 4px 8px;
-  font-size: 14px;
-  color: var(--text-dim);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;

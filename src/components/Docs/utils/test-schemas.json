@@ -1,0 +1,7345 @@
+{
+  "_note": "Frozen subset schemas for test stability. MGetKV3ClassDefaults stripped to reduce size. Do not regenerate from live data.",
+  "classes": [
+    {
+      "fields": [
+        {
+          "name": "m_BuoyancyHelper",
+          "offset": 3720,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CBuoyancyHelper"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "CFuncWater",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseModelEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"RenderingChanged\""
+            }
+          ],
+          "name": "m_bShowLight",
+          "offset": 4504,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bShowLight\""
+        }
+      ],
+      "module": "client",
+      "name": "C_RectLight",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BarnLight"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_zoomLevel",
+          "offset": 8000,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_iBurstShotsRemaining",
+          "offset": 8004,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_iSilencerBodygroup",
+          "offset": 8008,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_silencedModelIndex",
+          "offset": 8024,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_inPrecache",
+          "offset": 8028,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_bNeedsBoltAction",
+          "offset": 8029,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nRevolverCylinderIdx",
+          "offset": 8032,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_zoomLevel\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_iBurstShotsRemaining\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bNeedsBoltAction\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int32 m_nRevolverCylinderIdx\""
+        }
+      ],
+      "module": "client",
+      "name": "C_CSWeaponBaseGun",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_CSWeaponBase"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "scale",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "int16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord\""
+            }
+          ],
+          "name": "origin",
+          "offset": 12,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "bClip3DSkyBoxNearToWorldFar",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "flClip3DSkyBoxNearToWorldFarOffset",
+          "offset": 28,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "fog",
+          "offset": 32,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "fogparams_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nWorldGroupID",
+          "offset": 136,
+          "type": {
+            "category": "atomic",
+            "name": "WorldGroupId_t"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int16 scale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector origin\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool bClip3DSkyBoxNearToWorldFar\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 flClip3DSkyBoxNearToWorldFarOffset\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"fogparams_t fog\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"WorldGroupId_t m_nWorldGroupID\""
+        }
+      ],
+      "module": "client",
+      "name": "sky3dparams_t"
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_entitySpottedState",
+          "offset": 5080,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "EntitySpottedState_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_leader",
+          "offset": 5104,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_reuseTimer",
+          "offset": 5112,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CountdownTimer"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_vel",
+          "offset": 5136,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"RecvProxy_Rescued\""
+            }
+          ],
+          "name": "m_isRescued",
+          "offset": 5148,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"RecvProxy_Jumped\""
+            }
+          ],
+          "name": "m_jumpedThisFrame",
+          "offset": 5149,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnHostageStateChanged\""
+            }
+          ],
+          "name": "m_nHostageState",
+          "offset": 5152,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_bHandsHaveBeenCut",
+          "offset": 5156,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnGrabberChanged\""
+            }
+          ],
+          "name": "m_hHostageGrabber",
+          "offset": 5160,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_CSPlayerPawn"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_fLastGrabTime",
+          "offset": 5164,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "name": "m_vecGrabbedPos",
+          "offset": 5168,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flRescueStartTime",
+          "offset": 5180,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flGrabSuccessTime",
+          "offset": 5184,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flDropStartTime",
+          "offset": 5188,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "name": "m_flDeadOrRescuedTime",
+          "offset": 5192,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "name": "m_blinkTimer",
+          "offset": 5200,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CountdownTimer"
+          }
+        },
+        {
+          "name": "m_lookAt",
+          "offset": 5224,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_lookAroundTimer",
+          "offset": 5240,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CountdownTimer"
+          }
+        },
+        {
+          "name": "m_isInit",
+          "offset": 5264,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_eyeAttachment",
+          "offset": 5265,
+          "type": {
+            "category": "declared_class",
+            "module": "modellib",
+            "name": "AttachmentHandle_t"
+          }
+        },
+        {
+          "name": "m_chestAttachment",
+          "offset": 5266,
+          "type": {
+            "category": "declared_class",
+            "module": "modellib",
+            "name": "AttachmentHandle_t"
+          }
+        },
+        {
+          "name": "m_pPredictionOwner",
+          "offset": 5272,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CBasePlayerController"
+            }
+          }
+        },
+        {
+          "name": "m_fNewestAlphaThinkTime",
+          "offset": 5280,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_iMaxHealth\""
+        },
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_iHealth\""
+        },
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_lifeState\""
+        },
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_fFlags\""
+        },
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_vecViewOffset\""
+        },
+        {
+          "name": "MNetworkOverride",
+          "value": "\"m_vecViewOffset C_BaseModelEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"EntitySpottedState_t m_entitySpottedState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CHandle< CBaseEntity> m_leader\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CountdownTimer m_reuseTimer\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_vel\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_isRescued\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_jumpedThisFrame\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_nHostageState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bHandsHaveBeenCut\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CHandle< CCSPlayerPawn> m_hHostageGrabber\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTime_t m_flRescueStartTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTime_t m_flGrabSuccessTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTime_t m_flDropStartTime\""
+        }
+      ],
+      "module": "client",
+      "name": "C_Hostage",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseCombatCharacter"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_OnPlay",
+          "offset": 1544,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1568,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_soundEventName",
+          "offset": 1576,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_bOverrideWithEvent",
+          "offset": 1584,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundscapeIndex",
+          "offset": 1588,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundscapeEntityListId",
+          "offset": 1592,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_positionNames",
+          "offset": 1600,
+          "type": {
+            "category": "fixed_array",
+            "count": 8,
+            "inner": {
+              "category": "atomic",
+              "name": "CUtlSymbolLarge"
+            }
+          }
+        },
+        {
+          "name": "m_hProxySoundscape",
+          "offset": 1664,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CEnvSoundscape"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_bDisabled",
+          "offset": 1668,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_soundscapeName",
+          "offset": 1672,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundEventHash",
+          "offset": 1680,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "CEnvSoundscape",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_pos",
+          "offset": 4456,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_vel",
+          "offset": 4468,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_angles",
+          "offset": 4480,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_localLifeState",
+          "offset": 4492,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_deathDepth",
+          "offset": 4496,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_deathAngle",
+          "offset": 4500,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_buoyancy",
+          "offset": 4504,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_wiggleTimer",
+          "offset": 4512,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CountdownTimer"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_wigglePhase",
+          "offset": 4536,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_wiggleRate",
+          "offset": 4540,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_actualPos",
+          "offset": 4544,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_actualAngles",
+          "offset": 4556,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_poolOrigin",
+          "offset": 4568,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_waterLevel",
+          "offset": 4580,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_gotUpdate",
+          "offset": 4584,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"fish_pos_x\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnPosChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_x",
+          "offset": 4588,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"fish_pos_y\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnPosChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_y",
+          "offset": 4592,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"fish_pos_z\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnPosChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_z",
+          "offset": 4596,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"angle_normalize_positive\""
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "7"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "360.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnAngChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_angle",
+          "offset": 4600,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_errorHistory",
+          "offset": 4604,
+          "type": {
+            "category": "fixed_array",
+            "count": 20,
+            "inner": {
+              "category": "builtin",
+              "name": "float32"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_errorHistoryIndex",
+          "offset": 4684,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_errorHistoryCount",
+          "offset": 4688,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_averageError",
+          "offset": 4692,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_nModelIndex\""
+        },
+        {
+          "name": "MNetworkIncludeByName",
+          "value": "\"m_lifeState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_poolOrigin\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_waterLevel\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_x\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_y\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_z\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_angle\""
+        }
+      ],
+      "module": "client",
+      "name": "C_Fish",
+      "parents": [
+        {
+          "module": "client",
+          "name": "CBaseAnimGraph"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"CBodyComponent\""
+            },
+            {
+              "name": "MNetworkAlias",
+              "value": "\"CBodyComponent\""
+            },
+            {
+              "name": "MNetworkTypeAlias",
+              "value": "\"CBodyComponent\""
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "48"
+            }
+          ],
+          "name": "m_CBodyComponent",
+          "offset": 56,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CBodyComponent"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_NetworkTransmitComponent",
+          "offset": 64,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CNetworkTransmitComponent"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nLastThinkTick",
+          "offset": 816,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTick_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_pGameSceneNode",
+          "offset": 824,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CGameSceneNode"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_pRenderComponent",
+          "offset": 832,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CRenderComponent"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_pCollision",
+          "offset": 840,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CCollisionProperty"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iMaxHealth",
+          "offset": 848,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"ClampHealth\""
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Player\""
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            }
+          ],
+          "name": "m_iHealth",
+          "offset": 852,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flDamageAccumulator",
+          "offset": 856,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Player\""
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_lifeState",
+          "offset": 860,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bTakesDamage",
+          "offset": 861,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nTakeDamageFlags",
+          "offset": 864,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "TakeDamageFlags_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nPlatformType",
+          "offset": 872,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "EntityPlatformTypes_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnInterpolationFrameChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_ubInterpolationFrame",
+          "offset": 873,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "name": "m_hSceneObjectController",
+          "offset": 876,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nNoInterpolationTick",
+          "offset": 880,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nVisibilityNoInterpolationTick",
+          "offset": 884,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flProxyRandomValue",
+          "offset": 888,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iEFlags",
+          "offset": 892,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nWaterType",
+          "offset": 896,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bInterpolateEvenWithNoModel",
+          "offset": 897,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bPredictionEligible",
+          "offset": 898,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bApplyLayerMatchIDToModel",
+          "offset": 899,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_tokLayerMatchID",
+          "offset": 900,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnSubclassIDChanged\""
+            }
+          ],
+          "name": "m_nSubclassID",
+          "offset": 904,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nSimulationTick",
+          "offset": 920,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iCurrentThinkContext",
+          "offset": 924,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_aThinkFunctions",
+          "offset": 928,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "thinkfunc_t"
+            },
+            "name": "CUtlVector"
+          }
+        },
+        {
+          "name": "m_bDisabledContextThinks",
+          "offset": 952,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "0"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"animTimeSerializer\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flAnimTime",
+          "offset": 956,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "1"
+            },
+            {
+              "name": "MNetworkSerializer",
+              "value": "\"simulationTimeSerializer\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnSimulationTimeChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flSimulationTime",
+          "offset": 960,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nSceneObjectOverrideFlags",
+          "offset": 964,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bHasSuccessfullyInterpolated",
+          "offset": 965,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bHasAddedVarsToInterpolation",
+          "offset": 966,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bRenderEvenWhenNotSuccessfullyInterpolated",
+          "offset": 967,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nInterpolationLatchDirtyFlags",
+          "offset": 968,
+          "type": {
+            "category": "fixed_array",
+            "count": 2,
+            "inner": {
+              "category": "builtin",
+              "name": "int32"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_ListEntry",
+          "offset": 976,
+          "type": {
+            "category": "fixed_array",
+            "count": 11,
+            "inner": {
+              "category": "builtin",
+              "name": "uint16"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flCreateTime",
+          "offset": 1000,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flSpeed",
+          "offset": 1004,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_EntClientFlags",
+          "offset": 1008,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bClientSideRagdoll",
+          "offset": 1010,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnNetVarTeamNumChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iTeamNum",
+          "offset": 1011,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_spawnflags",
+          "offset": 1012,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nNextThinkTick",
+          "offset": 1016,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTick_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Player\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnFlagsChanged\""
+            }
+          ],
+          "name": "m_fFlags",
+          "offset": 1024,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_vecAbsVelocity",
+          "offset": 1028,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkAlias",
+              "value": "\"m_vecVelocity\""
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnServerVelocityChanged\""
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_vecServerVelocity",
+          "offset": 1040,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CNetworkVelocityVector"
+          }
+        },
+        {
+          "name": "m_vecVelocity",
+          "offset": 1080,
+          "type": {
+            "category": "declared_class",
+            "module": "client",
+            "name": "CNetworkVelocityVector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_vecBaseVelocity",
+          "offset": 1304,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_hEffectEntity",
+          "offset": 1316,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            }
+          ],
+          "name": "m_hOwnerEntity",
+          "offset": 1320,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_MoveCollide",
+          "offset": 1324,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "MoveCollide_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnMoveTypeChanged\""
+            }
+          ],
+          "name": "m_MoveType",
+          "offset": 1325,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "MoveType_t"
+          }
+        },
+        {
+          "name": "m_nActualMoveType",
+          "offset": 1326,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "MoveType_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Water\""
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnWaterLevelChangeNetworked\""
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "8"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "1.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "8"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flWaterLevel",
+          "offset": 1328,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnEffectsChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_fEffects",
+          "offset": 1332,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Player\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_hGroundEntity",
+          "offset": 1336,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkPriority",
+              "value": "32"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"Player\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nGroundBodyIndex",
+          "offset": 1340,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "8"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "4.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flFriction",
+          "offset": 1344,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flElasticity",
+          "offset": 1348,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnGravityUpdated\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flGravityScale",
+          "offset": 1352,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkUserGroup",
+              "value": "\"LocalPlayerExclusive\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flTimeScale",
+          "offset": 1356,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnInterpolationAmountChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bAnimatedEveryTick",
+          "offset": 1360,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnGravityUpdated\""
+            }
+          ],
+          "name": "m_bGravityDisabled",
+          "offset": 1361,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"OnNavIgnoreChanged\""
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flNavIgnoreUntilTime",
+          "offset": 1364,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_hThink",
+          "offset": 1368,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_fBBoxVisFlags",
+          "offset": 1384,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "name": "m_flActualGravityScale",
+          "offset": 1388,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_bGravityActuallyDisabled",
+          "offset": 1392,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bPredictable",
+          "offset": 1393,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bRenderWithViewModels",
+          "offset": 1394,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nFirstPredictableCommand",
+          "offset": 1396,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nLastPredictableCommand",
+          "offset": 1400,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_hOldMoveParent",
+          "offset": 1404,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "C_BaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_Particles",
+          "offset": 1408,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CParticleProperty"
+          }
+        },
+        {
+          "name": "m_vecAngVelocity",
+          "offset": 1456,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_DataChangeEventRef",
+          "offset": 1468,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_dependencies",
+          "offset": 1472,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "CEntityHandle"
+            },
+            "name": "CUtlVector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nCreationTick",
+          "offset": 1496,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bAnimTimeChanged",
+          "offset": 1513,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_bSimulationTimeChanged",
+          "offset": 1514,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_sUniqueHammerID",
+          "offset": 1528,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlString"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nBloodType",
+          "offset": 1536,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "BloodType"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_bClientSideRagdoll\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_iMaxHealth\""
+        },
+        {
+          "name": "MNetworkExcludeByUserGroup",
+          "value": "\"Player\""
+        },
+        {
+          "name": "MNetworkExcludeByUserGroup",
+          "value": "\"Water\""
+        },
+        {
+          "name": "MNetworkExcludeByUserGroup",
+          "value": "\"LocalPlayerExclusive\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_spawnflags\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_bTakesDamage\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_nTakeDamageFlags\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_vecAbsVelocity\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_flSpeed\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_flWaterLevel\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_flTimeScale\""
+        },
+        {
+          "name": "MNetworkExcludeByName",
+          "value": "\"m_vecBaseVelocity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CBodyComponent::Storage_t m_CBodyComponent\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int32 m_iMaxHealth\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int32 m_iHealth\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_lifeState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bTakesDamage\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"TakeDamageFlags_t m_nTakeDamageFlags\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"EntityPlatformTypes_t m_nPlatformType\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_ubInterpolationFrame\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"EntitySubclassID_t m_nSubclassID\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flAnimTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flSimulationTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTime_t m_flCreateTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flSpeed\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bClientSideRagdoll\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_iTeamNum\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint32 m_spawnflags\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTick_t m_nNextThinkTick\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint32 m_fFlags\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_vecBaseVelocity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CHandle< CBaseEntity> m_hEffectEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CHandle< CBaseEntity> m_hOwnerEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"MoveCollide_t m_MoveCollide\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"MoveType_t m_MoveType\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flWaterLevel\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint32 m_fEffects\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CHandle< CBaseEntity> m_hGroundEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_nGroundBodyIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flFriction\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flElasticity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flGravityScale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flTimeScale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bAnimatedEveryTick\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_bGravityDisabled\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"GameTime_t m_flNavIgnoreUntilTime\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"BloodType m_nBloodType\""
+        }
+      ],
+      "module": "client",
+      "name": "C_BaseEntity",
+      "parents": [
+        {
+          "module": "entity2",
+          "name": "CEntityInstance"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_bStartActive",
+          "offset": 1552,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_flMaxSimulationTime",
+          "offset": 1556,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_iszEffectName",
+          "offset": 1560,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_PathNodes_Name",
+          "offset": 1568,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "CUtlSymbolLarge"
+            },
+            "name": "CUtlVector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flParticleSpacing",
+          "offset": 1592,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_flSlack",
+          "offset": 1596,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1600,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_ColorTint",
+          "offset": 1604,
+          "type": {
+            "category": "atomic",
+            "name": "Color"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"effectStateChanged\""
+            }
+          ],
+          "name": "m_nEffectState",
+          "offset": 1608,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iEffectIndex",
+          "offset": 1616,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "resourcesystem",
+              "name": "InfoForResourceTypeIParticleSystemDefinition"
+            },
+            "name": "CStrongHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_Position",
+          "offset": 1624,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_TangentIn",
+          "offset": 1648,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_TangentOut",
+          "offset": 1672,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_Color",
+          "offset": 1696,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"pinStateChanged\""
+            }
+          ],
+          "name": "m_PathNodes_PinEnabled",
+          "offset": 1720,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "builtin",
+              "name": "bool"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_RadiusScale",
+          "offset": 1744,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "builtin",
+              "name": "float32"
+            },
+            "name": "C_NetworkUtlVectorBase"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flParticleSpacing\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flSlack\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Color m_ColorTint\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_nEffectState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"HParticleSystemDefinitionStrong m_iEffectIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_Position\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_TangentIn\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_TangentOut\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_Color\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_PathNodes_PinEnabled\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_PathNodes_RadiusScale\""
+        }
+      ],
+      "module": "client",
+      "name": "C_PathParticleRope",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flTimeToDetonate",
+          "offset": 2992,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_numOpponentsHit",
+          "offset": 2996,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "name": "m_numTeammatesHit",
+          "offset": 2997,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CFlashbangProjectile",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseCSGrenadeProjectile"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_BuoyancyHelper",
+          "offset": 1840,
+          "type": {
+            "category": "declared_class",
+            "module": "server",
+            "name": "CBuoyancyHelper"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CFuncWater",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseModelEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "scale",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "int16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord\""
+            }
+          ],
+          "name": "origin",
+          "offset": 12,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "bClip3DSkyBoxNearToWorldFar",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "flClip3DSkyBoxNearToWorldFarOffset",
+          "offset": 28,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "fog",
+          "offset": 32,
+          "type": {
+            "category": "declared_class",
+            "module": "server",
+            "name": "fogparams_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nWorldGroupID",
+          "offset": 136,
+          "type": {
+            "category": "atomic",
+            "name": "WorldGroupId_t"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int16 scale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector origin\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool bClip3DSkyBoxNearToWorldFar\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 flClip3DSkyBoxNearToWorldFarOffset\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"fogparams_t fog\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"WorldGroupId_t m_nWorldGroupID\""
+        }
+      ],
+      "module": "server",
+      "name": "sky3dparams_t"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_OnPlay",
+          "offset": 1192,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1216,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_soundEventName",
+          "offset": 1224,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_bOverrideWithEvent",
+          "offset": 1232,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundscapeIndex",
+          "offset": 1236,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundscapeEntityListId",
+          "offset": 1240,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_positionNames",
+          "offset": 1248,
+          "type": {
+            "category": "fixed_array",
+            "count": 8,
+            "inner": {
+              "category": "atomic",
+              "name": "CUtlSymbolLarge"
+            }
+          }
+        },
+        {
+          "name": "m_hProxySoundscape",
+          "offset": 1312,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CEnvSoundscape"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_bDisabled",
+          "offset": 1316,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_soundscapeName",
+          "offset": 1320,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_soundEventHash",
+          "offset": 1328,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CEnvSoundscape",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1584,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        }
+      ],
+      "module": "client",
+      "name": "C_SoundAreaEntitySphere",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_SoundAreaEntityBase"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nLongAxis",
+          "offset": 3720,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 3724,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_flLineLength",
+          "offset": 3728,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "C_FuncTrackTrain",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseModelEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1720,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        }
+      ],
+      "module": "client",
+      "name": "C_SoundEventSphereEntity",
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_SoundEventEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flRadius",
+          "offset": 1600,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "CFilterProximity",
+      "parents": [
+        {
+          "module": "client",
+          "name": "CBaseFilter"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord_integral\""
+            }
+          ],
+          "name": "m_vOrigin",
+          "offset": 8,
+          "type": {
+            "category": "atomic",
+            "name": "VectorWS"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord_integral\""
+            }
+          ],
+          "name": "m_vStart",
+          "offset": 20,
+          "type": {
+            "category": "atomic",
+            "name": "VectorWS"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"normal\""
+            }
+          ],
+          "name": "m_vNormal",
+          "offset": 32,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"qangle\""
+            }
+          ],
+          "name": "m_vAngles",
+          "offset": 44,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_hEntity",
+          "offset": 56,
+          "type": {
+            "category": "atomic",
+            "name": "CEntityHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_hOtherEntity",
+          "offset": 60,
+          "type": {
+            "category": "atomic",
+            "name": "CEntityHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flScale",
+          "offset": 64,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "12"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "1023.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            }
+          ],
+          "name": "m_flMagnitude",
+          "offset": 68,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "10"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "1023.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 72,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nSurfaceProp",
+          "offset": 76,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nEffectIndex",
+          "offset": 80,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "resourcesystem",
+              "name": "InfoForResourceTypeIParticleSystemDefinition"
+            },
+            "name": "CWeakHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nDamageType",
+          "offset": 88,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nPenetrate",
+          "offset": 92,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nMaterial",
+          "offset": 94,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nHitBox",
+          "offset": 96,
+          "type": {
+            "category": "builtin",
+            "name": "int16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nColor",
+          "offset": 98,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_fFlags",
+          "offset": 99,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nAttachmentIndex",
+          "offset": 100,
+          "type": {
+            "category": "declared_class",
+            "module": "modellib",
+            "name": "AttachmentHandle_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nAttachmentName",
+          "offset": 104,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_iEffectName",
+          "offset": 108,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nExplosionType",
+          "offset": 110,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"VectorWS m_vOrigin\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"VectorWS m_vStart\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_vNormal\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"QAngle m_vAngles\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CEntityHandle m_hEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CEntityHandle m_hOtherEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flScale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flMagnitude\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flRadius\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CUtlStringToken m_nSurfaceProp\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"HParticleSystemDefinition m_nEffectIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint32 m_nDamageType\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nPenetrate\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint16 m_nMaterial\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int16 m_nHitBox\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nColor\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_fFlags\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"AttachmentHandle_t m_nAttachmentIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CUtlStringToken m_nAttachmentName\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint16 m_iEffectName\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nExplosionType\""
+        }
+      ],
+      "module": "client",
+      "name": "CEffectData"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_nDamage",
+          "offset": 1192,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_bitsDamageType",
+          "offset": 1196,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "DamageTypes_t"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1200,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flDelay",
+          "offset": 1204,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_strTarget",
+          "offset": 1208,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_pActivator",
+          "offset": 1216,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CBaseEntity"
+            },
+            "name": "CHandle"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CPointHurt",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CPointEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flRadius",
+          "offset": 1192,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_angViewPunch",
+          "offset": 1196,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CEnvViewPunch",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CPointEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_bStartActive",
+          "offset": 1200,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_flMaxSimulationTime",
+          "offset": 1204,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_iszEffectName",
+          "offset": 1208,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_PathNodes_Name",
+          "offset": 1216,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "CUtlSymbolLarge"
+            },
+            "name": "CUtlVector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flParticleSpacing",
+          "offset": 1240,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_flSlack",
+          "offset": 1244,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1248,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"parametersChanged\""
+            }
+          ],
+          "name": "m_ColorTint",
+          "offset": 1252,
+          "type": {
+            "category": "atomic",
+            "name": "Color"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"effectStateChanged\""
+            }
+          ],
+          "name": "m_nEffectState",
+          "offset": 1256,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_iEffectIndex",
+          "offset": 1264,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "resourcesystem",
+              "name": "InfoForResourceTypeIParticleSystemDefinition"
+            },
+            "name": "CStrongHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_Position",
+          "offset": 1272,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_TangentIn",
+          "offset": 1296,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_TangentOut",
+          "offset": 1320,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_Color",
+          "offset": 1344,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkChangeCallback",
+              "value": "\"pinStateChanged\""
+            }
+          ],
+          "name": "m_PathNodes_PinEnabled",
+          "offset": 1368,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "builtin",
+              "name": "bool"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_PathNodes_RadiusScale",
+          "offset": 1392,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "builtin",
+              "name": "float32"
+            },
+            "name": "CNetworkUtlVectorBase"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flParticleSpacing\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flSlack\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Color m_ColorTint\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int m_nEffectState\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"HParticleSystemDefinitionStrong m_iEffectIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_Position\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_TangentIn\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_TangentOut\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_PathNodes_Color\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"bool m_PathNodes_PinEnabled\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_PathNodes_RadiusScale\""
+        }
+      ],
+      "module": "server",
+      "name": "CPathParticleRope",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MClassPtr"
+            }
+          ],
+          "name": "m_pnext",
+          "offset": 1192,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CPathTrack"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MClassPtr"
+            }
+          ],
+          "name": "m_pprevious",
+          "offset": 1200,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CPathTrack"
+            }
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MClassPtr"
+            }
+          ],
+          "name": "m_paltpath",
+          "offset": 1208,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CPathTrack"
+            }
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1216,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_length",
+          "offset": 1220,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_altName",
+          "offset": 1224,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNotSaved"
+            }
+          ],
+          "name": "m_nIterVal",
+          "offset": 1232,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_eOrientationType",
+          "offset": 1236,
+          "type": {
+            "category": "declared_enum",
+            "module": "server",
+            "name": "TrackOrientationType_t"
+          }
+        },
+        {
+          "name": "m_OnPass",
+          "offset": 1240,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CPathTrack",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CPointEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_iszEnemyName",
+          "offset": 1248,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1256,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flOuterRadius",
+          "offset": 1260,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nMaxSquadmatesPerEnemy",
+          "offset": 1264,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_iszPlayerName",
+          "offset": 1272,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CFilterEnemy",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseFilter"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_OnMagnetAttach",
+          "offset": 2592,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnMagnetDetach",
+          "offset": 2616,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_massScale",
+          "offset": 2640,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_forceLimit",
+          "offset": 2644,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_torqueLimit",
+          "offset": 2648,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_MagnettedEntities",
+          "offset": 2656,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "magnetted_objects_t"
+            },
+            "name": "CUtlVector"
+          }
+        },
+        {
+          "name": "m_bActive",
+          "offset": 2680,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bHasHitSomething",
+          "offset": 2681,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_flTotalMass",
+          "offset": 2684,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 2688,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flNextSuckTime",
+          "offset": 2692,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "name": "m_iMaxObjectsAttached",
+          "offset": 2696,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CPhysMagnet",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseAnimGraph"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_iSearchType",
+          "offset": 1192,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_strSearchName",
+          "offset": 1200,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_strNewHintGroup",
+          "offset": 1208,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1216,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CAI_ChangeHintGroup",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_bEnabled",
+          "offset": 1192,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_flMagnitude",
+          "offset": 1196,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1200,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flInnerRadius",
+          "offset": 1204,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flConeOfInfluence",
+          "offset": 1208,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_iszFilterName",
+          "offset": 1216,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_hFilter",
+          "offset": 1224,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CBaseFilter"
+            },
+            "name": "CHandle"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CPointPush",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CPointEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1368,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        }
+      ],
+      "module": "server",
+      "name": "CSoundEventSphereEntity",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CSoundEventEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_iszEntry",
+          "offset": 1192,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszPreIdle",
+          "offset": 1200,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszPlay",
+          "offset": 1208,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszPostIdle",
+          "offset": 1216,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszModifierToAddOnPlay",
+          "offset": 1224,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszNextScript",
+          "offset": 1232,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszEntity",
+          "offset": 1240,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_iszSyncGroup",
+          "offset": 1248,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlSymbolLarge"
+          }
+        },
+        {
+          "name": "m_nMoveTo",
+          "offset": 1256,
+          "type": {
+            "category": "declared_enum",
+            "module": "modellib",
+            "name": "ScriptedMoveTo_t"
+          }
+        },
+        {
+          "name": "m_nMoveToGait",
+          "offset": 1260,
+          "type": {
+            "category": "declared_enum",
+            "module": "modellib",
+            "name": "SharedMovementGait_t"
+          }
+        },
+        {
+          "name": "m_nHeldWeaponBehavior",
+          "offset": 1264,
+          "type": {
+            "category": "declared_enum",
+            "module": "modellib",
+            "name": "ScriptedHeldWeaponBehavior_t"
+          }
+        },
+        {
+          "name": "m_nForcedCrouchState",
+          "offset": 1268,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "ForcedCrouchState_t"
+          }
+        },
+        {
+          "name": "m_bIsPlayingPreIdle",
+          "offset": 1272,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIsPlayingEntry",
+          "offset": 1273,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIsPlayingAction",
+          "offset": 1274,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIsPlayingPostIdle",
+          "offset": 1275,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDontRotateOther",
+          "offset": 1276,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIsRepeatable",
+          "offset": 1277,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bShouldLeaveCorpse",
+          "offset": 1278,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bStartOnSpawn",
+          "offset": 1279,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDisallowInterrupts",
+          "offset": 1280,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bCanOverrideNPCState",
+          "offset": 1281,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDontTeleportAtEnd",
+          "offset": 1282,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bHighPriority",
+          "offset": 1283,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bHideDebugComplaints",
+          "offset": 1284,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bContinueOnDeath",
+          "offset": 1285,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bLoopPreIdleSequence",
+          "offset": 1286,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bLoopActionSequence",
+          "offset": 1287,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bLoopPostIdleSequence",
+          "offset": 1288,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bSynchPostIdles",
+          "offset": 1289,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIgnoreLookAt",
+          "offset": 1290,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIgnoreGravity",
+          "offset": 1291,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDisableNPCCollisions",
+          "offset": 1292,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bKeepAnimgraphLockedPost",
+          "offset": 1293,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDontAddModifiers",
+          "offset": 1294,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bDisableAimingWhileMoving",
+          "offset": 1295,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIgnoreRotation",
+          "offset": 1296,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1300,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRepeat",
+          "offset": 1304,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flPlayAnimFadeInTime",
+          "offset": 1308,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flMoveInterpTime",
+          "offset": 1312,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flAngRate",
+          "offset": 1316,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flMoveSpeed",
+          "offset": 1320,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_bWaitUntilMoveCompletesToStartAnimation",
+          "offset": 1324,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_nNotReadySequenceCount",
+          "offset": 1328,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_startTime",
+          "offset": 1332,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTime_t"
+          }
+        },
+        {
+          "name": "m_bWaitForBeginSequence",
+          "offset": 1336,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_saved_effects",
+          "offset": 1340,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_savedFlags",
+          "offset": 1344,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_savedCollisionGroup",
+          "offset": 1348,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_bInterruptable",
+          "offset": 1352,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_sequenceStarted",
+          "offset": 1353,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bPositionRelativeToOtherEntity",
+          "offset": 1354,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_hTargetEnt",
+          "offset": 1356,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CBaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_hNextCine",
+          "offset": 1360,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CScriptedSequence"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_bThinking",
+          "offset": 1364,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bInitiatedSelfDelete",
+          "offset": 1365,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bIsTeleportingDueToMoveTo",
+          "offset": 1366,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bAllowCustomInterruptConditions",
+          "offset": 1367,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_hForcedTarget",
+          "offset": 1368,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CBaseAnimGraph"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_bDontCancelOtherSequences",
+          "offset": 1372,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bForceSynch",
+          "offset": 1373,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bPreventUpdateYawOnFinish",
+          "offset": 1374,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bEnsureOnNavmeshOnFinish",
+          "offset": 1375,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_onDeathBehavior",
+          "offset": 1376,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "ScriptedOnDeath_t"
+          }
+        },
+        {
+          "name": "m_ConflictResponse",
+          "offset": 1380,
+          "type": {
+            "category": "declared_enum",
+            "module": "server",
+            "name": "ScriptedConflictResponse_t"
+          }
+        },
+        {
+          "name": "m_OnBeginSequence",
+          "offset": 1384,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnActionStartOrLoop",
+          "offset": 1408,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnEndSequence",
+          "offset": 1432,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnPostIdleEndSequence",
+          "offset": 1456,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnCancelSequence",
+          "offset": 1480,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnCancelFailedSequence",
+          "offset": 1504,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        },
+        {
+          "name": "m_OnScriptEvent",
+          "offset": 1528,
+          "type": {
+            "category": "fixed_array",
+            "count": 8,
+            "inner": {
+              "category": "declared_class",
+              "module": "entity2",
+              "name": "CEntityIOOutput"
+            }
+          }
+        },
+        {
+          "name": "m_matOtherToMain",
+          "offset": 1728,
+          "type": {
+            "category": "atomic",
+            "name": "CTransform"
+          }
+        },
+        {
+          "name": "m_hInteractionMainEntity",
+          "offset": 1760,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "server",
+              "name": "CBaseEntity"
+            },
+            "name": "CHandle"
+          }
+        },
+        {
+          "name": "m_iPlayerDeathBehavior",
+          "offset": 1764,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_bSkipFadeIn",
+          "offset": 1768,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CScriptedSequence",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 1224,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float m_flRadius\""
+        }
+      ],
+      "module": "server",
+      "name": "CSoundAreaEntitySphere",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CSoundAreaEntityBase"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flRadius",
+          "offset": 1248,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CFilterProximity",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CBaseFilter"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flWait",
+          "offset": 1192,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 1196,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_OnPass",
+          "offset": 1200,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "CEntityIOOutput"
+          }
+        }
+      ],
+      "module": "server",
+      "name": "CPathCorner",
+      "parents": [
+        {
+          "module": "server",
+          "name": "CPointEntity"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord_integral\""
+            }
+          ],
+          "name": "m_vOrigin",
+          "offset": 8,
+          "type": {
+            "category": "atomic",
+            "name": "VectorWS"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"coord_integral\""
+            }
+          ],
+          "name": "m_vStart",
+          "offset": 20,
+          "type": {
+            "category": "atomic",
+            "name": "VectorWS"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"normal\""
+            }
+          ],
+          "name": "m_vNormal",
+          "offset": 32,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkEncoder",
+              "value": "\"qangle\""
+            }
+          ],
+          "name": "m_vAngles",
+          "offset": 44,
+          "type": {
+            "category": "atomic",
+            "name": "QAngle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_hEntity",
+          "offset": 56,
+          "type": {
+            "category": "atomic",
+            "name": "CEntityHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_hOtherEntity",
+          "offset": 60,
+          "type": {
+            "category": "atomic",
+            "name": "CEntityHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_flScale",
+          "offset": 64,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "12"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "1023.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            }
+          ],
+          "name": "m_flMagnitude",
+          "offset": 68,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            },
+            {
+              "name": "MNetworkBitCount",
+              "value": "10"
+            },
+            {
+              "name": "MNetworkMinValue",
+              "value": "0.000000"
+            },
+            {
+              "name": "MNetworkMaxValue",
+              "value": "1023.000000"
+            },
+            {
+              "name": "MNetworkEncodeFlags",
+              "value": "1"
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 72,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nSurfaceProp",
+          "offset": 76,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nEffectIndex",
+          "offset": 80,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "resourcesystem",
+              "name": "InfoForResourceTypeIParticleSystemDefinition"
+            },
+            "name": "CWeakHandle"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nDamageType",
+          "offset": 88,
+          "type": {
+            "category": "builtin",
+            "name": "uint32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nPenetrate",
+          "offset": 92,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nMaterial",
+          "offset": 94,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nHitBox",
+          "offset": 96,
+          "type": {
+            "category": "builtin",
+            "name": "int16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nColor",
+          "offset": 98,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_fFlags",
+          "offset": 99,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nAttachmentIndex",
+          "offset": 100,
+          "type": {
+            "category": "declared_class",
+            "module": "modellib",
+            "name": "AttachmentHandle_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nAttachmentName",
+          "offset": 104,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlStringToken"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_iEffectName",
+          "offset": 108,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MNetworkEnable"
+            }
+          ],
+          "name": "m_nExplosionType",
+          "offset": 110,
+          "type": {
+            "category": "builtin",
+            "name": "uint8"
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"VectorWS m_vOrigin\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"VectorWS m_vStart\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"Vector m_vNormal\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"QAngle m_vAngles\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CEntityHandle m_hEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CEntityHandle m_hOtherEntity\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flScale\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flMagnitude\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"float32 m_flRadius\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CUtlStringToken m_nSurfaceProp\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"HParticleSystemDefinition m_nEffectIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint32 m_nDamageType\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nPenetrate\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint16 m_nMaterial\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"int16 m_nHitBox\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nColor\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_fFlags\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"AttachmentHandle_t m_nAttachmentIndex\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"CUtlStringToken m_nAttachmentName\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint16 m_iEffectName\""
+        },
+        {
+          "name": "MNetworkVarNames",
+          "value": "\"uint8 m_nExplosionType\""
+        }
+      ],
+      "module": "server",
+      "name": "CEffectData"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vCenter",
+          "offset": 120,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 132,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "navlib",
+      "name": "CNavVolumeSphere",
+      "parents": [
+        {
+          "module": "navlib",
+          "name": "CNavVolume"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"peak strength\""
+            }
+          ],
+          "name": "m_flPeakStrength",
+          "offset": 544,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"peak strength field override\""
+            },
+            {
+              "name": "MPropertyAttributeChoiceName",
+              "value": "\"particlefield_scalar\""
+            }
+          ],
+          "name": "m_nPeakStrengthFieldOverride",
+          "offset": 548,
+          "type": {
+            "category": "declared_class",
+            "module": "particles",
+            "name": "ParticleAttributeIndex_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 552,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"strength field override\""
+            },
+            {
+              "name": "MPropertyAttributeChoiceName",
+              "value": "\"particlefield_scalar\""
+            }
+          ],
+          "name": "m_nRadiusFieldOverride",
+          "offset": 556,
+          "type": {
+            "category": "declared_class",
+            "module": "particles",
+            "name": "ParticleAttributeIndex_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"shake duration after end\""
+            }
+          ],
+          "name": "m_flShakeDuration",
+          "offset": 560,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"amount of time taken to smooth between different shake parameters\""
+            }
+          ],
+          "name": "m_flTransitionTime",
+          "offset": 564,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Twist amount (-1..1)\""
+            }
+          ],
+          "name": "m_flTwistAmount",
+          "offset": 568,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Radial Amount (-1..1)\""
+            }
+          ],
+          "name": "m_flRadialAmount",
+          "offset": 572,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Control Point Orientation Amount (-1..1)\""
+            }
+          ],
+          "name": "m_flControlPointOrientationAmount",
+          "offset": 576,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Control Point for Orientation Amount\""
+            }
+          ],
+          "name": "m_nControlPointForLinearDirection",
+          "offset": 580,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "particles",
+      "name": "C_OP_RenderTreeShake",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionRenderer"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 544,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"magnitude\""
+            }
+          ],
+          "name": "m_flMagnitude",
+          "offset": 912,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"filter explosion to single simulation id\""
+            }
+          ],
+          "name": "m_nSimIdFilter",
+          "offset": 1280,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "particles",
+      "name": "C_OP_RenderClientPhysicsImpulse",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionRenderer"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vPosition",
+          "offset": 0,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_vDirection",
+          "offset": 12,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_vLookAt",
+          "offset": 24,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_Color",
+          "offset": 36,
+          "type": {
+            "category": "atomic",
+            "name": "Color"
+          }
+        },
+        {
+          "name": "m_flAxisScale",
+          "offset": 40,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 44,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flBrightness",
+          "offset": 48,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flLightSourceRadius",
+          "offset": 52,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flDistance",
+          "offset": 56,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_bRelativePositioning",
+          "offset": 60,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bParentToCamera",
+          "offset": 61,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "toolscene",
+      "name": "CLightRigLight"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_nCounterMin",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_nCounterMax",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_flSpacing",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 12,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flEraseAmount",
+          "offset": 16,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_bConstantDensity",
+          "offset": 20,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bOnlyHitMeshes",
+          "offset": 21,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_bRadialFalloff",
+          "offset": 22,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "name": "m_elements",
+          "offset": 24,
+          "type": {
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "mapdoclib",
+              "name": "CSprayedDataPresetElement"
+            },
+            "name": "CUtlVector"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "mapdoclib",
+      "name": "CSprayedDataPreset"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vWsPosition",
+          "offset": 64,
+          "type": {
+            "category": "atomic",
+            "name": "VectorAligned"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 80,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_Color",
+          "offset": 84,
+          "type": {
+            "category": "atomic",
+            "name": "Color"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "animgraphlib",
+      "name": "CAnimationGraphVisualizerSphere",
+      "parents": [
+        {
+          "module": "animgraphlib",
+          "name": "CAnimationGraphVisualizerPrimitiveBase"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vCenter",
+          "offset": 0,
+          "type": {
+            "category": "fixed_array",
+            "count": 2,
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            }
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nParticle",
+          "offset": 28,
+          "type": {
+            "category": "fixed_array",
+            "count": 2,
+            "inner": {
+              "category": "builtin",
+              "name": "uint16"
+            }
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "physicslib",
+      "name": "RnSoftbodyCapsule_t"
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Radius calculation mode\""
+            }
+          ],
+          "name": "m_nMassMode",
+          "offset": 0,
+          "type": {
+            "category": "declared_enum",
+            "module": "particles",
+            "name": "ParticleMassMode_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Radius input\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 8,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Nominal radius value\""
+            }
+          ],
+          "name": "m_flNominalRadius",
+          "offset": 376,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Scale to apply to result\""
+            }
+          ],
+          "name": "m_flScale",
+          "offset": 744,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "particles",
+      "name": "CParticleMassCalculationParameters"
+    },
+    {
+      "fields": [
+        {
+          "name": "originParentSpace",
+          "offset": 0,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "parentIndex",
+          "offset": 32,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 36,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nHeight",
+          "offset": 40,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "ragdollelement_t"
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 472,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output attribute\""
+            },
+            {
+              "name": "MPropertyAttributeChoiceName",
+              "value": "\"particlefield_scalar\""
+            }
+          ],
+          "name": "m_nFieldOutput",
+          "offset": 840,
+          "type": {
+            "category": "declared_class",
+            "module": "particles",
+            "name": "ParticleAttributeIndex_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output\""
+            }
+          ],
+          "name": "m_flOutputRemap",
+          "offset": 848,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CParticleRemapFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"set value method\""
+            }
+          ],
+          "name": "m_nSetMethod",
+          "offset": 1216,
+          "type": {
+            "category": "declared_enum",
+            "module": "particles",
+            "name": "ParticleSetMethod_t"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "particles",
+      "name": "C_INIT_CheckParticleForWater",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionInitializer"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vRayStart",
+          "offset": 0,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_vRayDelta",
+          "offset": 12,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flMaxFraction",
+          "offset": 28,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flScale",
+          "offset": 32,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_pHull",
+          "offset": 40,
+          "type": {
+            "category": "ptr",
+            "inner": {
+              "category": "declared_class",
+              "module": "physicslib",
+              "name": "RnHull_t"
+            }
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "physicslib",
+      "name": "CastSphereSATParams_t"
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse position\""
+            }
+          ],
+          "name": "m_vecPos",
+          "offset": 544,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleVecInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 2264,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse magnitude\""
+            }
+          ],
+          "name": "m_flMagnitude",
+          "offset": 2632,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse wave roundness\""
+            }
+          ],
+          "name": "m_flShape",
+          "offset": 3000,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse wind speed (when wind is true)\""
+            }
+          ],
+          "name": "m_flWindSpeed",
+          "offset": 3368,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse wobble radius\""
+            }
+          ],
+          "name": "m_flWobble",
+          "offset": 3736,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CPerParticleFloatInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"impulse is wind\""
+            }
+          ],
+          "name": "m_bIsRadialWind",
+          "offset": 4104,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"event type\""
+            }
+          ],
+          "name": "m_nEventType",
+          "offset": 4108,
+          "type": {
+            "category": "declared_enum",
+            "module": "particles",
+            "name": "EventTypeSelection_t"
+          }
+        }
+      ],
+      "module": "particles",
+      "name": "C_OP_WaterImpulseRenderer",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionRenderer"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"set value method\""
+            }
+          ],
+          "name": "m_nSetMethod",
+          "offset": 464,
+          "type": {
+            "category": "declared_enum",
+            "module": "particles",
+            "name": "ParticleSetMethod_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"transform input\""
+            }
+          ],
+          "name": "m_TransformInput",
+          "offset": 472,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CParticleTransformInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output field\""
+            },
+            {
+              "name": "MPropertyAttributeChoiceName",
+              "value": "\"particlefield_scalar\""
+            }
+          ],
+          "name": "m_nFieldOutput",
+          "offset": 576,
+          "type": {
+            "category": "declared_class",
+            "module": "particles",
+            "name": "ParticleAttributeIndex_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"CP visibility minimum\""
+            }
+          ],
+          "name": "m_flInputMin",
+          "offset": 580,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"CP visibility maximum\""
+            }
+          ],
+          "name": "m_flInputMax",
+          "offset": 584,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output minimum\""
+            }
+          ],
+          "name": "m_flOutputMin",
+          "offset": 588,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output maximum\""
+            }
+          ],
+          "name": "m_flOutputMax",
+          "offset": 592,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"visibility radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 596,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "particles",
+      "name": "C_OP_RemapTransformVisibilityToScalar",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionOperator"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flVignetteStrength",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_vCenter",
+          "offset": 4,
+          "type": {
+            "category": "atomic",
+            "name": "Vector2D"
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 12,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flRoundness",
+          "offset": 16,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flFeather",
+          "offset": 20,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_vColorTint",
+          "offset": 24,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "materialsystem2",
+      "name": "PostProcessingVignetteParameters_t"
+    },
+    {
+      "fields": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"set value method\""
+            }
+          ],
+          "name": "m_nSetMethod",
+          "offset": 464,
+          "type": {
+            "category": "declared_enum",
+            "module": "particles",
+            "name": "ParticleSetMethod_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"transform input\""
+            }
+          ],
+          "name": "m_TransformInput",
+          "offset": 472,
+          "type": {
+            "category": "declared_class",
+            "module": "particleslib",
+            "name": "CParticleTransformInput"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output field\""
+            },
+            {
+              "name": "MPropertyAttributeChoiceName",
+              "value": "\"particlefield_vector\""
+            }
+          ],
+          "name": "m_nFieldOutput",
+          "offset": 576,
+          "type": {
+            "category": "declared_class",
+            "module": "particles",
+            "name": "ParticleAttributeIndex_t"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"CP visibility minimum\""
+            }
+          ],
+          "name": "m_flInputMin",
+          "offset": 580,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"CP visibility maximum\""
+            }
+          ],
+          "name": "m_flInputMax",
+          "offset": 584,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output minimum\""
+            }
+          ],
+          "name": "m_vecOutputMin",
+          "offset": 588,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"output maximum\""
+            }
+          ],
+          "name": "m_vecOutputMax",
+          "offset": 600,
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"visibility radius\""
+            }
+          ],
+          "name": "m_flRadius",
+          "offset": 612,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "particles",
+      "name": "C_OP_RemapTransformVisibilityToVector",
+      "parents": [
+        {
+          "module": "particles",
+          "name": "CParticleFunctionOperator"
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "name": "m_vCenter",
+          "offset": 0,
+          "type": {
+            "category": "fixed_array",
+            "count": 2,
+            "inner": {
+              "category": "atomic",
+              "name": "Vector"
+            }
+          }
+        },
+        {
+          "name": "m_flRadius",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "metadata": [],
+      "module": "physicslib",
+      "name": "RnCapsule_t"
+    }
+  ],
+  "enums": [
+    {
+      "alignment": "uint32_t",
+      "members": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Keep running normally.\""
+            }
+          ],
+          "name": "None",
+          "value": 0
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Kill after current node.\""
+            },
+            {
+              "name": "MPropertyDescription",
+              "value": "\"Do not stop the current yielding node, but do not continue to the next node afterwards.\""
+            }
+          ],
+          "name": "CancelOnSucceeded",
+          "value": 1
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Kill elegantly.\""
+            },
+            {
+              "name": "MPropertyDescription",
+              "value": "\"Request elegant wind-down of any associated work (e.g. vcd interrupt).\""
+            }
+          ],
+          "name": "SoftCancel",
+          "value": 2
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Kill immediately.\""
+            },
+            {
+              "name": "MPropertyDescription",
+              "value": "\"Stop without any wind-down.\""
+            }
+          ],
+          "name": "HardCancel",
+          "value": 3
+        }
+      ],
+      "module": "pulse_runtime_lib",
+      "name": "PulseCursorCancelPriority_t"
+    },
+    {
+      "alignment": "uint32_t",
+      "members": [
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Black\""
+            }
+          ],
+          "name": "BLACK",
+          "value": 0
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"White\""
+            }
+          ],
+          "name": "WHITE",
+          "value": 1
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Red\""
+            }
+          ],
+          "name": "RED",
+          "value": 2
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Green\""
+            }
+          ],
+          "name": "GREEN",
+          "value": 3
+        },
+        {
+          "metadata": [
+            {
+              "name": "MPropertyFriendlyName",
+              "value": "\"Blue\""
+            }
+          ],
+          "name": "BLUE",
+          "value": 4
+        }
+      ],
+      "module": "pulse_system",
+      "name": "PulseTestEnumColor_t"
+    },
+    {
+      "alignment": "uint32_t",
+      "members": [
+        {
+          "name": "DOTA_UNIT_TARGET_TEAM_NONE",
+          "value": 0
+        },
+        {
+          "name": "DOTA_UNIT_TARGET_TEAM_FRIENDLY",
+          "value": 1
+        },
+        {
+          "name": "DOTA_UNIT_TARGET_TEAM_ENEMY",
+          "value": 2
+        },
+        {
+          "name": "DOTA_UNIT_TARGET_TEAM_CUSTOM",
+          "value": 4
+        },
+        {
+          "name": "DOTA_UNIT_TARGET_TEAM_BOTH",
+          "value": 3
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MEnumFlagsWithOverlappingBits"
+        }
+      ],
+      "module": "client",
+      "name": "DOTA_UNIT_TARGET_TEAM"
+    }
+  ],
+  "revision": 0,
+  "version_date": "test",
+  "version_time": "test"
+}
