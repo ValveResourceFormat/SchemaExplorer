@@ -72,6 +72,17 @@ function SchemasPage() {
     const gameName = validGame ? getGame(validGame)?.name : null;
     const parts = [scope, module, gameName, "Source 2 Schema Explorer"].filter(Boolean);
     document.title = parts.join(" - ");
+
+    const desc = scope
+      ? `${scope} in ${module} module for ${gameName} Source 2 schemas.`
+      : module
+        ? `All classes and enums in the ${module} module for ${gameName} Source 2 schemas.`
+        : gameName
+          ? `Browse Source 2 engine schemas for ${gameName}.`
+          : undefined;
+    if (desc) {
+      document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
+    }
   }, [validGame, module, scope]);
 
   const resolvedDeclarations = declarations ?? EMPTY_DECLARATIONS;

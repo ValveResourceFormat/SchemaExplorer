@@ -176,8 +176,7 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
       metadata?: api.SchemaMetadataEntry[],
     ): boolean {
       return (
-        name.includes(word) ||
-        (metadata?.some((m) => m.name.toLowerCase().includes(word)) ?? false)
+        name.includes(word) || (metadata?.some((m) => m.name.toLowerCase().includes(word)) ?? false)
       );
     }
 
@@ -195,8 +194,10 @@ function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.De
 
   function matchesMetadata(declaration: api.Declaration): boolean {
     const allMetadata: (api.SchemaMetadataEntry[] | undefined)[] = [declaration.metadata];
-    if (declaration.kind === "class") declaration.fields.forEach((f) => allMetadata.push(f.metadata));
-    else if (declaration.kind === "enum") declaration.members.forEach((m) => allMetadata.push(m.metadata));
+    if (declaration.kind === "class")
+      declaration.fields.forEach((f) => allMetadata.push(f.metadata));
+    else if (declaration.kind === "enum")
+      declaration.members.forEach((m) => allMetadata.push(m.metadata));
 
     const keysMatch =
       metadataKeys.length === 0 || allMetadata.some((md) => matchesMetadataKeys(md, metadataKeys));
