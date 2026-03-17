@@ -1,5 +1,5 @@
 import * as api from "./api";
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
@@ -7,6 +7,7 @@ import { KindIcon } from "../KindIcon";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
 import { formatEnumHex } from "./utils/format";
+import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "./utils/enum-flags";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
@@ -59,6 +60,11 @@ const EnumMemberHex = styled.span`
   margin-left: auto;
 `;
 
+const FlagBreakdown = styled.div`
+  font-size: 13px;
+  color: var(--text-dim);
+`;
+
 export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
   isSearchResult?: boolean;
@@ -68,6 +74,10 @@ export const SchemaEnumView: React.FC<{
   const fieldParam = useFieldParam();
 
   const declPath = declarationPath(root, declaration.module, declaration.name);
+  const baseFlags = useMemo(
+    () => (isFlagEnum(declaration.members) ? getBaseFlags(declaration.members) : null),
+    [declaration.members],
+  );
 
   return (
     <CommonGroupWrapper>
@@ -87,6 +97,7 @@ export const SchemaEnumView: React.FC<{
             <EnumMemberView
               key={`${member.name}-${member.value}`}
               member={member}
+              baseFlags={baseFlags}
               alignment={declaration.alignment}
               fieldUrlBase={declPath}
               root={root}
@@ -104,6 +115,7 @@ export const SchemaEnumView: React.FC<{
 
 function EnumMemberView({
   member,
+  baseFlags,
   alignment,
   fieldUrlBase,
   root,
@@ -111,6 +123,7 @@ function EnumMemberView({
   anchored,
 }: {
   member: api.SchemaEnumMember;
+  baseFlags: BaseFlags | null;
   alignment: string;
   fieldUrlBase: string;
   root: string;
@@ -119,6 +132,7 @@ function EnumMemberView({
 }) {
   const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, member.name, anchored);
   const hex = formatEnumHex(member.value, alignment);
+  const decomposed = baseFlags ? decomposeFlags(member.value, baseFlags) : null;
 
   return (
     <EnumMemberWrapper ref={rowRef} data-anchored={anchored || undefined}>
@@ -133,6 +147,7 @@ function EnumMemberView({
           = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
           {hex && <EnumMemberHex>{hex}</EnumMemberHex>}
         </MemberSignature>
+        {decomposed && <FlagBreakdown>{decomposed.join(" | ")}</FlagBreakdown>}
         <MetadataTags metadata={member.metadata} root={root} navigate={navigate} />
       </GridContent>
     </EnumMemberWrapper>
