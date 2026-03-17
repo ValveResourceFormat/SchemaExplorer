@@ -1,4 +1,4 @@
-import type { SchemaEnumMember } from "../api";
+import type { SchemaEnumMember } from "../data/types";
 
 const isPowerOf2 = (n: number) => n > 0 && (n & (n - 1)) === 0;
 

@@ -1,8 +1,8 @@
 import React from "react";
-import { GAME_LIST, type GameDef, type GameId } from "./gamesList";
+import { GAME_LIST, type GameDef, type GameId } from "./games-list";
 
 export type { GameId, GameDef };
-export { GAME_LIST, isGameId } from "./gamesList";
+export { GAME_LIST, isGameId } from "./games-list";
 
 export type Game = GameDef & { icon: React.ReactNode };
 

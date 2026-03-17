@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import { Declaration, SchemaClass } from "./api";
-import { SchemaMetadata } from "../data";
+import { Declaration, SchemaClass } from "../../data/types";
+import { SchemaMetadata } from "../../data/loader";
 import { GameId } from "../../games";
 
 export type ReferenceEntry = {

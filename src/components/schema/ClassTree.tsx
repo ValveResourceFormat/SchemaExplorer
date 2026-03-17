@@ -1,7 +1,7 @@
 import { useContext, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { styled } from "@linaria/react";
-import { SchemaClass } from "./api";
+import { SchemaClass } from "../../data/types";
 import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 
 interface TreeNode {

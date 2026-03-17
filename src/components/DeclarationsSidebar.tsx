@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
-import { DeclarationsContext } from "./Docs/DeclarationsContext";
-import { Declaration } from "./Docs/api";
+import { DeclarationsContext } from "./schema/DeclarationsContext";
+import { Declaration } from "../data/types";
 import { DeclarationSidebarElement, SidebarGroupHeader, SidebarWrapper } from "./layout/Sidebar";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
-import { SearchInput } from "./Search";
+import { SearchInput } from "./search/SearchBox";
 import { GameSwitcher, S2VLogo } from "./layout/NavBar";
 
 type SidebarRow =

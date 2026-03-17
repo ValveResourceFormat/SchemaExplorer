@@ -1,7 +1,7 @@
 import { useContext, useMemo } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { SearchContext } from "../../Search/SearchContext";
-import * as api from "../api";
+import { SearchContext } from "../components/search/SearchContext";
+import * as api from "../data/types";
 
 export interface ParsedSearch {
   nameWords: string[];

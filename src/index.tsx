@@ -3,9 +3,9 @@ import { createRoot } from "react-dom/client";
 import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
-import { Declaration } from "./components/Docs/api";
+import { Declaration } from "./data/types";
 import { isGameId, GameId, GAMES, getGame } from "./games";
-import { loadGameSchemas, type SchemaMetadata } from "./components/data";
+import { loadGameSchemas, type SchemaMetadata } from "./data/loader";
 import DeclarationsPage from "./components/DeclarationsPage";
 import "./global.css";
 

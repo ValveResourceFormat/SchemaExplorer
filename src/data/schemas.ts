@@ -1,4 +1,4 @@
-import type { Declaration, SchemaFieldType, SchemaMetadataEntry } from "./Docs/api.ts";
+import type { Declaration, SchemaFieldType, SchemaMetadataEntry } from "./types.ts";
 
 export interface RawSchemaClass {
   name: string;

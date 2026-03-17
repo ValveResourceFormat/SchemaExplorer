@@ -1,18 +1,18 @@
-import * as api from "./api";
+import * as api from "../../data/types";
 import React, { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
-import { ColoredSyntax } from "../ColoredSyntax";
-import { KindIcon } from "../KindIcon";
+import { ColoredSyntax } from "./ColoredSyntax";
+import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
-import { formatEnumHex } from "./utils/format";
-import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "./utils/enum-flags";
+import { formatEnumHex } from "../../utils/format";
+import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "../../utils/enum-flags";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
-import { useFieldParam } from "./utils/filtering";
-import { useAnchoredRow } from "./utils/useAnchoredRow";
+import { useFieldParam } from "../../utils/filtering";
+import { useAnchoredRow } from "./useAnchoredRow";
 import {
   AnchorName,
   CommonGroupMembers,
@@ -24,7 +24,7 @@ import {
   GridIcon,
   MemberSignature,
   SectionBadge,
-} from "./utils/styles";
+} from "./styles";
 
 const AlignmentBadge = styled(SectionBadge)`
   color: var(--syntax-literal);
