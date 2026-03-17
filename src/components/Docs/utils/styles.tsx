@@ -70,22 +70,30 @@ export const SectionList = styled.div`
   gap: 5px;
 `;
 
-export const SectionLink = styled(Link)`
+const sectionBadgeStyles = `
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
   border-radius: 6px;
   font-size: 14px;
-  text-decoration: none;
   color: var(--text);
   background: var(--group-members);
   border: 1px solid var(--group-border);
+`;
+
+export const SectionLink = styled(Link)`
+  ${sectionBadgeStyles}
+  text-decoration: none;
   transition: border-color 0.1s;
 
   &:hover {
     border-color: var(--highlight);
   }
+`;
+
+export const SectionBadge = styled.span`
+  ${sectionBadgeStyles}
 `;
 
 export const SectionToggle = styled.button`
