@@ -160,7 +160,7 @@ export function filterItems<T extends HasNameAndMetadata>(
   };
 }
 
-function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.Declaration[] {
+export function doSearch(declarations: api.Declaration[], parsed: ParsedSearch): api.Declaration[] {
   const { nameWords, moduleWords, offsets: offsetSet, metadataKeys, metadataValues } = parsed;
 
   function filterModule(declaration: api.Declaration): boolean {

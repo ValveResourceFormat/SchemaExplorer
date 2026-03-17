@@ -1,15 +1,19 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
-import { useFilteredData } from "./utils/filtering";
+import { useFilteredData, useParsedSearch, doSearch } from "./utils/filtering";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
 import { Declaration } from "./api";
-import { DeclarationsContext, declarationKey } from "./DeclarationsContext";
-import { GAMES } from "../../games";
+import {
+  DeclarationsContext,
+  DeclarationsContextType,
+  declarationKey,
+} from "./DeclarationsContext";
+import { GAMES, GameId } from "../../games";
 
 const CardBlock = styled.div`
   max-width: 560px;
@@ -159,6 +163,65 @@ const OffsetsNote = styled.div`
   padding: 8px 4px;
 `;
 
+const OtherGameHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 4px;
+  font-size: 15px;
+  color: var(--text-dim);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+  }
+`;
+
+function OtherGamesResults() {
+  const ctx = useContext(DeclarationsContext);
+  const parsed = useParsedSearch();
+
+  const gameResults = useMemo(() => {
+    const result: { gameId: GameId; declarations: Declaration[] }[] = [];
+    for (const [gameId, lookup] of ctx.otherGamesLookup) {
+      if (gameId === ctx.game) continue;
+      const decls = Array.from(lookup.values());
+      const found = doSearch(decls, parsed);
+      if (found.length > 0) {
+        result.push({ gameId, declarations: found });
+      }
+    }
+    return result;
+  }, [ctx.game, ctx.otherGamesLookup, parsed]);
+
+  if (gameResults.length === 0) return null;
+
+  return (
+    <>
+      {gameResults.map(({ gameId, declarations }) => {
+        const gameInfo = GAMES.find((g) => g.id === gameId);
+        const overrideCtx: DeclarationsContextType = {
+          ...ctx,
+          game: gameId,
+          root: `/${gameId}`,
+          declarations,
+        };
+        return (
+          <React.Fragment key={gameId}>
+            <OtherGameHeader>
+              {gameInfo?.icon} {gameInfo?.name}
+            </OtherGameHeader>
+            <DeclarationsContext.Provider value={overrideCtx}>
+              <LazyList data={declarations} render={renderItem} />
+            </DeclarationsContext.Provider>
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
 function renderItem(declaration: Declaration) {
   let children: React.JSX.Element;
   switch (declaration.kind) {
@@ -189,7 +252,10 @@ export function ContentList() {
           <ScrollableList data={data} render={renderItem} />
         )
       ) : isSearching ? (
-        <TextMessage>No results found</TextMessage>
+        <>
+          <TextMessage>No results found</TextMessage>
+          <OtherGamesResults />
+        </>
       ) : error ? (
         <TextMessage>{`Failed to load schemas: ${error}`}</TextMessage>
       ) : loading ? (
