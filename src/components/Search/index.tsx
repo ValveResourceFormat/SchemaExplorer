@@ -65,6 +65,13 @@ export const SEARCH_TAGS = [
     example: "e.g. offset:0x1A0",
   },
   {
+    tag: "enumvalue:",
+    icon: "enum-member" as IconKind,
+    label: "Enum Value",
+    description: "Filter by enum member value",
+    example: "e.g. enumvalue:4",
+  },
+  {
     tag: "metadata:",
     icon: "meta-tag" as IconKind,
     label: "Metadata",

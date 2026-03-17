@@ -7,6 +7,7 @@ export interface ParsedSearch {
   nameWords: string[];
   moduleWords: string[];
   offsets: Set<number>;
+  enumValues: Set<number>;
   metadataKeys: string[];
   metadataValues: string[];
 }
@@ -15,6 +16,7 @@ export const EMPTY_PARSED: ParsedSearch = {
   nameWords: [],
   moduleWords: [],
   offsets: new Set(),
+  enumValues: new Set(),
   metadataKeys: [],
   metadataValues: [],
 };
@@ -23,12 +25,13 @@ export function isFilterPrefix(word: string): boolean {
   return (
     word.startsWith("module:") ||
     word.startsWith("offset:") ||
+    word.startsWith("enumvalue:") ||
     word.startsWith("metadata:") ||
     word.startsWith("metadatavalue:")
   );
 }
 
-export function parseOffset(value: string): number | null {
+export function parseIntValue(value: string): number | null {
   const trimmed = value.trim();
   if (trimmed === "") return null;
   const n = trimmed.startsWith("0x") ? parseInt(trimmed, 16) : parseInt(trimmed, 10);
@@ -44,7 +47,11 @@ export function parseSearch(search: string): ParsedSearch {
     .filter(Boolean);
   const offsetValues = words
     .filter((x) => x.startsWith("offset:"))
-    .map((x) => parseOffset(x.slice(7)))
+    .map((x) => parseIntValue(x.slice(7)))
+    .filter((x): x is number => x !== null);
+  const enumValueValues = words
+    .filter((x) => x.startsWith("enumvalue:"))
+    .map((x) => parseIntValue(x.slice(10)))
     .filter((x): x is number => x !== null);
   const metadataKeys = words
     .filter((x) => x.startsWith("metadata:") && !x.startsWith("metadatavalue:"))
@@ -54,7 +61,14 @@ export function parseSearch(search: string): ParsedSearch {
     .filter((x) => x.startsWith("metadatavalue:"))
     .map((x) => x.slice(14))
     .filter(Boolean);
-  return { nameWords, moduleWords, offsets: new Set(offsetValues), metadataKeys, metadataValues };
+  return {
+    nameWords,
+    moduleWords,
+    offsets: new Set(offsetValues),
+    enumValues: new Set(enumValueValues),
+    metadataKeys,
+    metadataValues,
+  };
 }
 
 export function useParsedSearch(): ParsedSearch {
@@ -118,13 +132,27 @@ export function searchDeclarations(
   declarations: api.Declaration[],
   parsed: ParsedSearch,
 ): api.Declaration[] {
-  const { nameWords, moduleWords, offsets: offsetSet, metadataKeys, metadataValues } = parsed;
+  const {
+    nameWords,
+    moduleWords,
+    offsets: offsetSet,
+    enumValues: enumValueSet,
+    metadataKeys,
+    metadataValues,
+  } = parsed;
 
   const hasNameFilter = nameWords.length > 0;
   const hasOffsetFilter = offsetSet.size > 0;
+  const hasEnumValueFilter = enumValueSet.size > 0;
   const hasMetadataFilter = metadataKeys.length > 0 || metadataValues.length > 0;
 
-  if (!hasNameFilter && !hasOffsetFilter && !hasMetadataFilter && moduleWords.length === 0) {
+  if (
+    !hasNameFilter &&
+    !hasOffsetFilter &&
+    !hasEnumValueFilter &&
+    !hasMetadataFilter &&
+    moduleWords.length === 0
+  ) {
     return [];
   }
 
@@ -146,9 +174,12 @@ export function searchDeclarations(
       (metadataKeys.length === 0 || matchesMetadataKeys(declaration.metadata, metadataKeys)) &&
       (metadataValues.length === 0 || matchesMetadataValues(declaration.metadata, metadataValues));
 
-    // Field-level filtering needed when there are remaining words, offset, or unsatisfied metadata
+    // Field-level filtering needed when there are remaining words, offset, enumvalue, or unsatisfied metadata
     const hasFieldFilter =
-      remainingWords.length > 0 || hasOffsetFilter || (hasMetadataFilter && !declMetaSatisfied);
+      remainingWords.length > 0 ||
+      hasOffsetFilter ||
+      hasEnumValueFilter ||
+      (hasMetadataFilter && !declMetaSatisfied);
 
     if (!hasFieldFilter) {
       // Declaration-level match (name / module / metadata) — include without fields
@@ -165,10 +196,14 @@ export function searchDeclarations(
     // Offset filter excludes enums entirely
     if (hasOffsetFilter && declaration.kind !== "class") continue;
 
-    // Filter fields/members: each item must pass ALL criteria
+    // Enum value filter excludes classes entirely
+    if (hasEnumValueFilter && declaration.kind !== "enum") continue;
+
+    // Filter fields/members: each item must pass ALL criteria.
+    // numericValue is the field offset (for classes) or member value (for enums).
     function isFieldMatch(
       item: { name: string; metadata?: api.SchemaMetadataEntry[] },
-      offset?: number,
+      numericValue?: number,
     ): boolean {
       if (remainingWords.length > 0) {
         // Each remaining word must match the field name OR a metadata key name individually
@@ -188,7 +223,8 @@ export function searchDeclarations(
         (metadataValues.length === 0 ||
           declMetaSatisfied ||
           matchesMetadataValues(item.metadata, metadataValues)) &&
-        (offsetSet.size === 0 || (offset != null && offsetSet.has(offset)))
+        (offsetSet.size === 0 || (numericValue != null && offsetSet.has(numericValue))) &&
+        (enumValueSet.size === 0 || (numericValue != null && enumValueSet.has(numericValue)))
       );
     }
 
@@ -198,7 +234,7 @@ export function searchDeclarations(
         results.push({ ...declaration, fields });
       }
     } else {
-      const members = declaration.members.filter((m) => isFieldMatch(m));
+      const members = declaration.members.filter((m) => isFieldMatch(m, m.value));
       if (members.length > 0) {
         results.push({ ...declaration, members });
       }
