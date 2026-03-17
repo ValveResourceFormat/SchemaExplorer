@@ -9,7 +9,9 @@
     "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",
     "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin src scripts",
-    "fmt": "oxfmt src scripts"
+    "fmt": "oxfmt src scripts",
+    "test": "tsc && oxlint --react-perf-plugin --jsx-a11y-plugin src scripts && vitest run --reporter=agent && oxfmt --check src scripts",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.22",
@@ -24,9 +26,10 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "@wyw-in-js/vite": "^1.0.6",
-    "oxfmt": "^0.40.0",
+    "oxfmt": "^0.41.0",
     "oxlint": "^1.55.0",
     "typescript": "^5.9.3",
-    "vite": "^8.0.0"
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
   }
 }

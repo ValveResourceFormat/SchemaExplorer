@@ -1,5 +1,5 @@
 import * as api from "./api";
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "../ColoredSyntax";
@@ -10,18 +10,10 @@ import { formatHexOffset } from "./utils/format";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
-import {
-  matchesWords,
-  matchesMetadataKeys,
-  matchesMetadataValues,
-  filterItems,
-  useParsedSearch,
-  useFieldParam,
-} from "./utils/filtering";
+import { useFieldParam } from "./utils/filtering";
 import { useAnchoredRow } from "./utils/useAnchoredRow";
 import {
   AnchorName,
-  CollapsedItemsLink,
   CommonGroupMembers,
   CommonGroupSignature,
   CommonGroupWrapper,
@@ -53,10 +45,6 @@ const EnumMemberWrapper = styled.div`
   grid-template-columns: auto 1fr;
   gap: 0 6px;
 
-  &[data-highlighted] {
-    background-color: var(--search-highlight);
-  }
-
   &[data-anchored] {
     background-color: var(--search-highlight);
   }
@@ -73,30 +61,11 @@ const EnumMemberHex = styled.span`
 
 export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
-}> = ({ declaration }) => {
+  isSearchResult?: boolean;
+}> = ({ declaration, isSearchResult }) => {
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
-  const parsed = useParsedSearch();
-  const {
-    nameWords: searchWords,
-    metadataKeys: searchMetadata,
-    metadataValues: searchMetadataValues,
-  } = parsed;
   const fieldParam = useFieldParam();
-
-  const isSearching =
-    searchWords.length > 0 || searchMetadata.length > 0 || searchMetadataValues.length > 0;
-  const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
-  const collapseNonMatching = isSearching && !nameMatches;
-
-  const {
-    visible: matchingMembers,
-    highlighted: highlightedMembers,
-    hiddenCount,
-  } = useMemo(
-    () => filterItems(declaration.members, parsed, declaration.name, collapseNonMatching),
-    [declaration.members, parsed, declaration.name, collapseNonMatching],
-  );
 
   const declPath = declarationPath(root, declaration.module, declaration.name);
 
@@ -111,35 +80,23 @@ export const SchemaEnumView: React.FC<{
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      {(!collapseNonMatching ||
-        (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
-        (searchMetadataValues.length > 0 &&
-          matchesMetadataValues(declaration.metadata, searchMetadataValues)) ||
-        (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
-        <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
-      )}
-      {(matchingMembers.length > 0 || hiddenCount > 0) && (
+      <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
+      {declaration.members.length > 0 && (
         <EnumMembers>
-          {matchingMembers.map((member) => (
+          {declaration.members.map((member) => (
             <EnumMemberView
               key={`${member.name}-${member.value}`}
               member={member}
               fieldUrlBase={declPath}
               root={root}
               navigate={navigate}
-              highlighted={highlightedMembers.has(member)}
               anchored={fieldParam === member.name}
             />
           ))}
-          {hiddenCount > 0 && (
-            <CollapsedItemsLink to={declPath}>
-              {hiddenCount} more member{hiddenCount !== 1 ? "s" : ""}…
-            </CollapsedItemsLink>
-          )}
         </EnumMembers>
       )}
-      {!collapseNonMatching && <ReferencedBy name={declaration.name} module={declaration.module} />}
-      {!collapseNonMatching && <CrossGameRefs declaration={declaration} />}
+      {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
+      {!isSearchResult && <CrossGameRefs declaration={declaration} />}
     </CommonGroupWrapper>
   );
 };
@@ -149,25 +106,19 @@ function EnumMemberView({
   fieldUrlBase,
   root,
   navigate,
-  highlighted,
   anchored,
 }: {
   member: api.SchemaEnumMember;
   fieldUrlBase: string;
   root: string;
   navigate: ReturnType<typeof useNavigate>;
-  highlighted: boolean;
   anchored: boolean;
 }) {
   const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, member.name, anchored);
   const hex = member.value >= 0 ? formatHexOffset(member.value) : null;
 
   return (
-    <EnumMemberWrapper
-      ref={rowRef}
-      data-highlighted={highlighted || undefined}
-      data-anchored={anchored || undefined}
-    >
+    <EnumMemberWrapper ref={rowRef} data-anchored={anchored || undefined}>
       <GridIcon>
         <KindIcon kind="enum-member" size="small" />
       </GridIcon>

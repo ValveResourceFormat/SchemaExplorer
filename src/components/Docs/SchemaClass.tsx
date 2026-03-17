@@ -8,20 +8,12 @@ import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon } from "../KindIcon";
 import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 import { getGame } from "../../games";
-import {
-  matchesWords,
-  matchesMetadataKeys,
-  matchesMetadataValues,
-  filterItems,
-  useParsedSearch,
-  useFieldParam,
-} from "./utils/filtering";
+import { useFieldParam } from "./utils/filtering";
 import { formatHexOffset } from "./utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "./utils/bitfields";
 import { useAnchoredRow } from "./utils/useAnchoredRow";
 import {
   AnchorName,
-  CollapsedItemsLink,
   CommonGroupMembers,
   CommonGroupSignature,
   CommonGroupWrapper,
@@ -52,10 +44,6 @@ const FieldRow = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0 10px;
-
-  &[data-highlighted] {
-    background-color: var(--search-highlight);
-  }
 
   &[data-anchored] {
     background-color: var(--search-highlight);
@@ -133,26 +121,14 @@ export const GitHubFileLink: React.FC<{ module: string; name: string }> = ({ mod
 
 export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
-}> = ({ declaration }) => {
+  isSearchResult?: boolean;
+}> = ({ declaration, isSearchResult }) => {
   const { root, classesByKey } = useContext(DeclarationsContext);
   const navigate = useNavigate();
-  const parsed = useParsedSearch();
-  const {
-    nameWords: searchWords,
-    offsets: searchOffsets,
-    metadataKeys: searchMetadata,
-    metadataValues: searchMetadataValues,
-  } = parsed;
   const fieldParam = useFieldParam();
 
-  const isSearching =
-    searchWords.length > 0 ||
-    searchOffsets.size > 0 ||
-    searchMetadata.length > 0 ||
-    searchMetadataValues.length > 0;
-
   const inheritedGroups = useMemo(() => {
-    if (isSearching) return [];
+    if (isSearchResult) return [];
     const groups: { parent: { name: string; module: string }; fields: api.SchemaField[] }[] = [];
     const visited = new Set<string>();
     function collect(parents: { name: string; module: string }[]) {
@@ -171,25 +147,7 @@ export const SchemaClassView: React.FC<{
     }
     collect(declaration.parents);
     return groups;
-  }, [declaration.parents, classesByKey, isSearching]);
-  const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
-  const collapseNonMatching = isSearching && !nameMatches;
-
-  const {
-    visible: matchingFields,
-    highlighted: highlightedFields,
-    hiddenCount,
-  } = useMemo(
-    () =>
-      filterItems(
-        declaration.fields,
-        parsed,
-        declaration.name,
-        collapseNonMatching,
-        (f) => searchOffsets.size === 0 || searchOffsets.has(f.offset),
-      ),
-    [declaration.fields, parsed, declaration.name, collapseNonMatching, searchOffsets],
-  );
+  }, [declaration.parents, classesByKey, isSearchResult]);
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
   const declPath = declarationPath(root, declaration.module, declaration.name);
@@ -204,17 +162,11 @@ export const SchemaClassView: React.FC<{
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      {(!collapseNonMatching ||
-        (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
-        (searchMetadataValues.length > 0 &&
-          matchesMetadataValues(declaration.metadata, searchMetadataValues)) ||
-        (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
-        <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
-      )}
+      <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
-      {(matchingFields.length > 0 || hiddenCount > 0) && (
+      {declaration.fields.length > 0 && (
         <ClassMembers>
-          {matchingFields.map((field) => (
+          {declaration.fields.map((field) => (
             <SchemaFieldView
               key={`${field.name}-${field.offset}`}
               field={field}
@@ -222,19 +174,13 @@ export const SchemaClassView: React.FC<{
               root={root}
               navigate={navigate}
               bitfield={bitfieldInfo.get(field)}
-              highlighted={highlightedFields.has(field)}
               anchored={fieldParam === field.name}
             />
           ))}
-          {hiddenCount > 0 && (
-            <CollapsedItemsLink to={declPath}>
-              {hiddenCount} more field{hiddenCount !== 1 ? "s" : ""}…
-            </CollapsedItemsLink>
-          )}
         </ClassMembers>
       )}
-      {!collapseNonMatching && <ReferencedBy name={declaration.name} module={declaration.module} />}
-      {!collapseNonMatching && <CrossGameRefs declaration={declaration} />}
+      {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
+      {!isSearchResult && <CrossGameRefs declaration={declaration} />}
     </CommonGroupWrapper>
   );
 };
@@ -374,7 +320,6 @@ function SchemaFieldView({
   root,
   navigate,
   bitfield,
-  highlighted,
   anchored,
 }: {
   field: api.SchemaField;
@@ -382,7 +327,6 @@ function SchemaFieldView({
   root: string;
   navigate: ReturnType<typeof useNavigate>;
   bitfield?: BitfieldInfo;
-  highlighted: boolean;
   anchored: boolean;
 }) {
   const offsetHex = formatHexOffset(field.offset);
@@ -390,11 +334,7 @@ function SchemaFieldView({
 
   return (
     <>
-      <FieldRow
-        ref={rowRef}
-        data-highlighted={highlighted || undefined}
-        data-anchored={anchored || undefined}
-      >
+      <FieldRow ref={rowRef} data-anchored={anchored || undefined}>
         <GridIcon>
           <KindIcon kind="field" size="small" />
         </GridIcon>
