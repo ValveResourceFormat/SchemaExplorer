@@ -6,7 +6,7 @@ import { ColoredSyntax } from "../ColoredSyntax";
 import { KindIcon } from "../KindIcon";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
-import { formatHexOffset } from "./utils/format";
+import { formatEnumHex } from "./utils/format";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
@@ -87,6 +87,7 @@ export const SchemaEnumView: React.FC<{
             <EnumMemberView
               key={`${member.name}-${member.value}`}
               member={member}
+              alignment={declaration.alignment}
               fieldUrlBase={declPath}
               root={root}
               navigate={navigate}
@@ -103,19 +104,21 @@ export const SchemaEnumView: React.FC<{
 
 function EnumMemberView({
   member,
+  alignment,
   fieldUrlBase,
   root,
   navigate,
   anchored,
 }: {
   member: api.SchemaEnumMember;
+  alignment: string;
   fieldUrlBase: string;
   root: string;
   navigate: ReturnType<typeof useNavigate>;
   anchored: boolean;
 }) {
   const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, member.name, anchored);
-  const hex = member.value >= 0 ? formatHexOffset(member.value) : null;
+  const hex = formatEnumHex(member.value, alignment);
 
   return (
     <EnumMemberWrapper ref={rowRef} data-anchored={anchored || undefined}>
