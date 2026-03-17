@@ -139,9 +139,9 @@ export const SchemaClassView: React.FC<{
         const parentDecl = classesByKey.get(key);
         if (parentDecl) {
           collect(parentDecl.parents);
-          if (parentDecl.fields.length > 0) {
-            groups.push({ parent: p, fields: parentDecl.fields });
-          }
+          groups.push({ parent: p, fields: parentDecl.fields });
+        } else {
+          groups.push({ parent: p, fields: [] });
         }
       }
     }
@@ -210,7 +210,9 @@ function InheritedSection({
               {group.parent.name}
             </SectionLink>
           ))}
-          <SectionToggle onClick={() => setExpanded(true)}>expand fields</SectionToggle>
+          {totalFields > 0 && (
+            <SectionToggle onClick={() => setExpanded(true)}>expand fields</SectionToggle>
+          )}
         </SectionList>
       </SectionWrapper>
     );
