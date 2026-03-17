@@ -233,7 +233,7 @@ function SearchTagPopup({
   activeIndex,
   onSelect,
 }: {
-  tags: (typeof SEARCH_TAGS)[number][];
+  tags: readonly (typeof SEARCH_TAGS)[number][];
   activeIndex: number;
   onSelect: (tag: string) => void;
 }) {
