@@ -49,7 +49,7 @@ export const SearchInput = styled.input`
   }
 `;
 
-const SEARCH_TAGS = [
+export const SEARCH_TAGS = [
   {
     tag: "module:",
     icon: "field" as IconKind,
