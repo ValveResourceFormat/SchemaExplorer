@@ -299,6 +299,14 @@ function InheritedFieldView({ field }: { field: api.SchemaField }) {
   );
 }
 
+const DefaultValueSpan = styled.span`
+  color: var(--text-dim);
+  opacity: 0.7;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+`;
+
 const BitRange = styled.span`
   font-family: var(--font-mono);
   font-size: 13px;
@@ -346,6 +354,9 @@ function SchemaFieldView({
               {field.name}
             </AnchorName>
             : <SchemaTypeView type={field.type} />
+            {field.defaultValue != null && (
+              <DefaultValueSpan> = {field.defaultValue}</DefaultValueSpan>
+            )}
             {bitfield && (
               <BitRange>
                 bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}

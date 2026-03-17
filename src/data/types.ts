@@ -18,6 +18,7 @@ export interface SchemaField {
   offset: number;
   type: SchemaFieldType;
   metadata: SchemaMetadataEntry[];
+  defaultValue?: string;
 }
 
 export interface SchemaClass {
