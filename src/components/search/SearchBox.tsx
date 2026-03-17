@@ -249,7 +249,9 @@ function ValueSuggestPopup({
               onSelect(v);
             }}
           >
-            <TagItemName><HighlightMatch text={v} query={query} /></TagItemName>
+            <TagItemName>
+              <HighlightMatch text={v} query={query} />
+            </TagItemName>
           </TagItem>
         ))}
       </ValuePopupList>
