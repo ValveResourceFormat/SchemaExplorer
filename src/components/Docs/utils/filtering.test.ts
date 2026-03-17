@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   parseSearch,
-  parseOffset,
+  parseIntValue,
   isFilterPrefix,
   matchesWords,
   matchesMetadataKeys,
@@ -24,23 +24,23 @@ for (const d of declarations) {
   else enumsByName.set(d.name, d);
 }
 
-// -- parseOffset --
+// -- parseIntValue --
 
-describe("parseOffset", () => {
+describe("parseIntValue", () => {
   it("parses decimal", () => {
-    expect(parseOffset("128")).toBe(128);
+    expect(parseIntValue("128")).toBe(128);
   });
   it("parses hex", () => {
-    expect(parseOffset("0x80")).toBe(128);
+    expect(parseIntValue("0x80")).toBe(128);
   });
   it("returns null for empty string", () => {
-    expect(parseOffset("")).toBeNull();
+    expect(parseIntValue("")).toBeNull();
   });
   it("returns null for non-numeric", () => {
-    expect(parseOffset("abc")).toBeNull();
+    expect(parseIntValue("abc")).toBeNull();
   });
   it("trims whitespace", () => {
-    expect(parseOffset(" 42 ")).toBe(42);
+    expect(parseIntValue(" 42 ")).toBe(42);
   });
 });
 
@@ -55,6 +55,9 @@ describe("isFilterPrefix", () => {
   });
   it("recognizes metadata:", () => {
     expect(isFilterPrefix("metadata:key")).toBe(true);
+  });
+  it("recognizes enumvalue:", () => {
+    expect(isFilterPrefix("enumvalue:4")).toBe(true);
   });
   it("recognizes metadatavalue:", () => {
     expect(isFilterPrefix("metadatavalue:val")).toBe(true);
@@ -73,6 +76,7 @@ describe("parseSearch", () => {
     expect(result.nameWords).toEqual([]);
     expect(result.moduleWords).toEqual([]);
     expect(result.offsets.size).toBe(0);
+    expect(result.enumValues.size).toBe(0);
     expect(result.metadataKeys).toEqual([]);
     expect(result.metadataValues).toEqual([]);
   });
@@ -129,12 +133,43 @@ describe("parseSearch", () => {
   });
 
   it("order of words and filters does not matter", () => {
-    const a = parseSearch("C_Fish module:client metadata:MNetworkEnable offset:0x10");
-    const b = parseSearch("metadata:MNetworkEnable offset:0x10 module:client C_Fish");
+    const a = parseSearch(
+      "C_Fish module:client metadata:MNetworkEnable offset:0x10 enumvalue:4 metadatavalue:coord",
+    );
+    const b = parseSearch(
+      "metadatavalue:coord enumvalue:4 metadata:MNetworkEnable offset:0x10 module:client C_Fish",
+    );
     expect(a.nameWords).toEqual(b.nameWords);
     expect(a.moduleWords).toEqual(b.moduleWords);
     expect(a.offsets).toEqual(b.offsets);
+    expect(a.enumValues).toEqual(b.enumValues);
     expect(a.metadataKeys).toEqual(b.metadataKeys);
+    expect(a.metadataValues).toEqual(b.metadataValues);
+  });
+
+  it("parses decimal enumvalue", () => {
+    const result = parseSearch("enumvalue:4");
+    expect(result.enumValues).toEqual(new Set([4]));
+  });
+
+  it("parses hex enumvalue", () => {
+    const result = parseSearch("enumvalue:0xFF");
+    expect(result.enumValues).toEqual(new Set([255]));
+  });
+
+  it("parses multiple enumvalues", () => {
+    const result = parseSearch("enumvalue:1 enumvalue:2");
+    expect(result.enumValues).toEqual(new Set([1, 2]));
+  });
+
+  it("ignores invalid enumvalue", () => {
+    const result = parseSearch("enumvalue:abc");
+    expect(result.enumValues.size).toBe(0);
+  });
+
+  it("ignores empty enumvalue:", () => {
+    const result = parseSearch("enumvalue:");
+    expect(result.enumValues.size).toBe(0);
   });
 
   it("parses multiple offsets", () => {
@@ -415,6 +450,75 @@ describe("searchDeclarations — declaration matching", () => {
       const result = searchDeclarations(declarations, parseSearch("module:server offset:2992"));
       expect(result.some((d) => d.name === "CFlashbangProjectile")).toBe(true);
       expect(result.every((d) => d.module === "server")).toBe(true);
+    });
+  });
+
+  describe("enum value filter", () => {
+    it("finds enum with matching member value", () => {
+      // DOTA_UNIT_TARGET_TEAM_CUSTOM = 4
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:4"));
+      expect(result.some((d) => d.name === "DOTA_UNIT_TARGET_TEAM")).toBe(true);
+    });
+
+    it("finds enum with hex value", () => {
+      // 4 = 0x4
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:0x4"));
+      expect(result.some((d) => d.name === "DOTA_UNIT_TARGET_TEAM")).toBe(true);
+    });
+
+    it("enumvalue filter excludes classes", () => {
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:0"));
+      expect(result.every((d) => d.kind === "enum")).toBe(true);
+    });
+
+    it("enumvalue that matches no member returns nothing", () => {
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:99999"));
+      expect(result).toHaveLength(0);
+    });
+
+    it("multiple enumvalues (OR within values)", () => {
+      // PulseCursorCancelPriority_t: CancelOnSucceeded=1, SoftCancel=2
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:1 enumvalue:2"));
+      expect(result.some((d) => d.name === "PulseCursorCancelPriority_t")).toBe(true);
+    });
+
+    it("enumvalue + name word narrows results", () => {
+      // DOTA_UNIT_TARGET_TEAM_CUSTOM = 4, name has "DOTA"
+      const result = searchDeclarations(declarations, parseSearch("DOTA enumvalue:4"));
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe("DOTA_UNIT_TARGET_TEAM");
+    });
+
+    it("enumvalue + wrong name returns nothing", () => {
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("PulseTestEnumColor_t enumvalue:4"),
+      );
+      // PulseTestEnumColor_t has BLACK=0, WHITE=1, RED=2, GREEN=3, BLUE=4
+      // Wait — BLUE=4. So this SHOULD match.
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe("PulseTestEnumColor_t");
+    });
+
+    it("enumvalue + module filter", () => {
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("module:pulse_runtime_lib enumvalue:2"),
+      );
+      expect(result.every((d) => d.module === "pulse_runtime_lib")).toBe(true);
+      expect(result.some((d) => d.name === "PulseCursorCancelPriority_t")).toBe(true);
+    });
+
+    it("enumvalue:0 matches members at value 0", () => {
+      // All 3 enums have a member at value 0
+      const result = searchDeclarations(declarations, parseSearch("enumvalue:0"));
+      expect(result.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it("offset + enumvalue combined returns nothing (mutually exclusive)", () => {
+      // offset excludes enums, enumvalue excludes classes — nothing can pass both
+      const result = searchDeclarations(declarations, parseSearch("offset:0 enumvalue:0"));
+      expect(result).toHaveLength(0);
     });
   });
 
@@ -1016,6 +1120,62 @@ describe("searchDeclarations — field filtering", () => {
       expect(result.name).toBe(decl.name);
     });
 
+    it("filters members by enumvalue", () => {
+      const decl = enumsByName.get("PulseTestEnumColor_t")!;
+      // RED=2
+      const parsed = parseSearch("enumvalue:2");
+      const result = searchDeclarations([decl], parsed)[0] as SchemaEnum;
+      expect(result.members).toHaveLength(1);
+      expect(result.members[0].name).toBe("RED");
+    });
+
+    it("filters members by hex enumvalue", () => {
+      const decl = enumsByName.get("DOTA_UNIT_TARGET_TEAM")!;
+      // DOTA_UNIT_TARGET_TEAM_CUSTOM = 4 = 0x4
+      const parsed = parseSearch("enumvalue:0x4");
+      const result = searchDeclarations([decl], parsed)[0] as SchemaEnum;
+      expect(result.members).toHaveLength(1);
+      expect(result.members[0].name).toBe("DOTA_UNIT_TARGET_TEAM_CUSTOM");
+    });
+
+    it("multiple enumvalues filter with OR", () => {
+      const decl = enumsByName.get("PulseTestEnumColor_t")!;
+      // WHITE=1, GREEN=3
+      const parsed = parseSearch("enumvalue:1 enumvalue:3");
+      const result = searchDeclarations([decl], parsed)[0] as SchemaEnum;
+      expect(result.members).toHaveLength(2);
+      const names = result.members.map((m) => m.name);
+      expect(names).toContain("WHITE");
+      expect(names).toContain("GREEN");
+    });
+
+    it("enumvalue + name word combined", () => {
+      const decl = enumsByName.get("PulseTestEnumColor_t")!;
+      // "pulse" consumed by enum name, "red" is remaining → RED=2
+      // enumvalue:2 also matches RED
+      const parsed = parseSearch("PulseTestEnumColor_t RED enumvalue:2");
+      const result = searchDeclarations([decl], parsed)[0] as SchemaEnum;
+      expect(result.members).toHaveLength(1);
+      expect(result.members[0].name).toBe("RED");
+    });
+
+    it("enumvalue + metadata combined on member", () => {
+      const decl = enumsByName.get("PulseCursorCancelPriority_t")!;
+      // SoftCancel=2 has MPropertyDescription
+      const parsed = parseSearch("enumvalue:2 metadata:MPropertyDescription");
+      const result = searchDeclarations([decl], parsed)[0] as SchemaEnum;
+      expect(result.members).toHaveLength(1);
+      expect(result.members[0].name).toBe("SoftCancel");
+    });
+
+    it("enumvalue that no member has → declaration excluded", () => {
+      const decl = enumsByName.get("PulseTestEnumColor_t")!;
+      // values are 0-4, 99 doesn't exist
+      const parsed = parseSearch("enumvalue:99");
+      const result = searchDeclarations([decl], parsed);
+      expect(result).toHaveLength(0);
+    });
+
     it("member name word that matches nothing → declaration excluded", () => {
       const decl = enumsByName.get("PulseTestEnumColor_t")!;
       const parsed = parseSearch("PulseTestEnumColor_t xyznotamember");
@@ -1447,6 +1607,57 @@ describe("field and metadata visibility", () => {
       expect(e.members).toHaveLength(1);
       expect(e.members[0].name).toBe("SoftCancel");
     });
+
+    it("enumvalue:3 shows only members with value 3, hides others", () => {
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("PulseCursorCancelPriority_t enumvalue:3"),
+      );
+      const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+
+      expect(e.members).toHaveLength(1);
+      expect(e.members[0].name).toBe("HardCancel");
+    });
+
+    it("enumvalue preserves member metadata on matching members", () => {
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("PulseCursorCancelPriority_t enumvalue:2"),
+      );
+      const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+
+      expect(e.members).toHaveLength(1);
+      expect(e.members[0].name).toBe("SoftCancel");
+      expect(e.members[0].metadata.some((m) => m.name === "MPropertyFriendlyName")).toBe(true);
+      expect(e.members[0].metadata.some((m) => m.name === "MPropertyDescription")).toBe(true);
+    });
+
+    it("enumvalue + metadatavalue combined narrows members", () => {
+      // SoftCancel=2, HardCancel=3 both have MPropertyDescription with "wind-down"
+      // enumvalue:2 limits to just SoftCancel
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("PulseCursorCancelPriority_t enumvalue:2 metadatavalue:wind-down"),
+      );
+      const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+
+      expect(e.members).toHaveLength(1);
+      expect(e.members[0].name).toBe("SoftCancel");
+    });
+
+    it("enumvalue preserves enum-level metadata", () => {
+      // DOTA_UNIT_TARGET_TEAM has enum-level MEnumFlagsWithOverlappingBits
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("DOTA_UNIT_TARGET_TEAM enumvalue:4"),
+      );
+      const e = result.find((d) => d.name === "DOTA_UNIT_TARGET_TEAM") as SchemaEnum;
+
+      expect(e.members).toHaveLength(1);
+      expect(e.members[0].name).toBe("DOTA_UNIT_TARGET_TEAM_CUSTOM");
+      // Enum-level metadata is preserved
+      expect(e.metadata.some((m) => m.name === "MEnumFlagsWithOverlappingBits")).toBe(true);
+    });
   });
 });
 
@@ -1698,7 +1909,7 @@ describe("complex edge cases", () => {
     });
   });
 
-  describe("offset filter on enums returns nothing", () => {
+  describe("offset and enumvalue are kind-exclusive", () => {
     it("enum + offset filter → enum excluded from results entirely", () => {
       // PulseTestEnumColor_t is an enum — offset filter only works on classes
       const result = searchDeclarations(declarations, parseSearch("PulseTestEnumColor_t offset:0"));
@@ -1706,6 +1917,18 @@ describe("complex edge cases", () => {
 
       // Enums fail offset check entirely
       expect(e).toBeUndefined();
+    });
+
+    it("class + enumvalue filter → class excluded from results entirely", () => {
+      const result = searchDeclarations(declarations, parseSearch("C_BaseEntity enumvalue:0"));
+      const c = result.find((d) => d.name === "C_BaseEntity");
+
+      expect(c).toBeUndefined();
+    });
+
+    it("offset + enumvalue combined → nothing matches (mutually exclusive)", () => {
+      const result = searchDeclarations(declarations, parseSearch("offset:0 enumvalue:0"));
+      expect(result).toHaveLength(0);
     });
   });
 
@@ -2021,6 +2244,132 @@ describe("filter permutation coverage", () => {
       parseSearch("C_Fish metadatavalue:fish_pos_x metadatavalue:angle_normalize"),
     );
     expect(result).toHaveLength(0);
+  });
+
+  it("name + enumvalue", () => {
+    // DOTA_UNIT_TARGET_TEAM_CUSTOM = 4
+    const result = searchDeclarations(declarations, parseSearch("DOTA enumvalue:4"));
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("DOTA_UNIT_TARGET_TEAM");
+    expect((result[0] as SchemaEnum).members).toHaveLength(1);
+    expect((result[0] as SchemaEnum).members[0].name).toBe("DOTA_UNIT_TARGET_TEAM_CUSTOM");
+  });
+
+  it("name + module + enumvalue", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("PulseCursorCancelPriority_t module:pulse_runtime_lib enumvalue:2"),
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("PulseCursorCancelPriority_t");
+    expect((result[0] as SchemaEnum).members).toHaveLength(1);
+    expect((result[0] as SchemaEnum).members[0].name).toBe("SoftCancel");
+  });
+
+  it("enumvalue + metadata", () => {
+    // SoftCancel=2 has MPropertyDescription
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("enumvalue:2 metadata:MPropertyDescription"),
+    );
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
+  });
+
+  it("enumvalue + metadatavalue", () => {
+    // SoftCancel=2, has MPropertyDescription with "elegantly"
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("enumvalue:2 metadatavalue:elegantly"),
+    );
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
+  });
+
+  it("name + enumvalue + metadata + metadatavalue", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch(
+        "PulseCursorCancelPriority_t enumvalue:2 metadata:MPropertyDescription metadatavalue:elegantly",
+      ),
+    );
+    expect(result).toHaveLength(1);
+    const e = result[0] as SchemaEnum;
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
+  });
+
+  it("enumvalue + metadatavalue where no member matches both → excluded", () => {
+    // None=0 has no MPropertyDescription, but SoftCancel=2 does with "elegantly"
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("PulseCursorCancelPriority_t enumvalue:0 metadatavalue:elegantly"),
+    );
+    expect(result).toHaveLength(0);
+  });
+
+  it("module + enumvalue", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("module:pulse_runtime_lib enumvalue:3"),
+    );
+    expect(result.every((d) => d.module === "pulse_runtime_lib")).toBe(true);
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members.every((m) => m.value === 3)).toBe(true);
+  });
+
+  it("module + enumvalue + metadata", () => {
+    // SoftCancel=2 and HardCancel=3 have MPropertyDescription
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("module:pulse_runtime_lib enumvalue:3 metadata:MPropertyDescription"),
+    );
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("HardCancel");
+  });
+
+  it("module + enumvalue + metadatavalue", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("module:pulse_runtime_lib enumvalue:2 metadatavalue:elegantly"),
+    );
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
+  });
+
+  it("module + enumvalue + metadata + metadatavalue", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch(
+        "module:pulse_runtime_lib enumvalue:2 metadata:MPropertyDescription metadatavalue:elegantly",
+      ),
+    );
+    const e = result.find((d) => d.name === "PulseCursorCancelPriority_t") as SchemaEnum;
+    expect(e).toBeDefined();
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
+  });
+
+  it("name + module + enumvalue + metadata + metadatavalue (all filters)", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch(
+        "PulseCursorCancelPriority_t module:pulse_runtime_lib enumvalue:2 metadata:MPropertyDescription metadatavalue:elegantly",
+      ),
+    );
+    expect(result).toHaveLength(1);
+    const e = result[0] as SchemaEnum;
+    expect(e.members).toHaveLength(1);
+    expect(e.members[0].name).toBe("SoftCancel");
   });
 });
 
