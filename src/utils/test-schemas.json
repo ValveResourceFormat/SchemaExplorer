@@ -1,5 +1,5 @@
 {
-  "_note": "Frozen subset schemas for test stability. MGetKV3ClassDefaults stripped to reduce size. Do not regenerate from live data.",
+  "_note": "Frozen subset schemas for test stability. Do not regenerate from live data.",
   "classes": [
     {
       "fields": [
@@ -7187,6 +7187,304 @@
       "metadata": [],
       "module": "physicslib",
       "name": "RnCapsule_t"
+    },
+    {
+      "fields": [
+        { "name": "m_flValue", "offset": 0, "type": { "category": "builtin", "name": "float32" } },
+        { "name": "m_nCount", "offset": 4, "type": { "category": "builtin", "name": "int32" } },
+        { "name": "m_bEnabled", "offset": 8, "type": { "category": "builtin", "name": "bool" } },
+        {
+          "name": "m_szName",
+          "offset": 16,
+          "type": { "category": "builtin", "name": "CUtlString" }
+        },
+        { "name": "m_hTarget", "offset": 24, "type": { "category": "builtin", "name": "CHandle" } }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"_class\": \"TestSimpleDefaults\",\n\t\"m_flValue\": 1.500000,\n\t\"m_nCount\": 42,\n\t\"m_bEnabled\": true,\n\t\"m_szName\": \"hello\",\n\t\"m_hTarget\": null\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestSimpleDefaults"
+    },
+    {
+      "fields": [
+        { "name": "m_nSeed", "offset": 0, "type": { "category": "builtin", "name": "int32" } },
+        { "name": "m_flRate", "offset": 4, "type": { "category": "builtin", "name": "float32" } }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_nSeed\": <HIDDEN FOR DIFF>,\n\t\"m_flRate\": 0.500000\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestHiddenValues"
+    },
+    {
+      "fields": [
+        { "name": "m_flA", "offset": 0, "type": { "category": "builtin", "name": "float32" } },
+        { "name": "m_flB", "offset": 4, "type": { "category": "builtin", "name": "float32" } }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_flA\": 10.000000,\n\t\"m_flB\": 20.000000\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestBaseClass"
+    },
+    {
+      "fields": [
+        { "name": "m_flC", "offset": 8, "type": { "category": "builtin", "name": "float32" } },
+        {
+          "name": "m_inner",
+          "offset": 12,
+          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"_class\": \"TestChildClass\",\n\t\"m_flA\": 10.000000,\n\t\"m_flB\": 99.000000,\n\t\"m_flC\": 5.000000,\n\t\"m_inner\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 20.000000\n\t}\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestChildClass",
+      "parents": [{ "module": "test", "name": "TestBaseClass" }]
+    },
+    {
+      "fields": [
+        { "name": "m_flX", "offset": 0, "type": { "category": "builtin", "name": "float32" } }
+      ],
+      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "Could not parse KV3 Defaults" }],
+      "module": "test",
+      "name": "TestBrokenDefaults"
+    },
+    {
+      "fields": [
+        { "name": "m_flVal", "offset": 0, "type": { "category": "builtin", "name": "float32" } }
+      ],
+      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_flVal\": -nan\n}" }],
+      "module": "test",
+      "name": "TestNanDefaults"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_items",
+          "offset": 0,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlVector",
+            "inner": { "category": "builtin", "name": "int32" }
+          }
+        },
+        {
+          "name": "m_empty",
+          "offset": 24,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlVector",
+            "inner": { "category": "builtin", "name": "int32" }
+          }
+        },
+        {
+          "name": "m_vecZero",
+          "offset": 48,
+          "type": { "category": "atomic", "name": "Vector" }
+        },
+        {
+          "name": "m_vecNonZero",
+          "offset": 60,
+          "type": { "category": "atomic", "name": "Vector" }
+        },
+        {
+          "name": "m_color",
+          "offset": 72,
+          "type": { "category": "atomic", "name": "Color" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_items\": [1, 2, 3],\n\t\"m_empty\": [],\n\t\"m_vecZero\": [0, 0, 0],\n\t\"m_vecNonZero\": [1, 0, 0],\n\t\"m_color\": [255, 128, 0, 255]\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestArrayDefaults"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_data",
+          "offset": 0,
+          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_data\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 77.000000\n\t}\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestObjectDiff"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_data",
+          "offset": 0,
+          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_data\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 20.000000\n\t}\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestObjectRedundant"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_curve",
+          "offset": 0,
+          "type": { "category": "atomic", "name": "CPiecewiseCurve" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_curve\": {\n\t\t\"m_spline\": [],\n\t\t\"m_tangents\": []\n\t}\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestAtomicObject"
+    },
+    {
+      "fields": [
+        { "name": "m_id", "offset": 0, "type": { "category": "builtin", "name": "int32" } },
+        { "name": "m_name", "offset": 4, "type": { "category": "builtin", "name": "CUtlString" } }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_id\": <HIDDEN FOR DIFF>,\n\t\"m_name\": <HIDDEN FOR DIFF>\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestAllHidden"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_inner",
+          "offset": 0,
+          "type": { "category": "declared_class", "module": "test", "name": "TestMissingClass" }
+        }
+      ],
+      "metadata": [
+        { "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_inner\": {\n\t\t\"m_x\": 5\n\t}\n}" }
+      ],
+      "module": "test",
+      "name": "TestMissingTarget"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_ptr",
+          "offset": 0,
+          "type": {
+            "category": "ptr",
+            "inner": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          }
+        }
+      ],
+      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_ptr\": null\n}" }],
+      "module": "test",
+      "name": "TestPtrField"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_eColor",
+          "offset": 0,
+          "type": {
+            "category": "declared_enum",
+            "module": "pulse_system",
+            "name": "PulseTestEnumColor_t"
+          }
+        },
+        {
+          "name": "m_eTeam",
+          "offset": 4,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "DOTA_UNIT_TARGET_TEAM"
+          }
+        }
+      ],
+      "metadata": [
+        { "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_eColor\": 2,\n\t\"m_eTeam\": 0\n}" }
+      ],
+      "module": "test",
+      "name": "TestEnumDefaults"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_szLabel",
+          "offset": 0,
+          "type": { "category": "atomic", "name": "CUtlString" }
+        },
+        {
+          "name": "m_nZero",
+          "offset": 8,
+          "type": {
+            "category": "declared_enum",
+            "module": "client",
+            "name": "DOTA_UNIT_TARGET_TEAM"
+          }
+        },
+        {
+          "name": "m_bOff",
+          "offset": 12,
+          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_szLabel\": \"\",\n\t\"m_nZero\": 0,\n\t\"m_bOff\": false\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestZeroNonBuiltin"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flX",
+          "offset": 0,
+          "type": { "category": "builtin", "name": "float32" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"_class\": \"TestUnknownKeys\",\n\t\"m_flX\": 3.0,\n\t\"m_unknown\": 77,\n\t\"m_extra\": \"data\"\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestUnknownKeys"
     }
   ],
   "enums": [
