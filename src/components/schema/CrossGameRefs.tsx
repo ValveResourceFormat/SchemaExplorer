@@ -1,6 +1,12 @@
 import React, { useContext } from "react";
 import { styled } from "@linaria/react";
-import { Declaration, SchemaClass, SchemaEnum, SchemaFieldType, SchemaMetadataEntry } from "../../data/types";
+import {
+  Declaration,
+  SchemaClass,
+  SchemaEnum,
+  SchemaFieldType,
+  SchemaMetadataEntry,
+} from "../../data/types";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 import { GAMES, GameId } from "../../games";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";

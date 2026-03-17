@@ -45,7 +45,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       if (type.inner) {
         return (
           <span>
-            <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>
+            <ColoredSyntax kind="container">{type.name}</ColoredSyntax>
             <AngleBracket>&lt; </AngleBracket>
             <SchemaTypeView type={type.inner} />
             {type.inner2 && (
@@ -57,7 +57,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
           </span>
         );
       }
-      return <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>;
+      return <ColoredSyntax kind="atomic">{type.name}</ColoredSyntax>;
     case "bitfield":
       return <ColoredSyntax kind="literal">bitfield:{type.count}</ColoredSyntax>;
   }

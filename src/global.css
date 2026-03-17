@@ -13,8 +13,10 @@
   --group-border: #e0e2e8;
   --search-highlight: #fef9c3;
 
-  --syntax-literal: #0e7555;
+  --syntax-literal: #0550ae;
   --syntax-interface: #0e7555;
+  --syntax-container: #7c5e10;
+  --syntax-atomic: #8250af;
 
   --scrollbar-track: transparent;
   --scrollbar-thumb: #cdd0d6;
@@ -38,8 +40,10 @@
   --group-border: #262930;
   --search-highlight: #6dbf3a20;
 
-  --syntax-literal: #5ee6b8;
+  --syntax-literal: #79c0ff;
   --syntax-interface: #5ee6b8;
+  --syntax-container: #e3b341;
+  --syntax-atomic: #d2a8ff;
 
   --scrollbar-track: transparent;
   --scrollbar-thumb: #363a42;
