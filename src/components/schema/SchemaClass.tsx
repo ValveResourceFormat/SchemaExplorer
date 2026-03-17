@@ -1,17 +1,17 @@
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
-import * as api from "./api";
+import * as api from "../../data/types";
 import { SchemaTypeView, MetadataTags } from "./SchemaType";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
-import { KindIcon } from "../KindIcon";
+import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
 import { getGame } from "../../games";
-import { useFieldParam } from "./utils/filtering";
-import { formatHexOffset } from "./utils/format";
-import { computeBitfieldInfo, type BitfieldInfo } from "./utils/bitfields";
-import { useAnchoredRow } from "./utils/useAnchoredRow";
+import { useFieldParam } from "../../utils/filtering";
+import { formatHexOffset } from "../../utils/format";
+import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
+import { useAnchoredRow } from "./useAnchoredRow";
 import {
   AnchorName,
   CommonGroupMembers,
@@ -27,7 +27,7 @@ import {
   SectionTitle,
   SectionToggle,
   SectionWrapper,
-} from "./utils/styles";
+} from "./styles";
 
 const ClassMembers = styled(CommonGroupMembers)`
   > :not(:last-child) {

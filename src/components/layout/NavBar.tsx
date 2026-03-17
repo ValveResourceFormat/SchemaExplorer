@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@linaria/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../AppContext";
-import { SearchBox } from "../Search";
+import { SearchBox } from "../search/SearchBox";
 import { GAMES, GameId, getGame } from "../../games";
 
 export const NavBar = ({ baseUrl, onMenuClick }: { baseUrl: string; onMenuClick?: () => void }) => {

@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { styled } from "@linaria/react";
 import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
-import { KindIcon } from "../KindIcon";
+import { KindIcon } from "../kind-icon/KindIcon";
 import {
   SectionWrapper,
   SectionTitle,
   SectionList,
   SectionLink,
   SectionToggle,
-} from "./utils/styles";
+} from "./styles";
 
 const COLLAPSE_THRESHOLD = 8;
 

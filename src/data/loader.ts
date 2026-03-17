@@ -1,4 +1,4 @@
-import { Declaration } from "./Docs/api";
+import { Declaration } from "./types";
 import { GameId } from "../games";
 import { parseSchemas, type SchemasJson, type SchemaMetadata } from "./schemas";
 export type { SchemasJson, SchemaMetadata };

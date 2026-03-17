@@ -1,4 +1,4 @@
-import type { IconKind } from "./index";
+import type { IconKind } from "./KindIcon";
 
 export const metadataIconMap: Record<string, IconKind> = {
   MPropertyFriendlyName: "meta-tag",

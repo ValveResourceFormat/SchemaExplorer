@@ -1,4 +1,4 @@
-import type { SchemaField } from "../api";
+import type { SchemaField } from "../data/types";
 
 export interface BitfieldInfo {
   bitOffset: number;

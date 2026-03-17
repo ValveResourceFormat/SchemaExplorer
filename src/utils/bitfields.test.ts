@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeBitfieldInfo } from "./bitfields";
-import type { SchemaField } from "../api";
+import type { SchemaField } from "../data/types";
 
 function makeField(
   name: string,

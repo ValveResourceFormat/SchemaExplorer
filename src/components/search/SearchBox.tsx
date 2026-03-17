@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useMemo, useRef, useState, useTransition 
 import { useLocation, useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
-import { DeclarationsContext } from "../Docs/DeclarationsContext";
-import { KindIcon, IconKind } from "../KindIcon";
+import { DeclarationsContext } from "../schema/DeclarationsContext";
+import { KindIcon, IconKind } from "../kind-icon/KindIcon";
 
 export function useCtrlFHook<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { isFlagEnum, getBaseFlags, decomposeFlags } from "./enum-flags";
-import type { SchemaEnumMember } from "../api";
+import type { SchemaEnumMember } from "../data/types";
 
 const m = (name: string, value: number): SchemaEnumMember => ({
   name,

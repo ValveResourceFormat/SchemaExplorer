@@ -5,13 +5,13 @@ import {
   DeclarationsContextType,
   ReferenceEntry,
   declarationKey,
-} from "./Docs/DeclarationsContext";
-import { Declaration, SchemaClass, SchemaFieldType } from "./Docs/api";
+} from "./schema/DeclarationsContext";
+import { Declaration, SchemaClass, SchemaFieldType } from "../data/types";
 import { GameId } from "../games";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
-import { ContentList } from "./Docs/ContentList";
+import { ContentList } from "./schema/ContentList";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
-import { SearchContext } from "./Search/SearchContext";
+import { SearchContext } from "./search/SearchContext";
 import { NavBar } from "./layout/NavBar";
 
 function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {

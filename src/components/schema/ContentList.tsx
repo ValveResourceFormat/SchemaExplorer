@@ -3,19 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
-import { useFilteredData, useParsedSearch, searchDeclarations } from "./utils/filtering";
+import { useFilteredData, useParsedSearch, searchDeclarations } from "../../utils/filtering";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
-import { Declaration } from "./api";
+import { Declaration } from "../../data/types";
 import {
   DeclarationsContext,
   DeclarationsContextType,
   declarationKey,
 } from "./DeclarationsContext";
 import { GAMES, GameId } from "../../games";
-import { SEARCH_TAGS } from "../Search";
-import { KindIcon } from "../KindIcon";
+import { SEARCH_TAGS } from "../search/SearchBox";
+import { KindIcon } from "../kind-icon/KindIcon";
 
 const CardBlock = styled.div`
   max-width: 560px;

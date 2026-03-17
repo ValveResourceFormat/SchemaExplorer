@@ -2,9 +2,9 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Declaration, SchemaMetadataEntry } from "../src/components/Docs/api.ts";
-import { parseSchemas, type SchemasJson } from "../src/components/schemas.ts";
-import { GAME_LIST } from "../src/gamesList.ts";
+import type { Declaration, SchemaMetadataEntry } from "../src/data/types.ts";
+import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
+import { GAME_LIST } from "../src/games-list.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");

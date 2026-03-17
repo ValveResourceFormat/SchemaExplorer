@@ -9,8 +9,8 @@ import {
   searchDeclarations,
   EMPTY_PARSED,
 } from "./filtering";
-import type { SchemaClass, SchemaEnum } from "../api";
-import { parseSchemas, type SchemasJson } from "../../schemas";
+import type { SchemaClass, SchemaEnum } from "../data/types";
+import { parseSchemas, type SchemasJson } from "../data/schemas";
 import testSchemas from "./test-schemas.json";
 
 // -- Load test schema fixture (subset of CS2 schemas, frozen for test stability) --

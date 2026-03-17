@@ -1,10 +1,10 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { NavLink, type NavigateFunction } from "react-router-dom";
 import { styled } from "@linaria/react";
-import { SchemaFieldType, SchemaMetadataEntry } from "./api";
-import { ColoredSyntax } from "../ColoredSyntax";
-import { KindIcon } from "../KindIcon";
-import { metadataIconMap } from "../KindIcon/metadataIconMap";
+import { SchemaFieldType, SchemaMetadataEntry } from "../../data/types";
+import { ColoredSyntax } from "./ColoredSyntax";
+import { KindIcon } from "../kind-icon/KindIcon";
+import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 
 const AngleBracket = styled.span`

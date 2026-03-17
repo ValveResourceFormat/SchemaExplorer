@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { styled } from "@linaria/react";
-import { IconKind, KindIcon } from "../KindIcon";
-import { Declaration } from "../Docs/api";
-import { DeclarationsContext, declarationPath } from "../Docs/DeclarationsContext";
+import { IconKind, KindIcon } from "../kind-icon/KindIcon";
+import { Declaration } from "../../data/types";
+import { DeclarationsContext, declarationPath } from "../schema/DeclarationsContext";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const SidebarLink = styled(NavLink)`
