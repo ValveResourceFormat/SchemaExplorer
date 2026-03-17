@@ -23,13 +23,11 @@ import {
   GridContent,
   GridIcon,
   MemberSignature,
+  SectionBadge,
 } from "./utils/styles";
 
-const EnumTypeWrapper = styled.span`
-  font-size: 16px;
-  font-weight: normal;
-  color: var(--text-dim);
-  margin-left: 8px;
+const AlignmentBadge = styled(SectionBadge)`
+  color: var(--syntax-literal);
 `;
 
 const EnumMembers = styled(CommonGroupMembers)`
@@ -85,7 +83,7 @@ export const SchemaEnumView: React.FC<{
         <CommonGroupSignature>
           <KindIcon kind="enum" size="big" />
           <DeclarationNameLink to={declPath}>{declaration.name}</DeclarationNameLink>
-          <EnumTypeWrapper>: {declaration.alignment}</EnumTypeWrapper>
+          <AlignmentBadge>{declaration.alignment}</AlignmentBadge>
           <ModuleBadge module={declaration.module} />
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
