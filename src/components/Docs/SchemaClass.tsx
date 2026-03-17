@@ -265,6 +265,7 @@ function InheritedSection({
       {groups.map((group) => (
         <React.Fragment key={`inherited-${group.parent.module}/${group.parent.name}`}>
           <InheritedGroupLabel>
+            Inherits from
             <KindIcon kind="inherited-class" size="small" />
             <SchemaTypeView
               type={{
@@ -282,7 +283,7 @@ function InheritedSection({
           ))}
         </React.Fragment>
       ))}
-      <SectionToggle onClick={() => setExpanded(false)}>collapse</SectionToggle>
+      <SectionToggle onClick={() => setExpanded(false)}>collapse inherited</SectionToggle>
     </InheritedMembers>
   );
 }
