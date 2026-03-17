@@ -202,16 +202,36 @@ const ValuePopupList = styled.div`
   overflow-y: auto;
 `;
 
+const MatchHighlight = styled.span`
+  background: color-mix(in srgb, var(--highlight) 25%, transparent);
+  border-radius: 2px;
+`;
+
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <MatchHighlight>{text.slice(idx, idx + query.length)}</MatchHighlight>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 function ValueSuggestPopup({
   header,
   values,
   activeIndex,
   onSelect,
+  query,
 }: {
   header: string;
   values: string[];
   activeIndex: number;
   onSelect: (value: string) => void;
+  query: string;
 }) {
   return (
     <TagPopup role="listbox" aria-label={header}>
@@ -229,7 +249,7 @@ function ValueSuggestPopup({
               onSelect(v);
             }}
           >
-            <TagItemName>{v}</TagItemName>
+            <TagItemName><HighlightMatch text={v} query={query} /></TagItemName>
           </TagItem>
         ))}
       </ValuePopupList>
@@ -444,6 +464,7 @@ export function SearchBox({
           values={secondLevelValues}
           activeIndex={activeIndex}
           onSelect={handleValueSelect}
+          query={secondLevel.value}
         />
       )}
     </SearchBoxWrapper>
