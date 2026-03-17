@@ -77,10 +77,15 @@ export const SchemaEnumView: React.FC<{
   const { root } = useContext(DeclarationsContext);
   const navigate = useNavigate();
   const parsed = useParsedSearch();
-  const { nameWords: searchWords, metadataKeys: searchMetadata, metadataValues: searchMetadataValues } = parsed;
+  const {
+    nameWords: searchWords,
+    metadataKeys: searchMetadata,
+    metadataValues: searchMetadataValues,
+  } = parsed;
   const fieldParam = useFieldParam();
 
-  const isSearching = searchWords.length > 0 || searchMetadata.length > 0 || searchMetadataValues.length > 0;
+  const isSearching =
+    searchWords.length > 0 || searchMetadata.length > 0 || searchMetadataValues.length > 0;
   const nameMatches = searchWords.length > 0 && matchesWords(declaration.name, searchWords);
   const collapseNonMatching = isSearching && !nameMatches;
 
@@ -108,7 +113,8 @@ export const SchemaEnumView: React.FC<{
       </DeclarationHeader>
       {(!collapseNonMatching ||
         (searchMetadata.length > 0 && matchesMetadataKeys(declaration.metadata, searchMetadata)) ||
-        (searchMetadataValues.length > 0 && matchesMetadataValues(declaration.metadata, searchMetadataValues)) ||
+        (searchMetadataValues.length > 0 &&
+          matchesMetadataValues(declaration.metadata, searchMetadataValues)) ||
         (searchWords.length > 0 && matchesMetadataKeys(declaration.metadata, searchWords))) && (
         <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
       )}

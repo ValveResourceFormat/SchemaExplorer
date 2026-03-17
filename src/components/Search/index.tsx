@@ -50,10 +50,34 @@ export const SearchInput = styled.input`
 `;
 
 const SEARCH_TAGS = [
-  { tag: "module:",        icon: "field" as IconKind,         label: "Module",         description: "Filter by module name",        example: "e.g. module:client" },
-  { tag: "offset:",        icon: "meta-default" as IconKind,  label: "Offset",         description: "Filter by byte offset",         example: "e.g. offset:0x1A0" },
-  { tag: "metadata:",      icon: "meta-tag" as IconKind,      label: "Metadata",       description: "Filter by metadata key name",   example: "e.g. metadata:MNetworkEnable" },
-  { tag: "metadatavalue:", icon: "meta-variable" as IconKind, label: "Metadata Value", description: "Filter by metadata value",      example: "e.g. metadatavalue:true" },
+  {
+    tag: "module:",
+    icon: "field" as IconKind,
+    label: "Module",
+    description: "Filter by module name",
+    example: "e.g. module:client",
+  },
+  {
+    tag: "offset:",
+    icon: "meta-default" as IconKind,
+    label: "Offset",
+    description: "Filter by byte offset",
+    example: "e.g. offset:0x1A0",
+  },
+  {
+    tag: "metadata:",
+    icon: "meta-tag" as IconKind,
+    label: "Metadata",
+    description: "Filter by metadata key name",
+    example: "e.g. metadata:MNetworkEnable",
+  },
+  {
+    tag: "metadatavalue:",
+    icon: "meta-variable" as IconKind,
+    label: "Metadata Value",
+    description: "Filter by metadata value",
+    example: "e.g. metadatavalue:true",
+  },
 ] as const;
 
 function getLastWord(input: string): string {
@@ -67,7 +91,7 @@ function shouldShowFirstLevelPopup(input: string): boolean {
 
 function filterTags(lastWord: string) {
   if (lastWord === "") return SEARCH_TAGS;
-  return SEARCH_TAGS.filter(t => t.tag.startsWith(lastWord.toLowerCase()));
+  return SEARCH_TAGS.filter((t) => t.tag.startsWith(lastWord.toLowerCase()));
 }
 
 function insertTag(inputValue: string, tag: string): string {
@@ -77,7 +101,9 @@ function insertTag(inputValue: string, tag: string): string {
   return parts.join(" ");
 }
 
-function getSecondLevelContext(lastWord: string): { type: "module" | "metadata"; value: string } | null {
+function getSecondLevelContext(
+  lastWord: string,
+): { type: "module" | "metadata"; value: string } | null {
   const lower = lastWord.toLowerCase();
   if (lower.startsWith("module:")) return { type: "module", value: lastWord.slice(7) };
   if (lower.startsWith("metadata:")) return { type: "metadata", value: lastWord.slice(9) };
@@ -130,7 +156,10 @@ const TagItem = styled.button`
   font-size: 14px;
   cursor: pointer;
   text-align: left;
-  &[data-active], &:hover { background: var(--group-members); }
+  &[data-active],
+  &:hover {
+    background: var(--group-members);
+  }
 `;
 
 const TagItemText = styled.div`
@@ -166,7 +195,10 @@ const ValuePopupList = styled.div`
 `;
 
 function ValueSuggestPopup({
-  header, values, activeIndex, onSelect,
+  header,
+  values,
+  activeIndex,
+  onSelect,
 }: {
   header: string;
   values: string[];
@@ -183,7 +215,10 @@ function ValueSuggestPopup({
             role="option"
             aria-selected={i === activeIndex}
             data-active={i === activeIndex || undefined}
-            onMouseDown={(e) => { e.preventDefault(); onSelect(v); }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onSelect(v);
+            }}
           >
             <TagItemName>{v}</TagItemName>
           </TagItem>
@@ -194,9 +229,11 @@ function ValueSuggestPopup({
 }
 
 function SearchTagPopup({
-  tags, activeIndex, onSelect,
+  tags,
+  activeIndex,
+  onSelect,
 }: {
-  tags: typeof SEARCH_TAGS[number][];
+  tags: (typeof SEARCH_TAGS)[number][];
   activeIndex: number;
   onSelect: (tag: string) => void;
 }) {
@@ -209,7 +246,10 @@ function SearchTagPopup({
           role="option"
           aria-selected={i === activeIndex}
           data-active={i === activeIndex || undefined}
-          onMouseDown={(e) => { e.preventDefault(); onSelect(t.tag); }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onSelect(t.tag);
+          }}
         >
           <KindIcon kind={t.icon} size="small" />
           <TagItemText>
@@ -277,7 +317,8 @@ export function SearchBox({
 
   const lastWord = getLastWord(inputValue);
   const filteredTags = filterTags(lastWord);
-  const showFirstLevel = isFocused && shouldShowFirstLevelPopup(inputValue) && filteredTags.length > 0;
+  const showFirstLevel =
+    isFocused && shouldShowFirstLevelPopup(inputValue) && filteredTags.length > 0;
 
   const secondLevel = getSecondLevelContext(lastWord);
   const secondLevelValues = useMemo(() => {
@@ -285,10 +326,14 @@ export function SearchBox({
     const list = secondLevel.type === "module" ? uniqueModules : uniqueMetadataKeys;
     if (secondLevel.value === "") return list;
     const lower = secondLevel.value.toLowerCase();
-    return list.filter(v => v.toLowerCase().startsWith(lower));
+    return list.filter((v) => v.toLowerCase().startsWith(lower));
   }, [secondLevel?.type, secondLevel?.value, uniqueModules, uniqueMetadataKeys]);
-  const isExactMatch = secondLevel != null && secondLevelValues.length === 1 && secondLevelValues[0].toLowerCase() === secondLevel.value.toLowerCase();
-  const showSecondLevel = isFocused && secondLevel != null && secondLevelValues.length > 0 && !isExactMatch;
+  const isExactMatch =
+    secondLevel != null &&
+    secondLevelValues.length === 1 &&
+    secondLevelValues[0].toLowerCase() === secondLevel.value.toLowerCase();
+  const showSecondLevel =
+    isFocused && secondLevel != null && secondLevelValues.length > 0 && !isExactMatch;
 
   const showPopup = showFirstLevel || showSecondLevel;
   const popupLength = showFirstLevel ? filteredTags.length : secondLevelValues.length;
@@ -299,7 +344,9 @@ export function SearchBox({
     const replace = inputValue !== "" || newValue === "";
     startTransition(() => {
       setSearch(newValue);
-      navigate(newValue === "" ? baseUrl : `${baseUrl}?search=${encodeURIComponent(newValue)}`, { replace });
+      navigate(newValue === "" ? baseUrl : `${baseUrl}?search=${encodeURIComponent(newValue)}`, {
+        replace,
+      });
     });
     setActiveIndex(0);
     ref.current?.focus();
@@ -333,14 +380,21 @@ export function SearchBox({
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (!showPopup) return;
-    if (e.key === "ArrowDown") { e.preventDefault(); setActiveIndex(i => Math.min(i + 1, popupLength - 1)); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIndex(i => Math.max(i - 1, 0)); }
-    else if (e.key === "Enter" || e.key === "Tab") {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (showFirstLevel && filteredTags[activeIndex]) handleTagSelect(filteredTags[activeIndex].tag);
-      else if (showSecondLevel && secondLevelValues[activeIndex]) handleValueSelect(secondLevelValues[activeIndex]);
+      setActiveIndex((i) => Math.min(i + 1, popupLength - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      if (showFirstLevel && filteredTags[activeIndex])
+        handleTagSelect(filteredTags[activeIndex].tag);
+      else if (showSecondLevel && secondLevelValues[activeIndex])
+        handleValueSelect(secondLevelValues[activeIndex]);
+    } else if (e.key === "Escape") {
+      setIsFocused(false);
     }
-    else if (e.key === "Escape") { setIsFocused(false); }
   };
 
   const ref = useCtrlFHook<HTMLInputElement>();
