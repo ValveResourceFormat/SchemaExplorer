@@ -1,10 +1,12 @@
 import React from "react";
 
-export type ColoredSyntaxKind = "literal" | "interface";
+export type ColoredSyntaxKind = "literal" | "interface" | "container" | "atomic";
 
 const syntaxStyles: Record<ColoredSyntaxKind, React.CSSProperties> = {
   literal: { color: "var(--syntax-literal)" },
   interface: { color: "var(--syntax-interface)" },
+  container: { color: "var(--syntax-container)" },
+  atomic: { color: "var(--syntax-atomic)" },
 };
 
 export function ColoredSyntax({
