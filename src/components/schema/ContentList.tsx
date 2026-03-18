@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { href, useParams } from "react-router";
+import { useParams } from "react-router";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
@@ -14,6 +14,7 @@ import {
   DeclarationsContext,
   DeclarationsContextType,
   declarationKey,
+  schemaPath,
 } from "./DeclarationsContext";
 import { GAME_LIST, GameId, getGameDef, compareModuleNames } from "../../games-list";
 import { SEARCH_TAGS } from "../search/SearchBox";
@@ -74,7 +75,7 @@ function GameList() {
       {GAME_LIST.map((g, i) => (
         <React.Fragment key={g.id}>
           {i > 0 && " "}
-          <GameChip to={href("/:game/:module?/:scope?", { game: g.id })}>
+          <GameChip to={schemaPath(g.id)}>
             <svg width="24" height="24">
               <use href={`${ICONS_URL}#game-${g.id}`} />
             </svg>{" "}
@@ -204,7 +205,7 @@ function ModuleList() {
   return (
     <ModuleChipsBlock>
       {modules.map(([mod, count]) => (
-        <SectionLink key={mod} to={href("/:game/:module?/:scope?", { game, module: mod })}>
+        <SectionLink key={mod} to={schemaPath(game, mod)}>
           {mod} ({count})
         </SectionLink>
       ))}

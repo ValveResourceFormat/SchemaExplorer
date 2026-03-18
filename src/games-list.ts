@@ -6,6 +6,7 @@ export const GAME_LIST = [
 
 export type GameDef = (typeof GAME_LIST)[number];
 export type GameId = GameDef["id"];
+export const DEFAULT_GAME: GameId = GAME_LIST[0].id;
 
 export function getGameDef(id: string): GameDef | undefined {
   return GAME_LIST.find((g) => g.id === id);

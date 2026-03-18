@@ -2,12 +2,12 @@ import { createContext } from "react";
 import { href } from "react-router";
 import { Declaration, SchemaClass } from "../../data/types";
 import { SchemaMetadata } from "../../data/schemas";
-import { GameId } from "../../games-list";
+import { DEFAULT_GAME, GameId } from "../../games-list";
 import type { ReferenceEntry } from "../../data/derived";
 export { declarationKey, type ReferenceEntry } from "../../data/derived";
 
-export function declarationPath(game: string, module: string, name: string): string {
-  return href("/:game/:module?/:scope?", { game, module, scope: name });
+export function schemaPath(game: string, module?: string, scope?: string): string {
+  return href("/:game?/:module?/:scope?", { game, module, scope });
 }
 
 export type DeclarationsContextType = {
@@ -21,7 +21,7 @@ export type DeclarationsContextType = {
 };
 
 export const DeclarationsContext = createContext<DeclarationsContextType>({
-  game: "cs2",
+  game: DEFAULT_GAME,
   declarations: [],
   classesByKey: new Map(),
   metadata: { revision: 0, versionDate: "", versionTime: "" },

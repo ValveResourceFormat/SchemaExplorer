@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useLocation, useNavigate, href } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
-import { DeclarationsContext } from "../schema/DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
 import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 
 export const SearchInput = styled.input`
@@ -317,7 +317,7 @@ function SearchTagPopup({
 export function SearchBox({ className }: { className?: string }) {
   const { search } = useContext(SearchContext);
   const { game, declarations } = useContext(DeclarationsContext);
-  const baseUrl = href("/:game/:module?/:scope?", { game });
+  const baseUrl = schemaPath(game);
   const [inputValue, setInputValue] = useState(search);
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);

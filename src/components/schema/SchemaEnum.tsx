@@ -4,7 +4,7 @@ import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
-import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
 import { formatEnumHex } from "../../utils/format";
 import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "../../utils/enum-flags";
@@ -76,7 +76,7 @@ export const SchemaEnumView: React.FC<{
   const { game } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
 
-  const declPath = declarationPath(game, declaration.module, declaration.name);
+  const declPath = schemaPath(game, declaration.module, declaration.name);
   const baseFlags = useMemo(
     () => (isFlagEnum(declaration.members) ? getBaseFlags(declaration.members) : null),
     [declaration.members],

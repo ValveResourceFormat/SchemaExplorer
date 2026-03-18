@@ -10,7 +10,7 @@ export default {
   prerender: {
     unstable_concurrency: 8,
     async paths({ getStaticPaths }) {
-      const paths = [...getStaticPaths()];
+      const paths = [...getStaticPaths(), "/"];
 
       for (const game of GAME_LIST) {
         paths.push(`/${game.id}`);
