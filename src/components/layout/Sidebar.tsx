@@ -78,7 +78,7 @@ export const SidebarGroupHeader = styled.button`
   border: none;
   width: 100%;
   padding: 0 8px;
-  height: 30px;
+  height: 28px;
   box-sizing: border-box;
   font: inherit;
   font-size: 14px;
