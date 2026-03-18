@@ -48,12 +48,12 @@ const HEADER_GAP = 8;
 const ITEM_HEIGHT = 28;
 
 export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
-  const { declarations } = useContext(DeclarationsContext);
+  const { declarations, game } = useContext(DeclarationsContext);
   const { filter, setFilter } = useContext(SidebarFilterContext);
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
-  const parentRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLUListElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeStickyIndexRef = useRef(0);
   const navigatedFromSidebarRef = useRef(false);
@@ -212,10 +212,8 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     onNavigate?.();
   }, [onNavigate]);
 
-  const { game } = useContext(DeclarationsContext);
-
   return (
-    <SidebarWrapper ref={wrapperRef}>
+    <SidebarWrapper ref={wrapperRef} aria-label="Classes and enums">
       <SidebarHeader>
         <SidebarBrandRow>
           <SidebarBrand href="https://s2v.app/">
@@ -236,7 +234,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
         />
       </SidebarHeader>
       {hydrated ? (
-        <div ref={parentRef} style={{ flex: 1, overflow: "auto" }}>
+        <SidebarList ref={parentRef}>
           <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const row = rows[virtualRow.index];
@@ -244,7 +242,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
               const isActiveSticky = activeStickyIndexRef.current === virtualRow.index;
 
               return (
-                <div
+                <li
                   key={virtualRow.key}
                   style={{
                     ...(isActiveSticky
@@ -276,17 +274,17 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
                       onClick={handleSidebarNavigate}
                     />
                   )}
-                </div>
+                </li>
               );
             })}
           </div>
-        </div>
+        </SidebarList>
       ) : (
-        <div style={{ flex: 1, overflow: "auto" }}>
+        <SidebarList>
           {staticRows.map((row, i) => {
             if (row.type === "header") {
               return (
-                <div
+                <li
                   key={`h-${row.module}`}
                   style={{
                     height: HEADER_HEIGHT + (i > 0 ? HEADER_GAP : 0),
@@ -296,17 +294,16 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
                   <SidebarGroupHeader>
                     {row.module} ({row.count})
                   </SidebarGroupHeader>
-                </div>
+                </li>
               );
             }
             return (
-              <DeclarationSidebarElement
-                key={`${row.declaration.module}-${row.declaration.name}`}
-                declaration={row.declaration}
-              />
+              <li key={`${row.declaration.module}-${row.declaration.name}`}>
+                <DeclarationSidebarElement declaration={row.declaration} />
+              </li>
             );
           })}
-        </div>
+        </SidebarList>
       )}
     </SidebarWrapper>
   );
@@ -339,4 +336,12 @@ const SidebarBrand = styled.a`
 
 const SidebarSearchInput = styled(SearchInput)`
   background: var(--background);
+`;
+
+const SidebarList = styled.ul`
+  flex: 1;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 `;

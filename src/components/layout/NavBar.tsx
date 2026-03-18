@@ -74,7 +74,7 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
         onClick={() => setOpen(!open)}
         title={currentGameInfo?.name}
         aria-expanded={open}
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
       >
         <SwitcherChevron
           viewBox="0 0 24 24"
@@ -97,10 +97,11 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
         </SwitcherIcon>
       </SwitcherToggle>
       {open && (
-        <SwitcherDropdown>
+        <SwitcherDropdown role="menu" aria-label="Select game">
           {GAME_LIST.map((g) => (
             <SwitcherOption
               key={g.id}
+              role="menuitem"
               onClick={() => switchTo(g.id)}
               data-active={g.id === currentGame || undefined}
             >

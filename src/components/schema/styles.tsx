@@ -30,12 +30,12 @@ export const CommonGroupSignature = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 0 4px;
+`;
 
-  & > h2 {
-    margin: 0;
-    font-size: inherit;
-    font-weight: inherit;
-  }
+export const DeclarationHeading = styled.h1`
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
 `;
 
 export const DeclarationHeader = styled.div`

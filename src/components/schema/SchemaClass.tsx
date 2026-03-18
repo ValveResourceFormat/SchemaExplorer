@@ -19,6 +19,7 @@ import {
   CommonGroupSignature,
   CommonGroupWrapper,
   DeclarationHeader,
+  DeclarationHeading,
   DeclarationNameLink,
   GridContent,
   GridIcon,
@@ -82,7 +83,7 @@ const GitHubIcon = styled.a`
   display: inline-flex;
   align-items: center;
   color: var(--text-dim);
-  margin-left: 4px;
+  margin-left: auto;
 
   &:hover {
     color: var(--highlight);
@@ -146,12 +147,12 @@ export const SchemaClassView: React.FC<{
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="class" size="big" />
-          <h2>
+          <DeclarationHeading>
             <DeclarationNameLink to={declPath} title={`class in ${declaration.module}`}>
               {declaration.name}
             </DeclarationNameLink>
-          </h2>
-          <ModuleBadge module={declaration.module} />
+          </DeclarationHeading>
+          {isSearchResult && <ModuleBadge module={declaration.module} />}
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
