@@ -58,7 +58,7 @@ function describeDeclaration(d: Declaration, gameName: string): string {
   return `${prefix}.`;
 }
 
-export const meta: MetaFunction = ({ params, location }) => {
+export const meta: MetaFunction = ({ params }) => {
   const gameName = params.game && isGameId(params.game) ? getGameDef(params.game)?.name : null;
   const { module, scope } = params;
 
@@ -83,8 +83,8 @@ export const meta: MetaFunction = ({ params, location }) => {
     description = `Browse and explore Valve Source 2 engine schemas, classes, enums, and types for ${gameList}.`;
   }
 
-  const path = location.pathname.replace(/\/$/, "");
-  const canonicalUrl = `${SITE_ORIGIN}/SchemaExplorer${path}`;
+  const canonicalPath = [params.game, params.module, params.scope].filter(Boolean).join("/");
+  const canonicalUrl = `${SITE_ORIGIN}/SchemaExplorer/${canonicalPath}`;
 
   return [
     { title },
