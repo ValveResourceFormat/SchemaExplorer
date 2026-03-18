@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "../Link";
 import { styled } from "@linaria/react";
 import { IconKind, KindIcon } from "../kind-icon/KindIcon";
 import { Declaration } from "../../data/types";
@@ -48,9 +48,10 @@ export const SidebarElement: React.FC<{
   to: string;
   icon: IconKind;
   text: string;
+  title?: string;
   onClick?: () => void;
-}> = React.memo(({ to, icon, text, onClick }) => (
-  <SidebarLink to={to} prefetch="none" onClick={onClick}>
+}> = React.memo(({ to, icon, text, title, onClick }) => (
+  <SidebarLink to={to} onClick={onClick} title={title}>
     <KindIcon kind={icon} size="small" />
     <span>{text}</span>
   </SidebarLink>
@@ -60,12 +61,13 @@ export const DeclarationSidebarElement: React.FC<{
   declaration: Declaration;
   onClick?: () => void;
 }> = React.memo(({ declaration, onClick }) => {
-  const { root } = useContext(DeclarationsContext);
+  const { game } = useContext(DeclarationsContext);
   return (
     <SidebarElement
-      to={declarationPath(root, declaration.module, declaration.name)}
+      to={declarationPath(game, declaration.module, declaration.name)}
       icon={declaration.kind}
       text={declaration.name}
+      title={`${declaration.kind} in ${declaration.module}`}
       onClick={onClick}
     />
   );
@@ -107,7 +109,7 @@ export const SidebarGroupHeader = styled.button`
   }
 `;
 
-export const SidebarWrapper = styled.div`
+export const SidebarWrapper = styled.nav`
   grid-column: 1;
   grid-row: 1;
   display: flex;

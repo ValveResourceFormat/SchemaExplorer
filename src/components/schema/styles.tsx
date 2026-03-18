@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "../Link";
 import { styled } from "@linaria/react";
 
 export const CommonGroupWrapper = styled.div`
@@ -12,9 +12,11 @@ export const CommonGroupWrapper = styled.div`
   word-break: break-all;
 `;
 
-export const CommonGroupMembers = styled.div`
+export const CommonGroupMembers = styled.ul`
   background-color: var(--group-members);
   padding: 10px 12px;
+  margin: 0;
+  list-style: none;
 
   > :not(:last-child) {
     margin-bottom: 4px;
@@ -28,6 +30,12 @@ export const CommonGroupSignature = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 0 4px;
+
+  & > h2 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+  }
 `;
 
 export const DeclarationHeader = styled.div`
@@ -129,8 +137,9 @@ export const MemberSignature = styled.div`
   gap: 6px;
 `;
 
-export const AnchorName = styled.span`
-  cursor: pointer;
+export const AnchorName = styled(Link)`
+  color: inherit;
+  text-decoration: none;
 
   &:hover {
     text-decoration: underline;

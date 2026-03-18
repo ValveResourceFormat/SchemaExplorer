@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, href } from "react-router";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
@@ -234,7 +234,7 @@ function ValueSuggestPopup({
   query: string;
 }) {
   return (
-    <TagPopup role="listbox" aria-label={header}>
+    <TagPopup role="listbox" id="search-listbox" aria-label={header}>
       <TagPopupHeader>{header}</TagPopupHeader>
       <ValuePopupList>
         {values.map((v, i) => (
@@ -269,7 +269,7 @@ function SearchTagPopup({
   onSelect: (tag: string) => void;
 }) {
   return (
-    <TagPopup role="listbox" aria-label="Search tag suggestions">
+    <TagPopup role="listbox" id="search-listbox" aria-label="Search tag suggestions">
       <TagPopupHeader>Filters</TagPopupHeader>
       {tags.map((t, i) => (
         <TagItem
@@ -295,17 +295,10 @@ function SearchTagPopup({
   );
 }
 
-export function SearchBox({
-  baseUrl,
-  className,
-  placeholder = "Search...",
-}: {
-  baseUrl: string;
-  className?: string;
-  placeholder?: string;
-}) {
-  const { search, setSearch } = useContext(SearchContext);
-  const { declarations } = useContext(DeclarationsContext);
+export function SearchBox({ className }: { className?: string }) {
+  const { search } = useContext(SearchContext);
+  const { game, declarations } = useContext(DeclarationsContext);
+  const baseUrl = href("/:game/:module?/:scope?", { game });
   const [inputValue, setInputValue] = useState(search);
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -314,19 +307,15 @@ export function SearchBox({
   const [, startTransition] = useTransition();
   const ownNavigateRef = useRef(false);
 
-  // Sync from URL (back/forward navigation, clicking links)
+  // Sync input value from URL (back/forward navigation, clicking links)
   useEffect(() => {
     if (ownNavigateRef.current) {
       ownNavigateRef.current = false;
       return;
     }
-    const urlSearch = new URLSearchParams(location.search).get("search") ?? "";
+    const urlSearch = new URLSearchParams(location.hash.slice(1)).get("search") ?? "";
     setInputValue(urlSearch);
-    startTransition(() => setSearch(urlSearch));
-    // Intentionally depends only on location.search — we sync *from* the URL.
-    // search/setSearch are omitted because including them would create an
-    // infinite loop: setSearch triggers a navigate which changes location.search.
-  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.hash]);
 
   const uniqueModules = useMemo(() => {
     const set = new Set<string>();
@@ -375,10 +364,10 @@ export function SearchBox({
     ownNavigateRef.current = true;
     const replace = inputValue !== "" || newValue === "";
     startTransition(() => {
-      setSearch(newValue);
-      navigate(newValue === "" ? baseUrl : `${baseUrl}?search=${encodeURIComponent(newValue)}`, {
-        replace,
-      });
+      navigate(
+        { pathname: baseUrl, hash: newValue ? `search=${encodeURIComponent(newValue)}` : "" },
+        { replace },
+      );
     });
     setActiveIndex(0);
     ref.current?.focus();
@@ -395,20 +384,8 @@ export function SearchBox({
   };
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = ({ target: { value } }) => {
-    const wasSearching = inputValue !== "";
-    setInputValue(value);
-    setActiveIndex(0);
     setIsFocused(true);
-    ownNavigateRef.current = true;
-    // Push a history entry when starting a new search so back button works.
-    // Replace while typing to avoid polluting history with every keystroke.
-    const replace = wasSearching || value === "";
-    startTransition(() => {
-      setSearch(value);
-      navigate(value === "" ? baseUrl : `${baseUrl}?search=${encodeURIComponent(value)}`, {
-        replace,
-      });
-    });
+    applyNewValue(value);
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -443,14 +420,16 @@ export function SearchBox({
     <SearchBoxWrapper className={className}>
       <SearchInput
         type="search"
-        placeholder={placeholder}
+        placeholder="Search…"
         ref={ref}
         value={inputValue}
         onChange={onChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         onKeyDown={onKeyDown}
+        role="combobox"
         aria-label="Search"
+        aria-controls="search-listbox"
         aria-autocomplete="list"
         aria-expanded={showPopup}
         spellCheck={false}

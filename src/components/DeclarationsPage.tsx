@@ -7,11 +7,12 @@ import {
   declarationKey,
 } from "./schema/DeclarationsContext";
 import { Declaration, SchemaClass, SchemaFieldType } from "../data/types";
-import { GameId } from "../games";
+import { GameId } from "../games-list";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./schema/ContentList";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
 import { SearchContext } from "./search/SearchContext";
+import { useHashParam } from "../utils/filtering";
 import { NavBar } from "./layout/NavBar";
 
 function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
@@ -81,8 +82,8 @@ export default function DeclarationsPage({
   };
 }) {
   const [filter, setFilter] = useState("");
-  const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const search = useHashParam("search") ?? "";
 
   const references = useMemo(() => buildReferences(context.declarations), [context.declarations]);
 
@@ -109,7 +110,7 @@ export default function DeclarationsPage({
     return { ...rest, references, classesByKey, otherGamesLookup };
   }, [context, references, classesByKey, otherGamesLookup]);
 
-  const searchCtx = useMemo(() => ({ search, setSearch }), [search]);
+  const searchCtx = useMemo(() => ({ search }), [search]);
   const filterCtx = useMemo(() => ({ filter, setFilter }), [filter]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
@@ -125,7 +126,7 @@ export default function DeclarationsPage({
               <DeclarationsSidebar onNavigate={closeSidebar} />
             </SidebarPanel>
             <ContentColumn>
-              <NavBar baseUrl={context.root} onMenuClick={openSidebar} />
+              <NavBar onMenuClick={openSidebar} />
               <ContentList />
             </ContentColumn>
           </PageGrid>

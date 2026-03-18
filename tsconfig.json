@@ -7,10 +7,15 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDirs": [
+      ".",
+      "./.react-router/types"
+    ]
   },
   "include": [
     "src",
-    "scripts"
+    "scripts",
+    ".react-router/types/**/*"
   ]
 }

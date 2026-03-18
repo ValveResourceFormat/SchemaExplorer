@@ -1,6 +1,6 @@
 import * as api from "../../data/types";
 import React, { useContext, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
@@ -11,8 +11,8 @@ import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "../../
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
-import { useFieldParam } from "../../utils/filtering";
-import { useAnchoredRow } from "./useAnchoredRow";
+import { searchLink, useFieldParam } from "../../utils/filtering";
+import { useAnchoredRef } from "./useAnchoredRow";
 import {
   AnchorName,
   CommonGroupMembers,
@@ -36,7 +36,7 @@ const EnumMembers = styled(CommonGroupMembers)`
   }
 `;
 
-const EnumMemberWrapper = styled.div`
+const EnumMemberWrapper = styled.li`
   padding: 3px 8px;
   background-color: transparent;
   border-radius: 6px;
@@ -49,13 +49,18 @@ const EnumMemberWrapper = styled.div`
   }
 `;
 
-const EnumMemberHex = styled.span`
+const EnumMemberHex = styled(Link)`
   font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+  text-decoration: none;
   margin-left: auto;
+
+  &:hover {
+    color: var(--highlight);
+  }
 `;
 
 const FlagBreakdown = styled.div`
@@ -67,11 +72,10 @@ export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
   isSearchResult?: boolean;
 }> = ({ declaration, isSearchResult }) => {
-  const { root } = useContext(DeclarationsContext);
-  const navigate = useNavigate();
+  const { game } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
 
-  const declPath = declarationPath(root, declaration.module, declaration.name);
+  const declPath = declarationPath(game, declaration.module, declaration.name);
   const baseFlags = useMemo(
     () => (isFlagEnum(declaration.members) ? getBaseFlags(declaration.members) : null),
     [declaration.members],
@@ -82,13 +86,17 @@ export const SchemaEnumView: React.FC<{
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="enum" size="big" />
-          <DeclarationNameLink to={declPath}>{declaration.name}</DeclarationNameLink>
+          <h2>
+            <DeclarationNameLink to={declPath} title={`enum in ${declaration.module}`}>
+              {declaration.name}
+            </DeclarationNameLink>
+          </h2>
           <AlignmentBadge>{declaration.alignment}</AlignmentBadge>
           <ModuleBadge module={declaration.module} />
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      <MetadataTags metadata={declaration.metadata} root={root} navigate={navigate} />
+      <MetadataTags metadata={declaration.metadata} game={game} />
       {declaration.members.length > 0 && (
         <EnumMembers>
           {declaration.members.map((member) => (
@@ -98,8 +106,7 @@ export const SchemaEnumView: React.FC<{
               baseFlags={baseFlags}
               alignment={declaration.alignment}
               fieldUrlBase={declPath}
-              root={root}
-              navigate={navigate}
+              game={game}
               anchored={fieldParam === member.name}
             />
           ))}
@@ -116,37 +123,44 @@ function EnumMemberView({
   baseFlags,
   alignment,
   fieldUrlBase,
-  root,
-  navigate,
+  game,
   anchored,
 }: {
   member: api.SchemaEnumMember;
   baseFlags: BaseFlags | null;
   alignment: string;
   fieldUrlBase: string;
-  root: string;
-  navigate: ReturnType<typeof useNavigate>;
+  game: string;
   anchored: boolean;
 }) {
-  const { rowRef, copyAnchorLink } = useAnchoredRow(navigate, fieldUrlBase, member.name, anchored);
+  const rowRef = useAnchoredRef(anchored);
   const hex = formatEnumHex(member.value, alignment);
   const decomposed = baseFlags ? decomposeFlags(member.value, baseFlags) : null;
 
   return (
-    <EnumMemberWrapper ref={rowRef} data-anchored={anchored || undefined}>
+    <EnumMemberWrapper
+      ref={rowRef as React.Ref<HTMLLIElement>}
+      data-anchored={anchored || undefined}
+    >
       <GridIcon>
         <KindIcon kind="enum-member" size="small" />
       </GridIcon>
       <GridContent>
         <MemberSignature>
-          <AnchorName onClick={copyAnchorLink} title="Copy link to member">
+          <AnchorName
+            to={{ pathname: fieldUrlBase, hash: `field=${encodeURIComponent(member.name)}` }}
+            replace
+            preventScrollReset
+          >
             {member.name}
           </AnchorName>{" "}
           = <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-          {hex && <EnumMemberHex>{hex}</EnumMemberHex>}
+          {hex && (
+            <EnumMemberHex to={searchLink(game, `enumvalue:${member.value}`)}>{hex}</EnumMemberHex>
+          )}
         </MemberSignature>
         {decomposed && <FlagBreakdown>{decomposed.join(" | ")}</FlagBreakdown>}
-        <MetadataTags metadata={member.metadata} root={root} navigate={navigate} />
+        <MetadataTags metadata={member.metadata} game={game} />
       </GridContent>
     </EnumMemberWrapper>
   );

@@ -14,3 +14,14 @@ export function getGameDef(id: string): GameDef | undefined {
 export function isGameId(id: string): id is GameId {
   return GAME_LIST.some((g) => g.id === id);
 }
+
+export const SITE_ORIGIN = "https://s2v.app";
+
+const MODULE_PRIORITY = ["client", "server"];
+
+export function compareModuleNames(a: string, b: string): number {
+  const ai = MODULE_PRIORITY.indexOf(a);
+  const bi = MODULE_PRIORITY.indexOf(b);
+  if (ai !== bi) return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+  return a.localeCompare(b);
+}
