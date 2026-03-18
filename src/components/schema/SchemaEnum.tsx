@@ -19,6 +19,7 @@ import {
   CommonGroupSignature,
   CommonGroupWrapper,
   DeclarationHeader,
+  DeclarationHeading,
   DeclarationNameLink,
   GridContent,
   GridIcon,
@@ -86,13 +87,13 @@ export const SchemaEnumView: React.FC<{
       <DeclarationHeader>
         <CommonGroupSignature>
           <KindIcon kind="enum" size="big" />
-          <h2>
+          <DeclarationHeading>
             <DeclarationNameLink to={declPath} title={`enum in ${declaration.module}`}>
               {declaration.name}
             </DeclarationNameLink>
-          </h2>
+          </DeclarationHeading>
           <AlignmentBadge>{declaration.alignment}</AlignmentBadge>
-          <ModuleBadge module={declaration.module} />
+          {isSearchResult && <ModuleBadge module={declaration.module} />}
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>

@@ -5,6 +5,7 @@ import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData, useParsedSearch, searchDeclarations } from "../../utils/filtering";
+import { DeclarationBreadcrumb } from "./Breadcrumb";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
@@ -214,6 +215,13 @@ function ModuleList() {
 function renderItem(declaration: Declaration, isSearchResult?: boolean) {
   return (
     <ListItem key={declarationKey(declaration.module, declaration.name)}>
+      {!isSearchResult && (
+        <DeclarationBreadcrumb
+          module={declaration.module}
+          name={declaration.name}
+          parent={declaration.kind === "class" ? declaration.parents[0] : undefined}
+        />
+      )}
       {declaration.kind === "class" ? (
         <SchemaClassView declaration={declaration} isSearchResult={isSearchResult} />
       ) : (
