@@ -1,5 +1,6 @@
 import type { Config } from "@react-router/dev/config";
 import { GAME_LIST } from "./src/games-list.ts";
+import { parseSchemas, type SchemasJson } from "./src/data/schemas.ts";
 
 export default {
   ssr: false,
@@ -18,16 +19,13 @@ export default {
         paths.push(`/${game.id}`);
 
         const buf = readFileSync(resolve("schemas", `${game.id}.json.gz`));
-        const data = JSON.parse(gunzipSync(buf).toString("utf-8"));
+        const data: SchemasJson = JSON.parse(gunzipSync(buf).toString("utf-8"));
+        const { declarations } = parseSchemas(data);
 
         const names = new Map<string, Set<string>>();
-        for (const cls of data.classes ?? []) {
-          if (!names.has(cls.module)) names.set(cls.module, new Set());
-          names.get(cls.module)!.add(cls.name);
-        }
-        for (const enm of data.enums ?? []) {
-          if (!names.has(enm.module)) names.set(enm.module, new Set());
-          names.get(enm.module)!.add(enm.name);
+        for (const d of declarations) {
+          if (!names.has(d.module)) names.set(d.module, new Set());
+          names.get(d.module)!.add(d.name);
         }
 
         const limit = process.env.PRERENDER_ALL ? 0 : 10;
