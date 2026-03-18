@@ -3,25 +3,7 @@ import { useLocation, useNavigate, href } from "react-router";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
-import { KindIcon, IconKind } from "../kind-icon/KindIcon";
-
-export function useCtrlFHook<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  useEffect(() => {
-    const listener = (event: KeyboardEvent) => {
-      if (ref.current && (event.ctrlKey || event.metaKey) && event.key === "f") {
-        // Use default CTRL+F only when element already has focus
-        if (document.activeElement !== ref.current) event.preventDefault();
-        ref.current.focus();
-      }
-    };
-
-    document.addEventListener("keydown", listener);
-    return () => document.removeEventListener("keydown", listener);
-  }, []);
-
-  return ref;
-}
+import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 
 export const SearchInput = styled.input`
   width: 100%;
@@ -128,6 +110,43 @@ function insertValue(inputValue: string, tagPrefix: string, value: string): stri
 const SearchBoxWrapper = styled.div`
   position: relative;
   width: 100%;
+`;
+
+const SearchIcon = styled.svg`
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  pointer-events: none;
+  color: var(--searchbox-placeholder);
+`;
+
+const MainSearchInput = styled(SearchInput)`
+  padding-left: 36px;
+`;
+
+const SearchPlaceholder = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px 0 36px;
+  pointer-events: none;
+  color: var(--searchbox-placeholder);
+  font-size: 14px;
+  font-family: inherit;
+
+  kbd {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--searchbox-placeholder);
+    opacity: 0.6;
+    line-height: 1.4;
+  }
 `;
 
 const TagPopup = styled.div`
@@ -414,13 +433,21 @@ export function SearchBox({ className }: { className?: string }) {
     }
   };
 
-  const ref = useCtrlFHook<HTMLInputElement>();
+  const ref = useRef<HTMLInputElement>(null);
 
   return (
     <SearchBoxWrapper className={className}>
-      <SearchInput
+      <SearchIcon width="16" height="16">
+        <use href={`${ICONS_URL}#search`} />
+      </SearchIcon>
+      {!inputValue && !isFocused && (
+        <SearchPlaceholder>
+          Type <kbd>/</kbd> to search
+        </SearchPlaceholder>
+      )}
+      <MainSearchInput
+        id="main-search"
         type="search"
-        placeholder="Search…"
         ref={ref}
         value={inputValue}
         onChange={onChange}

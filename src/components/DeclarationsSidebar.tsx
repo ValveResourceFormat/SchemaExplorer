@@ -207,6 +207,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
           <GameSwitcher currentGame={game} />
         </SidebarBrandRow>
         <SidebarSearchInput
+          id="sidebar-filter"
           type="search"
           placeholder="Filter…"
           value={filter}

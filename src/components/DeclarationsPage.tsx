@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { styled } from "@linaria/react";
 import { DeclarationsContext, DeclarationsContextType } from "./schema/DeclarationsContext";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
@@ -12,6 +12,30 @@ export default function DeclarationsPage({ context }: { context: DeclarationsCon
   const [filter, setFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const search = useHashParam("search") ?? "";
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const active = document.activeElement;
+      const mainSearch = document.getElementById("main-search");
+      const sidebarFilter = document.getElementById("sidebar-filter");
+
+      if (active === mainSearch) {
+        e.preventDefault();
+        sidebarFilter?.focus();
+      } else if (active === sidebarFilter) {
+        // Explicit check before the HTMLInputElement guard below,
+        // otherwise "/" would just type into the filter input.
+        e.preventDefault();
+        mainSearch?.focus();
+      } else if (!(active instanceof HTMLInputElement)) {
+        e.preventDefault();
+        mainSearch?.focus();
+      }
+    };
+    document.addEventListener("keydown", listener);
+    return () => document.removeEventListener("keydown", listener);
+  }, []);
 
   const searchCtx = useMemo(() => ({ search }), [search]);
   const filterCtx = useMemo(() => ({ filter, setFilter }), [filter]);
