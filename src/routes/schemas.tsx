@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Navigate, useNavigate, useParams, href } from "react-router";
 import type { MetaFunction } from "react-router";
 import { Declaration } from "../data/types";
-import { isGameId, GameId, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
-import { loadGameSchemas, type SchemaMetadata } from "../data/loader";
-import { preloadedData } from "../data/preload";
+import { isGameId, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
+import { preloadedData, preloadErrors } from "../data/preload";
+import { getDerivedGameData } from "../data/derived";
+import type { DeclarationsContextType } from "../components/schema/DeclarationsContext";
 import DeclarationsPage from "../components/DeclarationsPage";
 
 const MAX_DESC_LENGTH = 200;
@@ -95,98 +96,34 @@ export const meta: MetaFunction = ({ params, location }) => {
 };
 
 const EMPTY_DECLARATIONS: Declaration[] = [];
-const EMPTY_OTHER_GAME_LIST = new Map<GameId, Declaration[]>();
+const EMPTY_METADATA = { revision: 0, versionDate: "", versionTime: "" };
 
 export default function SchemasPage() {
   const { game, module, scope } = useParams<{ game: string; module: string; scope: string }>();
   const validGame = game && isGameId(game) ? game : null;
-  const preloaded = useRef(preloadedData.get(validGame ?? ""));
-  const loadedGame = useRef<string | null>(validGame);
+  const schema = preloadedData.get(validGame ?? "");
+  const declarations = schema?.declarations ?? EMPTY_DECLARATIONS;
+  const metadata = schema?.metadata ?? EMPTY_METADATA;
+  const error = validGame ? (preloadErrors.get(validGame) ?? null) : null;
 
-  const [declarations, setDeclarations] = useState<Declaration[] | null>(
-    () => preloaded.current?.declarations ?? null,
-  );
-  const [metadata, setMetadata] = useState<SchemaMetadata>(
-    () =>
-      preloaded.current?.metadata ?? {
-        revision: 0,
-        versionDate: "",
-        versionTime: "",
-      },
-  );
-  const [otherGames, setOtherGames] = useState<Map<GameId, Declaration[]>>(() => {
-    if (!validGame) return EMPTY_OTHER_GAME_LIST;
-    const map = new Map<GameId, Declaration[]>();
-    for (const g of GAME_LIST) {
-      if (g.id === validGame) continue;
-      const other = preloadedData.get(g.id);
-      if (other) map.set(g.id, other.declarations);
-    }
-    return map.size > 0 ? map : EMPTY_OTHER_GAME_LIST;
-  });
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!validGame) return;
-    let stale = false;
-
-    if (preloaded.current) {
-      preloaded.current = undefined;
-      return;
-    }
-
-    // Subsequent navigations — clear and fetch
-    loadedGame.current = null;
-    setDeclarations(null);
-    setMetadata({ revision: 0, versionDate: "", versionTime: "" });
-    setOtherGames(EMPTY_OTHER_GAME_LIST);
-    setError(null);
-
-    loadGameSchemas(validGame)
-      .then((result) => {
-        if (stale) return;
-        loadedGame.current = validGame;
-        setDeclarations(result.declarations);
-        setMetadata(result.metadata);
-
-        for (const g of GAME_LIST) {
-          if (g.id === validGame) continue;
-          loadGameSchemas(g.id)
-            .then((result) => {
-              if (!stale) setOtherGames((prev) => new Map(prev).set(g.id, result.declarations));
-            })
-            .catch(() => {});
-        }
-      })
-      .catch((e) => {
-        if (!stale) setError(e instanceof Error ? e.message : String(e));
-      });
-
-    return () => {
-      stale = true;
-    };
-  }, [validGame]);
-
-  const resolvedDeclarations = declarations ?? EMPTY_DECLARATIONS;
-  const loading = !declarations && !error;
-
-  const context = useMemo(
-    () => ({
+  const context: DeclarationsContextType = useMemo(() => {
+    const derived = validGame ? getDerivedGameData(validGame) : undefined;
+    return {
       game: validGame ?? "cs2",
-      declarations: resolvedDeclarations,
+      declarations,
       metadata,
-      otherGames,
-      loading,
+      classesByKey: derived?.classesByKey ?? new Map(),
+      references: derived?.references ?? new Map(),
+      otherGamesLookup: derived?.otherGamesLookup ?? new Map(),
       error,
-    }),
-    [validGame, resolvedDeclarations, metadata, otherGames, loading, error],
-  );
+    };
+  }, [validGame, declarations, metadata, error]);
 
   const navigate = useNavigate();
 
   // Redirect if module or scope doesn't exist in the loaded data
   useEffect(() => {
-    if (!validGame || !declarations || loadedGame.current !== validGame) return;
+    if (!validGame || declarations.length === 0) return;
 
     const modules = new Set(declarations.map((d) => d.module));
     const validModule = module && modules.has(module);

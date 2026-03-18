@@ -234,7 +234,7 @@ function renderItem(declaration: Declaration, isSearchResult?: boolean) {
 const renderSearchResult = (declaration: Declaration) => renderItem(declaration, true);
 
 export function ContentList() {
-  const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
+  const { declarations, metadata, error } = useContext(DeclarationsContext);
   const { data, isSearching } = useFilteredData(declarations);
   const { module } = useParams();
 
@@ -252,9 +252,7 @@ export function ContentList() {
           <OtherGamesResults />
         </>
       ) : error ? (
-        <TextMessage>{`Failed to load schemas: ${error}`}</TextMessage>
-      ) : loading ? (
-        <TextMessage>Loading schemas...</TextMessage>
+        <TextMessage>{error}</TextMessage>
       ) : (
         <>
           <TextMessage>Choose a class or enum from the sidebar, or use search...</TextMessage>

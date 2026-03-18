@@ -1,7 +1,5 @@
-import { Declaration } from "./types";
 import { GameId } from "../games-list";
-import { parseSchemas, type SchemasJson, type SchemaMetadata } from "./schemas";
-export type { SchemasJson, SchemaMetadata };
+import { parseSchemas, type SchemasJson } from "./schemas";
 
 const schemaUrls = import.meta.glob<string>("../../schemas/*.json.gz", {
   import: "default",
@@ -9,7 +7,8 @@ const schemaUrls = import.meta.glob<string>("../../schemas/*.json.gz", {
   eager: true,
 });
 
-const cache = new Map<GameId, Promise<{ declarations: Declaration[]; metadata: SchemaMetadata }>>();
+type LoadResult = Awaited<ReturnType<typeof parseSchemas>>;
+const cache = new Map<GameId, Promise<LoadResult>>();
 
 export function loadGameSchemas(gameId: GameId) {
   const cached = cache.get(gameId);
