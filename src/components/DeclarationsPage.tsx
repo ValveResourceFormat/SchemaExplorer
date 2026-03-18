@@ -1,13 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { styled } from "@linaria/react";
-import {
-  DeclarationsContext,
-  DeclarationsContextType,
-  ReferenceEntry,
-  declarationKey,
-} from "./schema/DeclarationsContext";
-import { Declaration, SchemaClass, SchemaFieldType } from "../data/types";
-import { GameId } from "../games-list";
+import { DeclarationsContext, DeclarationsContextType } from "./schema/DeclarationsContext";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./schema/ContentList";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
@@ -15,100 +8,10 @@ import { SearchContext } from "./search/SearchContext";
 import { useHashParam } from "../utils/filtering";
 import { NavBar } from "./layout/NavBar";
 
-function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
-  switch (type.category) {
-    case "declared_class":
-    case "declared_enum":
-      out.add(declarationKey(type.module, type.name));
-      break;
-    case "ptr":
-    case "fixed_array":
-      collectTypeKeys(type.inner, out);
-      break;
-    case "atomic":
-      if (type.inner) collectTypeKeys(type.inner, out);
-      if (type.inner2) collectTypeKeys(type.inner2, out);
-      break;
-  }
-}
-
-function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntry[]> {
-  const refs = new Map<string, ReferenceEntry[]>();
-
-  function addRef(target: string, entry: ReferenceEntry) {
-    let list = refs.get(target);
-    if (!list) {
-      list = [];
-      refs.set(target, list);
-    }
-    list.push(entry);
-  }
-
-  for (const decl of declarations) {
-    if (decl.kind === "class") {
-      for (const parent of decl.parents) {
-        addRef(declarationKey(parent.module, parent.name), {
-          declarationName: decl.name,
-          declarationModule: decl.module,
-          relation: "class",
-        });
-      }
-      for (const field of decl.fields) {
-        const keys = new Set<string>();
-        collectTypeKeys(field.type, keys);
-        const declKey = declarationKey(decl.module, decl.name);
-        for (const key of keys) {
-          if (key !== declKey) {
-            addRef(key, {
-              declarationName: decl.name,
-              declarationModule: decl.module,
-              fieldName: field.name,
-              relation: "field",
-            });
-          }
-        }
-      }
-    }
-  }
-
-  return refs;
-}
-
-export default function DeclarationsPage({
-  context,
-}: {
-  context: Omit<DeclarationsContextType, "references" | "otherGamesLookup" | "classesByKey"> & {
-    otherGames: Map<GameId, Declaration[]>;
-  };
-}) {
+export default function DeclarationsPage({ context }: { context: DeclarationsContextType }) {
   const [filter, setFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const search = useHashParam("search") ?? "";
-
-  const references = useMemo(() => buildReferences(context.declarations), [context.declarations]);
-
-  const classesByKey = useMemo(() => {
-    const map = new Map<string, SchemaClass>();
-    for (const d of context.declarations) {
-      if (d.kind === "class") map.set(declarationKey(d.module, d.name), d);
-    }
-    return map;
-  }, [context.declarations]);
-
-  const otherGamesLookup = useMemo(() => {
-    const lookup = new Map<GameId, Map<string, Declaration>>();
-    for (const [gameId, decls] of context.otherGames) {
-      const map = new Map<string, Declaration>();
-      for (const d of decls) map.set(d.name, d);
-      lookup.set(gameId, map);
-    }
-    return lookup;
-  }, [context.otherGames]);
-
-  const fullContext = useMemo(() => {
-    const { otherGames: _, ...rest } = context;
-    return { ...rest, references, classesByKey, otherGamesLookup };
-  }, [context, references, classesByKey, otherGamesLookup]);
 
   const searchCtx = useMemo(() => ({ search }), [search]);
   const filterCtx = useMemo(() => ({ filter, setFilter }), [filter]);
@@ -117,7 +20,7 @@ export default function DeclarationsPage({
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
   return (
-    <DeclarationsContext.Provider value={fullContext}>
+    <DeclarationsContext.Provider value={context}>
       <SearchContext.Provider value={searchCtx}>
         <SidebarFilterContext.Provider value={filterCtx}>
           <PageGrid>
