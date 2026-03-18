@@ -6,7 +6,6 @@
     "tsc": "tsc",
     "dev": "react-router dev",
     "build": "react-router build && node scripts/flatten-prerender.ts",
-    "build:prod": "react-router build --prerender-all && node scripts/flatten-prerender.ts",
     "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",
     "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin *.ts src scripts",

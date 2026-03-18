@@ -30,7 +30,7 @@ export default {
           names.get(enm.module)!.add(enm.name);
         }
 
-        const limit = process.argv.includes("--prerender-all") ? 0 : 10;
+        const limit = process.env.PRERENDER_ALL ? 0 : 10;
         let count = 0;
 
         for (const mod of names.keys()) {
@@ -42,6 +42,12 @@ export default {
               if (limit && ++count >= limit) break;
             }
           }
+        }
+
+        if (limit) {
+          console.log(
+            `Prerender limited to ${limit} pages per game, set PRERENDER_ALL=1 to generate all pages`,
+          );
         }
       }
 

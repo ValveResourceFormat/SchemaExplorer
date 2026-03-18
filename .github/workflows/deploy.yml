@@ -37,7 +37,9 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build:prod
+        run: npm run build
+        env:
+          PRERENDER_ALL: 1
 
       - name: Generate sitemap
         run: npm run sitemap
