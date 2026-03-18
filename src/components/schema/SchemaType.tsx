@@ -6,7 +6,7 @@ import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
-import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 
 const AngleBracket = styled.span`
   color: var(--text-dim);
@@ -66,7 +66,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
 
 function DeclarationLink({ name, module }: { name: string; module: string }) {
   const { game } = useContext(DeclarationsContext);
-  const to = declarationPath(game, module, name);
+  const to = schemaPath(game, module, name);
 
   return (
     <TypeLink to={to} title={`in ${module}`}>

@@ -1,8 +1,9 @@
 import React from "react";
 import { styled } from "@linaria/react";
-import { useNavigate, useLocation, useParams, href } from "react-router";
+import { useNavigate, useLocation, useParams } from "react-router";
 import { AppContext } from "../AppContext";
 import { SearchBox } from "../search/SearchBox";
+import { schemaPath } from "../schema/DeclarationsContext";
 import { GAME_LIST, GameId, getGameDef } from "../../games-list";
 import { ICONS_URL } from "../kind-icon/KindIcon";
 
@@ -63,7 +64,7 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
     if (gameId === currentGame) return;
 
     navigate({
-      pathname: href("/:game/:module?/:scope?", { game: gameId, module, scope }),
+      pathname: schemaPath(gameId, module, scope),
       hash: location.hash,
     });
   }

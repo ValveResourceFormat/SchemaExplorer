@@ -1,5 +1,4 @@
 import React, { useContext, useMemo, useState } from "react";
-import { href } from "react-router";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import * as api from "../../data/types";
@@ -7,7 +6,7 @@ import { SchemaTypeView, MetadataTags } from "./SchemaType";
 import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
-import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameDef } from "../../games-list";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset } from "../../utils/format";
@@ -70,7 +69,7 @@ const FieldOffset = styled(Link)`
 export const ModuleBadge: React.FC<{ module: string }> = ({ module }) => {
   const { game } = useContext(DeclarationsContext);
   return (
-    <SectionLink to={href("/:game/:module?/:scope?", { game, module })}>
+    <SectionLink to={schemaPath(game, module)}>
       <svg width="16" height="16" aria-hidden="true">
         <use href={`${ICONS_URL}#ki-module`} />
       </svg>
@@ -140,7 +139,7 @@ export const SchemaClassView: React.FC<{
   }, [declaration.parents, classesByKey, isSearchResult]);
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
-  const declPath = declarationPath(game, declaration.module, declaration.name);
+  const declPath = schemaPath(game, declaration.module, declaration.name);
 
   return (
     <CommonGroupWrapper>
@@ -197,7 +196,7 @@ function InheritedSection({
           {groups.toReversed().map((group) => (
             <SectionLink
               key={`inherited-${group.parent.module}/${group.parent.name}`}
-              to={declarationPath(game, group.parent.module, group.parent.name)}
+              to={schemaPath(game, group.parent.module, group.parent.name)}
               title={`class in ${group.parent.module}`}
             >
               <KindIcon kind="inherited-class" size="small" />

@@ -1,8 +1,7 @@
 import React, { useContext } from "react";
-import { href } from "react-router";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
-import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { getGameDef, SITE_ORIGIN } from "../../games-list";
 
 const BreadcrumbNav = styled.nav`
@@ -51,20 +50,20 @@ export const DeclarationBreadcrumb: React.FC<{
   const gameData = getGameDef(game);
   if (!gameData) return null;
 
-  const nameUrl = declarationPath(game, module, name);
+  const nameUrl = schemaPath(game, module, name);
   let position = 1;
 
   return (
     <BreadcrumbNav aria-label="Breadcrumb">
       <BreadcrumbList itemScope itemType="https://schema.org/BreadcrumbList">
         <BreadcrumbItem itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-          <BreadcrumbLink to={href("/:game/:module?/:scope?", { game })} itemProp="item">
+          <BreadcrumbLink to={schemaPath(game)} itemProp="item">
             <span itemProp="name">{gameData.name}</span>
           </BreadcrumbLink>
           <meta itemProp="position" content={String(position++)} />
         </BreadcrumbItem>
         <BreadcrumbItem itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-          <BreadcrumbLink to={href("/:game/:module?/:scope?", { game, module })} itemProp="item">
+          <BreadcrumbLink to={schemaPath(game, module)} itemProp="item">
             <span itemProp="name">{module}</span>
           </BreadcrumbLink>
           <meta itemProp="position" content={String(position++)} />
@@ -75,7 +74,7 @@ export const DeclarationBreadcrumb: React.FC<{
             itemScope
             itemType="https://schema.org/ListItem"
           >
-            <BreadcrumbLink to={declarationPath(game, parent.module, parent.name)} itemProp="item">
+            <BreadcrumbLink to={schemaPath(game, parent.module, parent.name)} itemProp="item">
               <span itemProp="name">{parent.name}</span>
             </BreadcrumbLink>
             <meta itemProp="position" content={String(position++)} />

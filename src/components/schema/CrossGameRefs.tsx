@@ -7,7 +7,7 @@ import {
   SchemaFieldType,
   SchemaMetadataEntry,
 } from "../../data/types";
-import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { getGameDef, GameId } from "../../games-list";
 import { ICONS_URL } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";
@@ -138,7 +138,7 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
         {matches.map(({ gameId, gameName, status, module: otherModule }) => (
           <GameLink
             key={gameId}
-            to={declarationPath(gameId, otherModule, declaration.name)}
+            to={schemaPath(gameId, otherModule, declaration.name)}
             data-status={status === "identical" ? undefined : status}
             title={
               status === "identical"

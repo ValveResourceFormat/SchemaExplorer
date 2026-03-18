@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { styled } from "@linaria/react";
-import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink, SectionToggle } from "./styles";
 
@@ -32,7 +32,7 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
         {visible.map((ref, i) => (
           <SectionLink
             key={`${ref.declarationModule}/${ref.declarationName}-${ref.fieldName ?? ""}-${i}`}
-            to={declarationPath(game, ref.declarationModule, ref.declarationName)}
+            to={schemaPath(game, ref.declarationModule, ref.declarationName)}
             title={`${ref.relation} in ${ref.declarationModule}`}
           >
             <KindIcon kind={ref.relation} size={18} />

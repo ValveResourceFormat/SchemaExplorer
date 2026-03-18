@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { href, useLocation, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { SearchContext } from "../components/search/SearchContext";
+import { schemaPath } from "../components/schema/DeclarationsContext";
 import * as api from "../data/types";
 
 export function useHydrated(): boolean {
@@ -20,7 +21,7 @@ export function useHashParam(key: string): string | null {
 
 export function searchLink(game: string, query: string) {
   return {
-    pathname: href("/:game/:module?/:scope?", { game }),
+    pathname: schemaPath(game),
     hash: `search=${encodeURIComponent(query)}`,
   };
 }

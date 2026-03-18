@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from "react";
-import { Navigate, useNavigate, useParams, href } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import type { MetaFunction } from "react-router";
 import { Declaration } from "../data/types";
-import { isGameId, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
+import { isGameId, DEFAULT_GAME, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
 import { preloadedData, preloadErrors } from "../data/preload";
 import { getDerivedGameData } from "../data/derived";
 import type { DeclarationsContextType } from "../components/schema/DeclarationsContext";
+import { schemaPath } from "../components/schema/DeclarationsContext";
 import DeclarationsPage from "../components/DeclarationsPage";
 
 const MAX_DESC_LENGTH = 200;
@@ -99,17 +100,25 @@ const EMPTY_DECLARATIONS: Declaration[] = [];
 const EMPTY_METADATA = { revision: 0, versionDate: "", versionTime: "" };
 
 export default function SchemasPage() {
-  const { game, module, scope } = useParams<{ game: string; module: string; scope: string }>();
-  const validGame = game && isGameId(game) ? game : null;
-  const schema = preloadedData.get(validGame ?? "");
+  const {
+    game: gameParam,
+    module,
+    scope,
+  } = useParams<{
+    game: string;
+    module: string;
+    scope: string;
+  }>();
+  const game = gameParam && isGameId(gameParam) ? gameParam : DEFAULT_GAME;
+  const schema = preloadedData.get(game);
   const declarations = schema?.declarations ?? EMPTY_DECLARATIONS;
   const metadata = schema?.metadata ?? EMPTY_METADATA;
-  const error = validGame ? (preloadErrors.get(validGame) ?? null) : null;
+  const error = preloadErrors.get(game) ?? null;
 
   const context: DeclarationsContextType = useMemo(() => {
-    const derived = validGame ? getDerivedGameData(validGame) : undefined;
+    const derived = getDerivedGameData(game);
     return {
-      game: validGame ?? "cs2",
+      game,
       declarations,
       metadata,
       classesByKey: derived?.classesByKey ?? new Map(),
@@ -117,13 +126,18 @@ export default function SchemasPage() {
       otherGamesLookup: derived?.otherGamesLookup ?? new Map(),
       error,
     };
-  }, [validGame, declarations, metadata, error]);
+  }, [game, declarations, metadata, error]);
 
   const navigate = useNavigate();
 
-  // Redirect if module or scope doesn't exist in the loaded data
+  // Redirect unknown game to default, or fix invalid module/scope
   useEffect(() => {
-    if (!validGame || declarations.length === 0) return;
+    if (gameParam && !isGameId(gameParam)) {
+      navigate(schemaPath(DEFAULT_GAME), { replace: true });
+      return;
+    }
+
+    if (declarations.length === 0) return;
 
     const modules = new Set(declarations.map((d) => d.module));
     const validModule = module && modules.has(module);
@@ -131,21 +145,11 @@ export default function SchemasPage() {
       scope && validModule && declarations.some((d) => d.module === module && d.name === scope);
 
     if (scope && !validScope) {
-      navigate(
-        href("/:game/:module?/:scope?", {
-          game: validGame,
-          module: validModule ? module : undefined,
-        }),
-        { replace: true },
-      );
+      navigate(schemaPath(game, validModule ? module : undefined), { replace: true });
     } else if (module && !validModule) {
-      navigate(href("/:game/:module?/:scope?", { game: validGame }), { replace: true });
+      navigate(schemaPath(game), { replace: true });
     }
-  }, [validGame, declarations, module, scope, navigate]);
-
-  if (!validGame) {
-    return <Navigate to="/cs2" replace />;
-  }
+  }, [gameParam, game, declarations, module, scope, navigate]);
 
   return <DeclarationsPage context={context} />;
 }

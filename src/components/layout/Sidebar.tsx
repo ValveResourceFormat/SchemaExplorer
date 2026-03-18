@@ -3,7 +3,7 @@ import { NavLink } from "../Link";
 import { styled } from "@linaria/react";
 import { IconKind, KindIcon } from "../kind-icon/KindIcon";
 import { Declaration } from "../../data/types";
-import { DeclarationsContext, declarationPath } from "../schema/DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const SidebarLink = styled(NavLink)`
@@ -64,7 +64,7 @@ export const DeclarationSidebarElement: React.FC<{
   const { game } = useContext(DeclarationsContext);
   return (
     <SidebarElement
-      to={declarationPath(game, declaration.module, declaration.name)}
+      to={schemaPath(game, declaration.module, declaration.name)}
       icon={declaration.kind}
       text={declaration.name}
       title={`${declaration.kind} in ${declaration.module}`}

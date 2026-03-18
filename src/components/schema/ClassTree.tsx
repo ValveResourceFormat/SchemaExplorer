@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { SchemaClass } from "../../data/types";
-import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 
 interface TreeNode {
   cls: SchemaClass;
@@ -95,7 +95,7 @@ function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
   return (
     <li>
       <ClassLink
-        to={declarationPath(game, node.cls.module, node.cls.name)}
+        to={schemaPath(game, node.cls.module, node.cls.name)}
         title={`class in ${node.cls.module}`}
       >
         {node.cls.name}
