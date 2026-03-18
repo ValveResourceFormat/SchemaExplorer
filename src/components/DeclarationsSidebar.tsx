@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useContext,
   useEffect,
@@ -43,9 +43,9 @@ function groupByModule(declarations: Declaration[]): ModuleGroup[] {
   );
 }
 
-const HEADER_HEIGHT = 28;
-const HEADER_GAP = 8;
-const ITEM_HEIGHT = 28;
+const ROW_HEIGHT = 28;
+const STATIC_BEFORE = 19;
+const STATIC_AFTER = 60;
 
 export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { declarations, game } = useContext(DeclarationsContext);
@@ -53,10 +53,11 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
-  const parentRef = useRef<HTMLUListElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeStickyIndexRef = useRef(0);
   const navigatedFromSidebarRef = useRef(false);
+  const isInitialMount = useRef(true);
 
   const groups = useMemo(() => {
     let filtered = declarations;
@@ -67,27 +68,20 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     return groupByModule(filtered);
   }, [declarations, filter]);
 
-  const rows = useMemo(() => {
-    const result: SidebarRow[] = [];
+  const { rows, stickyIndexes } = useMemo(() => {
+    const rows: SidebarRow[] = [];
+    const stickyIndexes: number[] = [];
     for (const g of groups) {
-      result.push({ type: "header", module: g.module, count: g.items.length });
+      stickyIndexes.push(rows.length);
+      rows.push({ type: "header", module: g.module, count: g.items.length });
       if (!collapsed.has(g.module)) {
         for (const d of g.items) {
-          result.push({ type: "item", declaration: d });
+          rows.push({ type: "item", declaration: d });
         }
       }
     }
-    return result;
+    return { rows, stickyIndexes };
   }, [groups, collapsed]);
-
-  const stickyIndexes = useMemo(
-    () =>
-      rows.reduce<number[]>((acc, row, i) => {
-        if (row.type === "header") acc.push(i);
-        return acc;
-      }, []),
-    [rows],
-  );
 
   const rangeExtractor = useCallback(
     (range: Range) => {
@@ -100,9 +94,11 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
       }
       activeStickyIndexRef.current = active;
 
-      const next = new Set([active, ...defaultRangeExtractor(range)]);
-
-      return [...next].sort((a, b) => a - b);
+      const result = defaultRangeExtractor(range);
+      if (result[0] > active) {
+        result.unshift(active);
+      }
+      return result;
     },
     [stickyIndexes],
   );
@@ -115,47 +111,40 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     );
   }, [rows, scope, activeModule]);
 
+  const [initialOffset] = useState(() => {
+    const target = activeIndex >= 0 ? activeIndex : 0;
+    return Math.max(0, target - STATIC_BEFORE) * ROW_HEIGHT;
+  });
+
+  const setParentRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      parentRef.current = el;
+      if (el && initialOffset > 0) {
+        el.scrollTop = initialOffset;
+      }
+    },
+    [initialOffset],
+  );
+
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => {
-      if (rows[index].type === "header") {
-        return HEADER_HEIGHT + (index > 0 ? HEADER_GAP : 0);
-      }
-      return ITEM_HEIGHT;
-    },
+    estimateSize: () => ROW_HEIGHT,
     overscan: 20,
     rangeExtractor,
+    initialOffset,
   });
 
-  const didHydrationScroll = useRef(false);
   useLayoutEffect(() => {
     setHydrated(true);
   }, []);
 
-  const STATIC_COUNT = 50;
   const staticRows = useMemo(() => {
     if (hydrated) return [];
-    const center = activeIndex >= 0 ? activeIndex : 0;
-    const half = Math.floor(STATIC_COUNT / 2);
-    let start = Math.max(0, center - half);
-    const end = Math.min(rows.length, start + STATIC_COUNT);
-    start = Math.max(0, end - STATIC_COUNT);
-
-    const slice = rows.slice(start, end);
-
-    // If the first row is an item, prepend its group header
-    if (slice.length > 0 && slice[0].type === "item") {
-      for (let i = start - 1; i >= 0; i--) {
-        if (rows[i].type === "header") {
-          slice.unshift(rows[i]);
-          break;
-        }
-      }
-    }
-
-    return slice;
-  }, [hydrated, rows, activeIndex]);
+    const start = initialOffset / ROW_HEIGHT;
+    const end = Math.min(rows.length, start + STATIC_BEFORE + STATIC_AFTER + 1);
+    return rows.slice(start, end);
+  }, [hydrated, rows, initialOffset]);
 
   const toggleModule = useCallback((module: string) => {
     setCollapsed((prev) => {
@@ -182,22 +171,17 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     });
   }, [activeModule, scope]);
 
-  // Scroll to active item on hydration (before paint)
-  useLayoutEffect(() => {
-    if (!didHydrationScroll.current && hydrated && activeIndex >= 0) {
-      didHydrationScroll.current = true;
-      virtualizer.scrollToIndex(activeIndex, { align: "center" });
-    }
-  }, [hydrated, activeIndex, virtualizer]);
-
   // Scroll to active item on navigation (skip if the click came from the sidebar)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (!scope || !activeModule) return;
     if (navigatedFromSidebarRef.current) {
       navigatedFromSidebarRef.current = false;
       return;
     }
-    if (!didHydrationScroll.current) return; // handled by layoutEffect above
     if (activeIndex >= 0) {
       virtualizer.scrollToIndex(activeIndex, { align: "center" });
     }
@@ -234,8 +218,8 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
         />
       </SidebarHeader>
       {hydrated ? (
-        <SidebarList ref={parentRef}>
-          <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        <SidebarList ref={setParentRef}>
+          <SidebarUl style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const row = rows[virtualRow.index];
               const isHeader = row.type === "header";
@@ -251,23 +235,16 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: virtualRow.size,
+                    height: ROW_HEIGHT,
                   }}
                 >
                   {isHeader ? (
-                    <div
-                      style={{
-                        paddingTop: virtualRow.index > 0 && !isActiveSticky ? HEADER_GAP : 0,
-                        background: "inherit",
-                      }}
+                    <SidebarGroupHeader
+                      data-collapsed={collapsed.has(row.module) || undefined}
+                      onClick={() => toggleModule(row.module)}
                     >
-                      <SidebarGroupHeader
-                        data-collapsed={collapsed.has(row.module) || undefined}
-                        onClick={() => toggleModule(row.module)}
-                      >
-                        {row.module} ({row.count})
-                      </SidebarGroupHeader>
-                    </div>
+                      {row.module} ({row.count})
+                    </SidebarGroupHeader>
                   ) : (
                     <DeclarationSidebarElement
                       declaration={row.declaration}
@@ -277,32 +254,25 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
                 </li>
               );
             })}
-          </div>
+          </SidebarUl>
         </SidebarList>
       ) : (
         <SidebarList>
-          {staticRows.map((row, i) => {
-            if (row.type === "header") {
-              return (
-                <li
-                  key={`h-${row.module}`}
-                  style={{
-                    height: HEADER_HEIGHT + (i > 0 ? HEADER_GAP : 0),
-                    paddingTop: i > 0 ? HEADER_GAP : 0,
-                  }}
-                >
+          <SidebarUl>
+            {staticRows.map((row) =>
+              row.type === "header" ? (
+                <li key={`h-${row.module}`} style={{ height: ROW_HEIGHT }}>
                   <SidebarGroupHeader>
                     {row.module} ({row.count})
                   </SidebarGroupHeader>
                 </li>
-              );
-            }
-            return (
-              <li key={`${row.declaration.module}-${row.declaration.name}`}>
-                <DeclarationSidebarElement declaration={row.declaration} />
-              </li>
-            );
-          })}
+              ) : (
+                <li key={`${row.declaration.module}-${row.declaration.name}`}>
+                  <DeclarationSidebarElement declaration={row.declaration} />
+                </li>
+              ),
+            )}
+          </SidebarUl>
         </SidebarList>
       )}
     </SidebarWrapper>
@@ -338,9 +308,12 @@ const SidebarSearchInput = styled(SearchInput)`
   background: var(--background);
 `;
 
-const SidebarList = styled.ul`
+const SidebarList = styled.div`
   flex: 1;
   overflow: auto;
+`;
+
+const SidebarUl = styled.ul`
   margin: 0;
   padding: 0;
   list-style: none;
