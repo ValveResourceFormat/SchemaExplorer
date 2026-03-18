@@ -6,6 +6,7 @@
     "tsc": "tsc",
     "dev": "react-router dev",
     "build": "react-router build && node scripts/flatten-prerender.ts",
+    "lastmod": "node scripts/generate-lastmod.ts",
     "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",
     "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin *.ts src scripts",

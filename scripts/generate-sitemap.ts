@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { gunzipSync } from "node:zlib";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
+import { readGzippedJson } from "./lib/read-gzipped-json.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");
@@ -18,17 +18,12 @@ function escapeXml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function toIsoDate(date: string, time?: string): string {
-  const d = new Date(`${date} ${time ?? "00:00:00"} UTC`);
-  return d.toISOString().replace(/\.\d{3}Z$/, "Z");
-}
-
 interface SitemapUrl {
   loc: string;
   lastmod?: string;
 }
 
-function writeUrlset(path: string, urls: SitemapUrl[]): void {
+function buildUrlset(urls: SitemapUrl[]): string {
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
   for (const { loc, lastmod } of urls) {
@@ -37,25 +32,18 @@ function writeUrlset(path: string, urls: SitemapUrl[]): void {
     xml += `</url>\n`;
   }
   xml += `</urlset>\n`;
-  writeFileSync(path, xml);
+  return xml;
 }
 
-mkdirSync(distDir, { recursive: true });
+await mkdir(distDir, { recursive: true });
 
 // Main sitemap: root + game pages + module pages
 const mainUrls: SitemapUrl[] = [{ loc: `${SITE_ORIGIN}${basePath}/` }];
 const indexEntries: { file: string; lastmod?: string }[] = [];
 
 for (const game of GAME_LIST) {
-  const buf = readFileSync(resolve(schemasDir, `${game.id}.json.gz`));
-  const data: SchemasJson = JSON.parse(gunzipSync(buf).toString("utf-8"));
-  const { declarations, metadata } = parseSchemas(data);
-
-  const isoDate = metadata.versionDate
-    ? toIsoDate(metadata.versionDate, metadata.versionTime)
-    : undefined;
-
-  mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}`, lastmod: isoDate });
+  const data = await readGzippedJson<SchemasJson>(resolve(schemasDir, `${game.id}.json.gz`));
+  const { declarations } = parseSchemas(data);
 
   const byModule = new Map<string, string[]>();
   for (const d of declarations) {
@@ -63,29 +51,52 @@ for (const game of GAME_LIST) {
     byModule.get(d.module)!.push(d.name);
   }
 
-  for (const mod of byModule.keys()) {
-    mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}`, lastmod: isoDate });
+  // Load per-class lastmod data if available
+  let lastmod: Record<string, string> = {};
+  try {
+    lastmod = JSON.parse(await readFile(resolve(schemasDir, `${game.id}-lastmod.json`), "utf-8"));
+  } catch {
+    // lastmod data is optional
   }
 
-  // Per-game sitemap: all declarations
+  // Per-game sitemap: all declarations, tracking max date per module
   const gameUrls: SitemapUrl[] = [];
+  let gameMaxDate: string | undefined;
+
   for (const [mod, names] of byModule) {
+    let moduleMaxDate: string | undefined;
     for (const name of names) {
+      const fileName = name.replace(/:/g, "_");
+      const date = lastmod[`${mod}/${fileName}`];
+      if (date && (!moduleMaxDate || date > moduleMaxDate)) moduleMaxDate = date;
       gameUrls.push({
         loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}/${name}`,
+        lastmod: date,
       });
     }
+    mainUrls.push({
+      loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}`,
+      lastmod: moduleMaxDate,
+    });
+    if (moduleMaxDate && (!gameMaxDate || moduleMaxDate > gameMaxDate)) gameMaxDate = moduleMaxDate;
   }
 
+  mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}`, lastmod: gameMaxDate });
+
   const gameFile = `sitemap-${game.id}.xml`;
-  writeUrlset(resolve(distDir, gameFile), gameUrls);
-  indexEntries.push({ file: gameFile, lastmod: isoDate });
+  await writeFile(resolve(distDir, gameFile), buildUrlset(gameUrls));
+  indexEntries.push({ file: gameFile, lastmod: gameMaxDate });
   console.log(`  ${gameFile}: ${gameUrls.length} URLs`);
 }
 
+const mainLastmod = indexEntries.reduce<string | undefined>(
+  (max, e) => (e.lastmod && (!max || e.lastmod > max) ? e.lastmod : max),
+  undefined,
+);
+
 const mainFile = "sitemap-main.xml";
-writeUrlset(resolve(distDir, mainFile), mainUrls);
-indexEntries.unshift({ file: mainFile });
+await writeFile(resolve(distDir, mainFile), buildUrlset(mainUrls));
+indexEntries.unshift({ file: mainFile, lastmod: mainLastmod });
 console.log(`  ${mainFile}: ${mainUrls.length} URLs`);
 
 // Sitemap index
@@ -97,6 +108,6 @@ for (const { file, lastmod } of indexEntries) {
   indexXml += `</sitemap>\n`;
 }
 indexXml += `</sitemapindex>\n`;
-writeFileSync(resolve(distDir, "sitemap.xml"), indexXml);
+await writeFile(resolve(distDir, "sitemap.xml"), indexXml);
 
 console.log(`Generated sitemap.xml index with ${indexEntries.length} sitemaps`);

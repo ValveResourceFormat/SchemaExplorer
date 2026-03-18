@@ -41,6 +41,9 @@ jobs:
         env:
           PRERENDER_ALL: 1
 
+      - name: Generate last-modified dates
+        run: npm run lastmod
+
       - name: Generate sitemap
         run: npm run sitemap
 

@@ -1,6 +1,7 @@
 import type { Config } from "@react-router/dev/config";
 import { GAME_LIST } from "./src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "./src/data/schemas.ts";
+import { readGzippedJson } from "./scripts/lib/read-gzipped-json.ts";
 
 export default {
   ssr: false,
@@ -9,17 +10,12 @@ export default {
   prerender: {
     unstable_concurrency: 8,
     async paths({ getStaticPaths }) {
-      const { readFileSync } = await import("node:fs");
-      const { resolve } = await import("node:path");
-      const { gunzipSync } = await import("node:zlib");
-
       const paths = [...getStaticPaths()];
 
       for (const game of GAME_LIST) {
         paths.push(`/${game.id}`);
 
-        const buf = readFileSync(resolve("schemas", `${game.id}.json.gz`));
-        const data: SchemasJson = JSON.parse(gunzipSync(buf).toString("utf-8"));
+        const data = await readGzippedJson<SchemasJson>(`schemas/${game.id}.json.gz`);
         const { declarations } = parseSchemas(data);
 
         const names = new Map<string, Set<string>>();
