@@ -1,7 +1,29 @@
-import { useContext, useMemo } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { href, useLocation, useParams } from "react-router";
 import { SearchContext } from "../components/search/SearchContext";
 import * as api from "../data/types";
+
+export function useHydrated(): boolean {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  return hydrated;
+}
+
+export function useHashParam(key: string): string | null {
+  const { hash } = useLocation();
+  const hydrated = useHydrated();
+  return useMemo(
+    () => (hydrated ? new URLSearchParams(hash.slice(1)).get(key) : null),
+    [hash, hydrated, key],
+  );
+}
+
+export function searchLink(game: string, query: string) {
+  return {
+    pathname: href("/:game/:module?/:scope?", { game }),
+    hash: `search=${encodeURIComponent(query)}`,
+  };
+}
 
 export interface ParsedSearch {
   nameWords: string[];
@@ -101,8 +123,7 @@ export function useFilteredData(declarations: api.Declaration[]) {
 }
 
 export function useFieldParam(): string | null {
-  const location = useLocation();
-  return useMemo(() => new URLSearchParams(location.search).get("field"), [location.search]);
+  return useHashParam("field");
 }
 
 export function matchesWords(name: string, words: string[]): boolean {

@@ -15,7 +15,7 @@ const RefField = styled.span`
 `;
 
 export function ReferencedBy({ name, module }: { name: string; module: string }) {
-  const { root, references } = useContext(DeclarationsContext);
+  const { game, references } = useContext(DeclarationsContext);
   const [expanded, setExpanded] = useState(false);
   useEffect(() => setExpanded(false), [name, module]);
 
@@ -32,7 +32,8 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
         {visible.map((ref, i) => (
           <SectionLink
             key={`${ref.declarationModule}/${ref.declarationName}-${ref.fieldName ?? ""}-${i}`}
-            to={declarationPath(root, ref.declarationModule, ref.declarationName)}
+            to={declarationPath(game, ref.declarationModule, ref.declarationName)}
+            title={`${ref.relation} in ${ref.declarationModule}`}
           >
             <KindIcon kind={ref.relation} size={18} />
             <span>

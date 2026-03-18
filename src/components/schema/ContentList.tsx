@@ -1,5 +1,6 @@
-import React, { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useMemo } from "react";
+import { href, useParams } from "react-router";
+import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
@@ -13,9 +14,10 @@ import {
   DeclarationsContextType,
   declarationKey,
 } from "./DeclarationsContext";
-import { GAMES, GameId } from "../../games";
+import { GAME_LIST, GameId, getGameDef, compareModuleNames } from "../../games-list";
 import { SEARCH_TAGS } from "../search/SearchBox";
-import { KindIcon } from "../kind-icon/KindIcon";
+import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
+import { SectionLink } from "./styles";
 
 const CardBlock = styled.div`
   max-width: 560px;
@@ -41,17 +43,16 @@ const InfoBlock = styled(CardBlock)`
   }
 `;
 
-const GameChip = styled.button`
+const GameChip = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
   border-radius: 6px;
-  font: inherit;
   background: var(--group-members);
   border: 1px solid var(--group-border);
   color: var(--text);
-  cursor: pointer;
+  text-decoration: none;
   vertical-align: middle;
   transition: border-color 0.1s;
 
@@ -67,14 +68,16 @@ const GameChip = styled.button`
 `;
 
 function GameList() {
-  const navigate = useNavigate();
   return (
     <>
-      {GAMES.map((g, i) => (
+      {GAME_LIST.map((g, i) => (
         <React.Fragment key={g.id}>
           {i > 0 && " "}
-          <GameChip onClick={() => navigate(`/${g.id}`)}>
-            {g.icon} {g.name}
+          <GameChip to={href("/:game/:module?/:scope?", { game: g.id })}>
+            <svg width="24" height="24">
+              <use href={`${ICONS_URL}#game-${g.id}`} />
+            </svg>{" "}
+            {g.name}
           </GameChip>
         </React.Fragment>
       ))}
@@ -84,10 +87,9 @@ function GameList() {
 
 const InfoLink = styled.a`
   color: var(--highlight);
-  text-decoration: none;
 
   &:hover {
-    text-decoration: underline;
+    color: var(--text);
   }
 `;
 
@@ -113,27 +115,13 @@ const SearchFiltersBlock = styled(CardBlock)`
   }
 `;
 
-const TreeToggle = styled.button`
-  display: block;
-  max-width: 560px;
-  margin: 16px auto 0;
-  padding: 10px 20px;
-  background: var(--group);
-  border: 1px solid var(--group-border);
-  border-radius: 10px;
-  font: inherit;
-  font-size: 15px;
-  color: var(--text);
-  cursor: pointer;
-  text-align: center;
-  width: 100%;
-
-  &:hover {
-    border-color: var(--highlight);
-  }
+const ModuleChipsBlock = styled(CardBlock)`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 `;
 
-const OffsetsNote = styled.div`
+const OffsetsNote = styled.footer`
   font-size: 14px;
   color: var(--text-dim);
   text-align: center;
@@ -177,17 +165,19 @@ function OtherGamesResults() {
   return (
     <>
       {gameResults.map(({ gameId, declarations }) => {
-        const gameInfo = GAMES.find((g) => g.id === gameId);
+        const gameInfo = getGameDef(gameId);
         const overrideCtx: DeclarationsContextType = {
           ...ctx,
           game: gameId,
-          root: `/${gameId}`,
           declarations,
         };
         return (
           <React.Fragment key={gameId}>
             <OtherGameHeader>
-              {gameInfo?.icon} {gameInfo?.name}
+              <svg width="24" height="24">
+                <use href={`${ICONS_URL}#game-${gameId}`} />
+              </svg>{" "}
+              {gameInfo?.name}
             </OtherGameHeader>
             <DeclarationsContext.Provider value={overrideCtx}>
               <LazyList data={declarations} render={renderSearchResult} />
@@ -196,6 +186,28 @@ function OtherGamesResults() {
         );
       })}
     </>
+  );
+}
+
+function ModuleList() {
+  const { game, declarations } = useContext(DeclarationsContext);
+
+  const modules = useMemo(() => {
+    const moduleMap = new Map<string, number>();
+    for (const d of declarations) {
+      moduleMap.set(d.module, (moduleMap.get(d.module) ?? 0) + 1);
+    }
+    return Array.from(moduleMap.entries()).sort(([a], [b]) => compareModuleNames(a, b));
+  }, [declarations]);
+
+  return (
+    <ModuleChipsBlock>
+      {modules.map(([mod, count]) => (
+        <SectionLink key={mod} to={href("/:game/:module?/:scope?", { game, module: mod })}>
+          {mod} ({count})
+        </SectionLink>
+      ))}
+    </ModuleChipsBlock>
   );
 }
 
@@ -216,9 +228,7 @@ const renderSearchResult = (declaration: Declaration) => renderItem(declaration,
 export function ContentList() {
   const { declarations, metadata, loading, error } = useContext(DeclarationsContext);
   const { data, isSearching } = useFilteredData(declarations);
-  const [showTree, setShowTree] = useState(
-    () => /bot|crawl|spider|slurp/i.test(navigator.userAgent) || navigator.webdriver,
-  );
+  const { module } = useParams();
 
   return (
     <ContentWrapper>
@@ -280,11 +290,7 @@ export function ContentList() {
             </dl>
             Filters can be combined.
           </SearchFiltersBlock>
-          {showTree ? (
-            <ClassTree />
-          ) : (
-            <TreeToggle onClick={() => setShowTree(true)}>View class inheritance tree</TreeToggle>
-          )}
+          {module ? <ClassTree module={module} /> : <ModuleList />}
         </>
       )}
       {data.length > 0 && metadata.revision > 0 && (

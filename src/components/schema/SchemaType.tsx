@@ -1,10 +1,11 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { NavLink, type NavigateFunction } from "react-router-dom";
+import { Link, NavLink } from "../Link";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "../../data/types";
 import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { metadataIconMap } from "../kind-icon/metadataIconMap";
+import { searchLink } from "../../utils/filtering";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
 
 const AngleBracket = styled.span`
@@ -64,11 +65,11 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
 }
 
 function DeclarationLink({ name, module }: { name: string; module: string }) {
-  const { root } = useContext(DeclarationsContext);
-  const to = declarationPath(root, module, name);
+  const { game } = useContext(DeclarationsContext);
+  const to = declarationPath(game, module, name);
 
   return (
-    <TypeLink to={to}>
+    <TypeLink to={to} title={`in ${module}`}>
       <ColoredSyntax kind="interface">{name}</ColoredSyntax>
     </TypeLink>
   );
@@ -85,21 +86,14 @@ const MetadataList = styled.div`
   gap: 2px;
 `;
 
-const MetadataGroupName = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--text);
-  opacity: 0.6;
-  cursor: pointer;
-  text-align: left;
+const MetadataGroupName = styled(Link)`
+  color: var(--text-dim);
+  text-decoration: none;
   display: flex;
   align-items: center;
 
   &:hover {
     color: var(--highlight);
-    opacity: 1;
   }
 `;
 
@@ -119,18 +113,12 @@ const MetadataIcon = styled.span`
   flex-shrink: 0;
 `;
 
-const MetadataName = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--text);
-  opacity: 0.6;
-  cursor: pointer;
+const MetadataName = styled(Link)`
+  color: var(--text-dim);
+  text-decoration: none;
 
   &:hover {
     color: var(--highlight);
-    opacity: 1;
   }
 `;
 
@@ -144,16 +132,15 @@ const MetadataToggle = styled.button`
   border: none;
   padding: 0;
   font: inherit;
-  color: inherit;
+  color: var(--text-dim);
   cursor: pointer;
   user-select: none;
-  opacity: 0.5;
   font-size: 14px;
   margin-left: 20px;
   text-align: left;
 
   &:hover {
-    opacity: 0.8;
+    color: var(--text);
   }
 
   &::before {
@@ -235,12 +222,10 @@ function truncateGroups(
 
 export function MetadataTags({
   metadata,
-  root,
-  navigate,
+  game,
 }: {
   metadata: SchemaMetadataEntry[];
-  root: string;
-  navigate: NavigateFunction;
+  game: string;
 }) {
   const grouped = useMemo(() => {
     const groups: { name: string; values: (string | undefined)[] }[] = [];
@@ -281,6 +266,7 @@ export function MetadataTags({
       <MetadataList>
         {visible.map((group) => {
           const iconKind = metadataIconMap[group.name] ?? "meta-default";
+          const metaTo = searchLink(game, `metadata:${group.name}`);
           if (group.values.length === 1) {
             return (
               <MetadataEntry key={group.name}>
@@ -288,13 +274,7 @@ export function MetadataTags({
                   <KindIcon kind={iconKind} size="small" />
                 </MetadataIcon>
                 <span>
-                  <MetadataName
-                    onClick={() =>
-                      navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
-                    }
-                  >
-                    {group.name}
-                  </MetadataName>
+                  <MetadataName to={metaTo}>{group.name}</MetadataName>
                   {group.values[0] !== undefined && (
                     <MetadataValue>: {group.values[0]}</MetadataValue>
                   )}
@@ -305,11 +285,7 @@ export function MetadataTags({
 
           return (
             <div key={group.name}>
-              <MetadataGroupName
-                onClick={() =>
-                  navigate(`${root}?search=${encodeURIComponent(`metadata:${group.name}`)}`)
-                }
-              >
+              <MetadataGroupName to={metaTo}>
                 <MetadataIcon>
                   <KindIcon kind={iconKind} size="small" />
                 </MetadataIcon>

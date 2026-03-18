@@ -1,10 +1,19 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useParams } from "react-router";
 import { styled } from "@linaria/react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
 import { DeclarationsContext } from "./schema/DeclarationsContext";
 import { Declaration } from "../data/types";
+import { compareModuleNames } from "../games-list";
 import { DeclarationSidebarElement, SidebarGroupHeader, SidebarWrapper } from "./layout/Sidebar";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
 import { SearchInput } from "./search/SearchBox";
@@ -29,13 +38,9 @@ function groupByModule(declarations: Declaration[]): ModuleGroup[] {
     }
     items.push(d);
   }
-  const priority = ["client", "server"];
-  return Array.from(map, ([module, items]) => ({ module, items })).sort((a, b) => {
-    const ai = priority.indexOf(a.module);
-    const bi = priority.indexOf(b.module);
-    if (ai !== bi) return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-    return a.module.localeCompare(b.module);
-  });
+  return Array.from(map, ([module, items]) => ({ module, items })).sort((a, b) =>
+    compareModuleNames(a.module, b.module),
+  );
 }
 
 const HEADER_HEIGHT = 28;
@@ -47,6 +52,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
   const { filter, setFilter } = useContext(SidebarFilterContext);
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const [hydrated, setHydrated] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const activeStickyIndexRef = useRef(0);
@@ -101,6 +107,14 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     [stickyIndexes],
   );
 
+  const activeIndex = useMemo(() => {
+    if (!scope || !activeModule) return -1;
+    return rows.findIndex(
+      (r) =>
+        r.type === "item" && r.declaration.name === scope && r.declaration.module === activeModule,
+    );
+  }, [rows, scope, activeModule]);
+
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -113,6 +127,35 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     overscan: 20,
     rangeExtractor,
   });
+
+  const didHydrationScroll = useRef(false);
+  useLayoutEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  const STATIC_COUNT = 50;
+  const staticRows = useMemo(() => {
+    if (hydrated) return [];
+    const center = activeIndex >= 0 ? activeIndex : 0;
+    const half = Math.floor(STATIC_COUNT / 2);
+    let start = Math.max(0, center - half);
+    const end = Math.min(rows.length, start + STATIC_COUNT);
+    start = Math.max(0, end - STATIC_COUNT);
+
+    const slice = rows.slice(start, end);
+
+    // If the first row is an item, prepend its group header
+    if (slice.length > 0 && slice[0].type === "item") {
+      for (let i = start - 1; i >= 0; i--) {
+        if (rows[i].type === "header") {
+          slice.unshift(rows[i]);
+          break;
+        }
+      }
+    }
+
+    return slice;
+  }, [hydrated, rows, activeIndex]);
 
   const toggleModule = useCallback((module: string) => {
     setCollapsed((prev) => {
@@ -139,6 +182,14 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     });
   }, [activeModule, scope]);
 
+  // Scroll to active item on hydration (before paint)
+  useLayoutEffect(() => {
+    if (!didHydrationScroll.current && hydrated && activeIndex >= 0) {
+      didHydrationScroll.current = true;
+      virtualizer.scrollToIndex(activeIndex, { align: "center" });
+    }
+  }, [hydrated, activeIndex, virtualizer]);
+
   // Scroll to active item on navigation (skip if the click came from the sidebar)
   useEffect(() => {
     if (!scope || !activeModule) return;
@@ -146,18 +197,15 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
       navigatedFromSidebarRef.current = false;
       return;
     }
-    const idx = rows.findIndex(
-      (r) =>
-        r.type === "item" && r.declaration.name === scope && r.declaration.module === activeModule,
-    );
-    if (idx >= 0) {
-      virtualizer.scrollToIndex(idx, { align: "center" });
+    if (!didHydrationScroll.current) return; // handled by layoutEffect above
+    if (activeIndex >= 0) {
+      virtualizer.scrollToIndex(activeIndex, { align: "center" });
     }
     // Reset wrapper scroll in case the browser scrolled it
     if (wrapperRef.current) {
       wrapperRef.current.scrollTop = 0;
     }
-  }, [activeModule, scope, rows, virtualizer]);
+  }, [activeModule, scope, activeIndex, virtualizer]);
 
   const handleSidebarNavigate = useCallback(() => {
     navigatedFromSidebarRef.current = true;
@@ -178,60 +226,88 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
         </SidebarBrandRow>
         <SidebarSearchInput
           type="search"
-          placeholder="Filter sidebar..."
+          placeholder="Filter…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          aria-label="Filter sidebar"
+          aria-label="Filter classes and enums"
           spellCheck={false}
           autoCorrect="off"
           autoCapitalize="off"
         />
       </SidebarHeader>
-      <div ref={parentRef} style={{ flex: 1, overflow: "auto" }}>
-        <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const row = rows[virtualRow.index];
-            const isHeader = row.type === "header";
-            const isActiveSticky = activeStickyIndexRef.current === virtualRow.index;
+      {hydrated ? (
+        <div ref={parentRef} style={{ flex: 1, overflow: "auto" }}>
+          <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              const isHeader = row.type === "header";
+              const isActiveSticky = activeStickyIndexRef.current === virtualRow.index;
 
-            return (
-              <div
-                key={virtualRow.key}
-                style={{
-                  ...(isActiveSticky
-                    ? { position: "sticky", zIndex: 1 }
-                    : { position: "absolute", transform: `translateY(${virtualRow.start}px)` }),
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: virtualRow.size,
-                }}
-              >
-                {isHeader ? (
-                  <div
-                    style={{
-                      paddingTop: virtualRow.index > 0 && !isActiveSticky ? HEADER_GAP : 0,
-                      background: "inherit",
-                    }}
-                  >
-                    <SidebarGroupHeader
-                      data-collapsed={collapsed.has(row.module) || undefined}
-                      onClick={() => toggleModule(row.module)}
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    ...(isActiveSticky
+                      ? { position: "sticky", zIndex: 1 }
+                      : { position: "absolute", transform: `translateY(${virtualRow.start}px)` }),
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: virtualRow.size,
+                  }}
+                >
+                  {isHeader ? (
+                    <div
+                      style={{
+                        paddingTop: virtualRow.index > 0 && !isActiveSticky ? HEADER_GAP : 0,
+                        background: "inherit",
+                      }}
                     >
-                      {row.module} ({row.count})
-                    </SidebarGroupHeader>
-                  </div>
-                ) : (
-                  <DeclarationSidebarElement
-                    declaration={row.declaration}
-                    onClick={handleSidebarNavigate}
-                  />
-                )}
-              </div>
+                      <SidebarGroupHeader
+                        data-collapsed={collapsed.has(row.module) || undefined}
+                        onClick={() => toggleModule(row.module)}
+                      >
+                        {row.module} ({row.count})
+                      </SidebarGroupHeader>
+                    </div>
+                  ) : (
+                    <DeclarationSidebarElement
+                      declaration={row.declaration}
+                      onClick={handleSidebarNavigate}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1, overflow: "auto" }}>
+          {staticRows.map((row, i) => {
+            if (row.type === "header") {
+              return (
+                <div
+                  key={`h-${row.module}`}
+                  style={{
+                    height: HEADER_HEIGHT + (i > 0 ? HEADER_GAP : 0),
+                    paddingTop: i > 0 ? HEADER_GAP : 0,
+                  }}
+                >
+                  <SidebarGroupHeader>
+                    {row.module} ({row.count})
+                  </SidebarGroupHeader>
+                </div>
+              );
+            }
+            return (
+              <DeclarationSidebarElement
+                key={`${row.declaration.module}-${row.declaration.name}`}
+                declaration={row.declaration}
+              />
             );
           })}
         </div>
-      </div>
+      )}
     </SidebarWrapper>
   );
 };

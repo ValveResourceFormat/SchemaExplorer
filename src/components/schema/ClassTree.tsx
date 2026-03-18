@@ -1,5 +1,5 @@
-import { useContext, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useMemo } from "react";
+import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { SchemaClass } from "../../data/types";
 import { DeclarationsContext, declarationKey, declarationPath } from "./DeclarationsContext";
@@ -60,34 +60,6 @@ function buildTree(classesByKey: Map<string, SchemaClass>): ModuleGroup[] {
   return groups;
 }
 
-function filterTree(nodes: TreeNode[], lower: string): TreeNode[] {
-  const result: TreeNode[] = [];
-  for (const node of nodes) {
-    const nameMatches = node.cls.name.toLowerCase().includes(lower);
-    if (nameMatches) {
-      result.push(node);
-    } else {
-      const filteredChildren = filterTree(node.children, lower);
-      if (filteredChildren.length > 0) {
-        result.push({ cls: node.cls, children: filteredChildren });
-      }
-    }
-  }
-  return result;
-}
-
-function filterGroups(groups: ModuleGroup[], query: string): ModuleGroup[] {
-  const lower = query.toLowerCase();
-  const result: ModuleGroup[] = [];
-  for (const group of groups) {
-    const filteredRoots = filterTree(group.roots, lower);
-    if (filteredRoots.length > 0) {
-      result.push({ module: group.module, roots: filteredRoots });
-    }
-  }
-  return result;
-}
-
 const ClassLink = styled(Link)`
   text-decoration: none;
   color: var(--text);
@@ -110,35 +82,22 @@ const RootList = styled.ul`
   list-style: none;
 `;
 
-const TreeHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 4px;
-  font-size: 14px;
-  color: var(--text-dim);
-`;
-
-const TreeFilterInput = styled.input`
-  background: var(--group-members);
+const TreeContainer = styled.div`
+  max-width: 560px;
+  margin: 16px auto 0;
+  padding: 16px 20px;
+  background: var(--group);
   border: 1px solid var(--group-border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font: inherit;
-  font-size: 13px;
-  color: var(--text);
-  width: 200px;
-
-  &:focus {
-    outline: none;
-    border-color: var(--highlight);
-  }
+  border-radius: 10px;
 `;
 
-function TreeNodeView({ node, root }: { node: TreeNode; root: string }) {
+function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
   return (
     <li>
-      <ClassLink to={declarationPath(root, node.cls.module, node.cls.name)}>
+      <ClassLink
+        to={declarationPath(game, node.cls.module, node.cls.name)}
+        title={`class in ${node.cls.module}`}
+      >
         {node.cls.name}
       </ClassLink>
       {node.children.length > 0 && (
@@ -147,7 +106,7 @@ function TreeNodeView({ node, root }: { node: TreeNode; root: string }) {
             <TreeNodeView
               key={declarationKey(child.cls.module, child.cls.name)}
               node={child}
-              root={root}
+              game={game}
             />
           ))}
         </TreeList>
@@ -156,34 +115,24 @@ function TreeNodeView({ node, root }: { node: TreeNode; root: string }) {
   );
 }
 
-export function ClassTree() {
-  const { classesByKey, root } = useContext(DeclarationsContext);
-  const [filter, setFilter] = useState("");
+export function ClassTree({ module }: { module?: string }) {
+  const { classesByKey, game } = useContext(DeclarationsContext);
 
-  const groups = useMemo(() => buildTree(classesByKey), [classesByKey]);
+  const filteredClassesByKey = useMemo(() => {
+    if (!module) return classesByKey;
+    const filtered = new Map<string, SchemaClass>();
+    for (const [key, cls] of classesByKey) {
+      if (cls.module === module) filtered.set(key, cls);
+    }
+    return filtered;
+  }, [classesByKey, module]);
 
-  const displayGroups = useMemo(() => {
-    if (!filter) return groups;
-    return filterGroups(groups, filter);
-  }, [groups, filter]);
-
-  const totalClasses = classesByKey.size;
+  const groups = useMemo(() => buildTree(filteredClassesByKey), [filteredClassesByKey]);
 
   return (
-    <>
-      <TreeHeader>
-        <TreeFilterInput
-          type="search"
-          placeholder={`Filter ${totalClasses} classes...`}
-          value={filter}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value)}
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
-      </TreeHeader>
+    <TreeContainer>
       <RootList>
-        {displayGroups.map((group) => (
+        {groups.map((group) => (
           <li key={group.module}>
             <strong>{group.module}</strong>
             <TreeList>
@@ -191,13 +140,13 @@ export function ClassTree() {
                 <TreeNodeView
                   key={declarationKey(node.cls.module, node.cls.name)}
                   node={node}
-                  root={root}
+                  game={game}
                 />
               ))}
             </TreeList>
           </li>
         ))}
       </RootList>
-    </>
+    </TreeContainer>
   );
 }

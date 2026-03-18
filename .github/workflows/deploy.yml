@@ -37,7 +37,7 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build
+        run: npm run build:prod
 
       - name: Generate sitemap
         run: npm run sitemap
@@ -45,7 +45,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: build/client/
 
       - name: Deploy to GitHub Pages
         id: deployment

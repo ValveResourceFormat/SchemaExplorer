@@ -8,7 +8,8 @@ import {
   SchemaMetadataEntry,
 } from "../../data/types";
 import { DeclarationsContext, declarationPath } from "./DeclarationsContext";
-import { GAMES, GameId } from "../../games";
+import { getGameDef, GameId } from "../../games-list";
+import { ICONS_URL } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";
 
 type DiffStatus = "identical" | "offsets_only" | "differs";
@@ -110,7 +111,6 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
 
   const matches: {
     gameId: GameId;
-    gameIcon: React.ReactNode;
     gameName: string;
     status: DiffStatus;
     module: string;
@@ -119,10 +119,9 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
   for (const [gameId, lookup] of otherGamesLookup) {
     const match = lookup.get(declaration.name);
     if (match && match.kind === declaration.kind) {
-      const gameInfo = GAMES.find((g) => g.id === gameId);
+      const gameInfo = getGameDef(gameId);
       matches.push({
         gameId,
-        gameIcon: gameInfo?.icon,
         gameName: gameInfo?.name ?? gameId,
         status: compareDeclarations(declaration, match),
         module: match.module,
@@ -136,10 +135,10 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
     <SectionWrapper>
       <SectionTitle>Also in</SectionTitle>
       <SectionList>
-        {matches.map(({ gameId, gameIcon, gameName, status, module: otherModule }) => (
+        {matches.map(({ gameId, gameName, status, module: otherModule }) => (
           <GameLink
             key={gameId}
-            to={declarationPath(`/${gameId}`, otherModule, declaration.name)}
+            to={declarationPath(gameId, otherModule, declaration.name)}
             data-status={status === "identical" ? undefined : status}
             title={
               status === "identical"
@@ -149,7 +148,11 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
                   : "Differs"
             }
           >
-            {gameIcon && <GameIconWrapper>{gameIcon}</GameIconWrapper>}
+            <GameIconWrapper>
+              <svg width="24" height="24">
+                <use href={`${ICONS_URL}#game-${gameId}`} />
+              </svg>
+            </GameIconWrapper>
             {gameName}
           </GameLink>
         ))}
