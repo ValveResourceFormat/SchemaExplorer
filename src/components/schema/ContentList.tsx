@@ -96,6 +96,10 @@ const InfoLink = styled.a`
 `;
 
 const SearchFiltersBlock = styled(CardBlock)`
+  dl {
+    margin: 0;
+  }
+
   dt {
     font-weight: 600;
     color: var(--text);
@@ -283,7 +287,7 @@ export function ContentList() {
           </InfoBlock>
           <SearchFiltersBlock>
             <dl>
-              <dt>Search by name</dt>
+              <dt>Search by name, filters can be combined</dt>
               <dd>Type any text to match class, field, or enum names.</dd>
               {SEARCH_TAGS.map((t) => (
                 <React.Fragment key={t.tag}>
@@ -295,7 +299,6 @@ export function ContentList() {
                 </React.Fragment>
               ))}
             </dl>
-            Filters can be combined.
           </SearchFiltersBlock>
           {module ? <ClassTree module={module} /> : <ModuleList />}
         </>
