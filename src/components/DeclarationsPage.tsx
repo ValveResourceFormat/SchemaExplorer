@@ -66,6 +66,7 @@ export default function DeclarationsPage({ context }: { context: DeclarationsCon
 const ContentColumn = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   padding-right: 32px;
 

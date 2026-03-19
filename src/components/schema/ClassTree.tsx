@@ -9,12 +9,7 @@ interface TreeNode {
   children: TreeNode[];
 }
 
-interface ModuleGroup {
-  module: string;
-  roots: TreeNode[];
-}
-
-function buildTree(classesByKey: Map<string, SchemaClass>): ModuleGroup[] {
+function buildTree(classesByKey: Map<string, SchemaClass>): TreeNode[] {
   const allNodes = new Map<string, TreeNode>();
   const hasParentInTree = new Set<string>();
 
@@ -39,31 +34,24 @@ function buildTree(classesByKey: Map<string, SchemaClass>): ModuleGroup[] {
     }
   }
 
-  const moduleRoots = new Map<string, TreeNode[]>();
+  const roots: TreeNode[] = [];
   for (const [key, node] of allNodes) {
     if (!hasParentInTree.has(key)) {
-      let roots = moduleRoots.get(node.cls.module);
-      if (!roots) {
-        roots = [];
-        moduleRoots.set(node.cls.module, roots);
-      }
       roots.push(node);
     }
   }
-
-  const groups: ModuleGroup[] = [];
-  for (const [module, roots] of moduleRoots) {
-    roots.sort((a, b) => a.cls.name.localeCompare(b.cls.name));
-    groups.push({ module, roots });
-  }
-  groups.sort((a, b) => a.module.localeCompare(b.module));
-  return groups;
+  roots.sort((a, b) => a.cls.name.localeCompare(b.cls.name));
+  return roots;
 }
 
 const ClassLink = styled(Link)`
   text-decoration: none;
   color: var(--text);
   font-size: 14px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     color: var(--highlight);
@@ -72,7 +60,7 @@ const ClassLink = styled(Link)`
 
 const TreeList = styled.ul`
   margin: 0;
-  padding-left: 20px;
+  padding-left: 10px;
   list-style: none;
 `;
 
@@ -82,6 +70,13 @@ const RootList = styled.ul`
   list-style: none;
 `;
 
+const TreeHeading = styled.h1`
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+`;
+
 const TreeContainer = styled.div`
   max-width: 560px;
   margin: 16px auto 0;
@@ -89,6 +84,7 @@ const TreeContainer = styled.div`
   background: var(--group);
   border: 1px solid var(--group-border);
   border-radius: 10px;
+  overflow: hidden;
 `;
 
 function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
@@ -127,24 +123,18 @@ export function ClassTree({ module }: { module?: string }) {
     return filtered;
   }, [classesByKey, module]);
 
-  const groups = useMemo(() => buildTree(filteredClassesByKey), [filteredClassesByKey]);
+  const roots = useMemo(() => buildTree(filteredClassesByKey), [filteredClassesByKey]);
 
   return (
     <TreeContainer>
+      <TreeHeading>{module}</TreeHeading>
       <RootList>
-        {groups.map((group) => (
-          <li key={group.module}>
-            <strong>{group.module}</strong>
-            <TreeList>
-              {group.roots.map((node) => (
-                <TreeNodeView
-                  key={declarationKey(node.cls.module, node.cls.name)}
-                  node={node}
-                  game={game}
-                />
-              ))}
-            </TreeList>
-          </li>
+        {roots.map((node) => (
+          <TreeNodeView
+            key={declarationKey(node.cls.module, node.cls.name)}
+            node={node}
+            game={game}
+          />
         ))}
       </RootList>
     </TreeContainer>
