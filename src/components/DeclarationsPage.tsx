@@ -50,7 +50,7 @@ export default function DeclarationsPage({ context }: { context: DeclarationsCon
           <PageGrid>
             <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
             <SidebarPanel data-open={sidebarOpen || undefined}>
-              <DeclarationsSidebar onNavigate={closeSidebar} />
+              <DeclarationsSidebar onNavigate={closeSidebar} sidebarOpen={sidebarOpen} />
             </SidebarPanel>
             <ContentColumn>
               <NavBar onMenuClick={openSidebar} />
@@ -103,11 +103,6 @@ const SidebarPanel = styled.div`
 
     &[data-open] {
       display: flex;
-    }
-
-    > * {
-      flex: 1;
-      min-height: 0;
     }
   }
 `;

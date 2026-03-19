@@ -92,6 +92,9 @@ export const SidebarGroupHeader = styled.button`
   display: flex;
   align-items: center;
   gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   transition: color 0.1s;
 
   &:hover {
@@ -123,4 +126,10 @@ export const SidebarWrapper = styled.nav`
   top: 0;
   height: 100dvh;
   align-self: start;
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+    flex: 1;
+    min-height: 0;
+  }
 `;
