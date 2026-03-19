@@ -47,7 +47,13 @@ const ROW_HEIGHT = 28;
 const STATIC_BEFORE = 19;
 const STATIC_AFTER = 60;
 
-export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
+export const DeclarationsSidebar = ({
+  onNavigate,
+  sidebarOpen,
+}: {
+  onNavigate?: () => void;
+  sidebarOpen?: boolean;
+}) => {
   const { declarations, game } = useContext(DeclarationsContext);
   const { filter, setFilter } = useContext(SidebarFilterContext);
   const { module: activeModule = "", scope = "" } = useParams();
@@ -191,6 +197,21 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
     }
   }, [activeModule, scope, activeIndex, virtualizer]);
 
+  // When the mobile sidebar opens, the virtualizer's scroll element transitions
+  // from display:none to display:flex. The element had zero dimensions while hidden,
+  // so the virtualizer rendered no items and scrollTop was lost. Re-measure and
+  // scroll to the active item.
+  useEffect(() => {
+    if (!sidebarOpen || !parentRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      virtualizer.measure();
+      if (activeIndex >= 0) {
+        virtualizer.scrollToIndex(activeIndex, { align: "center" });
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [sidebarOpen]);
+
   const handleSidebarNavigate = useCallback(() => {
     navigatedFromSidebarRef.current = true;
     onNavigate?.();
@@ -312,6 +333,7 @@ const SidebarSearchInput = styled(SearchInput)`
 const SidebarList = styled.div`
   flex: 1;
   overflow: auto;
+  overscroll-behavior: contain;
 `;
 
 const SidebarUl = styled.ul`
