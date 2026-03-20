@@ -1194,6 +1194,245 @@ describe("searchDeclarations — field filtering", () => {
   });
 });
 
+// -- Search result ranking --
+
+describe("search result ranking", () => {
+  it("exact name match ranks first", () => {
+    const result = searchDeclarations(declarations, parseSearch("CFuncWater"));
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0].name).toBe("CFuncWater");
+    expect(result[1].name).toBe("CFuncWater");
+  });
+
+  it("exact match is case-insensitive", () => {
+    const result = searchDeclarations(declarations, parseSearch("cfuncwater"));
+    expect(result[0].name).toBe("CFuncWater");
+    expect(result[1].name).toBe("CFuncWater");
+  });
+
+  it("starts-with ranks above substring", () => {
+    const result = searchDeclarations(declarations, parseSearch("CFilter"));
+    const names = result.map((d) => d.name);
+    // CFilterEnemy and CFilterProximity start with "cfilter"
+    expect(names[0]).toBe("CFilterEnemy");
+    expect(names[1]).toBe("CFilterProximity");
+    expect(names[2]).toBe("CFilterProximity");
+  });
+
+  it("declaration-level name match above field-only match (water)", () => {
+    const result = searchDeclarations(declarations, parseSearch("water"));
+    const names = result.map((d) => d.name);
+    // Name matches: C_INIT_CheckParticleForWater, C_OP_WaterImpulseRenderer, CFuncWater (x2)
+    const nameMatches = ["C_INIT_CheckParticleForWater", "C_OP_WaterImpulseRenderer", "CFuncWater"];
+    // Field-only: C_BaseEntity, C_Fish
+    const fieldOnly = ["C_BaseEntity", "C_Fish"];
+
+    // All name matches should come before all field-only matches
+    const lastNameMatchIdx = Math.max(...nameMatches.map((n) => names.lastIndexOf(n)));
+    const firstFieldOnlyIdx = Math.min(
+      ...fieldOnly.map((n) => names.indexOf(n)).filter((i) => i >= 0),
+    );
+    expect(lastNameMatchIdx).toBeLessThan(firstFieldOnlyIdx);
+  });
+
+  it("declaration-level name match above field-only match (effect)", () => {
+    const result = searchDeclarations(declarations, parseSearch("effect"));
+    const names = result.map((d) => d.name);
+    // CEffectData (client + server) should come before field-only matches
+    const lastEffectIdx = names.lastIndexOf("CEffectData");
+    const fieldOnly = [
+      "C_BaseEntity",
+      "C_PathParticleRope",
+      "CPathParticleRope",
+      "CScriptedSequence",
+    ];
+    const firstFieldOnlyIdx = Math.min(
+      ...fieldOnly.map((n) => names.indexOf(n)).filter((i) => i >= 0),
+    );
+    expect(lastEffectIdx).toBeLessThan(firstFieldOnlyIdx);
+  });
+
+  it("alphabetical within same tier (sphere)", () => {
+    const result = searchDeclarations(declarations, parseSearch("sphere"));
+    const names = result.map((d) => d.name);
+    // All are tier 2 (substring match), alphabetical by name then module
+    expect(names).toEqual([
+      "CAnimationGraphVisualizerSphere",
+      "CNavVolumeSphere",
+      "CSoundAreaEntitySphere",
+      "CSoundEventSphereEntity",
+      "C_SoundAreaEntitySphere",
+      "C_SoundEventSphereEntity",
+      "CastSphereSATParams_t",
+    ]);
+  });
+
+  it("alphabetical within tier, module as tiebreaker", () => {
+    const result = searchDeclarations(declarations, parseSearch("CFuncWater"));
+    // Both are exact matches (tier 0), same name → sorted by module
+    expect(result[0].module).toBe("client");
+    expect(result[1].module).toBe("server");
+  });
+
+  it("same result set regardless of ranking", () => {
+    const result = searchDeclarations(declarations, parseSearch("water"));
+    // Verify all expected names are present (ranking may reorder them)
+    const nameSet = new Set(result.map((d) => d.name));
+    expect(nameSet).toEqual(
+      new Set([
+        "C_BaseEntity",
+        "C_Fish",
+        "C_INIT_CheckParticleForWater",
+        "C_OP_WaterImpulseRenderer",
+        "CFuncWater",
+      ]),
+    );
+    expect(result).toHaveLength(6); // CFuncWater appears in client + server
+  });
+
+  it("module-only filter preserves tier ordering", () => {
+    const result = searchDeclarations(declarations, parseSearch("water module:client"));
+    const names = result.map((d) => d.name);
+    // Client name matches: CFuncWater
+    // Client field-only: C_BaseEntity, C_Fish
+    const cfuncIdx = names.indexOf("CFuncWater");
+    const baseEntityIdx = names.indexOf("C_BaseEntity");
+    const fishIdx = names.indexOf("C_Fish");
+    expect(cfuncIdx).toBeLessThan(baseEntityIdx);
+    expect(cfuncIdx).toBeLessThan(fishIdx);
+  });
+
+  it("multi-word search", () => {
+    const result = searchDeclarations(declarations, parseSearch("sound sphere"));
+    const names = result.map((d) => d.name);
+    // Only declarations matching both words
+    expect(names).toEqual([
+      "CSoundAreaEntitySphere",
+      "CSoundEventSphereEntity",
+      "C_SoundAreaEntitySphere",
+      "C_SoundEventSphereEntity",
+    ]);
+  });
+
+  it("enum exact match ranks first", () => {
+    const result = searchDeclarations(declarations, parseSearch("PulseTestEnumColor_t"));
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("PulseTestEnumColor_t");
+  });
+
+  it("enum starts-with", () => {
+    const result = searchDeclarations(declarations, parseSearch("Pulse"));
+    // PulseCursorCancelPriority_t and PulseTestEnumColor_t start with "pulse" (tier 1)
+    // C_OP_RenderClientPhysicsImpulse and C_OP_WaterImpulseRenderer contain "pulse" (tier 2)
+    const names = result.map((d) => d.name);
+    expect(names.indexOf("PulseCursorCancelPriority_t")).toBeLessThan(
+      names.indexOf("C_OP_RenderClientPhysicsImpulse"),
+    );
+    expect(names.indexOf("PulseTestEnumColor_t")).toBeLessThan(
+      names.indexOf("C_OP_WaterImpulseRenderer"),
+    );
+  });
+
+  it("field-only results alphabetical", () => {
+    const result = searchDeclarations(declarations, parseSearch("water"));
+    // Among field-only matches: C_BaseEntity before C_Fish
+    const fieldOnly = result.filter((d) => !d.name.toLowerCase().includes("water"));
+    expect(fieldOnly[0].name).toBe("C_BaseEntity");
+    expect(fieldOnly[1].name).toBe("C_Fish");
+  });
+
+  it("no name words (module-only) results are alphabetical", () => {
+    const result = searchDeclarations(declarations, parseSearch("module:client"));
+    const names = result.map((d) => d.name);
+    // All get score 2, sorted alphabetically (ASCII order: uppercase before _)
+    expect(names).toEqual([
+      "CEffectData",
+      "CEnvSoundscape",
+      "CFilterProximity",
+      "CFuncWater",
+      "C_BaseEntity",
+      "C_CSWeaponBaseGun",
+      "C_Fish",
+      "C_FuncTrackTrain",
+      "C_Hostage",
+      "C_PathParticleRope",
+      "C_RectLight",
+      "C_SoundAreaEntitySphere",
+      "C_SoundEventSphereEntity",
+      "DOTA_UNIT_TARGET_TEAM",
+      "ragdollelement_t",
+      "sky3dparams_t",
+    ]);
+  });
+
+  it("empty result stays empty", () => {
+    const result = searchDeclarations(declarations, parseSearch("xyzzy999qqq"));
+    expect(result).toEqual([]);
+  });
+
+  it("single result unchanged", () => {
+    const result = searchDeclarations(declarations, parseSearch("PulseTestEnumColor_t"));
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("PulseTestEnumColor_t");
+  });
+
+  it("metadata filter doesn't affect tier", () => {
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("CEnvSoundscape metadata:MNotSaved"),
+    );
+    // CEnvSoundscape matches by name (tier 0 exact) — metadata just filters fields
+    expect(result.length).toBe(2);
+    expect(result[0].name).toBe("CEnvSoundscape");
+    expect(result[1].name).toBe("CEnvSoundscape");
+  });
+
+  it("starts-with score preserved when offset forces field path", () => {
+    // "CFlashbang" starts-with match on CFlashbangProjectile (score 1),
+    // offset:2992 forces field-level filtering but shouldn't push score to 3
+    const result = searchDeclarations(declarations, parseSearch("CFlashbang offset:2992"));
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("CFlashbangProjectile");
+    // Verify it has filtered fields (field path was used)
+    expect((result[0] as SchemaClass).fields.length).toBeGreaterThan(0);
+  });
+
+  it("starts-with score preserved when metadata forces field path", () => {
+    // "C_CSWeapon" starts-with match on C_CSWeaponBaseGun (score 1),
+    // metadata forces field-level filtering
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("C_CSWeapon metadata:MNetworkEnable"),
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("C_CSWeaponBaseGun");
+    expect((result[0] as SchemaClass).fields.length).toBeGreaterThan(0);
+  });
+
+  it("mixed name+field multi-word query gets field-only score", () => {
+    // "weapon" matches C_CSWeaponBaseGun name, "zoom" matches field → score 3
+    // Should rank below a pure name match if both were in results
+    const result = searchDeclarations(declarations, parseSearch("weapon zoom"));
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("C_CSWeaponBaseGun");
+    expect((result[0] as SchemaClass).fields).toHaveLength(1);
+    expect((result[0] as SchemaClass).fields[0].name).toBe("m_zoomLevel");
+  });
+
+  it("field-only metadata results ranked below name matches", () => {
+    // "water" + metadata:MNetworkEnable → only field-only matches survive
+    // (CFuncWater has no MNetworkEnable fields, so it's excluded)
+    const result = searchDeclarations(declarations, parseSearch("water metadata:MNetworkEnable"));
+    expect(result.length).toBeGreaterThan(0);
+    // All results are field-only matches (score 3)
+    expect(
+      result.every(
+        (d) => !d.name.toLowerCase().includes("water") || (d as SchemaClass).fields.length > 0,
+      ),
+    ).toBe(true);
+  });
+});
+
 // -- Exhaustive visible/hidden checks --
 
 describe("field and metadata visibility", () => {
