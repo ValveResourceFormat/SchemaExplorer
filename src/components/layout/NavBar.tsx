@@ -229,33 +229,21 @@ const NavBarSearchBox = styled(SearchBox)`
 `;
 
 const ToggleTrack = styled.label`
-  display: flex;
-  align-items: center;
-  width: 44px;
+  display: block;
+  width: 40px;
   height: 22px;
   border-radius: 11px;
-  background-color: #d1d5db;
+  border: 1px solid var(--group-border);
+  background-color: var(--group-members);
   cursor: pointer;
   position: relative;
-  transition: background-color 0.2s;
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
   flex-shrink: 0;
 
-  [data-theme="dark"] & {
-    background-color: #2a2d33;
-  }
-
-  .theme-icon-dark {
-    display: none;
-  }
-  .theme-icon-light {
-    display: block;
-  }
-
-  [data-theme="dark"] & .theme-icon-dark {
-    display: block;
-  }
-  [data-theme="dark"] & .theme-icon-light {
-    display: none;
+  &:hover {
+    border-color: var(--text-dim);
   }
 
   input {
@@ -268,34 +256,54 @@ const ToggleTrack = styled.label`
 
 const ToggleThumb = styled.span`
   position: absolute;
-  left: 2px;
-  width: 18px;
-  height: 18px;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background-color: #ffffff;
-  transition:
-    left 0.2s,
-    background-color 0.2s;
+  background-color: var(--sidebar);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s;
+  overflow: hidden;
 
   [data-theme="dark"] & {
-    left: 24px;
-    background-color: #7a7f88;
+    transform: translateX(18px);
   }
 `;
 
-const ToggleLabel = styled.span`
-  font-size: 14px;
-  user-select: none;
+const ToggleIcon = styled.span`
   position: absolute;
-  line-height: 1;
-`;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  opacity: 1;
+  transition: opacity 0.25s;
 
-const ToggleLabelLeft = styled(ToggleLabel)`
-  left: 5px;
-`;
+  &.sun {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23f5a623' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/%3E%3C/g%3E%3C/svg%3E")
+      no-repeat center / contain;
+  }
 
-const ToggleLabelRight = styled(ToggleLabel)`
-  right: 5px;
+  &.moon {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9'/%3E%3C/svg%3E")
+      no-repeat center / contain;
+  }
+
+  &.sun {
+    opacity: 1;
+  }
+  &.moon {
+    opacity: 0;
+  }
+  [data-theme="dark"] &.sun {
+    opacity: 0;
+  }
+  [data-theme="dark"] &.moon {
+    opacity: 1;
+  }
 `;
 
 export function S2VLogo() {
@@ -310,16 +318,17 @@ function NavBarThemeSwitcher() {
   const appContext = React.useContext(AppContext);
 
   return (
-    <ToggleTrack>
+    <ToggleTrack title={appContext.darkmode ? "Switch to light theme" : "Switch to dark theme"}>
       <input
         type="checkbox"
         checked={appContext.darkmode}
         onChange={(e) => appContext.setDarkmode(e.target.checked)}
         aria-label="Dark Mode Toggle"
       />
-      <ToggleLabelLeft className="theme-icon-dark">{"\u{1F31C}"}</ToggleLabelLeft>
-      <ToggleLabelRight className="theme-icon-light">{"\u{1F31E}"}</ToggleLabelRight>
-      <ToggleThumb />
+      <ToggleThumb>
+        <ToggleIcon className="sun" />
+        <ToggleIcon className="moon" />
+      </ToggleThumb>
     </ToggleTrack>
   );
 }
