@@ -27,8 +27,10 @@ export function isFlagEnum(members: SchemaEnumMember[]): boolean {
   if (maxFlag < members.length) return false;
 
   // Check that at least one composite fully decomposes into base flags
-  const baseMask = baseFlags.reduce((a, b) => a | b, 0);
-  return composites.some((v) => (v & baseMask) === v && v !== 0);
+  // Use manual reduce to avoid 32-bit truncation from bitwise OR
+  let baseMask = 0;
+  for (const f of baseFlags) baseMask = (baseMask | f) >>> 0;
+  return composites.some((v) => ((v >>> 0) & baseMask) >>> 0 === v >>> 0 && v !== 0);
 }
 
 /** Precomputed base flags for a flag enum, sorted largest-first. */
@@ -56,12 +58,13 @@ export function decomposeFlags(value: number, baseFlags: BaseFlags): string[] | 
   if (value === 0 || isPowerOf2(value)) return null;
 
   const flags: string[] = [];
-  let remaining = value;
+  let remaining = value >>> 0;
 
   for (const flag of baseFlags) {
-    if ((remaining & flag.value) === flag.value) {
+    const fv = flag.value >>> 0;
+    if ((remaining & fv) >>> 0 === fv) {
       flags.push(flag.name);
-      remaining &= ~flag.value;
+      remaining = (remaining & ~fv) >>> 0;
     }
   }
 

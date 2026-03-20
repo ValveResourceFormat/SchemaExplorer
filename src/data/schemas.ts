@@ -42,6 +42,7 @@ export function diffObject(
 
 /** @internal Exported for testing */
 export function resolveLeafType(type: SchemaFieldType): SchemaFieldType {
+  if ("inner2" in type && type.inner2) return resolveLeafType(type.inner2);
   if ("inner" in type && type.inner) return resolveLeafType(type.inner);
   return type;
 }
@@ -57,30 +58,31 @@ function stringifyDefault(value: unknown): string {
 
 function assignDefaults(classes: SchemaClass[]) {
   const classMap = new Map<string, SchemaClass>();
-  for (const cls of classes) classMap.set(cls.name, cls);
+  for (const cls of classes) classMap.set(`${cls.module}/${cls.name}`, cls);
 
-  // Parse and cache defaults per class name
+  // Parse and cache defaults per class key
   const defaultsCache = new Map<string, Record<string, unknown> | null>();
-  function getDefaults(name: string): Record<string, unknown> | null {
-    if (defaultsCache.has(name)) return defaultsCache.get(name)!;
-    const cls = classMap.get(name);
+  function getDefaults(module: string, name: string): Record<string, unknown> | null {
+    const key = `${module}/${name}`;
+    if (defaultsCache.has(key)) return defaultsCache.get(key)!;
+    const cls = classMap.get(key);
     const meta = cls?.metadata.find((m) => m.name === "MGetKV3ClassDefaults" && m.value);
     const parsed = meta ? parseKV3Defaults(meta.value!) : null;
-    defaultsCache.set(name, parsed);
+    defaultsCache.set(key, parsed);
     return parsed;
   }
 
   // Collect all fields including from parent chain
   function collectFields(cls: SchemaClass, out: Map<string, SchemaField>) {
     for (const p of cls.parents) {
-      const parent = classMap.get(p.name);
+      const parent = classMap.get(`${p.module}/${p.name}`);
       if (parent) collectFields(parent, out);
     }
     for (const f of cls.fields) out.set(f.name, f);
   }
 
   for (const cls of classes) {
-    const defaults = getDefaults(cls.name);
+    const defaults = getDefaults(cls.module, cls.name);
     if (!defaults) continue;
 
     // Only assign defaults to the class's own fields, not inherited ones
@@ -106,7 +108,7 @@ function assignDefaults(classes: SchemaClass[]) {
         // Inherited field — put into unconsumed if child overrides the parent's default
         let parentDefault: unknown;
         for (const p of cls.parents) {
-          const pd = getDefaults(p.name);
+          const pd = getDefaults(p.module, p.name);
           if (pd && key in pd) {
             parentDefault = pd[key];
             break;
@@ -134,7 +136,8 @@ function assignDefaults(classes: SchemaClass[]) {
       } else {
         // For declared_class fields, diff against target's own defaults to avoid redundancy
         const leaf = resolveLeafType(field.type);
-        const targetDefaults = leaf.category === "declared_class" ? getDefaults(leaf.name) : null;
+        const targetDefaults =
+          leaf.category === "declared_class" ? getDefaults(leaf.module, leaf.name) : null;
         const obj = targetDefaults
           ? diffObject(value as Record<string, unknown>, targetDefaults)
           : (value as Record<string, unknown>);
@@ -153,7 +156,7 @@ function assignDefaults(classes: SchemaClass[]) {
   }
 }
 
-export interface RawSchemaClass {
+interface RawSchemaClass {
   name: string;
   module: string;
   parents?: { name: string; module: string }[];
@@ -166,7 +169,7 @@ export interface RawSchemaClass {
   metadata?: SchemaMetadataEntry[];
 }
 
-export interface RawSchemaEnum {
+interface RawSchemaEnum {
   name: string;
   module: string;
   alignment: string;

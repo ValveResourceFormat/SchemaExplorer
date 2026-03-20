@@ -73,7 +73,7 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
   return refs;
 }
 
-export type DerivedGameData = {
+type DerivedGameData = {
   classesByKey: Map<string, SchemaClass>;
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
@@ -93,13 +93,21 @@ export function getDerivedGameData(gameId: GameId): DerivedGameData {
     if (d.kind === "class") classesByKey.set(declarationKey(d.module, d.name), d);
   }
 
+  const modules = new Set(declarations.map((d) => d.module));
+
   const otherGamesLookup = new Map<GameId, Map<string, Declaration>>();
   for (const g of GAME_LIST) {
     if (g.id === gameId) continue;
     const other = preloadedData.get(g.id);
     if (other) {
       const map = new Map<string, Declaration>();
-      for (const d of other.declarations) map.set(d.name, d);
+      for (const d of other.declarations) {
+        // On duplicate names, prefer the one whose module also exists in the current game
+        const existing = map.get(d.name);
+        if (!existing || (modules.has(d.module) && !modules.has(existing.module))) {
+          map.set(d.name, d);
+        }
+      }
       otherGamesLookup.set(g.id, map);
     }
   }

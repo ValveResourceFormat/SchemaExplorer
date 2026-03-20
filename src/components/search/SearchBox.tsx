@@ -437,7 +437,7 @@ export function SearchBox({ className }: { className?: string }) {
 
   return (
     <SearchBoxWrapper className={className}>
-      <SearchIcon width="16" height="16">
+      <SearchIcon width="16" height="16" aria-hidden="true">
         <use href={`${ICONS_URL}#search`} />
       </SearchIcon>
       {!inputValue && !isFocused && (
@@ -456,7 +456,7 @@ export function SearchBox({ className }: { className?: string }) {
         onKeyDown={onKeyDown}
         role="combobox"
         aria-label="Search"
-        aria-controls="search-listbox"
+        aria-controls={showPopup ? "search-listbox" : undefined}
         aria-autocomplete="list"
         aria-expanded={showPopup}
         spellCheck={false}

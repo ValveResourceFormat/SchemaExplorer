@@ -3,8 +3,8 @@ import { href } from "react-router";
 import { Declaration, SchemaClass } from "../../data/types";
 import { SchemaMetadata } from "../../data/schemas";
 import { DEFAULT_GAME, GameId } from "../../games-list";
+export { declarationKey } from "../../data/derived";
 import type { ReferenceEntry } from "../../data/derived";
-export { declarationKey, type ReferenceEntry } from "../../data/derived";
 
 export function schemaPath(game: string, module?: string, scope?: string): string {
   return href("/:game?/:module?/:scope?", { game, module, scope });

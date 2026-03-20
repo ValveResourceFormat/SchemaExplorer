@@ -16,11 +16,11 @@ type DiffStatus = "identical" | "offsets_only" | "differs";
 
 const GameLink = styled(SectionLink)`
   &[data-status="offsets_only"] {
-    border-color: #5b8ab5;
+    border-color: var(--cross-game-offsets);
   }
 
   &[data-status="differs"] {
-    border-color: #c97a1e;
+    border-color: var(--cross-game-differs);
   }
 `;
 
@@ -81,6 +81,7 @@ function compareClasses(a: SchemaClass, b: SchemaClass): DiffStatus {
     if (a.fields[i].name !== b.fields[i].name) return "differs";
     if (!typesEqual(a.fields[i].type, b.fields[i].type)) return "differs";
     if (!metadataEqual(a.fields[i].metadata, b.fields[i].metadata)) return "differs";
+    if (a.fields[i].defaultValue !== b.fields[i].defaultValue) return "differs";
     if (a.fields[i].offset !== b.fields[i].offset) offsetsDiffer = true;
   }
   if (!metadataEqual(a.metadata, b.metadata)) return "differs";

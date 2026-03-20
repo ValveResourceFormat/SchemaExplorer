@@ -8,19 +8,19 @@ interface Props<T> {
 
 export function LazyList<T>({ data, render }: Props<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const parentOffsetRef = useRef(0);
+  const [parentOffset, setParentOffset] = React.useState(0);
 
   const virtualizer = useWindowVirtualizer({
     count: data.length,
     estimateSize: () => 80,
     overscan: 2,
-    scrollMargin: parentOffsetRef.current,
+    scrollMargin: parentOffset,
   });
 
   // Capture offset once on mount
   React.useLayoutEffect(() => {
     if (parentRef.current) {
-      parentOffsetRef.current = parentRef.current.getBoundingClientRect().top + window.scrollY;
+      setParentOffset(parentRef.current.getBoundingClientRect().top + window.scrollY);
     }
   }, []);
 
@@ -46,7 +46,7 @@ export function LazyList<T>({ data, render }: Props<T>) {
               top: 0,
               left: 0,
               width: "100%",
-              transform: `translateY(${virtualRow.start - parentOffsetRef.current}px)`,
+              transform: `translateY(${virtualRow.start - parentOffset}px)`,
             }}
           >
             {render(data[virtualRow.index])}

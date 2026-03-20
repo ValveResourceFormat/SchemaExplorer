@@ -81,6 +81,18 @@ describe("formatEnumHex", () => {
     });
   });
 
+  describe("negative values with uint64_t padding", () => {
+    it("pads to even hex digits in 64-bit path", () => {
+      expect(formatEnumHex(-1, "uint64_t")).toBe("0xFFFFFFFFFFFFFFFF");
+      expect(formatEnumHex(-2, "uint64_t")).toBe("0xFFFFFFFFFFFFFFFE");
+    });
+
+    it("handles large negative 64-bit values", () => {
+      // Verify the BigInt conversion stays consistent
+      expect(formatEnumHex(-9007199254740991, "uint64_t")).toBe("0xFFE0000000000001");
+    });
+  });
+
   describe("unknown alignment", () => {
     it("returns null for negative values", () => {
       expect(formatEnumHex(-1, "unknown")).toBeNull();
