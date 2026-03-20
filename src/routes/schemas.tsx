@@ -4,6 +4,7 @@ import type { MetaFunction } from "react-router";
 import { Declaration } from "../data/types";
 import { isGameId, DEFAULT_GAME, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
 import { preloadedData, preloadErrors } from "../data/preload";
+import { intrinsicDeclarations, INTRINSIC_MODULE } from "../data/intrinsics";
 import { getDerivedGameData } from "../data/derived";
 import type { DeclarationsContextType } from "../components/schema/DeclarationsContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
@@ -27,6 +28,16 @@ function truncateList(prefix: string, items: string[], suffix: string): string {
 }
 
 function describeDeclaration(d: Declaration, gameName: string): string {
+  if (d.module === INTRINSIC_MODULE) {
+    if (d.kind === "class" && d.fields.length > 0) {
+      return truncateList(
+        `${d.name} is an intrinsic Source 2 engine type with ${d.fields.length} field${d.fields.length !== 1 ? "s" : ""}: `,
+        d.fields.map((f) => f.name),
+        ".",
+      );
+    }
+    return `${d.name} is an intrinsic Source 2 engine type.`;
+  }
   const location = `${d.module}.dll (${gameName})`;
   if (d.kind === "class") {
     let prefix = `${d.name} is a class in ${location}`;
@@ -68,7 +79,9 @@ export const meta: MetaFunction = ({ params }) => {
   let description: string;
   if (scope && gameName) {
     const schema = preloadedData.get(params.game!);
-    const decl = schema?.declarations.find((d) => d.module === module && d.name === scope);
+    const decl =
+      schema?.declarations.find((d) => d.module === module && d.name === scope) ??
+      intrinsicDeclarations.find((d) => d.module === module && d.name === scope);
     description = decl
       ? describeDeclaration(decl, gameName)
       : `View the ${scope} schema definition in the ${module} module for ${gameName}.`;
@@ -111,7 +124,10 @@ export default function SchemasPage() {
   }>();
   const game = gameParam && isGameId(gameParam) ? gameParam : DEFAULT_GAME;
   const schema = preloadedData.get(game);
-  const declarations = schema?.declarations ?? EMPTY_DECLARATIONS;
+  const declarations = useMemo(
+    () => [...(schema?.declarations ?? EMPTY_DECLARATIONS), ...intrinsicDeclarations],
+    [schema],
+  );
   const metadata = schema?.metadata ?? EMPTY_METADATA;
   const error = preloadErrors.get(game) ?? null;
 

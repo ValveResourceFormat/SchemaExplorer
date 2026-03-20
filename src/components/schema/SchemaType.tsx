@@ -7,6 +7,7 @@ import { KindIcon } from "../kind-icon/KindIcon";
 import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
+import { INTRINSIC_MODULE } from "../../data/intrinsics";
 
 const AngleBracket = styled.span`
   color: var(--text-dim);
@@ -16,7 +17,20 @@ const AngleBracket = styled.span`
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
   font-weight: 600;
-  text-decoration-color: var(--syntax-interface);
+
+  &.interface {
+    color: var(--syntax-interface);
+  }
+  &.container {
+    color: var(--syntax-container);
+  }
+  &.atomic {
+    color: var(--syntax-atomic);
+  }
+
+  &:hover {
+    color: var(--highlight);
+  }
 
   &.active {
     text-decoration: none;
@@ -46,7 +60,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       if (type.inner) {
         return (
           <span>
-            <ColoredSyntax kind="container">{type.name}</ColoredSyntax>
+            <IntrinsicLink name={type.name} kind="container" />
             <AngleBracket>&lt; </AngleBracket>
             <SchemaTypeView type={type.inner} />
             {type.inner2 && (
@@ -58,7 +72,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
           </span>
         );
       }
-      return <ColoredSyntax kind="atomic">{type.name}</ColoredSyntax>;
+      return <IntrinsicLink name={type.name} kind="atomic" />;
     case "bitfield":
       return <ColoredSyntax kind="literal">bitfield:{type.count}</ColoredSyntax>;
     default:
@@ -66,13 +80,24 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
   }
 }
 
+function IntrinsicLink({ name, kind }: { name: string; kind: "atomic" | "container" }) {
+  const { game } = useContext(DeclarationsContext);
+  const to = schemaPath(game, INTRINSIC_MODULE, name);
+
+  return (
+    <TypeLink to={to} title="intrinsic type" className={kind}>
+      {name}
+    </TypeLink>
+  );
+}
+
 function DeclarationLink({ name, module }: { name: string; module: string }) {
   const { game } = useContext(DeclarationsContext);
   const to = schemaPath(game, module, name);
 
   return (
-    <TypeLink to={to} title={`in ${module}`}>
-      <ColoredSyntax kind="interface">{name}</ColoredSyntax>
+    <TypeLink to={to} title={`in ${module}`} className="interface">
+      {name}
     </TypeLink>
   );
 }

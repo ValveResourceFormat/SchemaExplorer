@@ -10,6 +10,7 @@ import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
 import { Declaration } from "../../data/types";
+import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import {
   DeclarationsContext,
   DeclarationsContextType,
@@ -303,7 +304,7 @@ export function ContentList() {
           {module ? <ClassTree module={module} /> : <ModuleList />}
         </>
       )}
-      {data.length > 0 && metadata.revision > 0 && (
+      {data.length > 0 && metadata.revision > 0 && module !== INTRINSIC_MODULE && (
         <OffsetsNote>
           Offsets are from Windows. Source revision {metadata.revision} built on{" "}
           {metadata.versionDate}.

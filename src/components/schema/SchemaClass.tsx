@@ -8,6 +8,7 @@ import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameDef } from "../../games-list";
+import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset } from "../../utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
@@ -89,8 +90,27 @@ const GitHubIcon = styled.a`
   }
 `;
 
+const INTRINSIC_SOURCE_URL =
+  "https://github.com/ValveResourceFormat/SchemaExplorer/blob/master/src/data/intrinsics.ts";
+
 export const GitHubFileLink: React.FC<{ module: string; name: string }> = ({ module, name }) => {
   const { game } = useContext(DeclarationsContext);
+
+  if (module === INTRINSIC_MODULE) {
+    return (
+      <GitHubIcon
+        href={INTRINSIC_SOURCE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View intrinsic type definitions"
+      >
+        <svg width="16" height="16" aria-hidden="true">
+          <use href={`${ICONS_URL}#ki-github`} />
+        </svg>
+      </GitHubIcon>
+    );
+  }
+
   const gameData = getGameDef(game);
   if (!gameData) return null;
   const fileName = name.replace(/:/g, "_");
