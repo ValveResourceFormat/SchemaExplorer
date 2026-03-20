@@ -133,22 +133,45 @@ export function matchesWords(name: string, words: string[]): boolean {
   return words.every((w) => lower.includes(w));
 }
 
+function matchesLoweredKeys(lowerNames: string[] | undefined, keys: string[]): boolean {
+  if (!lowerNames || lowerNames.length === 0) return false;
+  return keys.every((key) => lowerNames.some((n) => n.includes(key)));
+}
+
+function matchesLoweredValues(
+  lowerValues: (string | undefined)[] | undefined,
+  values: string[],
+): boolean {
+  if (!lowerValues || lowerValues.length === 0) return false;
+  return values.every((val) => lowerValues.some((v) => v != null && v.includes(val)));
+}
+
+function lowerMetaNames(metadata: api.SchemaMetadataEntry[] | undefined): string[] | undefined {
+  if (!metadata || metadata.length === 0) return undefined;
+  return metadata.map((m) => m.name.toLowerCase());
+}
+
+function lowerMetaVals(
+  metadata: api.SchemaMetadataEntry[] | undefined,
+): (string | undefined)[] | undefined {
+  if (!metadata || metadata.length === 0) return undefined;
+  return metadata.map((m) => m.value?.toLowerCase());
+}
+
 export function matchesMetadataKeys(
   metadata: api.SchemaMetadataEntry[] | undefined,
   keys: string[],
 ): boolean {
-  if (!metadata || metadata.length === 0 || keys.length === 0) return false;
-  return keys.every((key) => metadata.some((m) => m.name.toLowerCase().includes(key)));
+  if (keys.length === 0) return false;
+  return matchesLoweredKeys(lowerMetaNames(metadata), keys);
 }
 
 export function matchesMetadataValues(
   metadata: api.SchemaMetadataEntry[] | undefined,
   values: string[],
 ): boolean {
-  if (!metadata || metadata.length === 0 || values.length === 0) return false;
-  return values.every((val) =>
-    metadata.some((m) => m.value != null && m.value.toLowerCase().includes(val)),
-  );
+  if (values.length === 0) return false;
+  return matchesLoweredValues(lowerMetaVals(metadata), values);
 }
 
 export function searchDeclarations(
@@ -179,7 +202,54 @@ export function searchDeclarations(
     return [];
   }
 
-  const results: api.Declaration[] = [];
+  const joinedQuery = nameWords.join(" ");
+  const results: { declaration: api.Declaration; score: number }[] = [];
+
+  function nameScore(declLower: string, remainingWords: string[]): number {
+    if (remainingWords.length > 0) return 3;
+    if (hasNameFilter && declLower === joinedQuery) return 0;
+    if (hasNameFilter && declLower.startsWith(joinedQuery)) return 1;
+    return 2;
+  }
+
+  function isFieldMatch(
+    item: { name: string; metadata?: api.SchemaMetadataEntry[] },
+    numericValue: number | undefined,
+    remainingWords: string[],
+    declMetaSatisfied: boolean,
+  ): boolean {
+    // Lowercase metadata names once per field (lazy — only when needed)
+    let loweredNames: string[] | undefined | null = null; // null = not yet computed
+    function getLoweredNames() {
+      if (loweredNames === null) loweredNames = lowerMetaNames(item.metadata);
+      return loweredNames;
+    }
+
+    if (remainingWords.length > 0) {
+      const itemLower = item.name.toLowerCase();
+      const wordMatches = remainingWords.every(
+        (w) => itemLower.includes(w) || (getLoweredNames()?.some((n) => n.includes(w)) ?? false),
+      );
+      if (!wordMatches) return false;
+    }
+
+    if (offsetSet.size > 0 && (numericValue == null || !offsetSet.has(numericValue))) return false;
+    if (enumValueSet.size > 0 && (numericValue == null || !enumValueSet.has(numericValue)))
+      return false;
+
+    // Skip field-level metadata check if declaration metadata already satisfied it
+    if (!declMetaSatisfied) {
+      if (metadataKeys.length > 0 && !matchesLoweredKeys(getLoweredNames(), metadataKeys))
+        return false;
+      if (
+        metadataValues.length > 0 &&
+        !matchesLoweredValues(lowerMetaVals(item.metadata), metadataValues)
+      )
+        return false;
+    }
+
+    return true;
+  }
 
   for (const declaration of declarations) {
     // Module filter (OR across module words)
@@ -207,11 +277,11 @@ export function searchDeclarations(
     if (!hasFieldFilter) {
       // Declaration-level match (name / module / metadata) — include without fields
       if (hasNameFilter || moduleWords.length > 0 || declMetaSatisfied) {
-        if (declaration.kind === "class") {
-          results.push({ ...declaration, fields: [] });
-        } else {
-          results.push({ ...declaration, members: [] });
-        }
+        const stripped =
+          declaration.kind === "class"
+            ? { ...declaration, fields: [] }
+            : { ...declaration, members: [] };
+        results.push({ declaration: stripped, score: nameScore(declLower, remainingWords) });
       }
       continue;
     }
@@ -222,47 +292,33 @@ export function searchDeclarations(
     // Enum value filter excludes classes entirely
     if (hasEnumValueFilter && declaration.kind !== "enum") continue;
 
-    // Filter fields/members: each item must pass ALL criteria.
-    // numericValue is the field offset (for classes) or member value (for enums).
-    function isFieldMatch(
-      item: { name: string; metadata?: api.SchemaMetadataEntry[] },
-      numericValue?: number,
-    ): boolean {
-      if (remainingWords.length > 0) {
-        // Each remaining word must match the field name OR a metadata key name individually
-        const itemLower = item.name.toLowerCase();
-        const wordMatches = remainingWords.every(
-          (w) =>
-            itemLower.includes(w) ||
-            (item.metadata?.some((m) => m.name.toLowerCase().includes(w)) ?? false),
-        );
-        if (!wordMatches) return false;
-      }
-      return (
-        // Skip field-level metadata check if declaration metadata already satisfied it
-        (metadataKeys.length === 0 ||
-          declMetaSatisfied ||
-          matchesMetadataKeys(item.metadata, metadataKeys)) &&
-        (metadataValues.length === 0 ||
-          declMetaSatisfied ||
-          matchesMetadataValues(item.metadata, metadataValues)) &&
-        (offsetSet.size === 0 || (numericValue != null && offsetSet.has(numericValue))) &&
-        (enumValueSet.size === 0 || (numericValue != null && enumValueSet.has(numericValue)))
-      );
-    }
+    const score = nameScore(declLower, remainingWords);
 
     if (declaration.kind === "class") {
-      const fields = declaration.fields.filter((f) => isFieldMatch(f, f.offset));
+      const fields = declaration.fields.filter((f) =>
+        isFieldMatch(f, f.offset, remainingWords, declMetaSatisfied),
+      );
       if (fields.length > 0) {
-        results.push({ ...declaration, fields });
+        results.push({ declaration: { ...declaration, fields }, score });
       }
     } else {
-      const members = declaration.members.filter((m) => isFieldMatch(m, m.value));
+      const members = declaration.members.filter((m) =>
+        isFieldMatch(m, m.value, remainingWords, declMetaSatisfied),
+      );
       if (members.length > 0) {
-        results.push({ ...declaration, members });
+        results.push({ declaration: { ...declaration, members }, score });
       }
     }
   }
 
-  return results;
+  results.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    if (a.declaration.name < b.declaration.name) return -1;
+    if (a.declaration.name > b.declaration.name) return 1;
+    if (a.declaration.module < b.declaration.module) return -1;
+    if (a.declaration.module > b.declaration.module) return 1;
+    return 0;
+  });
+
+  return results.map((r) => r.declaration);
 }
