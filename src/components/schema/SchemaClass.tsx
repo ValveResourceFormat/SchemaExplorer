@@ -310,7 +310,7 @@ const BitRange = styled.span`
   font-variant-numeric: tabular-nums;
 `;
 
-const BitfieldPadding = styled.div`
+const BitfieldPadding = styled.li`
   padding: 3px 10px;
   font-size: 13px;
   color: var(--text-dim);

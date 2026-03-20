@@ -23,6 +23,9 @@
 
   --searchbox-background: #eceef3;
   --searchbox-placeholder: #9ca3af;
+
+  --cross-game-offsets: #5b8ab5;
+  --cross-game-differs: #c97a1e;
 }
 
 [data-theme="dark"] {
@@ -50,6 +53,9 @@
 
   --searchbox-background: #090e15;
   --searchbox-placeholder: #6b7280;
+
+  --cross-game-offsets: #6ba3d6;
+  --cross-game-differs: #e0953a;
 }
 
 :root {
@@ -58,8 +64,7 @@
 }
 
 html,
-body,
-#root {
+body {
   width: 100%;
   margin: 0;
   background-color: var(--background);

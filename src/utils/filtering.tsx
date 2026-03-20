@@ -4,7 +4,7 @@ import { SearchContext } from "../components/search/SearchContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import * as api from "../data/types";
 
-export function useHydrated(): boolean {
+function useHydrated(): boolean {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   return hydrated;
@@ -26,7 +26,7 @@ export function searchLink(game: string, query: string) {
   };
 }
 
-export interface ParsedSearch {
+interface ParsedSearch {
   nameWords: string[];
   moduleWords: string[];
   offsets: Set<number>;
@@ -127,6 +127,7 @@ export function useFieldParam(): string | null {
   return useHashParam("field");
 }
 
+/** @internal Exported for testing */
 export function matchesWords(name: string, words: string[]): boolean {
   const lower = name.toLowerCase();
   return words.every((w) => lower.includes(w));

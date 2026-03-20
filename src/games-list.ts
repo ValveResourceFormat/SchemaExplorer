@@ -4,7 +4,7 @@ export const GAME_LIST = [
   { id: "deadlock", name: "Deadlock", repo: "SteamTracking/GameTracking-Deadlock" },
 ] as const;
 
-export type GameDef = (typeof GAME_LIST)[number];
+type GameDef = (typeof GAME_LIST)[number];
 export type GameId = GameDef["id"];
 export const DEFAULT_GAME: GameId = GAME_LIST[0].id;
 

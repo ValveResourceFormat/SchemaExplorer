@@ -181,6 +181,13 @@ describe("resolveLeafType", () => {
     expect(resolveLeafType(type)).toBe(type);
   });
 
+  it("prefers inner2 over inner for atomic types (map value type)", () => {
+    const key = { category: "builtin" as const, name: "uint64" };
+    const value = { category: "declared_class" as const, name: "Bar", module: "m" };
+    const type = { category: "atomic" as const, name: "CUtlHashMap", inner: key, inner2: value };
+    expect(resolveLeafType(type)).toBe(value);
+  });
+
   it("returns declared_enum as-is", () => {
     const type = { category: "declared_enum" as const, name: "MyEnum", module: "m" };
     expect(resolveLeafType(type)).toBe(type);
@@ -338,6 +345,27 @@ describe("assignDefaults via parseSchemas", () => {
   it("keeps MGetKV3ClassDefaults for unparseable entries", () => {
     const cls = getClass("TestBrokenDefaults");
     expect(cls.metadata.some((m) => m.name === "MGetKV3ClassDefaults")).toBe(true);
+  });
+
+  it("assigns correct defaults when same-name class exists in different modules", () => {
+    const result = parseSchemas(testData as SchemasJson);
+    const classA = result.declarations.find(
+      (d) => d.name === "TestSameNameClass" && d.kind === "class" && d.module === "modA",
+    ) as SchemaClass;
+    const classB = result.declarations.find(
+      (d) => d.name === "TestSameNameClass" && d.kind === "class" && d.module === "modB",
+    ) as SchemaClass;
+    expect(classA).toBeDefined();
+    expect(classB).toBeDefined();
+    expect(getField(classA, "m_flVal").defaultValue).toBe("100");
+    expect(getField(classB, "m_flVal").defaultValue).toBe("200");
+  });
+
+  it("diffs nested object using inner2 (map value type) for target defaults", () => {
+    const cls = getClass("TestMapInner2");
+    // TestBaseClass defaults: m_flA=10, m_flB=20. Embedded: m_flA=10, m_flB=77
+    // inner2 resolves to TestBaseClass, diff should be {"m_flB":77}
+    expect(getField(cls, "m_map").defaultValue).toBe('{"m_flB":77}');
   });
 });
 

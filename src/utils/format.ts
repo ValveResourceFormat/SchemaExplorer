@@ -28,5 +28,7 @@ export function formatEnumHex(value: number, alignment: string): string | null {
 
   // For 64-bit, use BigInt
   const unsigned = BigInt(value) & ((1n << BigInt(bits)) - 1n);
-  return `0x${unsigned.toString(16).toUpperCase()}`;
+  const hexDigits = unsigned.toString(16).toUpperCase();
+  const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
+  return `0x${paddedHex}`;
 }

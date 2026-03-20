@@ -44,7 +44,7 @@ const SidebarLink = styled(NavLink)`
   }
 `;
 
-export const SidebarElement: React.FC<{
+const SidebarElement: React.FC<{
   to: string;
   icon: IconKind;
   text: string;
@@ -94,7 +94,7 @@ export const SidebarGroupHeader = styled.button`
   gap: 4px;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
+  min-width: 0;
   transition: color 0.1s;
 
   &:hover {

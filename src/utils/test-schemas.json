@@ -7485,6 +7485,62 @@
       ],
       "module": "test",
       "name": "TestUnknownKeys"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flVal",
+          "offset": 0,
+          "type": { "category": "builtin", "name": "float32" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_flVal\": 100\n}"
+        }
+      ],
+      "module": "modA",
+      "name": "TestSameNameClass"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_flVal",
+          "offset": 0,
+          "type": { "category": "builtin", "name": "float32" }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_flVal\": 200\n}"
+        }
+      ],
+      "module": "modB",
+      "name": "TestSameNameClass"
+    },
+    {
+      "fields": [
+        {
+          "name": "m_map",
+          "offset": 0,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlHashMap",
+            "inner": { "category": "builtin", "name": "uint64" },
+            "inner2": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "{\n\t\"m_map\": {\"m_flA\": 10, \"m_flB\": 77}\n}"
+        }
+      ],
+      "module": "test",
+      "name": "TestMapInner2"
     }
   ],
   "enums": [

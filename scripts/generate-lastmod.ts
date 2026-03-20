@@ -27,6 +27,7 @@ function extractLastModified(repoDir: string): Promise<Record<string, string>> {
     });
 
     let currentDate = "";
+    let exitCode: number | null = null;
     const rl = createInterface({ input: proc.stdout });
 
     rl.on("line", (line) => {
@@ -38,10 +39,13 @@ function extractLastModified(repoDir: string): Promise<Record<string, string>> {
       }
     });
 
-    rl.on("close", () => resolve(map));
     proc.on("error", reject);
     proc.on("close", (code) => {
-      if (code !== 0) reject(new Error(`git log exited ${code}`));
+      exitCode = code;
+    });
+    rl.on("close", () => {
+      if (exitCode !== 0) reject(new Error(`git log exited ${exitCode}`));
+      else resolve(map);
     });
   });
 }

@@ -2,7 +2,7 @@ import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 import { renderToPipeableStream } from "react-dom/server";
 import { PassThrough } from "node:stream";
-import { resolve } from "node:path";
+import { resolve as pathResolve } from "node:path";
 import { preloadedData } from "./data/preload";
 import { parseSchemas, type SchemasJson } from "./data/schemas";
 import { GAME_LIST } from "./games-list";
@@ -16,7 +16,7 @@ export default async function handleRequest(
 ) {
   for (const game of GAME_LIST) {
     if (!preloadedData.has(game.id)) {
-      const data = await readGzippedJson<SchemasJson>(resolve("schemas", `${game.id}.json.gz`));
+      const data = await readGzippedJson<SchemasJson>(pathResolve("schemas", `${game.id}.json.gz`));
       preloadedData.set(game.id, parseSchemas(data));
     }
   }

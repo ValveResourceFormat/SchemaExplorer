@@ -61,6 +61,8 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       return <ColoredSyntax kind="atomic">{type.name}</ColoredSyntax>;
     case "bitfield":
       return <ColoredSyntax kind="literal">bitfield:{type.count}</ColoredSyntax>;
+    default:
+      return <span>{(type as { category: string }).category}</span>;
   }
 }
 

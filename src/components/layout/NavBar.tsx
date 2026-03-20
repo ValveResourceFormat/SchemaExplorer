@@ -75,7 +75,7 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
         onClick={() => setOpen(!open)}
         title={currentGameInfo?.name}
         aria-expanded={open}
-        aria-haspopup="menu"
+        aria-haspopup="listbox"
       >
         <SwitcherChevron
           viewBox="0 0 24 24"
@@ -98,11 +98,12 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
         </SwitcherIcon>
       </SwitcherToggle>
       {open && (
-        <SwitcherDropdown role="menu" aria-label="Select game">
+        <SwitcherDropdown role="listbox" aria-label="Select game">
           {GAME_LIST.map((g) => (
             <SwitcherOption
               key={g.id}
-              role="menuitem"
+              role="option"
+              aria-selected={g.id === currentGame}
               onClick={() => switchTo(g.id)}
               data-active={g.id === currentGame || undefined}
             >
@@ -277,7 +278,7 @@ const ToggleThumb = styled.span`
     background-color 0.2s;
 
   [data-theme="dark"] & {
-    left: 22px;
+    left: 24px;
     background-color: #7a7f88;
   }
 `;

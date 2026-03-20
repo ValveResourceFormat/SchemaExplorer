@@ -1,6 +1,6 @@
 import type { IconKind } from "./KindIcon";
 
-export const metadataIconMap: Record<string, IconKind> = {
+export const metadataIconMap: Partial<Record<string, IconKind>> = {
   MPropertyFriendlyName: "meta-tag",
   MPropertyDescription: "meta-note",
   MNetworkEnable: "meta-broadcast",
