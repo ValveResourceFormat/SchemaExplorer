@@ -2,6 +2,7 @@ import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
 import type { GameId } from "../games-list";
 import { GAME_LIST } from "../games-list";
 import { preloadedData } from "./preload";
+import { intrinsicDeclarations, INTRINSIC_MODULE } from "./intrinsics";
 
 export type ReferenceEntry = {
   declarationName: string;
@@ -25,6 +26,7 @@ function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
       collectTypeKeys(type.inner, out);
       break;
     case "atomic":
+      out.add(declarationKey(INTRINSIC_MODULE, type.name));
       if (type.inner) collectTypeKeys(type.inner, out);
       if (type.inner2) collectTypeKeys(type.inner2, out);
       break;
@@ -88,8 +90,10 @@ export function getDerivedGameData(gameId: GameId): DerivedGameData {
   const schema = preloadedData.get(gameId);
   const declarations = schema?.declarations ?? [];
 
+  const allDeclarations = [...declarations, ...intrinsicDeclarations];
+
   const classesByKey = new Map<string, SchemaClass>();
-  for (const d of declarations) {
+  for (const d of allDeclarations) {
     if (d.kind === "class") classesByKey.set(declarationKey(d.module, d.name), d);
   }
 
@@ -114,7 +118,7 @@ export function getDerivedGameData(gameId: GameId): DerivedGameData {
 
   const result: DerivedGameData = {
     classesByKey,
-    references: buildReferences(declarations),
+    references: buildReferences(allDeclarations),
     otherGamesLookup,
   };
 

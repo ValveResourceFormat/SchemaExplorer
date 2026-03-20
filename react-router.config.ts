@@ -2,6 +2,7 @@ import type { Config } from "@react-router/dev/config";
 import { GAME_LIST } from "./src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "./src/data/schemas.ts";
 import { readGzippedJson } from "./scripts/lib/read-gzipped-json.ts";
+import { intrinsicDeclarations } from "./src/data/intrinsics.ts";
 
 const isDev = process.argv.includes("dev");
 
@@ -21,9 +22,10 @@ export default {
 
             const data = await readGzippedJson<SchemasJson>(`schemas/${game.id}.json.gz`);
             const { declarations } = parseSchemas(data);
+            const allDeclarations = [...declarations, ...intrinsicDeclarations];
 
             const names = new Map<string, Set<string>>();
-            for (const d of declarations) {
+            for (const d of allDeclarations) {
               if (!names.has(d.module)) names.set(d.module, new Set());
               names.get(d.module)!.add(d.name);
             }
