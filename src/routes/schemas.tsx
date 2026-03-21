@@ -146,25 +146,37 @@ export default function SchemasPage() {
 
   const navigate = useNavigate();
 
-  // Redirect unknown game to default, or fix invalid module/scope
+  // Redirect invalid URLs: try to find the scope in any game, otherwise strip invalid segments
   useEffect(() => {
-    if (gameParam && !isGameId(gameParam)) {
-      navigate(schemaPath(DEFAULT_GAME), { replace: true });
-      return;
-    }
-
-    if (declarations.length === 0) return;
-
-    const modules = new Set(declarations.map((d) => d.module));
-    const validModule = module && modules.has(module);
+    const validGame = gameParam && isGameId(gameParam);
+    const validModule = validGame && module && declarations.some((d) => d.module === module);
     const validScope =
-      scope && validModule && declarations.some((d) => d.module === module && d.name === scope);
+      validModule && scope && declarations.some((d) => d.module === module && d.name === scope);
 
-    if (scope && !validScope) {
-      navigate(schemaPath(game, validModule ? module : undefined), { replace: true });
-    } else if (module && !validModule) {
-      navigate(schemaPath(game), { replace: true });
+    if (validScope || (validModule && !scope) || (!module && (!gameParam || validGame))) return;
+
+    if (scope) {
+      // Check if the scope exists in another module of the current game
+      const sameGameMatch = declarations.find((d) => d.name === scope);
+      if (sameGameMatch) {
+        navigate(schemaPath(game, sameGameMatch.module, sameGameMatch.name), { replace: true });
+        return;
+      }
+
+      // Check if the scope exists in another game
+      const derived = getDerivedGameData(game);
+      for (const [gameId, lookup] of derived.otherGamesLookup) {
+        const match = lookup.get(scope);
+        if (match) {
+          navigate(schemaPath(gameId, match.module, match.name), { replace: true });
+          return;
+        }
+      }
     }
+
+    navigate(schemaPath(validGame ? game : DEFAULT_GAME, validModule ? module : undefined), {
+      replace: true,
+    });
   }, [gameParam, game, declarations, module, scope, navigate]);
 
   return <DeclarationsPage context={context} />;
