@@ -17,6 +17,7 @@ export type DeclarationsContextType = {
   metadata: SchemaMetadata;
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
+  crossModuleLookup: Map<string, Declaration>;
   error: string | null;
 };
 
@@ -27,5 +28,6 @@ export const DeclarationsContext = createContext<DeclarationsContextType>({
   metadata: { revision: 0, versionDate: "", versionTime: "" },
   references: new Map(),
   otherGamesLookup: new Map(),
+  crossModuleLookup: new Map(),
   error: null,
 });

@@ -75,10 +75,17 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
   return refs;
 }
 
+// Client classes use C_ prefix (e.g. C_BaseEntity), server uses C (e.g. CBaseEntity)
+function crossModuleName(name: string): string | null {
+  if (name.startsWith("C_")) return "C" + name.slice(2);
+  return null;
+}
+
 type DerivedGameData = {
   classesByKey: Map<string, SchemaClass>;
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
+  crossModuleLookup: Map<string, Declaration>;
 };
 
 const cache = new Map<GameId, DerivedGameData>();
@@ -116,10 +123,33 @@ export function getDerivedGameData(gameId: GameId): DerivedGameData {
     }
   }
 
+  // Build cross-module lookup between client and server
+  const serverByName = new Map<string, Declaration>();
+  const clientByName = new Map<string, Declaration>();
+  for (const d of declarations) {
+    if (d.module === "server") serverByName.set(d.name, d);
+    else if (d.module === "client") clientByName.set(d.name, d);
+  }
+
+  const crossModuleLookup = new Map<string, Declaration>();
+  for (const [src, dst] of [
+    [clientByName, serverByName],
+    [serverByName, clientByName],
+  ] as const) {
+    for (const [name, d] of src) {
+      const mapped = crossModuleName(name);
+      const match = (mapped && dst.get(mapped)) || dst.get(name);
+      if (match && match.kind === d.kind) {
+        crossModuleLookup.set(declarationKey(d.module, name), match);
+      }
+    }
+  }
+
   const result: DerivedGameData = {
     classesByKey,
     references: buildReferences(allDeclarations),
     otherGamesLookup,
+    crossModuleLookup,
   };
 
   cache.set(gameId, result);

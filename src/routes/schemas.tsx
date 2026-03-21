@@ -140,6 +140,7 @@ export default function SchemasPage() {
       classesByKey: derived?.classesByKey ?? new Map(),
       references: derived?.references ?? new Map(),
       otherGamesLookup: derived?.otherGamesLookup ?? new Map(),
+      crossModuleLookup: derived?.crossModuleLookup ?? new Map(),
       error,
     };
   }, [game, declarations, metadata, error]);
