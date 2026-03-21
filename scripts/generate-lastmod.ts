@@ -28,7 +28,14 @@ function extractLastModified(repoDir: string): Promise<Record<string, string>> {
 
     let currentDate = "";
     let exitCode: number | null = null;
+    let rlClosed = false;
     const rl = createInterface({ input: proc.stdout });
+
+    function tryFinish() {
+      if (exitCode === null || !rlClosed) return;
+      if (exitCode !== 0) reject(new Error(`git log exited ${exitCode}`));
+      else resolve(map);
+    }
 
     rl.on("line", (line) => {
       if (line.startsWith("COMMIT ")) {
@@ -42,10 +49,11 @@ function extractLastModified(repoDir: string): Promise<Record<string, string>> {
     proc.on("error", reject);
     proc.on("close", (code) => {
       exitCode = code;
+      tryFinish();
     });
     rl.on("close", () => {
-      if (exitCode !== 0) reject(new Error(`git log exited ${exitCode}`));
-      else resolve(map);
+      rlClosed = true;
+      tryFinish();
     });
   });
 }
