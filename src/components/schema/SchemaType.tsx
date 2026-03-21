@@ -274,7 +274,9 @@ export function MetadataTags({
     groups.sort((a, b) => {
       const p = priority(a.name) - priority(b.name);
       if (p !== 0) return p;
-      return a.name.localeCompare(b.name);
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
     });
     return groups;
   }, [metadata]);

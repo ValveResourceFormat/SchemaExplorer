@@ -3,13 +3,14 @@ import { fileURLToPath } from "node:url";
 import { GAME_LIST } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
 import { intrinsicDeclarations } from "../src/data/intrinsics.ts";
+import { allDeclarations, declarationKey } from "../src/data/derived.ts";
 import { readGzippedJson } from "./lib/read-gzipped-json.ts";
 import type { SchemaFieldType } from "../src/data/types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");
 
-const intrinsicNames = new Set(intrinsicDeclarations.map((d) => d.name));
+const intrinsicNames = new Set(intrinsicDeclarations.keys());
 
 function collectMissing(
   type: SchemaFieldType,
@@ -29,7 +30,7 @@ function collectMissing(
       break;
     case "declared_class":
     case "declared_enum": {
-      const key = `${type.module}/${type.name}`;
+      const key = declarationKey(type.module, type.name);
       if (!knownKeys.has(key)) {
         if (!declared.has(key)) declared.set(key, new Set());
         declared.get(key)!.add(source);
@@ -53,9 +54,12 @@ for (const game of GAME_LIST) {
   const data = await readGzippedJson<SchemasJson>(`${schemasDir}/${game.id}.json.gz`);
   const { declarations } = parseSchemas(data);
 
-  const knownKeys = new Set(declarations.map((d) => `${d.module}/${d.name}`));
+  const knownKeys = new Set<string>();
+  for (const d of allDeclarations(declarations)) {
+    knownKeys.add(declarationKey(d.module, d.name));
+  }
 
-  for (const decl of declarations) {
+  for (const decl of allDeclarations(declarations)) {
     if (decl.kind !== "class") continue;
     for (const field of decl.fields) {
       collectMissing(field.type, missingAtomics, missingDeclared, knownKeys, game.id);
@@ -64,7 +68,7 @@ for (const game of GAME_LIST) {
 }
 
 function printSection(title: string, entries: Map<string, Set<string>>) {
-  const sorted = [...entries.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const sorted = [...entries.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
   if (sorted.length === 0) {
     console.log(`No ${title} found.`);
   } else {

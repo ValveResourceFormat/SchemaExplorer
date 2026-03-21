@@ -11,13 +11,8 @@ import { SchemaEnumView } from "./SchemaEnum";
 import { ClassTree } from "./ClassTree";
 import { Declaration } from "../../data/types";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
-import {
-  DeclarationsContext,
-  DeclarationsContextType,
-  declarationKey,
-  schemaPath,
-} from "./DeclarationsContext";
-import { GAME_LIST, GameId, getGameDef, compareModuleNames } from "../../games-list";
+import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { GAME_LIST, GameId, getGameDef } from "../../games-list";
 import { SEARCH_TAGS } from "../search/SearchBox";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { SectionLink } from "./styles";
@@ -155,13 +150,12 @@ function OtherGamesResults() {
   const parsed = useParsedSearch();
 
   const gameResults = useMemo(() => {
-    const result: { gameId: GameId; declarations: Declaration[] }[] = [];
+    const result: { gameId: GameId; found: Declaration[] }[] = [];
     for (const [gameId, lookup] of ctx.otherGamesLookup) {
       if (gameId === ctx.game) continue;
-      const decls = Array.from(lookup.values());
-      const found = searchDeclarations(decls, parsed);
+      const found = searchDeclarations(lookup.values(), parsed);
       if (found.length > 0) {
-        result.push({ gameId, declarations: found });
+        result.push({ gameId, found });
       }
     }
     return result;
@@ -171,13 +165,8 @@ function OtherGamesResults() {
 
   return (
     <>
-      {gameResults.map(({ gameId, declarations }) => {
+      {gameResults.map(({ gameId, found }) => {
         const gameInfo = getGameDef(gameId);
-        const overrideCtx: DeclarationsContextType = {
-          ...ctx,
-          game: gameId,
-          declarations,
-        };
         return (
           <React.Fragment key={gameId}>
             <OtherGameHeader>
@@ -186,8 +175,8 @@ function OtherGamesResults() {
               </svg>{" "}
               {gameInfo?.name}
             </OtherGameHeader>
-            <DeclarationsContext.Provider value={overrideCtx}>
-              <LazyList data={declarations} render={renderSearchResult} />
+            <DeclarationsContext.Provider value={{ ...ctx, game: gameId }}>
+              <LazyList data={found} render={renderSearchResult} />
             </DeclarationsContext.Provider>
           </React.Fragment>
         );
@@ -199,19 +188,11 @@ function OtherGamesResults() {
 function ModuleList() {
   const { game, declarations } = useContext(DeclarationsContext);
 
-  const modules = useMemo(() => {
-    const moduleMap = new Map<string, number>();
-    for (const d of declarations) {
-      moduleMap.set(d.module, (moduleMap.get(d.module) ?? 0) + 1);
-    }
-    return Array.from(moduleMap.entries()).sort(([a], [b]) => compareModuleNames(a, b));
-  }, [declarations]);
-
   return (
     <ModuleChipsBlock>
-      {modules.map(([mod, count]) => (
+      {[...declarations].map(([mod, moduleMap]) => (
         <SectionLink key={mod} to={schemaPath(game, mod)}>
-          {mod} ({count})
+          {mod} ({moduleMap.size})
         </SectionLink>
       ))}
     </ModuleChipsBlock>

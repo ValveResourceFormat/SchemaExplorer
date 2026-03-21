@@ -1,7 +1,7 @@
 import { useContext, useMemo } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
-import { SchemaClass } from "../../data/types";
+import { Declaration, SchemaClass } from "../../data/types";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 
 interface TreeNode {
@@ -9,18 +9,29 @@ interface TreeNode {
   children: TreeNode[];
 }
 
-function buildTree(classesByKey: Map<string, SchemaClass>): TreeNode[] {
+function buildTree(
+  classes: Map<string, SchemaClass>,
+  declarations: Map<string, Map<string, Declaration>>,
+): TreeNode[] {
   const allNodes = new Map<string, TreeNode>();
   const hasParentInTree = new Set<string>();
 
-  for (const [key, cls] of classesByKey) {
+  for (const [key, cls] of classes) {
     allNodes.set(key, { cls, children: [] });
   }
 
-  for (const [key, cls] of classesByKey) {
+  for (const [key, cls] of classes) {
     for (const parent of cls.parents) {
       const parentKey = declarationKey(parent.module, parent.name);
-      const parentNode = allNodes.get(parentKey);
+      let parentNode = allNodes.get(parentKey);
+      if (!parentNode) {
+        // Parent may be in a different module
+        const parentDecl = declarations.get(parent.module)?.get(parent.name);
+        if (parentDecl?.kind === "class") {
+          parentNode = { cls: parentDecl, children: [] };
+          allNodes.set(parentKey, parentNode);
+        }
+      }
       if (parentNode) {
         hasParentInTree.add(key);
         parentNode.children.push(allNodes.get(key)!);
@@ -30,7 +41,9 @@ function buildTree(classesByKey: Map<string, SchemaClass>): TreeNode[] {
 
   for (const node of allNodes.values()) {
     if (node.children.length > 1) {
-      node.children.sort((a, b) => a.cls.name.localeCompare(b.cls.name));
+      node.children.sort((a, b) =>
+        a.cls.name < b.cls.name ? -1 : a.cls.name > b.cls.name ? 1 : 0,
+      );
     }
   }
 
@@ -40,7 +53,7 @@ function buildTree(classesByKey: Map<string, SchemaClass>): TreeNode[] {
       roots.push(node);
     }
   }
-  roots.sort((a, b) => a.cls.name.localeCompare(b.cls.name));
+  roots.sort((a, b) => (a.cls.name < b.cls.name ? -1 : a.cls.name > b.cls.name ? 1 : 0));
   return roots;
 }
 
@@ -112,18 +125,21 @@ function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
 }
 
 export function ClassTree({ module }: { module?: string }) {
-  const { classesByKey, game } = useContext(DeclarationsContext);
+  const { declarations, game } = useContext(DeclarationsContext);
 
-  const filteredClassesByKey = useMemo(() => {
-    if (!module) return classesByKey;
-    const filtered = new Map<string, SchemaClass>();
-    for (const [key, cls] of classesByKey) {
-      if (cls.module === module) filtered.set(key, cls);
+  const classes = useMemo(() => {
+    const result = new Map<string, SchemaClass>();
+    const modules = module ? [declarations.get(module)] : declarations.values();
+    for (const moduleMap of modules) {
+      if (!moduleMap) continue;
+      for (const d of moduleMap.values()) {
+        if (d.kind === "class") result.set(declarationKey(d.module, d.name), d);
+      }
     }
-    return filtered;
-  }, [classesByKey, module]);
+    return result;
+  }, [declarations, module]);
 
-  const roots = useMemo(() => buildTree(filteredClassesByKey), [filteredClassesByKey]);
+  const roots = useMemo(() => buildTree(classes, declarations), [classes, declarations]);
 
   return (
     <TreeContainer>

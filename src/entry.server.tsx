@@ -3,24 +3,26 @@ import { ServerRouter } from "react-router";
 import { renderToPipeableStream } from "react-dom/server";
 import { PassThrough } from "node:stream";
 import { resolve as pathResolve } from "node:path";
-import { preloadedData } from "./data/preload";
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { buildAllGameContexts } from "./data/derived";
 import { parseSchemas, type SchemasJson } from "./data/schemas";
-import { GAME_LIST } from "./games-list";
-import { readGzippedJson } from "../scripts/lib/read-gzipped-json.ts";
+import { GAME_LIST, type GameId } from "./games-list";
 
-export default async function handleRequest(
+const loaded = new Map<GameId, ReturnType<typeof parseSchemas>>();
+for (const game of GAME_LIST) {
+  const buf = readFileSync(pathResolve("schemas", `${game.id}.json.gz`));
+  const data: SchemasJson = JSON.parse(gunzipSync(buf).toString("utf-8"));
+  loaded.set(game.id, parseSchemas(data));
+}
+buildAllGameContexts(loaded, new Map());
+
+export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
-  for (const game of GAME_LIST) {
-    if (!preloadedData.has(game.id)) {
-      const data = await readGzippedJson<SchemasJson>(pathResolve("schemas", `${game.id}.json.gz`));
-      preloadedData.set(game.id, parseSchemas(data));
-    }
-  }
-
   return new Promise<Response>((resolve, reject) => {
     const body = new PassThrough();
     const chunks: Buffer[] = [];

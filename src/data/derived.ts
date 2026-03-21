@@ -1,8 +1,10 @@
-import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
+import type { Declaration, SchemaFieldType } from "./types";
+import type { ParsedSchemas } from "./schemas";
 import type { GameId } from "../games-list";
 import { GAME_LIST } from "../games-list";
-import { preloadedData } from "./preload";
-import { intrinsicDeclarations, INTRINSIC_MODULE } from "./intrinsics";
+import { INTRINSIC_MODULE } from "./intrinsics";
+
+// -- Types --
 
 export type ReferenceEntry = {
   declarationName: string;
@@ -11,9 +13,29 @@ export type ReferenceEntry = {
   relation: "field" | "class";
 };
 
+export type GameContext = {
+  game: GameId;
+  declarations: Map<string, Map<string, Declaration>>;
+  metadata: ParsedSchemas["metadata"];
+  references: Map<string, ReferenceEntry[]>;
+  otherGamesLookup: Map<GameId, Map<string, Declaration>>;
+  crossModuleLookup: Map<string, Declaration>;
+  error: string | null;
+};
+
+// -- Utilities --
+
 export function declarationKey(module: string, name: string): string {
   return `${module}/${name}`;
 }
+
+export function* allDeclarations(
+  declarations: Map<string, Map<string, Declaration>>,
+): Iterable<Declaration> {
+  for (const moduleMap of declarations.values()) yield* moduleMap.values();
+}
+
+// -- Private helpers --
 
 function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   switch (type.category) {
@@ -33,7 +55,9 @@ function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   }
 }
 
-function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntry[]> {
+function buildReferences(
+  declarations: Map<string, Map<string, Declaration>>,
+): Map<string, ReferenceEntry[]> {
   const refs = new Map<string, ReferenceEntry[]>();
 
   function addRef(target: string, entry: ReferenceEntry) {
@@ -45,7 +69,7 @@ function buildReferences(declarations: Declaration[]): Map<string, ReferenceEntr
     list.push(entry);
   }
 
-  for (const decl of declarations) {
+  for (const decl of allDeclarations(declarations)) {
     if (decl.kind === "class") {
       for (const parent of decl.parents) {
         addRef(declarationKey(parent.module, parent.name), {
@@ -81,77 +105,66 @@ function crossModuleName(name: string): string | null {
   return null;
 }
 
-type DerivedGameData = {
-  classesByKey: Map<string, SchemaClass>;
-  references: Map<string, ReferenceEntry[]>;
-  otherGamesLookup: Map<GameId, Map<string, Declaration>>;
-  crossModuleLookup: Map<string, Declaration>;
-};
+// -- Game context store --
 
-const cache = new Map<GameId, DerivedGameData>();
+const contexts = new Map<GameId, GameContext>();
 
-export function getDerivedGameData(gameId: GameId): DerivedGameData {
-  const cached = cache.get(gameId);
-  if (cached) return cached;
+export function buildAllGameContexts(
+  loaded: Map<GameId, ParsedSchemas>,
+  errors: Map<GameId, string>,
+): void {
+  contexts.clear();
 
-  const schema = preloadedData.get(gameId);
-  const declarations = schema?.declarations ?? [];
-
-  const allDeclarations = [...declarations, ...intrinsicDeclarations];
-
-  const classesByKey = new Map<string, SchemaClass>();
-  for (const d of allDeclarations) {
-    if (d.kind === "class") classesByKey.set(declarationKey(d.module, d.name), d);
-  }
-
-  const modules = new Set(declarations.map((d) => d.module));
-
-  const otherGamesLookup = new Map<GameId, Map<string, Declaration>>();
   for (const g of GAME_LIST) {
-    if (g.id === gameId) continue;
-    const other = preloadedData.get(g.id);
-    if (other) {
+    const schema = loaded.get(g.id);
+    const declarations = schema?.declarations ?? new Map<string, Map<string, Declaration>>();
+    const modules = new Set(declarations.keys());
+
+    const otherGamesLookup = new Map<GameId, Map<string, Declaration>>();
+    for (const other of GAME_LIST) {
+      if (other.id === g.id) continue;
+      const otherSchema = loaded.get(other.id);
+      if (!otherSchema) continue;
       const map = new Map<string, Declaration>();
-      for (const d of other.declarations) {
-        // On duplicate names, prefer the one whose module also exists in the current game
+      for (const d of allDeclarations(otherSchema.declarations)) {
         const existing = map.get(d.name);
         if (!existing || (modules.has(d.module) && !modules.has(existing.module))) {
           map.set(d.name, d);
         }
       }
-      otherGamesLookup.set(g.id, map);
+      otherGamesLookup.set(other.id, map);
     }
-  }
 
-  // Build cross-module lookup between client and server
-  const serverByName = new Map<string, Declaration>();
-  const clientByName = new Map<string, Declaration>();
-  for (const d of declarations) {
-    if (d.module === "server") serverByName.set(d.name, d);
-    else if (d.module === "client") clientByName.set(d.name, d);
-  }
+    // Build cross-module lookup between client and server
+    const clientByName = declarations.get("client") ?? new Map<string, Declaration>();
+    const serverByName = declarations.get("server") ?? new Map<string, Declaration>();
 
-  const crossModuleLookup = new Map<string, Declaration>();
-  for (const [src, dst] of [
-    [clientByName, serverByName],
-    [serverByName, clientByName],
-  ] as const) {
-    for (const [name, d] of src) {
-      const mapped = crossModuleName(name);
-      const match = (mapped && dst.get(mapped)) || dst.get(name);
-      if (match && match.kind === d.kind) {
-        crossModuleLookup.set(declarationKey(d.module, name), match);
+    const crossModuleLookup = new Map<string, Declaration>();
+    for (const [src, dst] of [
+      [clientByName, serverByName],
+      [serverByName, clientByName],
+    ] as const) {
+      for (const [name, d] of src) {
+        const mapped = crossModuleName(name);
+        const match = (mapped && dst.get(mapped)) || dst.get(name);
+        if (match && match.kind === d.kind) {
+          crossModuleLookup.set(declarationKey(d.module, name), match);
+        }
       }
     }
+
+    contexts.set(g.id, {
+      game: g.id,
+      declarations,
+      metadata: schema?.metadata ?? { revision: 0, versionDate: "", versionTime: "" },
+      references: buildReferences(declarations),
+      otherGamesLookup,
+      crossModuleLookup,
+      error: errors.get(g.id) ?? null,
+    });
   }
+}
 
-  const result: DerivedGameData = {
-    classesByKey,
-    references: buildReferences(allDeclarations),
-    otherGamesLookup,
-    crossModuleLookup,
-  };
-
-  cache.set(gameId, result);
-  return result;
+export function getGameContext(gameId: GameId): GameContext {
+  return contexts.get(gameId)!;
 }

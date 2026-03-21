@@ -133,7 +133,7 @@ export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
   isSearchResult?: boolean;
 }> = ({ declaration, isSearchResult }) => {
-  const { game, classesByKey } = useContext(DeclarationsContext);
+  const { game, declarations } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
 
   const inheritedGroups = useMemo(() => {
@@ -145,8 +145,8 @@ export const SchemaClassView: React.FC<{
         const key = declarationKey(p.module, p.name);
         if (visited.has(key)) continue;
         visited.add(key);
-        const parentDecl = classesByKey.get(key);
-        if (parentDecl) {
+        const parentDecl = declarations.get(p.module)?.get(p.name);
+        if (parentDecl?.kind === "class") {
           collect(parentDecl.parents);
           groups.push({ parent: p, fields: parentDecl.fields });
         } else {
@@ -156,7 +156,7 @@ export const SchemaClassView: React.FC<{
     }
     collect(declaration.parents);
     return groups;
-  }, [declaration.parents, classesByKey, isSearchResult]);
+  }, [declaration.parents, declarations, isSearchResult]);
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
   const declPath = schemaPath(game, declaration.module, declaration.name);
