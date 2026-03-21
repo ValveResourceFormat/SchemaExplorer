@@ -100,7 +100,7 @@ function buildReferences(
 }
 
 // Client classes use C_ prefix (e.g. C_BaseEntity), server uses C (e.g. CBaseEntity)
-function crossModuleName(name: string): string | null {
+export function crossModuleName(name: string): string | null {
   if (name.startsWith("C_")) return "C" + name.slice(2);
   if (name.startsWith("C") && name[1] !== "_") return "C_" + name.slice(1);
   return null;
