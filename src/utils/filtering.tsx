@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { SearchContext } from "../components/search/SearchContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
+import { allDeclarations } from "../data/derived";
 import * as api from "../data/types";
 
 function useHydrated(): boolean {
@@ -99,7 +100,7 @@ export function useParsedSearch(): ParsedSearch {
   return useMemo(() => (search ? parseSearch(search) : EMPTY_PARSED), [search]);
 }
 
-export function useFilteredData(declarations: api.Declaration[]) {
+export function useFilteredData(declarations: Map<string, Map<string, api.Declaration>>) {
   const { search } = useContext(SearchContext);
   const parsed = useParsedSearch();
   const { module = "", scope = "" } = useParams();
@@ -107,14 +108,15 @@ export function useFilteredData(declarations: api.Declaration[]) {
   return useMemo(() => {
     if (search) {
       return {
-        data: searchDeclarations(declarations, parsed),
+        data: searchDeclarations(allDeclarations(declarations), parsed),
         isSearching: true,
       };
     }
 
     if (module && scope) {
+      const found = declarations.get(module)?.get(scope);
       return {
-        data: declarations.filter((x) => x.module === module && x.name === scope),
+        data: found ? [found] : [],
         isSearching: false,
       };
     }
@@ -175,7 +177,7 @@ export function matchesMetadataValues(
 }
 
 export function searchDeclarations(
-  declarations: api.Declaration[],
+  declarations: Iterable<api.Declaration>,
   parsed: ParsedSearch,
 ): api.Declaration[] {
   const {

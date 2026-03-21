@@ -45,12 +45,6 @@ for (const game of GAME_LIST) {
   const data = await readGzippedJson<SchemasJson>(resolve(schemasDir, `${game.id}.json.gz`));
   const { declarations } = parseSchemas(data);
 
-  const byModule = new Map<string, string[]>();
-  for (const d of declarations) {
-    if (!byModule.has(d.module)) byModule.set(d.module, []);
-    byModule.get(d.module)!.push(d.name);
-  }
-
   // Load per-class lastmod data if available
   let lastmod: Record<string, string> = {};
   try {
@@ -63,9 +57,9 @@ for (const game of GAME_LIST) {
   const gameUrls: SitemapUrl[] = [];
   let gameMaxDate: string | undefined;
 
-  for (const [mod, names] of byModule) {
+  for (const [mod, inner] of declarations) {
     let moduleMaxDate: string | undefined;
-    for (const name of names) {
+    for (const [name] of inner) {
       const fileName = name.replace(/:/g, "_");
       const date = lastmod[`${mod}/${fileName}`];
       if (date && (!moduleMaxDate || date > moduleMaxDate)) moduleMaxDate = date;

@@ -13,7 +13,6 @@ import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
 import { DeclarationsContext } from "./schema/DeclarationsContext";
 import { Declaration } from "../data/types";
-import { compareModuleNames } from "../games-list";
 import { DeclarationSidebarElement, SidebarGroupHeader, SidebarWrapper } from "./layout/Sidebar";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
 import { SearchInput } from "./search/SearchBox";
@@ -22,26 +21,6 @@ import { GameSwitcher, S2VLogo } from "./layout/NavBar";
 type SidebarRow =
   | { type: "header"; module: string; count: number }
   | { type: "item"; declaration: Declaration };
-
-interface ModuleGroup {
-  module: string;
-  items: Declaration[];
-}
-
-function groupByModule(declarations: Declaration[]): ModuleGroup[] {
-  const map = new Map<string, Declaration[]>();
-  for (const d of declarations) {
-    let items = map.get(d.module);
-    if (!items) {
-      items = [];
-      map.set(d.module, items);
-    }
-    items.push(d);
-  }
-  return Array.from(map, ([module, items]) => ({ module, items })).sort((a, b) =>
-    compareModuleNames(a.module, b.module),
-  );
-}
 
 const ROW_HEIGHT = 28;
 const STATIC_BEFORE = 19;
@@ -65,29 +44,29 @@ export const DeclarationsSidebar = ({
   const navigatedFromSidebarRef = useRef(false);
   const isInitialMount = useRef(true);
 
-  const groups = useMemo(() => {
-    let filtered = declarations;
-    if (filter) {
-      const lower = filter.toLowerCase();
-      filtered = declarations.filter((d) => d.name.toLowerCase().includes(lower));
-    }
-    return groupByModule(filtered);
-  }, [declarations, filter]);
-
   const { rows, stickyIndexes } = useMemo(() => {
     const rows: SidebarRow[] = [];
     const stickyIndexes: number[] = [];
-    for (const g of groups) {
+    const lower = filter?.toLowerCase();
+    for (const [module, moduleMap] of declarations) {
+      // Collect matching items (or all items if no filter)
+      const items: Declaration[] = [];
+      for (const d of moduleMap.values()) {
+        if (!lower || d.name.toLowerCase().includes(lower)) {
+          items.push(d);
+        }
+      }
+      if (items.length === 0) continue;
       stickyIndexes.push(rows.length);
-      rows.push({ type: "header", module: g.module, count: g.items.length });
-      if (!collapsed.has(g.module)) {
-        for (const d of g.items) {
+      rows.push({ type: "header", module, count: items.length });
+      if (!collapsed.has(module)) {
+        for (const d of items) {
           rows.push({ type: "item", declaration: d });
         }
       }
     }
     return { rows, stickyIndexes };
-  }, [groups, collapsed]);
+  }, [declarations, filter, collapsed]);
 
   const rangeExtractor = useCallback(
     (range: Range) => {

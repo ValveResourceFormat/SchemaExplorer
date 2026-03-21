@@ -7,12 +7,20 @@ import {
   HIDDEN_SENTINEL,
   type SchemasJson,
 } from "./schemas";
-import type { SchemaClass } from "./types";
+import type { SchemaClass, Declaration } from "./types";
 import testData from "../utils/test-schemas.json";
+
+function findDecl(declarations: Map<string, Map<string, Declaration>>, name: string) {
+  for (const moduleMap of declarations.values()) {
+    const d = moduleMap.get(name);
+    if (d) return d;
+  }
+  return undefined;
+}
 
 function getClass(name: string): SchemaClass {
   const result = parseSchemas(testData as SchemasJson);
-  const decl = result.declarations.find((d) => d.name === name && d.kind === "class");
+  const decl = findDecl(result.declarations, name);
   if (!decl || decl.kind !== "class") throw new Error(`Class ${name} not found`);
   return decl;
 }
@@ -224,9 +232,7 @@ describe("assignDefaults via parseSchemas", () => {
 
   it("does not mutate parent field defaults from child class", () => {
     const result = parseSchemas(testData as SchemasJson);
-    const base = result.declarations.find(
-      (d) => d.name === "TestBaseClass" && d.kind === "class",
-    ) as SchemaClass;
+    const base = result.declarations.get("test")?.get("TestBaseClass") as SchemaClass;
     expect(getField(base, "m_flB").defaultValue).toBe("20");
   });
 
@@ -349,12 +355,8 @@ describe("assignDefaults via parseSchemas", () => {
 
   it("assigns correct defaults when same-name class exists in different modules", () => {
     const result = parseSchemas(testData as SchemasJson);
-    const classA = result.declarations.find(
-      (d) => d.name === "TestSameNameClass" && d.kind === "class" && d.module === "modA",
-    ) as SchemaClass;
-    const classB = result.declarations.find(
-      (d) => d.name === "TestSameNameClass" && d.kind === "class" && d.module === "modB",
-    ) as SchemaClass;
+    const classA = result.declarations.get("modA")?.get("TestSameNameClass") as SchemaClass;
+    const classB = result.declarations.get("modB")?.get("TestSameNameClass") as SchemaClass;
     expect(classA).toBeDefined();
     expect(classB).toBeDefined();
     expect(getField(classA, "m_flVal").defaultValue).toBe("100");
@@ -374,31 +376,37 @@ describe("assignDefaults via parseSchemas", () => {
 describe("parseSchemas", () => {
   it("deduplicates classes by module/name", () => {
     const result = parseSchemas(testData as SchemasJson);
-    const effectDataCount = result.declarations.filter((d) => d.name === "CEffectData").length;
     // CEffectData appears in both client and server modules — both should exist
-    expect(effectDataCount).toBe(2);
-    // But exact duplicates (same module+name) should be deduped
-    const skyCount = result.declarations.filter((d) => d.name === "sky3dparams_t");
-    const modules = new Set(skyCount.map((d) => d.module));
-    expect(modules.size).toBe(skyCount.length);
+    expect(result.declarations.get("client")?.has("CEffectData")).toBe(true);
+    expect(result.declarations.get("server")?.has("CEffectData")).toBe(true);
+    // But exact duplicates (same module+name) should be deduped — each module map has at most one entry per name
+    let skyCount = 0;
+    for (const moduleMap of result.declarations.values()) {
+      if (moduleMap.has("sky3dparams_t")) skyCount++;
+    }
+    // Each module containing sky3dparams_t has exactly one entry (Map keys are unique)
+    expect(skyCount).toBeGreaterThanOrEqual(1);
   });
 
-  it("sorts declarations alphabetically by name", () => {
+  it("sorts declarations alphabetically by name within each module", () => {
     const result = parseSchemas(testData as SchemasJson);
-    for (let i = 1; i < result.declarations.length; i++) {
-      expect(
-        result.declarations[i].name.localeCompare(result.declarations[i - 1].name),
-      ).toBeGreaterThanOrEqual(0);
+    for (const moduleMap of result.declarations.values()) {
+      const names = [...moduleMap.keys()];
+      for (let i = 1; i < names.length; i++) {
+        expect(names[i] >= names[i - 1]).toBe(true);
+      }
     }
   });
 
   it("fills in missing metadata arrays", () => {
     const result = parseSchemas(testData as SchemasJson);
-    for (const d of result.declarations) {
-      expect(Array.isArray(d.metadata)).toBe(true);
-      if (d.kind === "class") {
-        for (const f of d.fields) {
-          expect(Array.isArray(f.metadata)).toBe(true);
+    for (const moduleMap of result.declarations.values()) {
+      for (const d of moduleMap.values()) {
+        expect(Array.isArray(d.metadata)).toBe(true);
+        if (d.kind === "class") {
+          for (const f of d.fields) {
+            expect(Array.isArray(f.metadata)).toBe(true);
+          }
         }
       }
     }
@@ -416,9 +424,7 @@ describe("parseSchemas", () => {
 
   it("parses enum declarations with members and metadata", () => {
     const result = parseSchemas(testData as SchemasJson);
-    const decl = result.declarations.find(
-      (d) => d.name === "PulseTestEnumColor_t" && d.kind === "enum",
-    );
+    const decl = findDecl(result.declarations, "PulseTestEnumColor_t");
     expect(decl).toBeDefined();
     if (decl?.kind !== "enum") throw new Error("Expected enum");
     expect(decl.alignment).toBe("uint32_t");
@@ -430,9 +436,7 @@ describe("parseSchemas", () => {
 
   it("parses enums without metadata on members", () => {
     const result = parseSchemas(testData as SchemasJson);
-    const decl = result.declarations.find(
-      (d) => d.name === "DOTA_UNIT_TARGET_TEAM" && d.kind === "enum",
-    );
+    const decl = findDecl(result.declarations, "DOTA_UNIT_TARGET_TEAM");
     expect(decl).toBeDefined();
     if (decl?.kind !== "enum") throw new Error("Expected enum");
     // Members without metadata should get empty array

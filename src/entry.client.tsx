@@ -1,18 +1,20 @@
-import { preloadedData, preloadErrors } from "./data/preload";
-import { GAME_LIST } from "./games-list";
+import { buildAllGameContexts } from "./data/derived";
+import { GAME_LIST, type GameId } from "./games-list";
 
 async function hydrate() {
   const { loadGameSchemas } = await import("./data/loader");
+  const loaded = new Map<GameId, Awaited<ReturnType<typeof loadGameSchemas>>>();
+  const errors = new Map<GameId, string>();
   await Promise.all(
     GAME_LIST.map(async (g) => {
       try {
-        const data = await loadGameSchemas(g.id);
-        preloadedData.set(g.id, data);
+        loaded.set(g.id, await loadGameSchemas(g.id));
       } catch (e) {
-        preloadErrors.set(g.id, e instanceof Error ? e.message : String(e));
+        errors.set(g.id, e instanceof Error ? e.message : String(e));
       }
     }),
   );
+  buildAllGameContexts(loaded, errors);
 
   const { hydrateRoot } = await import("react-dom/client");
   const { HydratedRouter } = await import("react-router/dom");

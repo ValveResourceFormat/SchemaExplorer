@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { styled } from "@linaria/react";
-import { DeclarationsContext, DeclarationsContextType } from "./schema/DeclarationsContext";
+import { DeclarationsContext, type GameContext } from "./schema/DeclarationsContext";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./schema/ContentList";
 import { SidebarFilterContext } from "./layout/SidebarFilterContext";
@@ -8,7 +8,7 @@ import { SearchContext } from "./search/SearchContext";
 import { useHashParam } from "../utils/filtering";
 import { NavBar } from "./layout/NavBar";
 
-export default function DeclarationsPage({ context }: { context: DeclarationsContextType }) {
+export default function DeclarationsPage({ context }: { context: GameContext }) {
   const [filter, setFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const search = useHashParam("search") ?? "";

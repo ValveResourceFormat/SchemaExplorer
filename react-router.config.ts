@@ -2,7 +2,6 @@ import type { Config } from "@react-router/dev/config";
 import { GAME_LIST } from "./src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "./src/data/schemas.ts";
 import { readGzippedJson } from "./scripts/lib/read-gzipped-json.ts";
-import { intrinsicDeclarations } from "./src/data/intrinsics.ts";
 
 const isDev = process.argv.includes("dev");
 
@@ -22,21 +21,14 @@ export default {
 
             const data = await readGzippedJson<SchemasJson>(`schemas/${game.id}.json.gz`);
             const { declarations } = parseSchemas(data);
-            const allDeclarations = [...declarations, ...intrinsicDeclarations];
-
-            const names = new Map<string, Set<string>>();
-            for (const d of allDeclarations) {
-              if (!names.has(d.module)) names.set(d.module, new Set());
-              names.get(d.module)!.add(d.name);
-            }
 
             const limit = process.env.PRERENDER_ALL ? 0 : 10;
             let count = 0;
 
-            for (const mod of names.keys()) {
+            for (const [mod, moduleMap] of declarations) {
               paths.push(`/${game.id}/${mod}`);
               if (!limit || count < limit) {
-                for (const name of names.get(mod) ?? []) {
+                for (const name of moduleMap.keys()) {
                   if (process.platform === "win32" && name.includes("::")) continue;
                   paths.push(`/${game.id}/${mod}/${name}`);
                   if (limit && ++count >= limit) break;

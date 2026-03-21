@@ -1,30 +1,18 @@
 import { createContext } from "react";
 import { href } from "react-router";
-import { Declaration, SchemaClass } from "../../data/types";
-import { SchemaMetadata } from "../../data/schemas";
-import { DEFAULT_GAME, GameId } from "../../games-list";
+import type { GameContext } from "../../data/derived";
+import { DEFAULT_GAME } from "../../games-list";
+
+export type { GameContext } from "../../data/derived";
 export { declarationKey } from "../../data/derived";
-import type { ReferenceEntry } from "../../data/derived";
 
 export function schemaPath(game: string, module?: string, scope?: string): string {
   return href("/:game?/:module?/:scope?", { game, module, scope });
 }
 
-export type DeclarationsContextType = {
-  game: GameId;
-  declarations: Declaration[];
-  classesByKey: Map<string, SchemaClass>;
-  metadata: SchemaMetadata;
-  references: Map<string, ReferenceEntry[]>;
-  otherGamesLookup: Map<GameId, Map<string, Declaration>>;
-  crossModuleLookup: Map<string, Declaration>;
-  error: string | null;
-};
-
-export const DeclarationsContext = createContext<DeclarationsContextType>({
+export const DeclarationsContext = createContext<GameContext>({
   game: DEFAULT_GAME,
-  declarations: [],
-  classesByKey: new Map(),
+  declarations: new Map(),
   metadata: { revision: 0, versionDate: "", versionTime: "" },
   references: new Map(),
   otherGamesLookup: new Map(),

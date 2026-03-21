@@ -5,6 +5,8 @@ import type {
   SchemaFieldType,
   SchemaMetadataEntry,
 } from "./types.ts";
+import { compareModuleNames } from "../games-list.ts";
+import { intrinsicDeclarations } from "./intrinsics.ts";
 
 export const HIDDEN_SENTINEL = "__HIDDEN_FOR_DIFF__";
 
@@ -195,6 +197,8 @@ export interface SchemaMetadata {
   versionTime: string;
 }
 
+export type ParsedSchemas = ReturnType<typeof parseSchemas>;
+
 export function parseSchemas(data: SchemasJson) {
   const classes: Declaration[] = data.classes.map((c) => ({
     kind: "class" as const,
@@ -221,20 +225,30 @@ export function parseSchemas(data: SchemasJson) {
 
   assignDefaults(classes as SchemaClass[]);
 
-  const seen = new Set<string>();
-  const all: Declaration[] = [];
-  for (const arr of [classes, enums]) {
-    for (const d of arr) {
-      const key = `${d.module}/${d.name}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        all.push(d);
-      }
+  // Sort all declarations by module then name, build map in one pass
+  const all: Declaration[] = [...classes, ...enums, ...intrinsicDeclarations.values()];
+  all.sort((a, b) => {
+    const mc = compareModuleNames(a.module, b.module);
+    if (mc !== 0) return mc;
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
+
+  const declarations = new Map<string, Map<string, Declaration>>();
+  for (const d of all) {
+    let moduleMap = declarations.get(d.module);
+    if (!moduleMap) {
+      moduleMap = new Map();
+      declarations.set(d.module, moduleMap);
+    }
+    if (!moduleMap.has(d.name)) {
+      moduleMap.set(d.name, d);
     }
   }
 
   return {
-    declarations: all.sort((a, b) => a.name.localeCompare(b.name)),
+    declarations,
     metadata: {
       revision: data.revision ?? 0,
       versionDate: data.version_date ?? "",

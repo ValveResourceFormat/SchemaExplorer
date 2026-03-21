@@ -1,4 +1,4 @@
-import type { SchemaClass, SchemaFieldType } from "./types";
+import type { Declaration, SchemaFieldType } from "./types";
 
 export const INTRINSIC_MODULE = "_intrinsic";
 
@@ -376,11 +376,16 @@ const types: IntrinsicDef[] = [
   },
 ];
 
-export const intrinsicDeclarations: SchemaClass[] = types.map((c) => ({
-  kind: "class",
-  name: c.name,
-  module: INTRINSIC_MODULE,
-  parents: c.parents ?? [],
-  fields: (c.fields ?? []).map((f) => ({ ...f, metadata: [] })),
-  metadata: [],
-}));
+export const intrinsicDeclarations = new Map<string, Declaration>(
+  types.map((c): [string, Declaration] => [
+    c.name,
+    {
+      kind: "class",
+      name: c.name,
+      module: INTRINSIC_MODULE,
+      parents: c.parents ?? [],
+      fields: (c.fields ?? []).map((f) => ({ ...f, metadata: [] })),
+      metadata: [],
+    },
+  ]),
+);
