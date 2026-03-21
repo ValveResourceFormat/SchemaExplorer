@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { styled } from "@linaria/react";
 import {
   Declaration,
@@ -7,7 +7,7 @@ import {
   SchemaFieldType,
   SchemaMetadataEntry,
 } from "../../data/types";
-import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
+import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameDef, GameId } from "../../games-list";
 import { ICONS_URL } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";
@@ -33,6 +33,11 @@ const GameIconWrapper = styled.span`
     height: 18px;
     border-radius: 3px;
   }
+`;
+
+const ModuleIconWrapper = styled.span`
+  display: flex;
+  flex-shrink: 0;
 `;
 
 function typesEqual(a: SchemaFieldType, b: SchemaFieldType): boolean {
@@ -108,9 +113,13 @@ function compareDeclarations(a: Declaration, b: Declaration): DiffStatus {
 }
 
 export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
-  const { otherGamesLookup } = useContext(DeclarationsContext);
+  const { game, otherGamesLookup, crossModuleLookup } = useContext(DeclarationsContext);
 
-  const matches: {
+  const crossModuleMatch = crossModuleLookup.get(
+    declarationKey(declaration.module, declaration.name),
+  );
+
+  const gameMatches: {
     gameId: GameId;
     gameName: string;
     status: DiffStatus;
@@ -121,7 +130,7 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
     const match = lookup.get(declaration.name);
     if (match && match.kind === declaration.kind) {
       const gameInfo = getGameDef(gameId);
-      matches.push({
+      gameMatches.push({
         gameId,
         gameName: gameInfo?.name ?? gameId,
         status: compareDeclarations(declaration, match),
@@ -130,13 +139,26 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
     }
   }
 
-  if (matches.length === 0) return null;
+  if (!crossModuleMatch && gameMatches.length === 0) return null;
 
   return (
     <SectionWrapper>
       <SectionTitle>Also in</SectionTitle>
       <SectionList>
-        {matches.map(({ gameId, gameName, status, module: otherModule }) => (
+        {crossModuleMatch && (
+          <GameLink
+            key={`module-${crossModuleMatch.module}`}
+            to={schemaPath(game, crossModuleMatch.module, crossModuleMatch.name)}
+          >
+            <ModuleIconWrapper>
+              <svg width="16" height="16" aria-hidden="true">
+                <use href={`${ICONS_URL}#ki-module`} />
+              </svg>
+            </ModuleIconWrapper>
+            {crossModuleMatch.module}.dll
+          </GameLink>
+        )}
+        {gameMatches.map(({ gameId, gameName, status, module: otherModule }) => (
           <GameLink
             key={gameId}
             to={schemaPath(gameId, otherModule, declaration.name)}
