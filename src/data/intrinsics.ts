@@ -4,11 +4,8 @@ export const INTRINSIC_MODULE = "_intrinsic";
 
 const b = (name: string): SchemaFieldType => ({ category: "builtin", name });
 const bf = (count: number): SchemaFieldType => ({ category: "bitfield", count });
-const parent = (name: string) => [{ name, module: INTRINSIC_MODULE }];
-
 type IntrinsicDef = {
   name: string;
-  parents?: { name: string; module: string }[];
   fields?: { name: string; offset: number; type: SchemaFieldType }[];
   size: number;
 };
@@ -42,12 +39,7 @@ const types: IntrinsicDef[] = [
         name: "m128_f32",
         offset: 0,
         type: { category: "fixed_array", inner: b("float32"), count: 4 },
-      },
-      {
-        name: "m128_u32",
-        offset: 0,
-        type: { category: "fixed_array", inner: b("uint32"), count: 4 },
-      },
+      }
     ],
     size: 16,
   },
@@ -73,7 +65,13 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "matrix3x4a_t",
-    parents: parent("matrix3x4_t"),
+    fields: [
+      {
+        name: "m_flMatVal",
+        offset: 0,
+        type: { category: "fixed_array", inner: b("float32"), count: 12 },
+      },
+    ],
     size: 48,
   },
   {
@@ -97,7 +95,12 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "QuaternionAligned",
-    parents: parent("Quaternion"),
+    fields: [
+      { name: "x", offset: 0, type: b("float32") },
+      { name: "y", offset: 4, type: b("float32") },
+      { name: "z", offset: 8, type: b("float32") },
+      { name: "w", offset: 12, type: b("float32") },
+    ],
     size: 16,
   },
   {
@@ -146,13 +149,21 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "VectorAligned",
-    parents: parent("Vector"),
-    fields: [{ name: "w", offset: 12, type: b("float32") }],
+    fields: [
+      { name: "x", offset: 0, type: b("float32") },
+      { name: "y", offset: 4, type: b("float32") },
+      { name: "z", offset: 8, type: b("float32") },
+      { name: "w", offset: 12, type: b("float32") },
+    ],
     size: 16,
   },
   {
     name: "VectorWS",
-    parents: parent("Vector"),
+    fields: [
+      { name: "x", offset: 0, type: b("float32") },
+      { name: "y", offset: 4, type: b("float32") },
+      { name: "z", offset: 8, type: b("float32") },
+    ],
     size: 12,
   },
   {
@@ -173,7 +184,6 @@ const types: IntrinsicDef[] = [
   {
     name: "CEntityHandle",
     fields: [
-      { name: "m_Index", offset: 0, type: b("uint32") },
       { name: "m_EntityIndex", offset: 0, type: bf(15) },
       { name: "m_Serial", offset: 0, type: bf(17) },
     ],
@@ -186,7 +196,10 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "CHandle",
-    parents: parent("CEntityHandle"),
+    fields: [
+      { name: "m_EntityIndex", offset: 0, type: bf(15) },
+      { name: "m_Serial", offset: 0, type: bf(17) },
+    ],
     size: 4,
   },
   {
@@ -207,7 +220,6 @@ const types: IntrinsicDef[] = [
     fields: [
       { name: "m_nLength", offset: 0, type: b("int32") },
       { name: "m_nAllocatedSize", offset: 4, type: b("int32") },
-      { name: "m_pString", offset: 8, type: { category: "ptr", inner: b("char") } },
       {
         name: "m_szString",
         offset: 8,
@@ -243,7 +255,7 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "CGlobalSymbolCaseSensitive",
-    parents: parent("CGlobalSymbol"),
+    fields: [{ name: "m_Id", offset: 0, type: b("uint32") }],
     size: 4,
   },
   {
@@ -266,7 +278,12 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "CUtlVectorFixedGrowable",
-    parents: parent("CUtlVector"),
+    fields: [
+      { name: "m_Size", offset: 0, type: b("int32") },
+      { name: "m_pMemory", offset: 8, type: { category: "ptr", inner: b("void") } },
+      { name: "m_nAllocationCount", offset: 16, type: b("int32") },
+      { name: "m_nGrowSize", offset: 20, type: b("int32") },
+    ],
     size: 24,
   },
 
@@ -287,7 +304,7 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "CResourceString",
-    parents: parent("CResourcePointer"),
+    fields: [{ name: "m_nOffset", offset: 0, type: b("int32") }],
     size: 4,
   },
   {
@@ -302,12 +319,12 @@ const types: IntrinsicDef[] = [
   },
   {
     name: "CStrongHandleCopyable",
-    parents: parent("CStrongHandle"),
+    fields: [{ name: "m_pBinding", offset: 0, type: { category: "ptr", inner: b("void") } }],
     size: 8,
   },
   {
     name: "CStrongHandleVoid",
-    parents: parent("CStrongHandle"),
+    fields: [{ name: "m_pBinding", offset: 0, type: { category: "ptr", inner: b("void") } }],
     size: 8,
   },
   {
@@ -383,7 +400,7 @@ export const intrinsicDeclarations = new Map<string, Declaration>(
       kind: "class",
       name: c.name,
       module: INTRINSIC_MODULE,
-      parents: c.parents ?? [],
+      parents: [],
       fields: (c.fields ?? []).map((f) => ({ ...f, metadata: [] })),
       metadata: [],
     },
