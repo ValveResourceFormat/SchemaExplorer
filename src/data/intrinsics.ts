@@ -1,4 +1,4 @@
-import type { Declaration, SchemaFieldType } from "./types";
+import type { Declaration, SchemaFieldType } from "./types.ts";
 
 export const INTRINSIC_MODULE = "_intrinsic";
 
@@ -39,7 +39,7 @@ const types: IntrinsicDef[] = [
         name: "m128_f32",
         offset: 0,
         type: { category: "fixed_array", inner: b("float32"), count: 4 },
-      }
+      },
     ],
     size: 16,
   },

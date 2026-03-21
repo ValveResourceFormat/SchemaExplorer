@@ -1,8 +1,8 @@
-import type { Declaration, SchemaFieldType } from "./types";
-import type { ParsedSchemas } from "./schemas";
-import type { GameId } from "../games-list";
-import { GAME_LIST } from "../games-list";
-import { INTRINSIC_MODULE } from "./intrinsics";
+import type { Declaration, SchemaFieldType } from "./types.ts";
+import type { ParsedSchemas } from "./schemas.ts";
+import type { GameId } from "../games-list.ts";
+import { GAME_LIST } from "../games-list.ts";
+import { INTRINSIC_MODULE } from "./intrinsics.ts";
 
 // -- Types --
 
