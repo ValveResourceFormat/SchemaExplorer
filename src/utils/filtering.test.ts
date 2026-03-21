@@ -10,14 +10,7 @@ import {
   EMPTY_PARSED,
 } from "./filtering";
 import type { SchemaClass, SchemaEnum } from "../data/types";
-import { parseSchemas, type SchemasJson } from "../data/schemas";
-import { allDeclarations } from "../data/derived";
-import testSchemas from "./test-schemas.json";
-
-// -- Load test schema fixture (subset of CS2 schemas, frozen for test stability) --
-
-const { declarations: declarationMap } = parseSchemas(testSchemas as SchemasJson);
-const declarations = [...allDeclarations(declarationMap)];
+import { declarations } from "../data/test-helpers";
 
 const classesByName = new Map<string, SchemaClass>();
 const enumsByName = new Map<string, SchemaEnum>();

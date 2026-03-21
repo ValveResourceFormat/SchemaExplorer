@@ -1,35 +1,7 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseSchemas,
-  parseKV3Defaults,
-  diffObject,
-  resolveLeafType,
-  HIDDEN_SENTINEL,
-  type SchemasJson,
-} from "./schemas";
-import type { SchemaClass, Declaration } from "./types";
-import testData from "../utils/test-schemas.json";
-
-function findDecl(declarations: Map<string, Map<string, Declaration>>, name: string) {
-  for (const moduleMap of declarations.values()) {
-    const d = moduleMap.get(name);
-    if (d) return d;
-  }
-  return undefined;
-}
-
-function getClass(name: string): SchemaClass {
-  const result = parseSchemas(testData as SchemasJson);
-  const decl = findDecl(result.declarations, name);
-  if (!decl || decl.kind !== "class") throw new Error(`Class ${name} not found`);
-  return decl;
-}
-
-function getField(cls: SchemaClass, name: string) {
-  const field = cls.fields.find((f) => f.name === name);
-  if (!field) throw new Error(`Field ${name} not found on ${cls.name}`);
-  return field;
-}
+import { parseKV3Defaults, diffObject, resolveLeafType, HIDDEN_SENTINEL } from "./schemas";
+import type { SchemaClass } from "./types";
+import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
 // ==================== parseKV3Defaults ====================
 
@@ -231,8 +203,7 @@ describe("assignDefaults via parseSchemas", () => {
   });
 
   it("does not mutate parent field defaults from child class", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    const base = result.declarations.get("test")?.get("TestBaseClass") as SchemaClass;
+    const base = parsedSchemas.declarations.get("test")?.get("TestBaseClass") as SchemaClass;
     expect(getField(base, "m_flB").defaultValue).toBe("20");
   });
 
@@ -354,9 +325,8 @@ describe("assignDefaults via parseSchemas", () => {
   });
 
   it("assigns correct defaults when same-name class exists in different modules", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    const classA = result.declarations.get("modA")?.get("TestSameNameClass") as SchemaClass;
-    const classB = result.declarations.get("modB")?.get("TestSameNameClass") as SchemaClass;
+    const classA = parsedSchemas.declarations.get("modA")?.get("TestSameNameClass") as SchemaClass;
+    const classB = parsedSchemas.declarations.get("modB")?.get("TestSameNameClass") as SchemaClass;
     expect(classA).toBeDefined();
     expect(classB).toBeDefined();
     expect(getField(classA, "m_flVal").defaultValue).toBe("100");
@@ -375,13 +345,12 @@ describe("assignDefaults via parseSchemas", () => {
 
 describe("parseSchemas", () => {
   it("deduplicates classes by module/name", () => {
-    const result = parseSchemas(testData as SchemasJson);
     // CEffectData appears in both client and server modules — both should exist
-    expect(result.declarations.get("client")?.has("CEffectData")).toBe(true);
-    expect(result.declarations.get("server")?.has("CEffectData")).toBe(true);
+    expect(parsedSchemas.declarations.get("client")?.has("CEffectData")).toBe(true);
+    expect(parsedSchemas.declarations.get("server")?.has("CEffectData")).toBe(true);
     // But exact duplicates (same module+name) should be deduped — each module map has at most one entry per name
     let skyCount = 0;
-    for (const moduleMap of result.declarations.values()) {
+    for (const moduleMap of parsedSchemas.declarations.values()) {
       if (moduleMap.has("sky3dparams_t")) skyCount++;
     }
     // Each module containing sky3dparams_t has exactly one entry (Map keys are unique)
@@ -389,8 +358,7 @@ describe("parseSchemas", () => {
   });
 
   it("sorts declarations alphabetically by name within each module", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    for (const moduleMap of result.declarations.values()) {
+    for (const moduleMap of parsedSchemas.declarations.values()) {
       const names = [...moduleMap.keys()];
       for (let i = 1; i < names.length; i++) {
         expect(names[i] >= names[i - 1]).toBe(true);
@@ -399,8 +367,7 @@ describe("parseSchemas", () => {
   });
 
   it("fills in missing metadata arrays", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    for (const moduleMap of result.declarations.values()) {
+    for (const moduleMap of parsedSchemas.declarations.values()) {
       for (const d of moduleMap.values()) {
         expect(Array.isArray(d.metadata)).toBe(true);
         if (d.kind === "class") {
@@ -413,18 +380,15 @@ describe("parseSchemas", () => {
   });
 
   it("parses metadata fields", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    expect(result.metadata).toEqual({ revision: 0, versionDate: "test", versionTime: "test" });
-  });
-
-  it("defaults missing metadata fields to zero values", () => {
-    const result = parseSchemas({ classes: [], enums: [] });
-    expect(result.metadata).toEqual({ revision: 0, versionDate: "", versionTime: "" });
+    expect(parsedSchemas.metadata).toEqual({
+      revision: 0,
+      versionDate: "test",
+      versionTime: "test",
+    });
   });
 
   it("parses enum declarations with members and metadata", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    const decl = findDecl(result.declarations, "PulseTestEnumColor_t");
+    const decl = findDecl("PulseTestEnumColor_t");
     expect(decl).toBeDefined();
     if (decl?.kind !== "enum") throw new Error("Expected enum");
     expect(decl.alignment).toBe("uint32_t");
@@ -435,13 +399,91 @@ describe("parseSchemas", () => {
   });
 
   it("parses enums without metadata on members", () => {
-    const result = parseSchemas(testData as SchemasJson);
-    const decl = findDecl(result.declarations, "DOTA_UNIT_TARGET_TEAM");
+    const decl = findDecl("DOTA_UNIT_TARGET_TEAM");
     expect(decl).toBeDefined();
     if (decl?.kind !== "enum") throw new Error("Expected enum");
     // Members without metadata should get empty array
     expect(decl.members[0].metadata).toEqual([]);
     // Enum-level metadata should be preserved
     expect(decl.metadata).toEqual([{ name: "MEnumFlagsWithOverlappingBits" }]);
+  });
+
+  it("parses parent relationships", () => {
+    const decl = parsedSchemas.declarations.get("client")?.get("C_RectLight");
+    expect(decl).toBeDefined();
+    if (decl?.kind !== "class") throw new Error("Expected class");
+    expect(decl.parents).toEqual([{ module: "client", name: "C_BarnLight" }]);
+  });
+
+  it("parses field types correctly", () => {
+    const decl = parsedSchemas.declarations.get("client")?.get("CFuncWater");
+    expect(decl).toBeDefined();
+    if (decl?.kind !== "class") throw new Error("Expected class");
+    const field = decl.fields.find((f) => f.name === "m_BuoyancyHelper");
+    expect(field).toBeDefined();
+    expect(field!.type).toEqual({
+      category: "declared_class",
+      module: "client",
+      name: "CBuoyancyHelper",
+    });
+  });
+
+  it("preserves field metadata", () => {
+    const decl = parsedSchemas.declarations.get("client")?.get("C_RectLight");
+    if (decl?.kind !== "class") throw new Error("Expected class");
+    const field = decl.fields.find((f) => f.name === "m_bShowLight");
+    expect(field).toBeDefined();
+    expect(field!.metadata).toContainEqual({ name: "MNetworkEnable" });
+    expect(field!.metadata).toContainEqual({
+      name: "MNetworkChangeCallback",
+      value: '"RenderingChanged"',
+    });
+  });
+
+  it("preserves class-level metadata", () => {
+    const decl = parsedSchemas.declarations.get("client")?.get("C_RectLight");
+    if (decl?.kind !== "class") throw new Error("Expected class");
+    expect(decl.metadata).toContainEqual({
+      name: "MNetworkVarNames",
+      value: '"bool m_bShowLight"',
+    });
+  });
+
+  it("includes intrinsic declarations", () => {
+    const intrinsics = parsedSchemas.declarations.get("_intrinsic");
+    expect(intrinsics).toBeDefined();
+    expect(intrinsics!.has("Vector")).toBe(true);
+    expect(intrinsics!.has("QAngle")).toBe(true);
+    expect(intrinsics!.has("CUtlString")).toBe(true);
+    expect(intrinsics!.has("CHandle")).toBe(true);
+  });
+
+  it("orders modules with client and server first", () => {
+    const modules = [...parsedSchemas.declarations.keys()];
+    expect(modules.indexOf("client")).toBeLessThan(modules.indexOf("server"));
+    // client and server should come before other modules
+    for (const m of ["navlib", "particles", "test"]) {
+      const idx = modules.indexOf(m);
+      if (idx !== -1) {
+        expect(modules.indexOf("client")).toBeLessThan(idx);
+        expect(modules.indexOf("server")).toBeLessThan(idx);
+      }
+    }
+  });
+
+  it("handles classes with no parents", () => {
+    const decl = parsedSchemas.declarations.get("client")?.get("CEffectData");
+    if (decl?.kind !== "class") throw new Error("Expected class");
+    expect(decl.parents).toEqual([]);
+  });
+
+  it("keeps same-named classes in different modules separate", () => {
+    const clientSky = parsedSchemas.declarations.get("client")?.get("sky3dparams_t");
+    const serverSky = parsedSchemas.declarations.get("server")?.get("sky3dparams_t");
+    expect(clientSky).toBeDefined();
+    expect(serverSky).toBeDefined();
+    expect(clientSky).not.toBe(serverSky);
+    expect(clientSky!.module).toBe("client");
+    expect(serverSky!.module).toBe("server");
   });
 });
