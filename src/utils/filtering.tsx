@@ -135,6 +135,153 @@ export function matchesWords(name: string, words: string[]): boolean {
   return words.every((w) => lower.includes(w));
 }
 
+const FUZZY_MIN_PATTERN_LEN = 3;
+
+function isBoundaryAt(prev: number, curr: number, next: number): boolean {
+  // After _ or -
+  if (prev === 95 || prev === 45) return true;
+  // Uppercase after lowercase (camelCase)
+  if (curr >= 65 && curr <= 90 && prev >= 97 && prev <= 122) return true;
+  // Acronym end: uppercase before lowercase, preceded by uppercase (e.g. the W in CCSWeapon)
+  if (curr >= 65 && curr <= 90 && prev >= 65 && prev <= 90 && next >= 97 && next <= 122)
+    return true;
+  // Digit/letter transitions
+  const prevDigit = prev >= 48 && prev <= 57;
+  const currDigit = curr >= 48 && curr <= 57;
+  if (prevDigit !== currDigit) {
+    const prevLetter = (prev >= 65 && prev <= 90) || (prev >= 97 && prev <= 122);
+    const currLetter = (curr >= 65 && curr <= 90) || (curr >= 97 && curr <= 122);
+    if ((prevDigit && currLetter) || (prevLetter && currDigit)) return true;
+  }
+  return false;
+}
+
+function computeFuzzyQuality(
+  m: number,
+  n: number,
+  firstPos: number,
+  boundaryHits: number,
+  consecutiveRuns: number,
+  totalGap: number,
+  caseMatches: number,
+): number {
+  const boundaryRatio = boundaryHits / m;
+  const consecutiveRatio = m > 1 ? consecutiveRuns / (m - 1) : 0;
+  const caseRatio = caseMatches / m;
+  const positionPenalty = firstPos / n;
+  const gapPenalty = Math.min(totalGap / n, 1);
+
+  const quality =
+    1.0 -
+    boundaryRatio * 0.4 -
+    consecutiveRatio * 0.25 -
+    caseRatio * 0.05 +
+    positionPenalty * 0.15 +
+    gapPenalty * 0.15;
+
+  return 1000 + Math.round(Math.max(0, Math.min(1, quality)) * 3999);
+}
+
+/**
+ * Fuzzy-match a lowercased pattern against a target (original case).
+ * Returns a numeric score (lower = better) or null if no match.
+ *
+ * Score tiers:
+ *   0           = exact match
+ *   100-199     = prefix match (shorter targets rank higher)
+ *   200-999     = contiguous substring (earlier position = better)
+ *   1000-4999   = fuzzy match (boundary/consecutive quality)
+ *   null        = no match
+ *
+ * @internal Exported for testing
+ */
+export function fuzzyScore(pattern: string, target: string): number | null {
+  const m = pattern.length;
+  const n = target.length;
+  if (m === 0) return 0;
+  if (m > n) return null;
+
+  // Fast path: contiguous substring using V8-optimized toLowerCase + indexOf
+  const targetLower = target.toLowerCase();
+  const substringIdx = targetLower.indexOf(pattern);
+  if (substringIdx !== -1) {
+    if (m === n) return 0;
+    if (substringIdx === 0) return 100 + (n - m);
+    return 200 + substringIdx;
+  }
+
+  // Short patterns: substring only (too many false positives for fuzzy)
+  if (m < FUZZY_MIN_PATTERN_LEN) return null;
+
+  // Single pass: greedy scan + boundary scan simultaneously, with inline boundary detection.
+  // Also serves as the pre-check (if greedy fails, no match exists).
+  let gPi = 0,
+    gPrevPos = -1,
+    gFirstPos = 0,
+    gBoundaryHits = 0,
+    gConsecutive = 0,
+    gGap = 0,
+    gCase = 0;
+  let bPi = 0,
+    bPrevPos = -1,
+    bFirstPos = 0,
+    bConsecutive = 0,
+    bGap = 0,
+    bCase = 0;
+
+  for (let ti = 0; ti < n; ti++) {
+    const low = targetLower.charCodeAt(ti);
+    const raw = target.charCodeAt(ti);
+    const boundary =
+      ti === 0 ||
+      isBoundaryAt(target.charCodeAt(ti - 1), raw, ti + 1 < n ? target.charCodeAt(ti + 1) : 0);
+
+    // Greedy scan
+    if (gPi < m && low === pattern.charCodeAt(gPi)) {
+      if (gPi === 0) gFirstPos = ti;
+      if (boundary) gBoundaryHits++;
+      if (raw === pattern.charCodeAt(gPi)) gCase++;
+      if (gPrevPos >= 0) {
+        if (ti === gPrevPos + 1) gConsecutive++;
+        else gGap += ti - gPrevPos - 1;
+      }
+      gPrevPos = ti;
+      gPi++;
+    }
+
+    // Boundary scan (only match at boundary positions)
+    if (bPi < m && boundary && low === pattern.charCodeAt(bPi)) {
+      if (bPi === 0) bFirstPos = ti;
+      if (raw === pattern.charCodeAt(bPi)) bCase++;
+      if (bPrevPos >= 0) {
+        if (ti === bPrevPos + 1) bConsecutive++;
+        else bGap += ti - bPrevPos - 1;
+      }
+      bPrevPos = ti;
+      bPi++;
+    }
+
+    if (gPi === m && bPi === m) break;
+  }
+
+  if (gPi < m) return null; // No match at all
+
+  const greedyScore = computeFuzzyQuality(
+    m,
+    n,
+    gFirstPos,
+    gBoundaryHits,
+    gConsecutive,
+    gGap,
+    gCase,
+  );
+
+  if (bPi < m) return greedyScore; // Boundary scan didn't complete
+
+  const boundaryScore = computeFuzzyQuality(m, n, bFirstPos, m, bConsecutive, bGap, bCase);
+  return Math.min(greedyScore, boundaryScore);
+}
+
 function matchesLoweredKeys(lowerNames: string[] | undefined, keys: string[]): boolean {
   if (!lowerNames || lowerNames.length === 0) return false;
   return keys.every((key) => lowerNames.some((n) => n.includes(key)));
@@ -176,6 +323,10 @@ export function matchesMetadataValues(
   return matchesLoweredValues(lowerMetaVals(metadata), values);
 }
 
+const MAX_SEARCH_RESULTS = 500;
+const emptyFields: api.SchemaField[] = [];
+const emptyMembers: api.SchemaEnumMember[] = [];
+
 export function searchDeclarations(
   declarations: Iterable<api.Declaration>,
   parsed: ParsedSearch,
@@ -204,15 +355,7 @@ export function searchDeclarations(
     return [];
   }
 
-  const joinedQuery = nameWords.join(" ");
   const results: { declaration: api.Declaration; score: number }[] = [];
-
-  function nameScore(declLower: string, remainingWords: string[]): number {
-    if (remainingWords.length > 0) return 3;
-    if (hasNameFilter && declLower === joinedQuery) return 0;
-    if (hasNameFilter && declLower.startsWith(joinedQuery)) return 1;
-    return 2;
-  }
 
   function isFieldMatch(
     item: { name: string; metadata?: api.SchemaMetadataEntry[] },
@@ -260,8 +403,17 @@ export function searchDeclarations(
       if (!moduleWords.some((w) => mod.includes(w))) continue;
     }
 
-    const declLower = declaration.name.toLowerCase();
-    const remainingWords = nameWords.filter((w) => !declLower.includes(w));
+    // Fuzzy-score each name word against the declaration name
+    let nameFuzzyScore = 0;
+    const remainingWords: string[] = [];
+    for (const w of nameWords) {
+      const s = fuzzyScore(w, declaration.name);
+      if (s === null) {
+        remainingWords.push(w);
+      } else {
+        nameFuzzyScore += s;
+      }
+    }
 
     // Check if declaration-level metadata satisfies the metadata filters
     const declMetaSatisfied =
@@ -281,9 +433,10 @@ export function searchDeclarations(
       if (hasNameFilter || moduleWords.length > 0 || declMetaSatisfied) {
         const stripped =
           declaration.kind === "class"
-            ? { ...declaration, fields: [] }
-            : { ...declaration, members: [] };
-        results.push({ declaration: stripped, score: nameScore(declLower, remainingWords) });
+            ? { ...declaration, fields: emptyFields }
+            : { ...declaration, members: emptyMembers };
+        const score = hasNameFilter ? nameFuzzyScore : 3000;
+        results.push({ declaration: stripped, score });
       }
       continue;
     }
@@ -294,7 +447,8 @@ export function searchDeclarations(
     // Enum value filter excludes classes entirely
     if (hasEnumValueFilter && declaration.kind !== "enum") continue;
 
-    const score = nameScore(declLower, remainingWords);
+    const score =
+      remainingWords.length > 0 ? 5000 + nameFuzzyScore : hasNameFilter ? nameFuzzyScore : 3000;
 
     if (declaration.kind === "class") {
       const fields = declaration.fields.filter((f) =>
@@ -321,6 +475,11 @@ export function searchDeclarations(
     if (a.declaration.module > b.declaration.module) return 1;
     return 0;
   });
+
+  // Cap results to avoid excessive rendering for broad fuzzy queries
+  if (results.length > MAX_SEARCH_RESULTS) {
+    results.length = MAX_SEARCH_RESULTS;
+  }
 
   return results.map((r) => r.declaration);
 }

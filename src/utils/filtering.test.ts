@@ -7,6 +7,7 @@ import {
   matchesMetadataKeys,
   matchesMetadataValues,
   searchDeclarations,
+  fuzzyScore,
   EMPTY_PARSED,
 } from "./filtering";
 import type { SchemaClass, SchemaEnum } from "../data/types";
@@ -1247,18 +1248,18 @@ describe("search result ranking", () => {
     expect(lastEffectIdx).toBeLessThan(firstFieldOnlyIdx);
   });
 
-  it("alphabetical within same tier (sphere)", () => {
+  it("substring position affects ranking (sphere)", () => {
     const result = searchDeclarations(declarations, parseSearch("sphere"));
     const names = result.map((d) => d.name);
-    // All are tier 2 (substring match), alphabetical by name then module
+    // Sorted by substring position (earlier = better), then alphabetical
     expect(names).toEqual([
-      "CAnimationGraphVisualizerSphere",
-      "CNavVolumeSphere",
-      "CSoundAreaEntitySphere",
-      "CSoundEventSphereEntity",
-      "C_SoundAreaEntitySphere",
-      "C_SoundEventSphereEntity",
       "CastSphereSATParams_t",
+      "CNavVolumeSphere",
+      "CSoundEventSphereEntity",
+      "C_SoundEventSphereEntity",
+      "CSoundAreaEntitySphere",
+      "C_SoundAreaEntitySphere",
+      "CAnimationGraphVisualizerSphere",
     ]);
   });
 
@@ -1300,12 +1301,12 @@ describe("search result ranking", () => {
   it("multi-word search", () => {
     const result = searchDeclarations(declarations, parseSearch("sound sphere"));
     const names = result.map((d) => d.name);
-    // Only declarations matching both words
+    // Only declarations matching both words, scored by combined substring positions
     expect(names).toEqual([
-      "CSoundAreaEntitySphere",
       "CSoundEventSphereEntity",
-      "C_SoundAreaEntitySphere",
       "C_SoundEventSphereEntity",
+      "CSoundAreaEntitySphere",
+      "C_SoundAreaEntitySphere",
     ]);
   });
 
@@ -2844,5 +2845,163 @@ describe("boundary and edge cases", () => {
     // (MNotSaved → "mnotsaved" doesn't include "net")
     const result = searchDeclarations(declarations, parseSearch("CEnvSoundscape net"));
     expect(result.every((d) => d.name !== "CEnvSoundscape")).toBe(true);
+  });
+});
+
+// -- fuzzyScore --
+
+describe("fuzzyScore", () => {
+  it("returns 0 for exact match", () => {
+    expect(fuzzyScore("cbaseentity", "CBaseEntity")).toBe(0);
+  });
+
+  it("returns 0 for exact match same length", () => {
+    expect(fuzzyScore("abc", "abc")).toBe(0);
+  });
+
+  it("returns prefix score for prefix match", () => {
+    const score = fuzzyScore("cbase", "CBaseEntity")!;
+    expect(score).toBeGreaterThanOrEqual(100);
+    expect(score).toBeLessThan(200);
+  });
+
+  it("shorter target ranks higher for prefix", () => {
+    const short = fuzzyScore("cbase", "CBaseEnt")!;
+    const long = fuzzyScore("cbase", "CBaseEntity")!;
+    expect(short).toBeLessThan(long);
+  });
+
+  it("returns substring score for contiguous substring", () => {
+    const score = fuzzyScore("entity", "CBaseEntity")!;
+    expect(score).toBeGreaterThanOrEqual(200);
+    expect(score).toBeLessThan(1000);
+  });
+
+  it("earlier substring position scores better", () => {
+    const early = fuzzyScore("base", "CBaseEntity")!; // index 1
+    const late = fuzzyScore("base", "SomeClassBase")!; // index 9
+    expect(early).toBeLessThan(late);
+  });
+
+  it("returns null for no match", () => {
+    expect(fuzzyScore("xyz", "CBaseEntity")).toBeNull();
+  });
+
+  it("returns null for pattern longer than target", () => {
+    expect(fuzzyScore("cbaseentitylong", "CBase")).toBeNull();
+  });
+
+  it("returns fuzzy score for non-contiguous match", () => {
+    const score = fuzzyScore("cbe", "CBaseEntity")!;
+    expect(score).toBeGreaterThanOrEqual(1000);
+    expect(score).toBeLessThan(5000);
+  });
+
+  it("does not fuzzy-match 1-char patterns", () => {
+    // 'c' exists in 'Base' but single chars are substring-only
+    expect(fuzzyScore("c", "Base")).toBeNull();
+  });
+
+  it("does not fuzzy-match 2-char patterns", () => {
+    expect(fuzzyScore("cb", "CxxxxxByyy")).toBeNull();
+    // But substring still works
+    expect(fuzzyScore("cb", "xcby")).toBe(201);
+  });
+
+  it("fuzzy matches 3+ char patterns", () => {
+    expect(fuzzyScore("cbe", "CBaseEntity")).not.toBeNull();
+  });
+
+  it("boundary matches score better than scattered", () => {
+    // CBE -> CBaseEntity (all boundary hits: C, B, E)
+    const boundary = fuzzyScore("cbe", "CBaseEntity")!;
+    // cbe -> xCxxxBxxxxxExx (scattered)
+    const scattered = fuzzyScore("cbe", "xCxxxBxxxxxExx")!;
+    expect(boundary).toBeLessThan(scattered);
+  });
+
+  it("exact always beats prefix", () => {
+    const exact = fuzzyScore("cbase", "CBase")!;
+    const prefix = fuzzyScore("cbase", "CBaseEntity")!;
+    expect(exact).toBeLessThan(prefix);
+  });
+
+  it("prefix always beats substring", () => {
+    const prefix = fuzzyScore("base", "BaseEntity")!;
+    const substr = fuzzyScore("base", "CBaseEntity")!;
+    expect(prefix).toBeLessThan(substr);
+  });
+
+  it("substring always beats fuzzy", () => {
+    const substr = fuzzyScore("base", "CBaseEntity")!;
+    const fuz = fuzzyScore("bse", "CBaseEntity")!;
+    expect(substr).toBeLessThan(fuz);
+  });
+
+  it("matches camelCase boundaries", () => {
+    // "cswb" -> C_CSWeaponBase (C, S, W, B at boundaries)
+    const score = fuzzyScore("cswb", "C_CSWeaponBase");
+    expect(score).not.toBeNull();
+    expect(score!).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("handles m_ prefix naturally", () => {
+    // "fl" is a substring of m_flFoo
+    const score = fuzzyScore("fl", "m_flFalloff");
+    expect(score).not.toBeNull();
+    expect(score!).toBeGreaterThanOrEqual(200);
+    expect(score!).toBeLessThan(1000);
+  });
+
+  it("handles initfromsnapshot pattern", () => {
+    const score = fuzzyScore("initfromsnapshot", "C_INIT_InitFromCPSnapshot");
+    expect(score).not.toBeNull();
+    expect(score!).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("case-insensitive matching", () => {
+    expect(fuzzyScore("cbase", "CBASE")).toBe(0);
+    expect(fuzzyScore("cbase", "cbase")).toBe(0);
+  });
+
+  it("empty pattern returns 0", () => {
+    expect(fuzzyScore("", "anything")).toBe(0);
+  });
+});
+
+// -- fuzzy search integration --
+
+describe("fuzzy search integration", () => {
+  it("fuzzy query finds declarations with non-contiguous match", () => {
+    const result = searchDeclarations(declarations, parseSearch("cnvsph"));
+    const names = result.map((d) => d.name);
+    expect(names).toContain("CNavVolumeSphere");
+  });
+
+  it("exact match ranks above fuzzy match", () => {
+    const result = searchDeclarations(declarations, parseSearch("CEffectData"));
+    expect(result[0].name).toBe("CEffectData");
+  });
+
+  it("prefix ranks above substring which ranks above fuzzy", () => {
+    const result = searchDeclarations(declarations, parseSearch("CFilter"));
+    const names = result.map((d) => d.name);
+    // Both CFilterEnemy and CFilterProximity are prefix matches, shorter name scores better
+    const enemyIdx = names.indexOf("CFilterEnemy");
+    const proxIdx = names.indexOf("CFilterProximity");
+    expect(enemyIdx).toBeLessThan(proxIdx);
+    // Fuzzy match (C_OP_RemapTransformVisibilityToVector) ranks after prefix matches
+    const fuzzyIdx = names.indexOf("C_OP_RemapTransformVisibilityToVector");
+    if (fuzzyIdx >= 0) {
+      expect(proxIdx).toBeLessThan(fuzzyIdx);
+    }
+  });
+
+  it("two-char query uses substring only, no fuzzy", () => {
+    // "cb" with 2 chars: fuzzyScore returns null for non-substring matches
+    // But field-level substring matching can still find "cb" in field names like m_CBodyComponent
+    const result = searchDeclarations(declarations, parseSearch("cb"));
+    // All results should have "cb" somewhere — in declaration name or in a field/member name
+    expect(result.length).toBeGreaterThan(0);
   });
 });
