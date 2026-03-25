@@ -1,5 +1,6 @@
 import type {
   Declaration,
+  SchemaEnum,
   SchemaClass,
   SchemaField,
   SchemaFieldType,
@@ -25,6 +26,27 @@ export function parseKV3Defaults(value: string): Record<string, unknown> | null 
   return null;
 }
 
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== typeof b) return false;
+  if (typeof a !== "object") return false;
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  const aObj = a as Record<string, unknown>;
+  const bObj = b as Record<string, unknown>;
+  const aKeys = Object.keys(aObj);
+  if (aKeys.length !== Object.keys(bObj).length) return false;
+  for (const key of aKeys) {
+    if (!deepEqual(aObj[key], bObj[key])) return false;
+  }
+  return true;
+}
+
 /** @internal Exported for testing */
 export function diffObject(
   embedded: Record<string, unknown>,
@@ -34,7 +56,7 @@ export function diffObject(
   let hasDiff = false;
   for (const [k, v] of Object.entries(embedded)) {
     if (k === "_class" || v === HIDDEN_SENTINEL) continue;
-    if (JSON.stringify(v) !== JSON.stringify(ownDefaults[k])) {
+    if (!deepEqual(v, ownDefaults[k])) {
       diff[k] = v;
       hasDiff = true;
     }
@@ -62,25 +84,30 @@ function assignDefaults(classes: SchemaClass[]) {
   const classMap = new Map<string, SchemaClass>();
   for (const cls of classes) classMap.set(`${cls.module}/${cls.name}`, cls);
 
-  // Parse and cache defaults per class key
-  const defaultsCache = new Map<string, Record<string, unknown> | null>();
+  // Pre-parse all KV3 defaults before the main loop mutates metadata
+  const parsedDefaults = new Map<string, Record<string, unknown> | null>();
+  for (const cls of classes) {
+    const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults" && m.value);
+    parsedDefaults.set(`${cls.module}/${cls.name}`, meta ? parseKV3Defaults(meta.value!) : null);
+  }
   function getDefaults(module: string, name: string): Record<string, unknown> | null {
-    const key = `${module}/${name}`;
-    if (defaultsCache.has(key)) return defaultsCache.get(key)!;
-    const cls = classMap.get(key);
-    const meta = cls?.metadata.find((m) => m.name === "MGetKV3ClassDefaults" && m.value);
-    const parsed = meta ? parseKV3Defaults(meta.value!) : null;
-    defaultsCache.set(key, parsed);
-    return parsed;
+    return parsedDefaults.get(`${module}/${name}`) ?? null;
   }
 
-  // Collect all fields including from parent chain
-  function collectFields(cls: SchemaClass, out: Map<string, SchemaField>) {
+  // Cache all field names (including inherited) per class
+  const allFieldsCache = new Map<string, Set<string>>();
+  function getAllFieldNames(cls: SchemaClass): Set<string> {
+    const key = `${cls.module}/${cls.name}`;
+    const cached = allFieldsCache.get(key);
+    if (cached !== undefined) return cached;
+    const names = new Set<string>();
     for (const p of cls.parents) {
       const parent = classMap.get(`${p.module}/${p.name}`);
-      if (parent) collectFields(parent, out);
+      if (parent) for (const n of getAllFieldNames(parent)) names.add(n);
     }
-    for (const f of cls.fields) out.set(f.name, f);
+    for (const f of cls.fields) names.add(f.name);
+    allFieldsCache.set(key, names);
+    return names;
   }
 
   for (const cls of classes) {
@@ -91,16 +118,13 @@ function assignDefaults(classes: SchemaClass[]) {
     const ownFields = new Map<string, SchemaField>();
     for (const f of cls.fields) ownFields.set(f.name, f);
 
-    // Track parent field names so we know which keys are inherited vs truly unknown
-    const allFields = new Map<string, SchemaField>();
-    collectFields(cls, allFields);
-
+    const allFieldNames = getAllFieldNames(cls);
     const unconsumed: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(defaults)) {
       if (value === HIDDEN_SENTINEL) continue;
 
-      if (!allFields.has(key)) {
+      if (!allFieldNames.has(key)) {
         unconsumed[key] = value;
         continue;
       }
@@ -116,10 +140,7 @@ function assignDefaults(classes: SchemaClass[]) {
             break;
           }
         }
-        if (
-          parentDefault !== undefined &&
-          JSON.stringify(value) !== JSON.stringify(parentDefault)
-        ) {
+        if (parentDefault !== undefined && !deepEqual(value, parentDefault)) {
           unconsumed[key] = value;
         }
         continue;
@@ -200,30 +221,25 @@ export interface SchemaMetadata {
 export type ParsedSchemas = ReturnType<typeof parseSchemas>;
 
 export function parseSchemas(data: SchemasJson) {
-  const classes: Declaration[] = data.classes.map((c) => ({
-    kind: "class" as const,
-    name: c.name,
-    module: c.module,
-    parents: c.parents ?? [],
-    fields: (c.fields ?? []).map((f) => ({
-      ...f,
-      metadata: f.metadata ?? [],
-    })),
-    metadata: c.metadata ?? [],
-  }));
-  const enums: Declaration[] = data.enums.map((e) => ({
-    kind: "enum" as const,
-    name: e.name,
-    module: e.module,
-    alignment: e.alignment,
-    members: (e.members ?? []).map((m) => ({
-      ...m,
-      metadata: m.metadata ?? [],
-    })),
-    metadata: e.metadata ?? [],
-  }));
+  const classes = data.classes as SchemaClass[];
+  for (const c of classes) {
+    c.kind = "class";
+    c.parents ??= [];
+    c.metadata ??= [];
+    for (const f of (c.fields ??= [])) {
+      f.metadata ??= [];
+    }
+  }
+  const enums = data.enums as SchemaEnum[];
+  for (const e of enums) {
+    e.kind = "enum";
+    e.metadata ??= [];
+    for (const m of (e.members ??= [])) {
+      m.metadata ??= [];
+    }
+  }
 
-  assignDefaults(classes as SchemaClass[]);
+  assignDefaults(classes);
 
   // Sort all declarations by module then name, build map in one pass
   const all: Declaration[] = [...classes, ...enums, ...intrinsicDeclarations.values()];
