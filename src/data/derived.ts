@@ -69,8 +69,11 @@ function buildReferences(
     list.push(entry);
   }
 
+  const typeKeys = new Set<string>();
+
   for (const decl of allDeclarations(declarations)) {
     if (decl.kind === "class") {
+      const selfKey = declarationKey(decl.module, decl.name);
       for (const parent of decl.parents) {
         addRef(declarationKey(parent.module, parent.name), {
           declarationName: decl.name,
@@ -79,11 +82,10 @@ function buildReferences(
         });
       }
       for (const field of decl.fields) {
-        const keys = new Set<string>();
-        collectTypeKeys(field.type, keys);
-        const declKey = declarationKey(decl.module, decl.name);
-        for (const key of keys) {
-          if (key !== declKey) {
+        typeKeys.clear();
+        collectTypeKeys(field.type, typeKeys);
+        for (const key of typeKeys) {
+          if (key !== selfKey) {
             addRef(key, {
               declarationName: decl.name,
               declarationModule: decl.module,

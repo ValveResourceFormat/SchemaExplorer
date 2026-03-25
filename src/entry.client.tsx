@@ -1,8 +1,10 @@
+import { hydrateRoot } from "react-dom/client";
+import { HydratedRouter } from "react-router/dom";
 import { buildAllGameContexts } from "./data/derived";
+import { loadGameSchemas } from "./data/loader";
 import { GAME_LIST, type GameId } from "./games-list";
 
 async function hydrate() {
-  const { loadGameSchemas } = await import("./data/loader");
   const loaded = new Map<GameId, Awaited<ReturnType<typeof loadGameSchemas>>>();
   const errors = new Map<GameId, string>();
   await Promise.all(
@@ -16,8 +18,6 @@ async function hydrate() {
   );
   buildAllGameContexts(loaded, errors);
 
-  const { hydrateRoot } = await import("react-dom/client");
-  const { HydratedRouter } = await import("react-router/dom");
   hydrateRoot(document, <HydratedRouter />);
 }
 
