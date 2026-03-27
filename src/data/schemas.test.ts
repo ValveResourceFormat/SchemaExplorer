@@ -297,21 +297,17 @@ describe("assignDefaults via parseSchemas", () => {
     const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
     expect(meta).toBeDefined();
     const value = JSON.parse(meta!.value!);
-    expect(value._class).toBe("TestUnknownKeys");
     expect(value.m_unknown).toBe(77);
     expect(value.m_extra).toBe("data");
-    // Consumed field should not appear
+    // Consumed fields should not appear
+    expect(value._class).toBeUndefined();
     expect(value.m_flX).toBeUndefined();
   });
 
-  it("rewrites metadata to contain only unconsumed keys like _class", () => {
+  it("consumes _class when value matches the class name", () => {
     const cls = getClass("TestSimpleDefaults");
-    const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
-    expect(meta).toBeDefined();
-    const value = JSON.parse(meta!.value!);
-    expect(value._class).toBe("TestSimpleDefaults");
-    // Field keys should not be in unconsumed
-    expect(value.m_flValue).toBeUndefined();
+    // _class was the only unconsumed key, so metadata should be removed entirely
+    expect(cls.metadata.some((m) => m.name === "MGetKV3ClassDefaults")).toBe(false);
   });
 
   it("removes metadata entirely when no unconsumed keys", () => {
