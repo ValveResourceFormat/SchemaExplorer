@@ -125,6 +125,7 @@ function assignDefaults(classes: SchemaClass[]) {
       if (value === HIDDEN_SENTINEL) continue;
 
       if (!allFieldNames.has(key)) {
+        if (key === "_class" && value === cls.name) continue;
         unconsumed[key] = value;
         continue;
       }
