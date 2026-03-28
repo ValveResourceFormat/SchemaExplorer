@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { NavLink } from "../Link";
 import { styled } from "@linaria/react";
 import { IconKind, KindIcon } from "../kind-icon/KindIcon";
@@ -44,23 +44,32 @@ const SidebarLink = styled(NavLink)`
   }
 `;
 
-const SidebarElement: React.FC<{
+const SidebarElement = ({
+  to,
+  icon,
+  text,
+  title,
+  onClick,
+}: {
   to: string;
   icon: IconKind;
   text: string;
   title?: string;
   onClick?: () => void;
-}> = React.memo(({ to, icon, text, title, onClick }) => (
+}) => (
   <SidebarLink to={to} onClick={onClick} title={title}>
     <KindIcon kind={icon} size="small" />
     <span>{text}</span>
   </SidebarLink>
-));
+);
 
-export const DeclarationSidebarElement: React.FC<{
+export const DeclarationSidebarElement = ({
+  declaration,
+  onClick,
+}: {
   declaration: Declaration;
   onClick?: () => void;
-}> = React.memo(({ declaration, onClick }) => {
+}) => {
   const { game } = useContext(DeclarationsContext);
   return (
     <SidebarElement
@@ -71,7 +80,7 @@ export const DeclarationSidebarElement: React.FC<{
       onClick={onClick}
     />
   );
-});
+};
 
 export const SidebarGroupHeader = styled.button`
   background: var(--sidebar);
