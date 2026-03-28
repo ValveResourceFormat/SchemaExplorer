@@ -1,5 +1,3 @@
-import React from "react";
-
 export type IconKind =
   | "class"
   | "enum"
@@ -18,11 +16,15 @@ export type IconKind =
 import ICONS_URL from "../../icons.svg?url";
 export { ICONS_URL };
 
-export const KindIcon: React.FC<{
+export const KindIcon = ({
+  className,
+  kind,
+  size,
+}: {
   className?: string;
   kind: IconKind;
   size: "small" | "medium" | "big" | number;
-}> = React.memo(({ className, kind, size }) => {
+}) => {
   const sizes =
     typeof size === "number" ? size : size === "small" ? 16 : size === "medium" ? 20 : 24;
   return (
@@ -30,4 +32,4 @@ export const KindIcon: React.FC<{
       <use href={`${ICONS_URL}#ki-${kind}`} />
     </svg>
   );
-});
+};

@@ -26,6 +26,160 @@ const ROW_HEIGHT = 28;
 const STATIC_BEFORE = 19;
 const STATIC_AFTER = 60;
 
+const VirtualizedList = ({
+  rows,
+  stickyIndexes,
+  collapsed,
+  toggleModule,
+  activeIndex,
+  activeModule,
+  scope,
+  sidebarOpen,
+  onNavigate,
+  wrapperRef,
+}: {
+  rows: SidebarRow[];
+  stickyIndexes: number[];
+  collapsed: Set<string>;
+  toggleModule: (module: string) => void;
+  activeIndex: number;
+  activeModule: string;
+  scope: string;
+  sidebarOpen?: boolean;
+  onNavigate?: () => void;
+  wrapperRef: React.RefObject<HTMLDivElement | null>;
+}) => {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const activeStickyIndexRef = useRef(0);
+  const navigatedFromSidebarRef = useRef(false);
+  const isInitialMount = useRef(true);
+
+  const [initialOffset] = useState(() => {
+    const target = activeIndex >= 0 ? activeIndex : 0;
+    return Math.max(0, target - STATIC_BEFORE) * ROW_HEIGHT;
+  });
+
+  const setParentRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      parentRef.current = el;
+      if (el && initialOffset > 0) {
+        el.scrollTop = initialOffset;
+      }
+    },
+    [initialOffset],
+  );
+
+  const rangeExtractor = useCallback(
+    (range: Range) => {
+      let active = 0;
+      for (let i = stickyIndexes.length - 1; i >= 0; i--) {
+        if (range.startIndex >= stickyIndexes[i]) {
+          active = stickyIndexes[i];
+          break;
+        }
+      }
+      activeStickyIndexRef.current = active;
+
+      const result = defaultRangeExtractor(range);
+      if (result[0] > active) {
+        result.unshift(active);
+      }
+      return result;
+    },
+    [stickyIndexes],
+  );
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 20,
+    rangeExtractor,
+    initialOffset,
+  });
+
+  // Scroll to active item on navigation (skip if the click came from the sidebar)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (!scope || !activeModule) return;
+    if (navigatedFromSidebarRef.current) {
+      navigatedFromSidebarRef.current = false;
+      return;
+    }
+    if (activeIndex >= 0) {
+      virtualizer.scrollToIndex(activeIndex, { align: "center" });
+    }
+    // Reset wrapper scroll in case the browser scrolled it
+    if (wrapperRef.current) {
+      wrapperRef.current.scrollTop = 0;
+    }
+  }, [activeModule, scope, activeIndex, virtualizer, wrapperRef]);
+
+  // When the mobile sidebar opens, the virtualizer's scroll element transitions
+  // from display:none to display:flex. The element had zero dimensions while hidden,
+  // so the virtualizer rendered no items and scrollTop was lost. Re-measure and
+  // scroll to the active item.
+  useEffect(() => {
+    if (!sidebarOpen || !parentRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      virtualizer.measure();
+      if (activeIndex >= 0) {
+        virtualizer.scrollToIndex(activeIndex, { align: "center" });
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [sidebarOpen]);
+
+  const handleSidebarNavigate = useCallback(() => {
+    navigatedFromSidebarRef.current = true;
+    onNavigate?.();
+  }, [onNavigate]);
+
+  return (
+    <SidebarList ref={setParentRef}>
+      <SidebarUl style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const row = rows[virtualRow.index];
+          const isHeader = row.type === "header";
+          const isActiveSticky = activeStickyIndexRef.current === virtualRow.index;
+
+          return (
+            <li
+              key={virtualRow.key}
+              style={{
+                ...(isActiveSticky
+                  ? { position: "sticky", zIndex: 1 }
+                  : { position: "absolute", transform: `translateY(${virtualRow.start}px)` }),
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: ROW_HEIGHT,
+              }}
+            >
+              {isHeader ? (
+                <SidebarGroupHeader
+                  data-collapsed={collapsed.has(row.module) || undefined}
+                  onClick={() => toggleModule(row.module)}
+                >
+                  {row.module} ({row.count})
+                </SidebarGroupHeader>
+              ) : (
+                <DeclarationSidebarElement
+                  declaration={row.declaration}
+                  onClick={handleSidebarNavigate}
+                />
+              )}
+            </li>
+          );
+        })}
+      </SidebarUl>
+    </SidebarList>
+  );
+};
+
 export const DeclarationsSidebar = ({
   onNavigate,
   sidebarOpen,
@@ -38,11 +192,7 @@ export const DeclarationsSidebar = ({
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
-  const parentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const activeStickyIndexRef = useRef(0);
-  const navigatedFromSidebarRef = useRef(false);
-  const isInitialMount = useRef(true);
 
   const { rows, stickyIndexes } = useMemo(() => {
     const rows: SidebarRow[] = [];
@@ -68,26 +218,6 @@ export const DeclarationsSidebar = ({
     return { rows, stickyIndexes };
   }, [declarations, filter, collapsed]);
 
-  const rangeExtractor = useCallback(
-    (range: Range) => {
-      let active = 0;
-      for (let i = stickyIndexes.length - 1; i >= 0; i--) {
-        if (range.startIndex >= stickyIndexes[i]) {
-          active = stickyIndexes[i];
-          break;
-        }
-      }
-      activeStickyIndexRef.current = active;
-
-      const result = defaultRangeExtractor(range);
-      if (result[0] > active) {
-        result.unshift(active);
-      }
-      return result;
-    },
-    [stickyIndexes],
-  );
-
   const activeIndex = useMemo(() => {
     if (!scope || !activeModule) return -1;
     return rows.findIndex(
@@ -96,40 +226,16 @@ export const DeclarationsSidebar = ({
     );
   }, [rows, scope, activeModule]);
 
-  const [initialOffset] = useState(() => {
-    const target = activeIndex >= 0 ? activeIndex : 0;
-    return Math.max(0, target - STATIC_BEFORE) * ROW_HEIGHT;
-  });
-
-  const setParentRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      parentRef.current = el;
-      if (el && initialOffset > 0) {
-        el.scrollTop = initialOffset;
-      }
-    },
-    [initialOffset],
-  );
-
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: 20,
-    rangeExtractor,
-    initialOffset,
-  });
-
   useLayoutEffect(() => {
     setHydrated(true);
   }, []);
 
   const staticRows = useMemo(() => {
     if (hydrated) return [];
-    const start = initialOffset / ROW_HEIGHT;
+    const start = Math.max(0, (activeIndex >= 0 ? activeIndex : 0) - STATIC_BEFORE);
     const end = Math.min(rows.length, start + STATIC_BEFORE + STATIC_AFTER + 1);
     return rows.slice(start, end);
-  }, [hydrated, rows, initialOffset]);
+  }, [hydrated, rows, activeIndex]);
 
   const toggleModule = useCallback((module: string) => {
     setCollapsed((prev) => {
@@ -156,46 +262,6 @@ export const DeclarationsSidebar = ({
     });
   }, [activeModule, scope]);
 
-  // Scroll to active item on navigation (skip if the click came from the sidebar)
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    if (!scope || !activeModule) return;
-    if (navigatedFromSidebarRef.current) {
-      navigatedFromSidebarRef.current = false;
-      return;
-    }
-    if (activeIndex >= 0) {
-      virtualizer.scrollToIndex(activeIndex, { align: "center" });
-    }
-    // Reset wrapper scroll in case the browser scrolled it
-    if (wrapperRef.current) {
-      wrapperRef.current.scrollTop = 0;
-    }
-  }, [activeModule, scope, activeIndex, virtualizer]);
-
-  // When the mobile sidebar opens, the virtualizer's scroll element transitions
-  // from display:none to display:flex. The element had zero dimensions while hidden,
-  // so the virtualizer rendered no items and scrollTop was lost. Re-measure and
-  // scroll to the active item.
-  useEffect(() => {
-    if (!sidebarOpen || !parentRef.current) return;
-    const raf = requestAnimationFrame(() => {
-      virtualizer.measure();
-      if (activeIndex >= 0) {
-        virtualizer.scrollToIndex(activeIndex, { align: "center" });
-      }
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [sidebarOpen]);
-
-  const handleSidebarNavigate = useCallback(() => {
-    navigatedFromSidebarRef.current = true;
-    onNavigate?.();
-  }, [onNavigate]);
-
   return (
     <SidebarWrapper ref={wrapperRef} aria-label="Classes and enums">
       <SidebarHeader>
@@ -219,44 +285,18 @@ export const DeclarationsSidebar = ({
         />
       </SidebarHeader>
       {hydrated ? (
-        <SidebarList ref={setParentRef}>
-          <SidebarUl style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
-            {virtualizer.getVirtualItems().map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              const isHeader = row.type === "header";
-              const isActiveSticky = activeStickyIndexRef.current === virtualRow.index;
-
-              return (
-                <li
-                  key={virtualRow.key}
-                  style={{
-                    ...(isActiveSticky
-                      ? { position: "sticky", zIndex: 1 }
-                      : { position: "absolute", transform: `translateY(${virtualRow.start}px)` }),
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: ROW_HEIGHT,
-                  }}
-                >
-                  {isHeader ? (
-                    <SidebarGroupHeader
-                      data-collapsed={collapsed.has(row.module) || undefined}
-                      onClick={() => toggleModule(row.module)}
-                    >
-                      {row.module} ({row.count})
-                    </SidebarGroupHeader>
-                  ) : (
-                    <DeclarationSidebarElement
-                      declaration={row.declaration}
-                      onClick={handleSidebarNavigate}
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </SidebarUl>
-        </SidebarList>
+        <VirtualizedList
+          rows={rows}
+          stickyIndexes={stickyIndexes}
+          collapsed={collapsed}
+          toggleModule={toggleModule}
+          activeIndex={activeIndex}
+          activeModule={activeModule}
+          scope={scope}
+          sidebarOpen={sidebarOpen}
+          onNavigate={onNavigate}
+          wrapperRef={wrapperRef}
+        />
       ) : (
         <SidebarList>
           <SidebarUl>
