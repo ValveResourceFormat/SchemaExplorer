@@ -1,8 +1,10 @@
 import { useContext, useMemo } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
-import { Declaration, SchemaClass } from "../../data/types";
+import { Declaration, SchemaClass, SchemaEnum } from "../../data/types";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { CardBlock } from "./styles";
+import { ICONS_URL } from "../kind-icon/KindIcon";
 
 interface TreeNode {
   cls: SchemaClass;
@@ -84,19 +86,36 @@ const RootList = styled.ul`
 `;
 
 const TreeHeading = styled.h1`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 0 8px;
   font-size: 18px;
   font-weight: 600;
   color: var(--text);
+
+  a {
+    display: flex;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+  }
 `;
 
-const TreeContainer = styled.div`
-  max-width: 560px;
-  margin: 16px auto 0;
-  padding: 16px 20px;
-  background: var(--group);
-  border: 1px solid var(--group-border);
-  border-radius: 10px;
+const EnumsHeading = styled.h2`
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin: 12px 0 6px;
+`;
+
+const TreeContainer = styled(CardBlock)`
+  margin-top: 32px;
   overflow: hidden;
 `;
 
@@ -127,23 +146,33 @@ function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
 export function ClassTree({ module }: { module?: string }) {
   const { declarations, game } = useContext(DeclarationsContext);
 
-  const classes = useMemo(() => {
-    const result = new Map<string, SchemaClass>();
+  const { classes, enums } = useMemo(() => {
+    const classes = new Map<string, SchemaClass>();
+    const enums: SchemaEnum[] = [];
     const modules = module ? [declarations.get(module)] : declarations.values();
     for (const moduleMap of modules) {
       if (!moduleMap) continue;
       for (const d of moduleMap.values()) {
-        if (d.kind === "class") result.set(declarationKey(d.module, d.name), d);
+        if (d.kind === "class") classes.set(declarationKey(d.module, d.name), d);
+        else enums.push(d);
       }
     }
-    return result;
+    enums.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+    return { classes, enums };
   }, [declarations, module]);
 
   const roots = useMemo(() => buildTree(classes, declarations), [classes, declarations]);
 
   return (
     <TreeContainer>
-      <TreeHeading>{module}</TreeHeading>
+      <TreeHeading>
+        <Link to={schemaPath(game)}>
+          <svg width="24" height="24">
+            <use href={`${ICONS_URL}#game-${game}`} />
+          </svg>
+        </Link>
+        {module}
+      </TreeHeading>
       <RootList>
         {roots.map((node) => (
           <TreeNodeView
@@ -153,6 +182,20 @@ export function ClassTree({ module }: { module?: string }) {
           />
         ))}
       </RootList>
+      {enums.length > 0 && (
+        <>
+          <EnumsHeading>Enums</EnumsHeading>
+          <RootList>
+            {enums.map((e) => (
+              <li key={declarationKey(e.module, e.name)}>
+                <ClassLink to={schemaPath(game, e.module, e.name)} title={`enum in ${e.module}`}>
+                  {e.name}
+                </ClassLink>
+              </li>
+            ))}
+          </RootList>
+        </>
+      )}
     </TreeContainer>
   );
 }

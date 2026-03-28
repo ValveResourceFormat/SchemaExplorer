@@ -24,17 +24,6 @@ const GameLink = styled(SectionLink)`
   }
 `;
 
-const GameIconWrapper = styled.span`
-  display: flex;
-  flex-shrink: 0;
-
-  > svg {
-    width: 18px;
-    height: 18px;
-    border-radius: 3px;
-  }
-`;
-
 const ModuleIconWrapper = styled.span`
   display: flex;
   flex-shrink: 0;
@@ -171,11 +160,9 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
                   : "Differs"
             }
           >
-            <GameIconWrapper>
-              <svg width="24" height="24">
-                <use href={`${ICONS_URL}#game-${gameId}`} />
-              </svg>
-            </GameIconWrapper>
+            <svg width="24" height="24">
+              <use href={`${ICONS_URL}#game-${gameId}`} />
+            </svg>
             {gameName}
           </GameLink>
         ))}
