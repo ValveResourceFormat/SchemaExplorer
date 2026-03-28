@@ -1,6 +1,17 @@
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 
+export const CardBlock = styled.div`
+  margin: 16px auto 0;
+  padding: 16px 20px;
+  background: var(--group);
+  border: 1px solid var(--group-border);
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.6;
+`;
+
 export const CommonGroupWrapper = styled.div`
   display: flex;
   flex-flow: column;
@@ -88,6 +99,14 @@ const sectionBadgeStyles = `
   color: var(--text);
   background: var(--group-members);
   border: 1px solid var(--group-border);
+  vertical-align: middle;
+
+  > svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 3px;
+  }
 `;
 
 export const SectionLink = styled(Link)`
