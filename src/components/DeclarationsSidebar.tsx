@@ -14,8 +14,7 @@ import type { Range } from "@tanstack/react-virtual";
 import { DeclarationsContext } from "./schema/DeclarationsContext";
 import { Declaration } from "../data/types";
 import { DeclarationSidebarElement, SidebarGroupHeader, SidebarWrapper } from "./layout/Sidebar";
-import { SidebarFilterContext } from "./layout/SidebarFilterContext";
-import { SearchInput } from "./search/SearchBox";
+import { matchesWords, useParsedSearch } from "../utils/filtering";
 import { GameSwitcher, S2VLogo } from "./layout/NavBar";
 
 type SidebarRow =
@@ -188,7 +187,7 @@ export const DeclarationsSidebar = ({
   sidebarOpen?: boolean;
 }) => {
   const { declarations, game } = useContext(DeclarationsContext);
-  const { filter, setFilter } = useContext(SidebarFilterContext);
+  const { nameWords, moduleWords } = useParsedSearch();
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
@@ -197,14 +196,19 @@ export const DeclarationsSidebar = ({
   const { rows, stickyIndexes } = useMemo(() => {
     const rows: SidebarRow[] = [];
     const stickyIndexes: number[] = [];
-    const lower = filter?.toLowerCase();
+    const hasNameFilter = nameWords.length > 0;
+    const hasModuleFilter = moduleWords.length > 0;
     for (const [module, moduleMap] of declarations) {
+      // Module filter (OR across module words, same as main search)
+      if (hasModuleFilter) {
+        const mod = module.toLowerCase();
+        if (!moduleWords.some((w) => mod.includes(w))) continue;
+      }
       // Collect matching items (or all items if no filter)
       const items: Declaration[] = [];
       for (const d of moduleMap.values()) {
-        if (!lower || d.name.toLowerCase().includes(lower)) {
-          items.push(d);
-        }
+        if (hasNameFilter && !matchesWords(d.name, nameWords)) continue;
+        items.push(d);
       }
       if (items.length === 0) continue;
       stickyIndexes.push(rows.length);
@@ -216,7 +220,7 @@ export const DeclarationsSidebar = ({
       }
     }
     return { rows, stickyIndexes };
-  }, [declarations, filter, collapsed]);
+  }, [declarations, nameWords, moduleWords, collapsed]);
 
   const activeIndex = useMemo(() => {
     if (!scope || !activeModule) return -1;
@@ -272,17 +276,6 @@ export const DeclarationsSidebar = ({
           </SidebarBrand>
           <GameSwitcher currentGame={game} />
         </SidebarBrandRow>
-        <SidebarSearchInput
-          id="sidebar-filter"
-          type="search"
-          placeholder="Filter…"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          aria-label="Filter classes and enums"
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
       </SidebarHeader>
       {hydrated ? (
         <VirtualizedList
@@ -343,10 +336,6 @@ const SidebarBrand = styled.a`
   text-decoration: none;
   color: var(--text);
   white-space: nowrap;
-`;
-
-const SidebarSearchInput = styled(SearchInput)`
-  background: var(--background);
 `;
 
 const SidebarList = styled.div`

@@ -304,7 +304,7 @@ const types: IntrinsicDef[] = [
 
   {
     // Other aliases: CKV3MemberNameSet
-    name: "KeyValues3", 
+    name: "KeyValues3",
     fields: [
       { name: "m_bContextIndependent", offset: 0, type: bf(1) },
       { name: "m_bFreeArrayMemory", offset: 0, type: bf(1) },
