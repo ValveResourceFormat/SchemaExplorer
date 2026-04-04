@@ -3,13 +3,11 @@ import { styled } from "@linaria/react";
 import { DeclarationsContext, type GameContext } from "./schema/DeclarationsContext";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./schema/ContentList";
-import { SidebarFilterContext } from "./layout/SidebarFilterContext";
 import { SearchContext } from "./search/SearchContext";
 import { useHashParam } from "../utils/filtering";
 import { NavBar } from "./layout/NavBar";
 
 export default function DeclarationsPage({ context }: { context: GameContext }) {
-  const [filter, setFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const search = useHashParam("search") ?? "";
 
@@ -17,20 +15,9 @@ export default function DeclarationsPage({ context }: { context: GameContext }) 
     const listener = (e: KeyboardEvent) => {
       if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
       const active = document.activeElement;
-      const mainSearch = document.getElementById("main-search");
-      const sidebarFilter = document.getElementById("sidebar-filter");
-
-      if (active === mainSearch) {
+      if (!(active instanceof HTMLInputElement)) {
         e.preventDefault();
-        sidebarFilter?.focus();
-      } else if (active === sidebarFilter) {
-        // Explicit check before the HTMLInputElement guard below,
-        // otherwise "/" would just type into the filter input.
-        e.preventDefault();
-        mainSearch?.focus();
-      } else if (!(active instanceof HTMLInputElement)) {
-        e.preventDefault();
-        mainSearch?.focus();
+        document.getElementById("main-search")?.focus();
       }
     };
     document.addEventListener("keydown", listener);
@@ -38,7 +25,6 @@ export default function DeclarationsPage({ context }: { context: GameContext }) 
   }, []);
 
   const searchCtx = useMemo(() => ({ search }), [search]);
-  const filterCtx = useMemo(() => ({ filter, setFilter }), [filter]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
@@ -46,18 +32,16 @@ export default function DeclarationsPage({ context }: { context: GameContext }) 
   return (
     <DeclarationsContext.Provider value={context}>
       <SearchContext.Provider value={searchCtx}>
-        <SidebarFilterContext.Provider value={filterCtx}>
-          <PageGrid>
-            <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
-            <SidebarPanel data-open={sidebarOpen || undefined}>
-              <DeclarationsSidebar onNavigate={closeSidebar} sidebarOpen={sidebarOpen} />
-            </SidebarPanel>
-            <ContentColumn>
-              <NavBar onMenuClick={openSidebar} />
-              <ContentList />
-            </ContentColumn>
-          </PageGrid>
-        </SidebarFilterContext.Provider>
+        <PageGrid>
+          <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
+          <SidebarPanel data-open={sidebarOpen || undefined}>
+            <DeclarationsSidebar onNavigate={closeSidebar} sidebarOpen={sidebarOpen} />
+          </SidebarPanel>
+          <ContentColumn>
+            <NavBar onMenuClick={openSidebar} />
+            <ContentList />
+          </ContentColumn>
+        </PageGrid>
       </SearchContext.Provider>
     </DeclarationsContext.Provider>
   );
