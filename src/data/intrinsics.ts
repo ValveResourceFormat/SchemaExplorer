@@ -286,6 +286,62 @@ const types: IntrinsicDef[] = [
     ],
     size: 24,
   },
+  {
+    name: "CUtlHashtable",
+    fields: [
+      { name: "m_table", offset: 0, type: { category: "ptr", inner: b("void") } },
+      { name: "m_nUsed", offset: 24, type: b("int32") },
+      { name: "m_nTableSize", offset: 28, type: b("int32") },
+      { name: "m_nMinSize", offset: 32, type: b("int32") },
+      { name: "m_bSizeLocked", offset: 36, type: b("bool") },
+      { name: "m_eq", offset: 40, type: { category: "ptr", inner: b("void") } },
+      { name: "m_hash", offset: 48, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 56,
+  },
+
+  // ---- KeyValues3 types ----
+
+  {
+    // Other aliases: CKV3MemberNameSet
+    name: "KeyValues3", 
+    fields: [
+      { name: "m_bContextIndependent", offset: 0, type: bf(1) },
+      { name: "m_bFreeArrayMemory", offset: 0, type: bf(1) },
+      { name: "m_TypeEx", offset: 0, type: bf(8) },
+      { name: "m_SubType", offset: 0, type: bf(8) },
+      { name: "m_nFlags", offset: 0, type: bf(8) },
+      { name: "m_nClusterElement", offset: 0, type: bf(16) },
+      { name: "m_nNumArrayElements", offset: 0, type: bf(5) },
+      { name: "m_Data", offset: 8, type: b("uint64") },
+    ],
+    size: 16,
+  },
+  {
+    name: "CKeyValues3Array",
+    fields: [
+      { name: "m_nClusterElement", offset: 0, type: b("int32") },
+      { name: "m_nAllocatedChunks", offset: 4, type: b("int32") },
+      { name: "m_nCount", offset: 8, type: b("int32") },
+      { name: "m_nInitialSize", offset: 12, type: b("uint8") },
+      { name: "m_bIsDynamicallySized", offset: 13, type: b("bool") },
+      { name: "m_pDynamicElements", offset: 16, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 64,
+  },
+  {
+    name: "CKeyValues3Table",
+    fields: [
+      { name: "m_nClusterElement", offset: 0, type: b("int32") },
+      { name: "m_nAllocatedChunks", offset: 4, type: b("int32") },
+      { name: "m_pFastSearch", offset: 8, type: { category: "ptr", inner: b("void") } },
+      { name: "m_nCount", offset: 16, type: b("int32") },
+      { name: "m_nInitialSize", offset: 20, type: b("uint8") },
+      { name: "m_bIsDynamicallySized", offset: 21, type: b("bool") },
+      { name: "m_pDynamicBuffer", offset: 24, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 192,
+  },
 
   // ---- Resource / Handle types ----
 
