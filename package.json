@@ -3,7 +3,7 @@
   "name": "s2v-schema-explorer",
   "type": "module",
   "scripts": {
-    "tsc": "tsc",
+    "tsc": "react-router typegen && tsc",
     "dev": "react-router dev",
     "build": "react-router build && node scripts/flatten-prerender.ts",
     "lastmod": "node scripts/generate-lastmod.ts",
@@ -28,10 +28,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@wyw-in-js/vite": "^1.0.6",
-    "oxfmt": "^0.42.0",
+    "oxfmt": "^0.43.0",
     "oxlint": "^1.55.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.0",
-    "vitest": "^3.2.0"
+    "vite": "^8.0.5",
+    "vitest": "^4.1.2"
   }
 }
