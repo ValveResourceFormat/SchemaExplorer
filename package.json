@@ -25,12 +25,13 @@
     "@babel/preset-typescript": "^7.28.5",
     "@linaria/react": "^7.0.1",
     "@react-router/dev": "^7.13.1",
+    "@types/node": "^25.6.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@wyw-in-js/vite": "^1.0.6",
-    "oxfmt": "^0.43.0",
+    "oxfmt": "^0.48.0",
     "oxlint": "^1.55.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.5",
     "vitest": "^4.1.2"
   }

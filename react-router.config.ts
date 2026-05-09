@@ -12,7 +12,7 @@ export default {
   prerender: isDev
     ? false
     : {
-        unstable_concurrency: 8,
+        concurrency: 8,
         async paths({ getStaticPaths }) {
           const paths = [...getStaticPaths(), "/"];
 

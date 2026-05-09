@@ -98,11 +98,13 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
         </SwitcherIcon>
       </SwitcherToggle>
       {open && (
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
         <SwitcherDropdown role="listbox" aria-label="Select game">
           {GAME_LIST.map((g) => (
             <SwitcherOption
               key={g.id}
               role="option"
+              tabIndex={0}
               aria-selected={g.id === currentGame}
               onClick={() => switchTo(g.id)}
               data-active={g.id === currentGame || undefined}
