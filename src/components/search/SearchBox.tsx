@@ -254,10 +254,12 @@ function ValueSuggestPopup({
   query: string;
 }) {
   return (
+    // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
     <TagPopup role="listbox" id="search-listbox" aria-label={header}>
       <TagPopupHeader>{header}</TagPopupHeader>
       <ValuePopupList>
         {values.map((v, i) => (
+          // oxlint-disable-next-line jsx-a11y/interactive-supports-focus
           <TagItem
             key={v}
             ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
@@ -289,9 +291,11 @@ function SearchTagPopup({
   onSelect: (tag: string) => void;
 }) {
   return (
+    // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
     <TagPopup role="listbox" id="search-listbox" aria-label="Search tag suggestions">
       <TagPopupHeader>Filters</TagPopupHeader>
       {tags.map((t, i) => (
+        // oxlint-disable-next-line jsx-a11y/interactive-supports-focus
         <TagItem
           key={t.tag}
           ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
@@ -451,7 +455,9 @@ export function SearchBox({ className }: { className?: string }) {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         onKeyDown={onKeyDown}
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="combobox"
+        tabIndex={0}
         aria-label="Search"
         aria-controls={showPopup ? "search-listbox" : undefined}
         aria-autocomplete="list"
