@@ -4,6 +4,7 @@ import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
 import { SITE_ORIGIN } from "./games-list";
 import ogImage from "./source2viewer.png";
+import searchPrehydrate from "./search-prehydrate.ts?url";
 import "./global.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <script src={searchPrehydrate} />
         <ScrollRestoration />
         <Scripts />
       </body>
