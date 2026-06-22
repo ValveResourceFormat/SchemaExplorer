@@ -103,7 +103,6 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
           {GAME_LIST.map((g) => (
             <SwitcherOption
               key={g.id}
-              role="option"
               tabIndex={0}
               aria-selected={g.id === currentGame}
               onClick={() => switchTo(g.id)}
