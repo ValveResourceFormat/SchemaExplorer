@@ -52,6 +52,11 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       sourcemap: true,
+      // Emit the pre-hydration script as a standalone, cacheable file instead of
+      // inlining it as a data: URI. Inlining guesses the wrong MIME from the
+      // source extension and would duplicate the script across every prerendered
+      // page (tens of thousands of them).
+      assetsInlineLimit: (filePath) => (filePath.includes("search-prehydrate") ? false : undefined),
     },
   };
 });
