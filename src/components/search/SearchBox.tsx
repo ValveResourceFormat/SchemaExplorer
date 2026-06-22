@@ -263,7 +263,6 @@ function ValueSuggestPopup({
           <TagItem
             key={v}
             ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
-            role="option"
             aria-selected={i === activeIndex}
             data-active={i === activeIndex || undefined}
             onMouseDown={(e) => {
@@ -299,7 +298,6 @@ function SearchTagPopup({
         <TagItem
           key={t.tag}
           ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
-          role="option"
           aria-selected={i === activeIndex}
           data-active={i === activeIndex || undefined}
           onMouseDown={(e) => {

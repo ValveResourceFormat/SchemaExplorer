@@ -29,9 +29,6 @@ export default defineConfig(({ mode }) => {
         include: "src/**/*.tsx",
         classNameSlug: mode === "development" ? "[title]" : "[hash]",
         sourceMap: true,
-        babelOptions: {
-          presets: ["@babel/preset-typescript"],
-        },
       }),
       {
         // sirv treats .gz files as pre-compressed and adds Content-Encoding: gzip,
