@@ -4,7 +4,7 @@ import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
 import { SITE_ORIGIN } from "./games-list";
 import ogImage from "./source2viewer.png";
-import searchPrehydrate from "./search-prehydrate.ts?url";
+import searchPrehydrate from "./search-prehydrate.js?url";
 import "./global.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
