@@ -205,7 +205,8 @@ function HomepageContent() {
           extracted offline from game files by{" "}
           <InfoLink href="https://github.com/ValveResourceFormat/DumpSource2">DumpSource2</InfoLink>{" "}
           and updated automatically with each game patch. You'll sometimes see this called a "schema
-          dump."
+          dump". The code for this site is open source on{" "}
+          <InfoLink href="https://github.com/ValveResourceFormat/SchemaExplorer">GitHub</InfoLink>.
         </p>
         <p>
           <GameList />
