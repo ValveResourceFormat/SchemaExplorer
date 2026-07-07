@@ -29,6 +29,16 @@ export default function DeclarationsPage({ context }: { context: GameContext }) 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
+  // While the mobile drawer is open, arm a CloseWatcher so the back gesture,
+  // Escape, and other close requests dismiss it instead of navigating away.
+  useEffect(() => {
+    if (!sidebarOpen || typeof CloseWatcher === "undefined") return;
+
+    const watcher = new CloseWatcher();
+    watcher.onclose = closeSidebar;
+    return () => watcher.destroy();
+  }, [sidebarOpen, closeSidebar]);
+
   return (
     <DeclarationsContext.Provider value={context}>
       <SearchContext.Provider value={searchCtx}>
