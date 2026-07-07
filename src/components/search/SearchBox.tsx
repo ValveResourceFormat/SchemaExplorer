@@ -59,7 +59,7 @@ export const SEARCH_TAGS = [
     icon: "meta-tag" as IconKind,
     label: "Metadata",
     description: "Filter by metadata key name",
-    example: "e.g. metadata:MNetworkEnable",
+    example: "e.g. metadata:MPropertyFriendlyName",
   },
   {
     tag: "metadatavalue:",
