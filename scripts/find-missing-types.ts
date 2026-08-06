@@ -1,10 +1,10 @@
+import { readFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GAME_LIST } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
 import { intrinsicDeclarations } from "../src/data/intrinsics.ts";
 import { allDeclarations, declarationKey } from "../src/data/derived.ts";
-import { readGzippedJson } from "./lib/read-gzipped-json.ts";
 import type { SchemaFieldType } from "../src/data/types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -55,7 +55,7 @@ const missingAtomics = new Map<string, MissingTypeInfo>();
 const missingDeclared = new Map<string, MissingTypeInfo>();
 
 for (const game of GAME_LIST) {
-  const data = await readGzippedJson<SchemasJson>(`${schemasDir}/${game.id}.json.gz`);
+  const data: SchemasJson = JSON.parse(await readFile(`${schemasDir}/${game.id}.json`, "utf-8"));
   const { declarations } = parseSchemas(data);
 
   const knownKeys = new Set<string>();
