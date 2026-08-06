@@ -1,7 +1,7 @@
+import { readFile } from "node:fs/promises";
 import type { Config } from "@react-router/dev/config";
 import { GAME_LIST } from "./src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "./src/data/schemas.ts";
-import { readGzippedJson } from "./scripts/lib/read-gzipped-json.ts";
 
 const isDev = process.argv.includes("dev");
 
@@ -19,7 +19,9 @@ export default {
           for (const game of GAME_LIST) {
             paths.push(`/${game.id}`);
 
-            const data = await readGzippedJson<SchemasJson>(`schemas/${game.id}.json.gz`);
+            const data: SchemasJson = JSON.parse(
+              await readFile(`schemas/${game.id}.json`, "utf-8"),
+            );
             const { declarations } = parseSchemas(data);
 
             const limit = process.env.PRERENDER_ALL ? 0 : 10;

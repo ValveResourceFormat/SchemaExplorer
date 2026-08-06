@@ -3,7 +3,6 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
-import { readGzippedJson } from "./lib/read-gzipped-json.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");
@@ -42,7 +41,9 @@ const mainUrls: SitemapUrl[] = [{ loc: `${SITE_ORIGIN}${basePath}/` }];
 const indexEntries: { file: string; lastmod?: string }[] = [];
 
 for (const game of GAME_LIST) {
-  const data = await readGzippedJson<SchemasJson>(resolve(schemasDir, `${game.id}.json.gz`));
+  const data: SchemasJson = JSON.parse(
+    await readFile(resolve(schemasDir, `${game.id}.json`), "utf-8"),
+  );
   const { declarations } = parseSchemas(data);
 
   // Load per-class lastmod data if available

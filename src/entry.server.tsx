@@ -4,15 +4,15 @@ import { renderToPipeableStream } from "react-dom/server";
 import { PassThrough } from "node:stream";
 import { resolve as pathResolve } from "node:path";
 import { readFileSync } from "node:fs";
-import { gunzipSync } from "node:zlib";
 import { buildAllGameContexts } from "./data/derived";
 import { parseSchemas, type SchemasJson } from "./data/schemas";
 import { GAME_LIST, type GameId } from "./games-list";
 
 const loaded = new Map<GameId, ReturnType<typeof parseSchemas>>();
 for (const game of GAME_LIST) {
-  const buf = readFileSync(pathResolve("schemas", `${game.id}.json.gz`));
-  const data: SchemasJson = JSON.parse(gunzipSync(buf).toString("utf-8"));
+  const data: SchemasJson = JSON.parse(
+    readFileSync(pathResolve("schemas", `${game.id}.json`), "utf-8"),
+  );
   loaded.set(game.id, parseSchemas(data));
 }
 buildAllGameContexts(loaded, new Map());

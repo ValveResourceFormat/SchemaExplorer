@@ -1,4 +1,5 @@
 /node_modules/
 /build/
 /.react-router/
-/schemas/*.json
+/schemas/*.json.gz
+/schemas/*-lastmod.json
