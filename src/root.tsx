@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useMemo } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
-import { SITE_ORIGIN } from "./games-list";
+import { BASE_PATH, SITE_ORIGIN } from "./games-list";
 import ogImage from "./source2viewer.png";
 import searchPrehydrate from "./search-prehydrate.js?url";
 import "./global.css";
@@ -18,6 +18,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta property="og:image" content={`${SITE_ORIGIN}${ogImage}`} />
         <meta name="theme-color" content="#63a1ff" />
         <link rel="sitemap" href="/SchemaExplorer/sitemap.xml" />
+        <link
+          rel="alternate"
+          type="text/plain"
+          href={`${BASE_PATH}/llms.txt`}
+          title="Machine-readable schema data (llms.txt)"
+        />
         <Meta />
         <Links />
         <script

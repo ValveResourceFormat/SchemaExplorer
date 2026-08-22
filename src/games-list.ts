@@ -17,6 +17,7 @@ export function isGameId(id: string): id is GameId {
 }
 
 export const SITE_ORIGIN = "https://s2v.app";
+export const BASE_PATH = "/SchemaExplorer";
 
 const MODULE_PRIORITY = ["client", "server"];
 

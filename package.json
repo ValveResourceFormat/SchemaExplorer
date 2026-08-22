@@ -5,7 +5,7 @@
   "scripts": {
     "tsc": "react-router typegen && tsc",
     "dev": "node scripts/compress-schemas.ts && react-router dev",
-    "build": "node scripts/compress-schemas.ts && react-router build && node scripts/flatten-prerender.ts",
+    "build": "node scripts/compress-schemas.ts && react-router build && node scripts/flatten-prerender.ts && node scripts/generate-llms.ts",
     "lastmod": "node scripts/generate-lastmod.ts",
     "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",

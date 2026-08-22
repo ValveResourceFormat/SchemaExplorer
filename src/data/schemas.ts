@@ -180,6 +180,7 @@ function assignDefaults(classes: SchemaClass[]) {
   }
 }
 
+// Raw shapes of the JSON dump. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
 interface RawSchemaClass {
   name: string;
   module: string;

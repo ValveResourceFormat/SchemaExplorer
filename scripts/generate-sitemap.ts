@@ -1,13 +1,13 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
+import { BASE_PATH, GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");
 const distDir = resolve(__dirname, "../build/client");
-const basePath = "/SchemaExplorer";
+const basePath = BASE_PATH;
 
 function escapeXml(s: string): string {
   return s

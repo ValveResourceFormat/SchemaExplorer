@@ -10,7 +10,7 @@ import { SchemaEnumView } from "./SchemaEnum";
 import { Declaration } from "../../data/types";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
-import { GameId, getGameDef } from "../../games-list";
+import { BASE_PATH, GameId, getGameDef } from "../../games-list";
 import { ICONS_URL } from "../kind-icon/KindIcon";
 import { CardBlock, SectionLink } from "./styles";
 import { ClassTree } from "./ClassTree";
@@ -28,6 +28,14 @@ const OffsetsNote = styled.footer`
   color: var(--text-dim);
   text-align: center;
   padding: 8px 4px;
+
+  a {
+    color: inherit;
+
+    &:hover {
+      color: var(--text);
+    }
+  }
 `;
 
 const OtherGameHeader = styled.div`
@@ -146,10 +154,16 @@ export function ContentList() {
           {module ? <ClassTree module={module} /> : gameParam && <ModuleList />}
         </>
       )}
-      {data.length > 0 && metadata.revision > 0 && module !== INTRINSIC_MODULE && (
+      {module !== INTRINSIC_MODULE && (
         <OffsetsNote>
-          Offsets are from Windows. Source revision {metadata.revision} built on{" "}
-          {metadata.versionDate}.
+          {gameParam && metadata.revision > 0 && (
+            <>
+              Offsets are from Windows. Source revision {metadata.revision} built on{" "}
+              {metadata.versionDate}.{" "}
+            </>
+          )}
+          Machine-readable data for scripts and AI agents:{" "}
+          <a href={`${BASE_PATH}/llms.txt`}>llms.txt</a>.
         </OffsetsNote>
       )}
     </ContentWrapper>

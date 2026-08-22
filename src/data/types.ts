@@ -1,4 +1,4 @@
-// Structured C++ type from the JSON dump
+// Structured C++ type from the JSON dump. If this changes, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
 export type SchemaFieldType =
   | { category: "builtin"; name: string }
   | { category: "ptr"; inner: SchemaFieldType }
