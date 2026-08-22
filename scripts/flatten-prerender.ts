@@ -37,6 +37,15 @@ try {
   throw e;
 }
 
+// Rename SPA fallback to 404.html for GitHub Pages and add noindex
+const spaFallback = join(clientDir, "index.html");
+const html = (await readFile(spaFallback, "utf-8")).replace(
+  "<head>",
+  '<head>\n<meta name="robots" content="noindex">',
+);
+await writeFile(join(clientDir, "404.html"), html);
+await rm(spaFallback);
+
 // Flatten index.html → .html inside SchemaExplorer/
 await flatten(baseDir);
 
@@ -47,18 +56,5 @@ for (const entry of await readdir(baseDir, { withFileTypes: true })) {
   await rename(join(baseDir, entry.name), dest);
 }
 await rm(baseDir, { recursive: true });
-
-// Rename SPA fallback to 404.html for GitHub Pages and add noindex
-const spaFallback = join(clientDir, "__spa-fallback.html");
-try {
-  const html = (await readFile(spaFallback, "utf-8")).replace(
-    "<head>",
-    '<head>\n<meta name="robots" content="noindex">',
-  );
-  await writeFile(join(clientDir, "404.html"), html);
-  await rm(spaFallback);
-} catch (e: any) {
-  if (e.code !== "ENOENT") throw e;
-}
 
 console.log("Flattened prerendered routes and moved to build/client/.");
