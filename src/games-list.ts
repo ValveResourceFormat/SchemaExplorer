@@ -19,6 +19,10 @@ export function isGameId(id: string): id is GameId {
 export const SITE_ORIGIN = "https://s2v.app";
 export const BASE_PATH = "/SchemaExplorer";
 
+export function canonicalUrl(game?: string, module?: string, scope?: string): string {
+  return `${SITE_ORIGIN}${BASE_PATH}/${[game, module, scope].filter(Boolean).join("/")}`;
+}
+
 const MODULE_PRIORITY = ["client", "server"];
 
 export function compareModuleNames(a: string, b: string): number {

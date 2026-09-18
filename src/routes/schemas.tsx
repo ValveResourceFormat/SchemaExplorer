@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import type { MetaFunction } from "react-router";
 import type { Declaration } from "../data/types";
-import { isGameId, DEFAULT_GAME, GAME_LIST, getGameDef, SITE_ORIGIN } from "../games-list";
+import { isGameId, DEFAULT_GAME, GAME_LIST, getGameDef, canonicalUrl } from "../games-list";
 import { INTRINSIC_MODULE } from "../data/intrinsics";
 import { getGameContext } from "../data/derived";
 import { schemaPath } from "../components/schema/DeclarationsContext";
@@ -91,16 +91,15 @@ export const meta: MetaFunction = ({ params }) => {
     description = `Browse and explore Valve Source 2 engine schemas, classes, enums, and types for ${gameList}.`;
   }
 
-  const canonicalPath = [params.game, params.module, params.scope].filter(Boolean).join("/");
-  const canonicalUrl = `${SITE_ORIGIN}/SchemaExplorer/${canonicalPath}`;
+  const url = canonicalUrl(params.game, params.module, params.scope);
 
   return [
     { title },
     { name: "description", content: description },
     { property: "og:title", content: title },
     { property: "og:description", content: description },
-    { property: "og:url", content: canonicalUrl },
-    { tagName: "link", rel: "canonical", href: canonicalUrl },
+    { property: "og:url", content: url },
+    { tagName: "link", rel: "canonical", href: url },
   ];
 };
 
