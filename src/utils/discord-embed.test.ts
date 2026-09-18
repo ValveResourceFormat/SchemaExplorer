@@ -65,8 +65,8 @@ describe("buildComponentEmbed", () => {
     expect(new TextEncoder().encode(json).length).toBeLessThanOrEqual(3000);
 
     const content: string = JSON.parse(json).component.components[1].content;
-    expect(content).toContain("m_nSomeLongFieldName0;");
-    expect(content).not.toContain("m_nSomeLongFieldName499;");
-    expect(content).toMatch(/…and \d+ more fields$/);
+    expect(content).toContain("m_nSomeLongFieldName14;");
+    expect(content).not.toContain("m_nSomeLongFieldName15;");
+    expect(content).toMatch(/…and 485 more fields$/);
   });
 });
