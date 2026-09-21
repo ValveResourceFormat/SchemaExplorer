@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     customLogger: logger,
+    // Prerendering runs through a Vite preview server, so React Router's child
+    // compiler watches the project root. Without this, every prerendered page adds
+    // an fs.watch handle and a directory re-stat, which dominates the build.
+    server: { watch: { ignored: ["**/build/**"] } },
     base: "/SchemaExplorer/",
     assetsInclude: ["schemas/*.json.gz"],
     plugins: [
