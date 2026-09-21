@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
 import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
-import { allDeclarations } from "../../data/derived";
+import { getMetadataKeys } from "../../data/derived";
 import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 
 export const SearchInput = styled.input`
@@ -341,18 +341,7 @@ export function SearchBox({ className }: { className?: string }) {
 
   const uniqueModules = useMemo(() => [...declarations.keys()], [declarations]);
 
-  const uniqueMetadataKeys = useMemo(() => {
-    const set = new Set<string>();
-    for (const d of allDeclarations(declarations)) {
-      for (const m of d.metadata) set.add(m.name);
-      if (d.kind === "class") {
-        for (const f of d.fields) for (const m of f.metadata) set.add(m.name);
-      } else {
-        for (const mem of d.members) for (const m of mem.metadata) set.add(m.name);
-      }
-    }
-    return [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-  }, [declarations]);
+  const uniqueMetadataKeys = getMetadataKeys(declarations);
 
   const lastWord = getLastWord(inputValue);
   const filteredTags = filterTags(lastWord);

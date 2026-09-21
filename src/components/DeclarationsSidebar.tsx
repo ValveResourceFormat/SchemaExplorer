@@ -25,6 +25,59 @@ const ROW_HEIGHT = 28;
 const STATIC_BEFORE = 19;
 const STATIC_AFTER = 60;
 
+type SidebarRows = { rows: SidebarRow[]; stickyIndexes: number[] };
+
+const unfilteredRowsCache = new WeakMap<Map<string, Map<string, Declaration>>, SidebarRows>();
+
+/**
+ * With no search and nothing collapsed the row list is the same for every page of
+ * a game, so it is cached instead of rebuilt per render. Prerendering only ever
+ * hits this case, and a game can have tens of thousands of declarations.
+ */
+function buildRows(
+  declarations: Map<string, Map<string, Declaration>>,
+  nameWords: string[],
+  moduleWords: string[],
+  collapsed: Set<string>,
+): SidebarRows {
+  const hasNameFilter = nameWords.length > 0;
+  const hasModuleFilter = moduleWords.length > 0;
+  const cacheable = !hasNameFilter && !hasModuleFilter && collapsed.size === 0;
+
+  if (cacheable) {
+    const cached = unfilteredRowsCache.get(declarations);
+    if (cached) return cached;
+  }
+
+  const rows: SidebarRow[] = [];
+  const stickyIndexes: number[] = [];
+  for (const [module, moduleMap] of declarations) {
+    // Module filter (OR across module words, same as main search)
+    if (hasModuleFilter) {
+      const mod = module.toLowerCase();
+      if (!moduleWords.some((w) => mod.includes(w))) continue;
+    }
+    // Collect matching items (or all items if no filter)
+    const items: Declaration[] = [];
+    for (const d of moduleMap.values()) {
+      if (hasNameFilter && !matchesWords(d.name, nameWords)) continue;
+      items.push(d);
+    }
+    if (items.length === 0) continue;
+    stickyIndexes.push(rows.length);
+    rows.push({ type: "header", module, count: items.length });
+    if (!collapsed.has(module)) {
+      for (const d of items) {
+        rows.push({ type: "item", declaration: d });
+      }
+    }
+  }
+
+  const result = { rows, stickyIndexes };
+  if (cacheable) unfilteredRowsCache.set(declarations, result);
+  return result;
+}
+
 const VirtualizedList = ({
   rows,
   stickyIndexes,
@@ -193,34 +246,10 @@ export const DeclarationsSidebar = ({
   const [hydrated, setHydrated] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const { rows, stickyIndexes } = useMemo(() => {
-    const rows: SidebarRow[] = [];
-    const stickyIndexes: number[] = [];
-    const hasNameFilter = nameWords.length > 0;
-    const hasModuleFilter = moduleWords.length > 0;
-    for (const [module, moduleMap] of declarations) {
-      // Module filter (OR across module words, same as main search)
-      if (hasModuleFilter) {
-        const mod = module.toLowerCase();
-        if (!moduleWords.some((w) => mod.includes(w))) continue;
-      }
-      // Collect matching items (or all items if no filter)
-      const items: Declaration[] = [];
-      for (const d of moduleMap.values()) {
-        if (hasNameFilter && !matchesWords(d.name, nameWords)) continue;
-        items.push(d);
-      }
-      if (items.length === 0) continue;
-      stickyIndexes.push(rows.length);
-      rows.push({ type: "header", module, count: items.length });
-      if (!collapsed.has(module)) {
-        for (const d of items) {
-          rows.push({ type: "item", declaration: d });
-        }
-      }
-    }
-    return { rows, stickyIndexes };
-  }, [declarations, nameWords, moduleWords, collapsed]);
+  const { rows, stickyIndexes } = useMemo(
+    () => buildRows(declarations, nameWords, moduleWords, collapsed),
+    [declarations, nameWords, moduleWords, collapsed],
+  );
 
   const activeIndex = useMemo(() => {
     if (!scope || !activeModule) return -1;

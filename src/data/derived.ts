@@ -35,6 +35,33 @@ export function* allDeclarations(
   for (const moduleMap of declarations.values()) yield* moduleMap.values();
 }
 
+const metadataKeysCache = new WeakMap<Map<string, Map<string, Declaration>>, string[]>();
+
+/**
+ * Every metadata key used anywhere in a game, sorted, for search autocomplete.
+ * Walking every declaration is expensive and the result only changes per game, so
+ * it is cached on the declarations map rather than recomputed per render. During
+ * prerendering that is the difference between once per game and once per page.
+ */
+export function getMetadataKeys(declarations: Map<string, Map<string, Declaration>>): string[] {
+  let keys = metadataKeysCache.get(declarations);
+  if (keys) return keys;
+
+  const set = new Set<string>();
+  for (const d of allDeclarations(declarations)) {
+    for (const m of d.metadata) set.add(m.name);
+    if (d.kind === "class") {
+      for (const f of d.fields) for (const m of f.metadata) set.add(m.name);
+    } else {
+      for (const mem of d.members) for (const m of mem.metadata) set.add(m.name);
+    }
+  }
+
+  keys = [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  metadataKeysCache.set(declarations, keys);
+  return keys;
+}
+
 // -- Private helpers --
 
 function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
