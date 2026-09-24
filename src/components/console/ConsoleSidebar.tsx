@@ -9,8 +9,10 @@ import {
 import { BrandRow } from "../layout/NavBar";
 import { SidebarGroupHeader, SidebarHeader, SidebarList, SidebarWrapper } from "../layout/Sidebar";
 import { KindIcon } from "../kind-icon/KindIcon";
+import { useTooltip } from "../Tooltip";
 import { flagColorVars } from "./ConsoleRow";
-import { flagGroup, flagIcon } from "./flags";
+import { FlagTooltipContent } from "./FlagTooltipContent";
+import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
 import type { ConsoleFilters } from "./ConsolePage";
 
 const KINDS = [
@@ -19,17 +21,11 @@ const KINDS = [
   { kind: "commands", label: "Commands", icon: "command" },
 ] as const;
 
-const TITLES: Record<FilterTag, Record<TagState, (value: string) => string>> = {
-  "flag:": {
-    off: (v) => `Only show ${v}`,
-    include: (v) => `Hide ${v}`,
-    exclude: (v) => `Stop filtering by ${v}`,
-  },
-  "module:": {
-    off: (v) => `Only show ${v}`,
-    include: (v) => `Stop filtering by ${v}`,
-    exclude: (v) => `Stop filtering by ${v}`,
-  },
+// Flags explain themselves via their tooltip instead, modules don't have one
+const MODULE_TITLE: Record<TagState, (value: string) => string> = {
+  off: (v) => `Only show ${v}`,
+  include: (v) => `Stop filtering by ${v}`,
+  exclude: (v) => `Stop filtering by ${v}`,
 };
 
 export const ConsoleSidebar = memo(function ConsoleSidebar({
@@ -131,19 +127,24 @@ function TagGroup({
       {values.map((v) => {
         const state = getTagState(parsed, tag, v);
         const count = counts.get(v) ?? 0;
-        const icon = tag === "flag:" ? flagIcon(v) : undefined;
-        return (
+        return tag === "flag:" ? (
+          <FlagFilterItem
+            key={v}
+            flag={v}
+            state={state}
+            count={count}
+            onClick={() => onToggle(tag, v)}
+          />
+        ) : (
           <FilterItem
             key={v}
-            data-group={tag === "flag:" ? flagGroup(v) : undefined}
             data-state={state}
             data-empty={count === 0 || undefined}
             aria-pressed={state === "include"}
-            title={TITLES[tag][state](v)}
+            title={MODULE_TITLE[state](v)}
             onClick={() => onToggle(tag, v)}
           >
-            {/* The flag's own icon takes the place of the color dot */}
-            {icon ? <FlagIcon kind={icon} size={12} /> : tag === "flag:" ? <Dot /> : <Spacer />}
+            <Spacer />
             <ItemName>{v}</ItemName>
             {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
             <ChipCount>{count.toLocaleString("en-US")}</ChipCount>
@@ -151,6 +152,46 @@ function TagGroup({
         );
       })}
     </Group>
+  );
+}
+
+/** A flag's filter row, with a hover tooltip explaining the flag */
+function FlagFilterItem({
+  flag,
+  state,
+  count,
+  onClick,
+}: {
+  flag: string;
+  state: TagState;
+  count: number;
+  onClick: () => void;
+}) {
+  const icon = flagIcon(flag);
+  const description = flagDescription(flag);
+  const { referenceProps, tooltip } = useTooltip(
+    description && <FlagTooltipContent flag={flag} description={description} />,
+    flagAccent(flag),
+  );
+
+  return (
+    <>
+      <FilterItem
+        data-group={flagGroup(flag)}
+        data-state={state}
+        data-empty={count === 0 || undefined}
+        aria-pressed={state === "include"}
+        onClick={onClick}
+        {...referenceProps}
+      >
+        {/* The flag's own icon takes the place of the color dot */}
+        {icon ? <FlagIcon kind={icon} size={12} /> : <Dot />}
+        <ItemName>{flag}</ItemName>
+        {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
+        <ChipCount>{count.toLocaleString("en-US")}</ChipCount>
+      </FilterItem>
+      {tooltip}
+    </>
   );
 }
 
