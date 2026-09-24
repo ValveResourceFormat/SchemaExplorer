@@ -429,7 +429,9 @@ function PvalType({
     }
   } else if (base === "schema_enum" && enumModule) {
     if (declarations.get(enumModule)?.get(sub)?.kind === "enum") {
-      inner = <SchemaTypeView type={{ category: "declared_enum", name: sub, module: enumModule }} />;
+      inner = (
+        <SchemaTypeView type={{ category: "declared_enum", name: sub, module: enumModule }} />
+      );
     }
   }
 
@@ -814,9 +816,7 @@ export function UsedByKeyvalues({ name, module }: { name: string; module: string
           <span>
             {entityLabel(entity)}
             <RefField>{key.name}</RefField>
-            {ambiguous.has(`${entityLabel(entity)}.${key.name}`) && (
-              <Dim> ({entity.module})</Dim>
-            )}
+            {ambiguous.has(`${entityLabel(entity)}.${key.name}`) && <Dim> ({entity.module})</Dim>}
           </span>
         </SectionLink>
       )}

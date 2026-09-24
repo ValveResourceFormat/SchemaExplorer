@@ -9,9 +9,9 @@
     "lastmod": "node scripts/generate-lastmod.ts",
     "sitemap": "node scripts/generate-sitemap.ts",
     "preview": "vite preview",
-    "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin *.ts src scripts",
-    "fmt": "oxfmt *.ts src scripts",
-    "test": "tsc && oxlint --react-perf-plugin --jsx-a11y-plugin *.ts src scripts && vitest run --reporter=dot && oxfmt --check *.ts src scripts",
+    "lint": "oxlint --react-perf-plugin --jsx-a11y-plugin react-router.config.ts vite.config.ts src scripts",
+    "fmt": "oxfmt react-router.config.ts vite.config.ts src scripts",
+    "test": "tsc && oxlint --react-perf-plugin --jsx-a11y-plugin react-router.config.ts vite.config.ts src scripts && vitest run --reporter=dot && oxfmt --check react-router.config.ts vite.config.ts src scripts",
     "test:watch": "vitest"
   },
   "dependencies": {

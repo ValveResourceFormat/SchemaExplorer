@@ -214,8 +214,7 @@ function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
   const { size, alignment } = declaration;
   return (
     <LayoutText>
-      {plural(size, "byte")} ({formatHexOffset(size)})
-      {alignment != null && `, align ${alignment}`}
+      {plural(size, "byte")} ({formatHexOffset(size)}){alignment != null && `, align ${alignment}`}
     </LayoutText>
   );
 }
