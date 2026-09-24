@@ -29,7 +29,8 @@ export interface SchemaMetadataEntry {
 
 export interface SchemaField {
   name: string;
-  offset: number;
+  /** Omitted in dumps that are not kept up to date, where offsets would go stale */
+  offset?: number;
   type: SchemaFieldType;
   metadata: SchemaMetadataEntry[];
   defaultValue?: string;
@@ -52,9 +53,9 @@ export interface SchemaClass {
   kind: "class";
   name: string;
   module: string;
-  /** Size in bytes */
-  size: number;
-  /** Omitted when unknown */
+  /** Size in bytes, omitted in dumps that are not kept up to date */
+  size?: number;
+  /** Omitted when unknown, or in dumps that are not kept up to date */
   alignment?: number;
   flags: SchemaClassFlag[];
   parents: SchemaParent[];

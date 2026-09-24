@@ -81,13 +81,14 @@ not the on-disk resource layout.
 \`\`\`
 { generator, revision, version_date, version_time, classes: Class[], enums: Enum[],
   convars?: ConVar[], commands?: Command[], entities?: Entity[] }
-Class  { module, name, size, alignment?, flags?: string[], parents?: {module,name,offset?}[],
+Class  { module, name, size?, alignment?, flags?: string[], parents?: {module,name,offset?}[],
          fields?: Field[], metadata?: Meta[] }
-       // size and alignment in bytes, alignment omitted when unknown; flags: abstract,
+       // size and alignment in bytes, alignment omitted when unknown; games that are not kept up
+       // to date omit size, alignment and all offsets, as they would go stale; flags: abstract,
        // trivial_constructor, trivial_destructor, construct_disallowed; parents = direct base
        // classes only, offset (non-zero only) is where a later base in multiple inheritance starts,
        // its fields are at offset + field offset; fields = own only, not inherited
-Field  { name, offset, type: Type, metadata?: Meta[] }   // offset in bytes from class start
+Field  { name, offset?, type: Type, metadata?: Meta[] }   // offset in bytes from class start
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
        // alignment = underlying C type as a string, e.g. "uint8_t"; value is a number
 Meta   { name, value?: string | object }

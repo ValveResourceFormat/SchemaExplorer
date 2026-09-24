@@ -212,6 +212,7 @@ const LayoutText = styled.span`
 /** Size and alignment of a class */
 function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
   const { size, alignment } = declaration;
+  if (size == null) return null;
   return (
     <LayoutText>
       {plural(size, "byte")} ({formatHexOffset(size)}){alignment != null && `, align ${alignment}`}
@@ -339,15 +340,17 @@ function InheritedFieldView({
   field: api.SchemaField;
   baseOffset: number;
 }) {
-  const offset = baseOffset + field.offset;
+  const offset = field.offset != null ? baseOffset + field.offset : undefined;
   return (
     <InheritedRow>
       <KindIcon kind="field" size="small" />
       <span>{field.name}:</span> <SchemaTypeView type={field.type} />
       <KeyvalueChips owner={owner} field={field.name} />
-      <InheritedFieldOffset>
-        {offset} ({formatHexOffset(offset)})
-      </InheritedFieldOffset>
+      {offset != null && (
+        <InheritedFieldOffset>
+          {offset} ({formatHexOffset(offset)})
+        </InheritedFieldOffset>
+      )}
     </InheritedRow>
   );
 }
@@ -392,7 +395,7 @@ function SchemaFieldView({
   bitfield?: BitfieldInfo;
   anchored: boolean;
 }) {
-  const offsetHex = formatHexOffset(field.offset);
+  const offsetHex = field.offset != null ? formatHexOffset(field.offset) : undefined;
   const rowRef = useAnchoredRef(anchored);
 
   return (
@@ -421,9 +424,11 @@ function SchemaFieldView({
                 {bitfield.bitCount !== 1 ? `..${bitfield.bitOffset + bitfield.bitCount - 1}` : ""}
               </BitRange>
             )}
-            <FieldOffset to={searchLink(game, `offset:${offsetHex}`)}>
-              {field.offset} ({offsetHex})
-            </FieldOffset>
+            {offsetHex != null && (
+              <FieldOffset to={searchLink(game, `offset:${offsetHex}`)}>
+                {field.offset} ({offsetHex})
+              </FieldOffset>
+            )}
           </MemberSignature>
           <MetadataTags metadata={field.metadata} game={game} module={owner.module} />
         </GridContent>

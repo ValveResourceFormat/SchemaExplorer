@@ -207,13 +207,13 @@ function assignDefaults(classes: SchemaClass[]) {
 interface RawSchemaClass {
   name: string;
   module: string;
-  size: number;
+  size?: number;
   alignment?: number;
   flags?: SchemaClassFlag[];
   parents?: SchemaParent[];
   fields?: {
     name: string;
-    offset: number;
+    offset?: number;
     type: SchemaFieldType;
     metadata?: SchemaMetadataEntry[];
   }[];
