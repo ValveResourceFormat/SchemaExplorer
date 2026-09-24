@@ -1,113 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { styled } from "@linaria/react";
-import { DeclarationsContext, type GameContext } from "./schema/DeclarationsContext";
+import { type GameContext } from "./schema/DeclarationsContext";
 import { DeclarationsSidebar } from "./DeclarationsSidebar";
 import { ContentList } from "./schema/ContentList";
-import { SearchContext } from "./search/SearchContext";
-import { useHashParam } from "../utils/filtering";
-import { NavBar } from "./layout/NavBar";
+import { PageProviders, PageShell } from "./layout/PageShell";
 
 export default function DeclarationsPage({ context }: { context: GameContext }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const search = useHashParam("search") ?? "";
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
-      const active = document.activeElement;
-      if (!(active instanceof HTMLInputElement)) {
-        e.preventDefault();
-        document.getElementById("main-search")?.focus();
-      }
-    };
-    document.addEventListener("keydown", listener);
-    return () => document.removeEventListener("keydown", listener);
-  }, []);
-
-  const searchCtx = useMemo(() => ({ search }), [search]);
-
-  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
-  const openSidebar = useCallback(() => setSidebarOpen(true), []);
-
-  // While the mobile drawer is open, arm a CloseWatcher so the back gesture,
-  // Escape, and other close requests dismiss it instead of navigating away.
-  useEffect(() => {
-    if (!sidebarOpen || typeof CloseWatcher === "undefined") return;
-
-    const watcher = new CloseWatcher();
-    watcher.onclose = closeSidebar;
-    return () => watcher.destroy();
-  }, [sidebarOpen, closeSidebar]);
-
   return (
-    <DeclarationsContext.Provider value={context}>
-      <SearchContext.Provider value={searchCtx}>
-        <PageGrid>
-          <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
-          <SidebarPanel data-open={sidebarOpen || undefined}>
-            <DeclarationsSidebar onNavigate={closeSidebar} sidebarOpen={sidebarOpen} />
-          </SidebarPanel>
-          <ContentColumn>
-            <NavBar onMenuClick={openSidebar} />
-            <ContentList />
-          </ContentColumn>
-        </PageGrid>
-      </SearchContext.Provider>
-    </DeclarationsContext.Provider>
+    <PageProviders context={context}>
+      <PageShell
+        section="schemas"
+        sidebar={({ onNavigate, sidebarOpen }) => (
+          <DeclarationsSidebar onNavigate={onNavigate} sidebarOpen={sidebarOpen} />
+        )}
+      >
+        <ContentList />
+      </PageShell>
+    </PageProviders>
   );
 }
-
-const ContentColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  padding-right: 32px;
-
-  @media (max-width: 768px) {
-    padding: 0 8px;
-  }
-`;
-
-const MobileSidebarOverlay = styled.div`
-  display: none;
-
-  @media (max-width: 768px) {
-    &[data-open] {
-      display: block;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 300;
-    }
-  }
-`;
-
-const SidebarPanel = styled.div`
-  display: contents;
-
-  @media (max-width: 768px) {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 300px;
-    z-index: 301;
-    background: var(--sidebar);
-
-    &[data-open] {
-      display: flex;
-    }
-  }
-`;
-
-const PageGrid = styled.div`
-  display: grid;
-  grid-template-columns: 372px 1fr;
-  min-height: 100dvh;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;

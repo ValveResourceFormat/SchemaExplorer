@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { buildHash } from "../../utils/filtering";
+import { getConsoleStats } from "../../utils/console-filtering";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
-import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
-import { getMetadataKeys } from "../../data/derived";
+import { DeclarationsContext, consolePath, schemaPath } from "../schema/DeclarationsContext";
+import { getMetadataKeys, type GameContext } from "../../data/derived";
 import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 
 export const SearchInput = styled.input`
@@ -32,43 +34,84 @@ export const SearchInput = styled.input`
   }
 `;
 
-export const SEARCH_TAGS = [
+export type SearchMode = "schemas" | "console";
+
+export interface SearchTag {
+  tag: string;
+  icon: IconKind;
+  label: string;
+  description: string;
+  example: string;
+  /** Only shown for games that have entities */
+  entities?: boolean;
+}
+
+const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "module:",
-    icon: "field" as IconKind,
+    icon: "field",
     label: "Module",
     description: "Filter by module name",
     example: "e.g. module:client",
   },
   {
     tag: "offset:",
-    icon: "meta-default" as IconKind,
+    icon: "meta-default",
     label: "Offset",
     description: "Filter by byte offset",
     example: "e.g. offset:0x1A0",
   },
   {
     tag: "enumvalue:",
-    icon: "enum-member" as IconKind,
+    icon: "enum-member",
     label: "Enum Value",
     description: "Filter by enum member value",
     example: "e.g. enumvalue:4",
   },
   {
     tag: "metadata:",
-    icon: "meta-tag" as IconKind,
+    icon: "meta-tag",
     label: "Metadata",
     description: "Filter by metadata key name",
     example: "e.g. metadata:MPropertyFriendlyName",
   },
   {
     tag: "metadatavalue:",
-    icon: "meta-variable" as IconKind,
+    icon: "meta-variable",
     label: "Metadata Value",
     description: "Filter by metadata value",
     example: "e.g. metadatavalue:true",
   },
-] as const;
+];
+
+const CONSOLE_SEARCH_TAGS: readonly SearchTag[] = [
+  {
+    tag: "module:",
+    icon: "field",
+    label: "Module",
+    description: "Filter by declaring module",
+    example: "e.g. module:server",
+  },
+  {
+    tag: "flag:",
+    icon: "meta-tag",
+    label: "Flag",
+    description: "Filter by flag, -flag: excludes",
+    example: "e.g. flag:cheat -flag:hidden",
+  },
+  {
+    tag: "type:",
+    icon: "convar",
+    label: "Type",
+    description: "Filter convars by value type",
+    example: "e.g. type:float32",
+  },
+];
+
+export function getSearchTags(mode: SearchMode, hasEntities: boolean): readonly SearchTag[] {
+  if (mode === "console") return CONSOLE_SEARCH_TAGS;
+  return hasEntities ? SEARCH_TAGS : SEARCH_TAGS.filter((t) => !t.entities);
+}
 
 function getLastWord(input: string): string {
   if (input === "" || input.endsWith(" ")) return "";
@@ -80,25 +123,57 @@ function shouldShowFirstLevelPopup(input: string): boolean {
   return !getLastWord(input).includes(":");
 }
 
-function filterTags(lastWord: string) {
-  if (lastWord === "") return SEARCH_TAGS;
-  return SEARCH_TAGS.filter((t) => t.tag.includes(lastWord.toLowerCase()));
+/** Only console tags can be negated with a leading "-" */
+function negationPrefix(word: string, mode: SearchMode): "-" | "" {
+  return mode === "console" && word.startsWith("-") ? "-" : "";
 }
 
-function insertTag(inputValue: string, tag: string): string {
+function filterTags(tags: readonly SearchTag[], lastWord: string, mode: SearchMode) {
+  if (lastWord === "") return tags;
+  const lower = lastWord.toLowerCase().slice(negationPrefix(lastWord, mode).length);
+  return tags.filter((t) => t.tag.includes(lower));
+}
+
+function insertTag(inputValue: string, tag: string, mode: SearchMode): string {
   if (inputValue === "" || inputValue.endsWith(" ")) return inputValue + tag;
   const parts = inputValue.split(" ");
-  parts[parts.length - 1] = tag;
+  parts[parts.length - 1] = negationPrefix(parts[parts.length - 1], mode) + tag;
   return parts.join(" ");
 }
 
+type ValueSuggestions = {
+  tag: string;
+  header: string;
+  values: string[];
+  counts?: Map<string, number>;
+};
+
 function getSecondLevelContext(
   lastWord: string,
-): { type: "module" | "metadata"; value: string } | null {
+  suggestions: ValueSuggestions[],
+  mode: SearchMode,
+): { prefix: string; value: string; suggestions: ValueSuggestions } | null {
   const lower = lastWord.toLowerCase();
-  if (lower.startsWith("module:")) return { type: "module", value: lastWord.slice(7) };
-  if (lower.startsWith("metadata:")) return { type: "metadata", value: lastWord.slice(9) };
+  const negated = negationPrefix(lower, mode);
+  for (const sug of suggestions) {
+    if (lower.startsWith(negated + sug.tag)) {
+      return {
+        prefix: negated + sug.tag,
+        value: lastWord.slice(negated.length + sug.tag.length),
+        suggestions: sug,
+      };
+    }
+  }
   return null;
+}
+
+function getConsoleSuggestions(items: GameContext["consoleItems"]): ValueSuggestions[] {
+  const { sorted, modules, flags, types } = getConsoleStats(items);
+  return [
+    { tag: "module:", header: "Modules", values: sorted.modules, counts: modules },
+    { tag: "flag:", header: "Flags", values: sorted.flags, counts: flags },
+    { tag: "type:", header: "Types", values: sorted.types, counts: types },
+  ];
 }
 
 function insertValue(inputValue: string, tagPrefix: string, value: string): string {
@@ -137,6 +212,13 @@ const SearchPlaceholder = styled.div`
   color: var(--searchbox-placeholder);
   font-size: 14px;
   font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   kbd {
     font-family: inherit;
@@ -217,6 +299,13 @@ const TagItemExample = styled.span`
   flex-shrink: 0;
 `;
 
+const ValueCount = styled.span`
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+`;
+
 const ValuePopupList = styled.div`
   max-height: 200px;
   overflow-y: auto;
@@ -243,12 +332,14 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
 function ValueSuggestPopup({
   header,
   values,
+  counts,
   activeIndex,
   onSelect,
   query,
 }: {
   header: string;
   values: string[];
+  counts?: Map<string, number>;
   activeIndex: number;
   onSelect: (value: string) => void;
   query: string;
@@ -273,6 +364,7 @@ function ValueSuggestPopup({
             <TagItemName>
               <HighlightMatch text={v} query={query} />
             </TagItemName>
+            {counts && <ValueCount>{counts.get(v)}</ValueCount>}
           </TagItem>
         ))}
       </ValuePopupList>
@@ -285,7 +377,7 @@ function SearchTagPopup({
   activeIndex,
   onSelect,
 }: {
-  tags: readonly (typeof SEARCH_TAGS)[number][];
+  tags: readonly SearchTag[];
   activeIndex: number;
   onSelect: (tag: string) => void;
 }) {
@@ -317,10 +409,18 @@ function SearchTagPopup({
   );
 }
 
-export function SearchBox({ className }: { className?: string }) {
+export function SearchBox({
+  className,
+  mode = "schemas",
+}: {
+  className?: string;
+  mode?: SearchMode;
+}) {
   const { search } = useContext(SearchContext);
-  const { game, declarations } = useContext(DeclarationsContext);
-  const baseUrl = schemaPath(game);
+  const { game, declarations, entities, consoleItems } = useContext(DeclarationsContext);
+  const baseUrl = mode === "console" ? consolePath(game) : schemaPath(game);
+  const hasEntities = entities.length > 0;
+  const tags = getSearchTags(mode, hasEntities);
   const [inputValue, setInputValue] = useState(search);
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -339,23 +439,28 @@ export function SearchBox({ className }: { className?: string }) {
     setInputValue(urlSearch);
   }, [location.hash]);
 
-  const uniqueModules = useMemo(() => [...declarations.keys()], [declarations]);
-
-  const uniqueMetadataKeys = getMetadataKeys(declarations);
+  const valueSuggestions = useMemo((): ValueSuggestions[] => {
+    if (mode === "console") return getConsoleSuggestions(consoleItems);
+    const list: ValueSuggestions[] = [
+      { tag: "module:", header: "Modules", values: [...declarations.keys()] },
+      { tag: "metadata:", header: "Metadata Keys", values: getMetadataKeys(declarations) },
+    ];
+    return list;
+  }, [mode, consoleItems, declarations]);
 
   const lastWord = getLastWord(inputValue);
-  const filteredTags = filterTags(lastWord);
+  const filteredTags = filterTags(tags, lastWord, mode);
   const showFirstLevel =
     isFocused && shouldShowFirstLevelPopup(inputValue) && filteredTags.length > 0;
 
-  const secondLevel = getSecondLevelContext(lastWord);
+  const secondLevel = getSecondLevelContext(lastWord, valueSuggestions, mode);
   const secondLevelValues = useMemo(() => {
     if (!secondLevel) return [];
-    const list = secondLevel.type === "module" ? uniqueModules : uniqueMetadataKeys;
+    const list = secondLevel.suggestions.values;
     if (secondLevel.value === "") return list;
     const lower = secondLevel.value.toLowerCase();
     return list.filter((v) => v.toLowerCase().includes(lower));
-  }, [secondLevel?.type, secondLevel?.value, uniqueModules, uniqueMetadataKeys]);
+  }, [secondLevel?.suggestions, secondLevel?.value]);
   const isExactMatch =
     secondLevel != null &&
     secondLevelValues.length === 1 &&
@@ -370,9 +475,13 @@ export function SearchBox({ className }: { className?: string }) {
     setInputValue(newValue);
     ownNavigateRef.current = true;
     const replace = inputValue !== "" || newValue === "";
+    // Other hash params, like the convars page kind filter, stay when searching on the same page.
+    // A directly loaded prerendered page can have a trailing slash
+    const samePage = location.pathname.replace(/\/$/, "") === baseUrl;
+    const params = Object.fromEntries(new URLSearchParams(samePage ? location.hash.slice(1) : ""));
     startTransition(() => {
       navigate(
-        { pathname: baseUrl, hash: newValue ? `search=${encodeURIComponent(newValue)}` : "" },
+        { pathname: baseUrl, hash: buildHash({ ...params, name: null, search: newValue }) },
         { replace },
       );
     });
@@ -381,13 +490,12 @@ export function SearchBox({ className }: { className?: string }) {
   };
 
   const handleTagSelect = (tag: string) => {
-    applyNewValue(insertTag(inputValue, tag));
+    applyNewValue(insertTag(inputValue, tag, mode));
   };
 
   const handleValueSelect = (value: string) => {
     if (!secondLevel) return;
-    const tagPrefix = secondLevel.type === "module" ? "module:" : "metadata:";
-    applyNewValue(insertValue(inputValue, tagPrefix, value));
+    applyNewValue(insertValue(inputValue, secondLevel.prefix, value));
   };
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = ({ target: { value } }) => {
@@ -423,6 +531,19 @@ export function SearchBox({ className }: { className?: string }) {
 
   const ref = useRef<HTMLInputElement>(null);
 
+  // "/" focuses the search from anywhere outside an input
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!(document.activeElement instanceof HTMLInputElement)) {
+        e.preventDefault();
+        ref.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", listener);
+    return () => document.removeEventListener("keydown", listener);
+  }, []);
+
   return (
     <SearchBoxWrapper className={className}>
       <SearchIcon width="16" height="16" aria-hidden="true">
@@ -430,7 +551,7 @@ export function SearchBox({ className }: { className?: string }) {
       </SearchIcon>
       {!inputValue && !isFocused && (
         <SearchPlaceholder>
-          Type <kbd>/</kbd> to search
+          Type <kbd>/</kbd> <span>to search{mode === "console" && " convars and commands"}</span>
         </SearchPlaceholder>
       )}
       <MainSearchInput
@@ -458,8 +579,9 @@ export function SearchBox({ className }: { className?: string }) {
       )}
       {showSecondLevel && secondLevel && (
         <ValueSuggestPopup
-          header={secondLevel.type === "module" ? "Modules" : "Metadata Keys"}
+          header={secondLevel.suggestions.header}
           values={secondLevelValues}
+          counts={secondLevel.suggestions.counts}
           activeIndex={activeIndex}
           onSelect={handleValueSelect}
           query={secondLevel.value}

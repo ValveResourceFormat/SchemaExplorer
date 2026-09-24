@@ -2,12 +2,21 @@ import React from "react";
 import { styled } from "@linaria/react";
 import { useNavigate, useLocation, useParams } from "react-router";
 import { AppContext } from "../AppContext";
-import { SearchBox } from "../search/SearchBox";
-import { schemaPath } from "../schema/DeclarationsContext";
+import { SearchBox, type SearchMode } from "../search/SearchBox";
+import { useDismiss } from "../useDismiss";
+import { DeclarationsContext, consolePath, schemaPath } from "../schema/DeclarationsContext";
 import { GAME_LIST, GameId, getGameDef } from "../../games-list";
+import { getGameContext } from "../../data/derived";
 import { ICONS_URL } from "../kind-icon/KindIcon";
+import { Link } from "../Link";
 
-export const NavBar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
+export const NavBar = ({
+  onMenuClick,
+  section = "schemas",
+}: {
+  onMenuClick?: () => void;
+  section?: SearchMode;
+}) => {
   return (
     <NavBarContentCell>
       {onMenuClick && (
@@ -27,35 +36,119 @@ export const NavBar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
           </svg>
         </MenuButton>
       )}
-      <NavBarSearchBox />
+      <SectionTabs section={section} />
+      <NavBarSearchBox mode={section} />
       <NavBarThemeSwitcher />
     </NavBarContentCell>
   );
 };
 
-export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
+function SectionTabs({ section }: { section: SearchMode }) {
+  const { game, consoleItems } = React.useContext(DeclarationsContext);
+  if (consoleItems.length === 0) return null;
+
+  return (
+    <TabsWrapper aria-label="Sections">
+      <Tab to={schemaPath(game)} {...tabState(section === "schemas")}>
+        Schemas
+      </Tab>
+      <Tab to={consolePath(game)} {...tabState(section === "console")}>
+        ConVars<TabLongLabel> &amp; Commands</TabLongLabel>
+      </Tab>
+    </TabsWrapper>
+  );
+}
+
+// The active section, not the current page: the schemas tab links to the game's home
+function tabState(active: boolean) {
+  return {
+    "data-active": active || undefined,
+    "aria-current": active ? ("true" as const) : undefined,
+  };
+}
+
+const TabsWrapper = styled.nav`
+  display: flex;
+  flex-shrink: 0;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--searchbox-background);
+`;
+
+const Tab = styled(Link)`
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-dim);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &[data-active] {
+    color: var(--text);
+    background: var(--group);
+    box-shadow: var(--group-shadow);
+  }
+`;
+
+const TabLongLabel = styled.span`
+  @media (max-width: 1024px) {
+    display: none;
+  }
+`;
+
+/** S2V brand link and the game switcher */
+export function BrandRow({ section }: { section?: SearchMode }) {
+  const { game } = React.useContext(DeclarationsContext);
+  return (
+    <BrandRowWrapper>
+      <Brand href="https://s2v.app/">
+        <S2VLogo />
+        <span>Source 2 Viewer</span>
+      </Brand>
+      <GameSwitcher currentGame={game} section={section} />
+    </BrandRowWrapper>
+  );
+}
+
+const BrandRowWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+`;
+
+const Brand = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--text);
+  white-space: nowrap;
+`;
+
+function GameSwitcher({
+  currentGame,
+  section = "schemas",
+}: {
+  currentGame: GameId;
+  section?: SearchMode;
+}) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { module, scope } = useParams();
 
-  React.useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  const close = React.useCallback(() => setOpen(false), []);
+  useDismiss(ref, open, close);
 
   const currentGameInfo = getGameDef(currentGame);
 
@@ -63,10 +156,12 @@ export function GameSwitcher({ currentGame }: { currentGame: GameId }) {
     setOpen(false);
     if (gameId === currentGame) return;
 
-    navigate({
-      pathname: schemaPath(gameId, module, scope),
-      hash: location.hash,
-    });
+    // Stay on the console page when the other game has convars
+    const pathname =
+      section === "console" && getGameContext(gameId).consoleItems.length > 0
+        ? consolePath(gameId)
+        : schemaPath(gameId, module, scope);
+    navigate({ pathname, hash: location.hash });
   }
 
   return (
@@ -221,12 +316,19 @@ const NavBarContentCell = styled.header`
 
   @media (max-width: 768px) {
     grid-column: 1;
+    flex-wrap: wrap;
+    gap: 8px 14px;
   }
 `;
 
 const NavBarSearchBox = styled(SearchBox)`
   flex: 1;
   min-width: 0;
+
+  @media (max-width: 768px) {
+    order: 10;
+    flex-basis: 100%;
+  }
 `;
 
 const ToggleTrack = styled.label`
@@ -307,7 +409,7 @@ const ToggleIcon = styled.span`
   }
 `;
 
-export function S2VLogo() {
+function S2VLogo() {
   return (
     <svg width="28" height="28">
       <use href={`${ICONS_URL}#s2v-logo`} />

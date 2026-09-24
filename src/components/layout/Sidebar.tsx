@@ -142,3 +142,17 @@ export const SidebarWrapper = styled.nav`
     min-height: 0;
   }
 `;
+
+export const SidebarHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  flex-shrink: 0;
+`;
+
+export const SidebarList = styled.div`
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+`;

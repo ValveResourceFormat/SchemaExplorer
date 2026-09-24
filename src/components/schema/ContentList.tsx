@@ -1,7 +1,13 @@
 import React, { useContext, useMemo } from "react";
 import { useParams } from "react-router";
 import { styled } from "@linaria/react";
-import { ContentWrapper, ListItem, TextMessage } from "../layout/Content";
+import {
+  ContentWrapper,
+  ListItem,
+  OtherGameHeading,
+  SiteFooter,
+  TextMessage,
+} from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData, useParsedSearch, searchDeclarations } from "../../utils/filtering";
 import { DeclarationBreadcrumb } from "./Breadcrumb";
@@ -10,8 +16,7 @@ import { SchemaEnumView } from "./SchemaEnum";
 import { Declaration } from "../../data/types";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
-import { BASE_PATH, GameId, getGameDef } from "../../games-list";
-import { ICONS_URL } from "../kind-icon/KindIcon";
+import { GameId } from "../../games-list";
 import { CardBlock, SectionLink } from "./styles";
 import { ClassTree } from "./ClassTree";
 import { SchemaHome } from "./SchemaHome";
@@ -21,36 +26,6 @@ const ModuleChipsBlock = styled(CardBlock)`
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-`;
-
-const OffsetsNote = styled.footer`
-  font-size: 14px;
-  color: var(--text-dim);
-  text-align: center;
-  padding: 8px 4px;
-
-  a {
-    color: inherit;
-
-    &:hover {
-      color: var(--text);
-    }
-  }
-`;
-
-const OtherGameHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 0 4px;
-  font-size: 15px;
-  color: var(--text-dim);
-
-  svg {
-    width: 18px;
-    height: 18px;
-    border-radius: 3px;
-  }
 `;
 
 function OtherGamesResults() {
@@ -74,15 +49,9 @@ function OtherGamesResults() {
   return (
     <>
       {gameResults.map(({ gameId, found }) => {
-        const gameInfo = getGameDef(gameId);
         return (
           <React.Fragment key={gameId}>
-            <OtherGameHeader>
-              <svg width="24" height="24">
-                <use href={`${ICONS_URL}#game-${gameId}`} />
-              </svg>
-              {gameInfo?.name}
-            </OtherGameHeader>
+            <OtherGameHeading gameId={gameId} />
             <DeclarationsContext.Provider value={{ ...ctx, game: gameId }}>
               <LazyList data={found} render={renderSearchResult} />
             </DeclarationsContext.Provider>
@@ -129,7 +98,8 @@ function renderItem(declaration: Declaration, isSearchResult?: boolean) {
 const renderSearchResult = (declaration: Declaration) => renderItem(declaration, true);
 
 export function ContentList() {
-  const { declarations, metadata, error } = useContext(DeclarationsContext);
+  const context = useContext(DeclarationsContext);
+  const { declarations, metadata, error } = context;
   const { data, isSearching } = useFilteredData(declarations);
   const { game: gameParam, module } = useParams();
 
@@ -155,16 +125,7 @@ export function ContentList() {
         </>
       )}
       {module !== INTRINSIC_MODULE && (
-        <OffsetsNote>
-          {gameParam && metadata.revision > 0 && (
-            <>
-              Offsets are from Windows. Source revision {metadata.revision} built on{" "}
-              {metadata.versionDate}.{" "}
-            </>
-          )}
-          Machine-readable data for scripts and AI agents:{" "}
-          <a href={`${BASE_PATH}/llms.txt`}>llms.txt</a>.
-        </OffsetsNote>
+        <SiteFooter metadata={gameParam ? metadata : undefined} note="Offsets are from Windows." />
       )}
     </ContentWrapper>
   );

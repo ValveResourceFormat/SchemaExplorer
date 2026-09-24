@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  buildHash,
   parseSearch,
   parseIntValue,
   isFilterPrefix,
@@ -3003,5 +3004,18 @@ describe("fuzzy search integration", () => {
     const result = searchDeclarations(declarations, parseSearch("cb"));
     // All results should have "cb" somewhere — in declaration name or in a field/member name
     expect(result.length).toBeGreaterThan(0);
+  });
+});
+
+describe("buildHash", () => {
+  it("joins params and encodes values", () => {
+    expect(buildHash({ kind: "convars", search: "sv_ flag:cheat" })).toBe(
+      "kind=convars&search=sv_%20flag%3Acheat",
+    );
+  });
+
+  it("skips empty params", () => {
+    expect(buildHash({ kind: null, search: "", name: undefined })).toBe("");
+    expect(buildHash({ kind: null, name: "sv_gravity" })).toBe("name=sv_gravity");
   });
 });

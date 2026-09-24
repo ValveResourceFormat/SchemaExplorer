@@ -6,9 +6,16 @@ import { allDeclarations } from "../data/derived";
 import * as api from "../data/types";
 import { metadataValueText } from "./format";
 
-function useHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+// Once the app has hydrated, components mounted by client-side navigation can skip the
+// hydration-safe first render, like rendering every prerendered row before virtualizing
+let appHydrated = false;
+
+export function useHydrated(): boolean {
+  const [hydrated, setHydrated] = useState(appHydrated);
+  useEffect(() => {
+    appHydrated = true;
+    setHydrated(true);
+  }, []);
   return hydrated;
 }
 
@@ -19,6 +26,14 @@ export function useHashParam(key: string): string | null {
     () => (hydrated ? new URLSearchParams(hash.slice(1)).get(key) : null),
     [hash, hydrated, key],
   );
+}
+
+/** Builds a location hash from params, skipping empty ones */
+export function buildHash(params: Record<string, string | null | undefined>): string {
+  return Object.entries(params)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v!)}`)
+    .join("&");
 }
 
 export function searchLink(game: string, query: string) {

@@ -12,8 +12,13 @@
     const search = new URLSearchParams(location.hash.slice(1)).get("search");
     if (search) input.value = search;
     input.addEventListener("input", () => {
-      const value = input.value;
-      const hash = value ? `#search=${encodeURIComponent(value)}` : "";
+      // Other hash params, like the convars page kind filter, are kept
+      const params = [];
+      for (const [key, value] of new URLSearchParams(location.hash.slice(1))) {
+        if (key !== "search" && key !== "name") params.push(`${key}=${encodeURIComponent(value)}`);
+      }
+      if (input.value) params.push(`search=${encodeURIComponent(input.value)}`);
+      const hash = params.length > 0 ? `#${params.join("&")}` : "";
       history.replaceState(null, "", location.pathname + location.search + hash);
     });
   };

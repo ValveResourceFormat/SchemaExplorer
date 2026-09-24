@@ -26,6 +26,13 @@
 
   --cross-game-offsets: #5b8ab5;
   --cross-game-differs: #c97a1e;
+
+  --flag-workshop: #a37800;
+  --flag-cheat: #cf222e;
+  --flag-devonly: var(--flag-cheat);
+  --flag-restricted: #bc4c00;
+  --flag-network: #0550ae;
+  --flag-saved: #4a8c2a;
 }
 
 [data-theme="dark"] {
@@ -56,6 +63,12 @@
 
   --cross-game-offsets: #6ba3d6;
   --cross-game-differs: #e0953a;
+
+  --flag-workshop: #e3b341;
+  --flag-cheat: #ff7b72;
+  --flag-restricted: #f0883e;
+  --flag-network: #79c0ff;
+  --flag-saved: #6dbf3a;
 }
 
 :root {

@@ -12,6 +12,12 @@ export function getGameDef(id: string): GameDef | undefined {
   return GAME_LIST.find((g) => g.id === id);
 }
 
+/** A file DumpSource2 wrote into the game's GameTracking repository */
+export function dumpFileUrl(id: string, path: string): string | null {
+  const game = getGameDef(id);
+  return game ? `https://github.com/${game.repo}/blob/master/DumpSource2/${path}` : null;
+}
+
 export function isGameId(id: string): id is GameId {
   return GAME_LIST.some((g) => g.id === id);
 }
@@ -21,6 +27,18 @@ export const BASE_PATH = "/SchemaExplorer";
 
 export function canonicalUrl(game?: string, module?: string, scope?: string): string {
   return `${SITE_ORIGIN}${BASE_PATH}/${[game, module, scope].filter(Boolean).join("/")}`;
+}
+
+/** Title, description, Open Graph and canonical tags of a page */
+export function pageMeta(title: string, description: string, url: string) {
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:url", content: url },
+    { tagName: "link", rel: "canonical", href: url },
+  ];
 }
 
 const MODULE_PRIORITY = ["client", "server"];

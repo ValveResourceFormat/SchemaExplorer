@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { styled } from "@linaria/react";
 import { GAME_LIST } from "../../games-list";
-import { SEARCH_TAGS } from "../search/SearchBox";
+import { getSearchTags } from "../search/SearchBox";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { CardBlock, SectionLink } from "./styles";
-import { schemaPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 
 const InfoBlock = styled(CardBlock)`
   margin-top: 32px;
@@ -123,12 +123,14 @@ function GameList() {
 
 function SearchFilters({ isRoot }: { isRoot?: boolean }) {
   const Block = isRoot ? HomepageSearchFilters : SearchFiltersBlock;
+  const hasEntities = useContext(DeclarationsContext).entities.length > 0;
+  const tags = getSearchTags("schemas", hasEntities);
   return (
     <Block>
       <dl>
         <dt>Search by name, filters can be combined</dt>
         <dd>Type any text to match class, field, or enum names.</dd>
-        {SEARCH_TAGS.map((t) => (
+        {tags.map((t) => (
           <React.Fragment key={t.tag}>
             <dt>
               <KindIcon kind={t.icon} size="small" /> <code>{t.tag}</code> —{" "}

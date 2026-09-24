@@ -8,7 +8,7 @@ import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { inheritedBases, type InheritedBase } from "../../data/derived";
-import { getGameDef } from "../../games-list";
+import { dumpFileUrl } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset } from "../../utils/format";
@@ -113,10 +113,8 @@ export const GitHubFileLink: React.FC<{ module: string; name: string }> = ({ mod
     );
   }
 
-  const gameData = getGameDef(game);
-  if (!gameData) return null;
-  const fileName = name.replace(/:/g, "_");
-  const url = `https://github.com/${gameData.repo}/blob/master/DumpSource2/schemas/${module}/${fileName}.h`;
+  const url = dumpFileUrl(game, `schemas/${module}/${name.replace(/:/g, "_")}.h`);
+  if (!url) return null;
   return (
     <GitHubIcon
       href={url}

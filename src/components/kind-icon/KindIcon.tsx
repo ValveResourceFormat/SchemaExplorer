@@ -11,7 +11,16 @@ export type IconKind =
   | "meta-variable"
   | "meta-eye-closed"
   | "meta-folder"
-  | "meta-discard";
+  | "meta-discard"
+  | "convar"
+  | "command"
+  | "hammer"
+  | "lock"
+  | "code"
+  | "shield"
+  | "replicated"
+  | "user"
+  | "github";
 
 import ICONS_URL from "../../icons.svg?url";
 export { ICONS_URL };

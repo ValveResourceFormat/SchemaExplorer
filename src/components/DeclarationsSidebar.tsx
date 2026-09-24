@@ -13,9 +13,15 @@ import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
 import { DeclarationsContext } from "./schema/DeclarationsContext";
 import { Declaration } from "../data/types";
-import { DeclarationSidebarElement, SidebarGroupHeader, SidebarWrapper } from "./layout/Sidebar";
+import {
+  DeclarationSidebarElement,
+  SidebarGroupHeader,
+  SidebarHeader,
+  SidebarList,
+  SidebarWrapper,
+} from "./layout/Sidebar";
 import { matchesWords, useParsedSearch } from "../utils/filtering";
-import { GameSwitcher, S2VLogo } from "./layout/NavBar";
+import { BrandRow } from "./layout/NavBar";
 
 type SidebarRow =
   | { type: "header"; module: string; count: number }
@@ -239,7 +245,7 @@ export const DeclarationsSidebar = ({
   onNavigate?: () => void;
   sidebarOpen?: boolean;
 }) => {
-  const { declarations, game } = useContext(DeclarationsContext);
+  const { declarations } = useContext(DeclarationsContext);
   const { nameWords, moduleWords } = useParsedSearch();
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
@@ -298,13 +304,7 @@ export const DeclarationsSidebar = ({
   return (
     <SidebarWrapper ref={wrapperRef} aria-label="Classes and enums">
       <SidebarHeader>
-        <SidebarBrandRow>
-          <SidebarBrand href="https://s2v.app/">
-            <S2VLogo />
-            Source 2 Viewer
-          </SidebarBrand>
-          <GameSwitcher currentGame={game} />
-        </SidebarBrandRow>
+        <BrandRow />
       </SidebarHeader>
       {hydrated ? (
         <VirtualizedList
@@ -341,37 +341,6 @@ export const DeclarationsSidebar = ({
     </SidebarWrapper>
   );
 };
-
-const SidebarHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 0;
-  flex-shrink: 0;
-`;
-
-const SidebarBrandRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const SidebarBrand = styled.a`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 700;
-  font-size: 16px;
-  text-decoration: none;
-  color: var(--text);
-  white-space: nowrap;
-`;
-
-const SidebarList = styled.div`
-  flex: 1;
-  overflow: auto;
-  overscroll-behavior: contain;
-`;
 
 const SidebarUl = styled.ul`
   margin: 0;

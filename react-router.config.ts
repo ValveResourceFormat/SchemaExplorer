@@ -22,7 +22,9 @@ export default {
             const data: SchemasJson = JSON.parse(
               await readFile(`schemas/${game.id}.json`, "utf-8"),
             );
-            const { declarations } = parseSchemas(data);
+            const { declarations, consoleItems } = parseSchemas(data);
+
+            if (consoleItems.length > 0) paths.push(`/${game.id}/convars`);
 
             const limit = process.env.PRERENDER_ALL ? 0 : 10;
             let count = 0;

@@ -44,7 +44,7 @@ for (const game of GAME_LIST) {
   const data: SchemasJson = JSON.parse(
     await readFile(resolve(schemasDir, `${game.id}.json`), "utf-8"),
   );
-  const { declarations } = parseSchemas(data);
+  const { declarations, consoleItems } = parseSchemas(data);
 
   // Load per-class lastmod data if available
   let lastmod: Record<string, string> = {};
@@ -77,6 +77,9 @@ for (const game of GAME_LIST) {
   }
 
   mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}`, lastmod: gameMaxDate });
+  if (consoleItems.length > 0) {
+    mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}/convars` });
+  }
 
   const gameFile = `sitemap-${game.id}.xml`;
   await writeFile(resolve(distDir, gameFile), buildUrlset(gameUrls));

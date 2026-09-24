@@ -11,6 +11,10 @@ export function schemaPath(game: string, module?: string, scope?: string): strin
   return href("/:game?/:module?/:scope?", { game, module, scope });
 }
 
+export function consolePath(game: string): string {
+  return href("/:game/convars", { game });
+}
+
 export const DeclarationsContext = createContext<GameContext>({
   game: DEFAULT_GAME,
   declarations: new Map(),
