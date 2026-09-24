@@ -28,6 +28,22 @@ export function flagGroup(flag: string): FlagGroup | undefined {
   return FLAG_GROUPS[flag];
 }
 
+// Matches the --flag-* custom properties in global.css, "hidden" has no color of its own
+const GROUP_ACCENTS: Partial<Record<FlagGroup, string>> = {
+  workshop: "var(--flag-workshop)",
+  cheat: "var(--flag-cheat)",
+  devonly: "var(--flag-devonly)",
+  restricted: "var(--flag-restricted)",
+  network: "var(--flag-network)",
+  saved: "var(--flag-saved)",
+};
+
+/** The accent color a flag's badge is drawn in, so other UI can match it */
+export function flagAccent(flag: string): string | undefined {
+  const group = flagGroup(flag);
+  return group ? GROUP_ACCENTS[group] : undefined;
+}
+
 // The flags that need to stand out get an icon before their name
 const FLAG_ICONS: Record<string, IconKind> = {
   workshop_whitelisted: "hammer",

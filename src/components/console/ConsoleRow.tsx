@@ -3,7 +3,7 @@ import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { useTooltip } from "../Tooltip";
-import { flagDescription, flagGroup, flagIcon } from "./flags";
+import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
 import type { FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatModules, formatRange, parseColor } from "../../utils/console-format";
 
@@ -77,6 +77,31 @@ const FlagChipButton = styled.button`
   }
 `;
 
+const TooltipFlagName = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent, var(--text));
+
+  > svg {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+const TooltipDescription = styled.div`
+  color: var(--text);
+`;
+
+const TooltipHint = styled.div`
+  margin-top: 6px;
+  color: var(--text-dim);
+  font-style: italic;
+`;
+
 /** Flag label, with an icon for the flags that need to stand out */
 function FlagContent({ flag }: { flag: string }) {
   const icon = flagIcon(flag);
@@ -88,8 +113,33 @@ function FlagContent({ flag }: { flag: string }) {
   );
 }
 
+/** Tooltip body: the flag's own badge as a heading, colored to match, then its description */
+function FlagTooltipContent({
+  flag,
+  description,
+  hint,
+}: {
+  flag: string;
+  description?: string;
+  hint?: string;
+}) {
+  return (
+    <>
+      <TooltipFlagName>
+        <FlagContent flag={flag} />
+      </TooltipFlagName>
+      {description && <TooltipDescription>{description}</TooltipDescription>}
+      {hint && <TooltipHint>{hint}</TooltipHint>}
+    </>
+  );
+}
+
 function FlagBadge({ flag }: { flag: string }) {
-  const { referenceProps, tooltip } = useTooltip(flagDescription(flag));
+  const description = flagDescription(flag);
+  const { referenceProps, tooltip } = useTooltip(
+    description && <FlagTooltipContent flag={flag} description={description} />,
+    flagAccent(flag),
+  );
   return (
     <>
       <FlagChip data-group={flagGroup(flag)} {...referenceProps}>
@@ -103,11 +153,14 @@ function FlagBadge({ flag }: { flag: string }) {
 /** Same badge, clickable to add a flag filter. Its tooltip covers both what the flag means
  *  and what clicking it does, since flags without a description would otherwise show nothing */
 function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => void }) {
-  const description = flagDescription(flag);
-  const content = description
-    ? `${description}\n\nClick to filter by this flag.`
-    : `Filter by flag:${flag}`;
-  const { referenceProps, tooltip } = useTooltip(content);
+  const { referenceProps, tooltip } = useTooltip(
+    <FlagTooltipContent
+      flag={flag}
+      description={flagDescription(flag)}
+      hint="Click to filter by this flag."
+    />,
+    flagAccent(flag),
+  );
   return (
     <>
       <FlagChipButton data-group={flagGroup(flag)} onClick={onClick} {...referenceProps}>
