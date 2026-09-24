@@ -518,7 +518,7 @@ function IORow({
 // -- Sections --
 
 const ListSectionTitle = styled(SectionTitle)`
-  padding: 10px 14px 0;
+  padding: 10px 14px;
   margin: 0;
   border-top: 1px solid var(--group-separator);
 
