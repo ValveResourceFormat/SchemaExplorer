@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { Fragment, useContext, useEffect, useMemo, useState } from "react";
 import { Link, NavLink } from "../Link";
 import { styled } from "@linaria/react";
 import { SchemaFieldType, SchemaMetadataEntry } from "../../data/types";
@@ -8,6 +8,8 @@ import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
+import { metadataValueText, parseNetworkOverride } from "../../utils/format";
+import { findDeclarationByName } from "../../data/derived";
 
 const AngleBracket = styled.span`
   color: var(--text-dim);
@@ -43,6 +45,13 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       return <ColoredSyntax kind="literal">{type.name}</ColoredSyntax>;
     case "declared_class":
     case "declared_enum":
+      if (!type.module) {
+        return (
+          <span title="Not in any schema scope">
+            <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>
+          </span>
+        );
+      }
       return <DeclarationLink name={type.name} module={type.module} />;
     case "ptr":
       return (
@@ -56,23 +65,27 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
           <SchemaTypeView type={type.inner} />[{type.count}]
         </>
       );
-    case "atomic":
-      if (type.inner) {
-        return (
-          <span>
-            <IntrinsicLink name={type.name} kind="container" />
-            <AngleBracket>&lt; </AngleBracket>
-            <SchemaTypeView type={type.inner} />
-            {type.inner2 && (
-              <>
-                , <SchemaTypeView type={type.inner2} />
-              </>
-            )}
-            <AngleBracket> &gt;</AngleBracket>
-          </span>
-        );
-      }
-      return <IntrinsicLink name={type.name} kind="atomic" />;
+    case "atomic": {
+      const args = [
+        type.inner && <SchemaTypeView type={type.inner} />,
+        type.inner2 && <SchemaTypeView type={type.inner2} />,
+        type.count != null && <ColoredSyntax kind="literal">{type.count}</ColoredSyntax>,
+      ].filter(Boolean);
+      if (args.length === 0) return <IntrinsicLink name={type.name} kind="atomic" />;
+      return (
+        <span>
+          <IntrinsicLink name={type.name} kind="container" />
+          <AngleBracket>&lt; </AngleBracket>
+          {args.map((arg, i) => (
+            <Fragment key={i}>
+              {i > 0 && ", "}
+              {arg}
+            </Fragment>
+          ))}
+          <AngleBracket> &gt;</AngleBracket>
+        </span>
+      );
+    }
     case "bitfield":
       return <ColoredSyntax kind="literal">bitfield:{type.count}</ColoredSyntax>;
     default:
@@ -153,6 +166,43 @@ const MetadataValue = styled.span`
   color: var(--text-dim);
   white-space: pre-wrap;
 `;
+
+const MetadataValueLink = styled(Link)`
+  color: var(--text-dim);
+
+  &:hover {
+    color: var(--highlight);
+  }
+`;
+
+/** Metadata value text, MNetworkOverride links to the overridden field */
+function MetadataValueText({
+  name,
+  text,
+  module,
+}: {
+  name: string;
+  text: string;
+  module?: string;
+}) {
+  const { game, declarations } = useContext(DeclarationsContext);
+  const override = name === "MNetworkOverride" ? parseNetworkOverride(text) : null;
+  if (!override) return text;
+  const target =
+    (module && declarations.get(module)?.get(override.className)) ||
+    findDeclarationByName(declarations, override.className, "class");
+  if (!target) return text;
+  return (
+    <MetadataValueLink
+      to={{
+        pathname: schemaPath(game, target.module, target.name),
+        hash: `field=${encodeURIComponent(override.field)}`,
+      }}
+    >
+      {text}
+    </MetadataValueLink>
+  );
+}
 
 const MetadataToggle = styled.button`
   background: none;
@@ -250,9 +300,12 @@ function truncateGroups(
 export function MetadataTags({
   metadata,
   game,
+  module,
 }: {
   metadata: SchemaMetadataEntry[];
   game: string;
+  /** Module of the declaration, preferred when a value names a class */
+  module?: string;
 }) {
   const grouped = useMemo(() => {
     const groups: { name: string; values: (string | undefined)[] }[] = [];
@@ -264,7 +317,7 @@ export function MetadataTags({
         map.set(entry.name, group);
         groups.push(group);
       }
-      group.values.push(entry.value);
+      group.values.push(metadataValueText(entry.value));
     }
     const priority = (name: string) => {
       if (name === "MPropertyFriendlyName" || name === "MPropertyDescription") return -1;
@@ -305,7 +358,10 @@ export function MetadataTags({
                 <span>
                   <MetadataName to={metaTo}>{group.name}</MetadataName>
                   {group.values[0] !== undefined && (
-                    <MetadataValue>: {group.values[0]}</MetadataValue>
+                    <MetadataValue>
+                      :{" "}
+                      <MetadataValueText name={group.name} text={group.values[0]} module={module} />
+                    </MetadataValue>
                   )}
                 </span>
               </MetadataEntry>
@@ -322,7 +378,11 @@ export function MetadataTags({
               </MetadataGroupName>
               <MetadataGroupValues>
                 {group.values.map((v, i) => (
-                  <MetadataValue key={i}>{v}</MetadataValue>
+                  <MetadataValue key={i}>
+                    {v !== undefined && (
+                      <MetadataValueText name={group.name} text={v} module={module} />
+                    )}
+                  </MetadataValue>
                 ))}
               </MetadataGroupValues>
             </div>

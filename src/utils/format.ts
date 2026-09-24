@@ -1,3 +1,24 @@
+import type { SchemaMetadataValue } from "../data/types";
+
+const metadataTextCache = new WeakMap<object, string>();
+
+/** Metadata values as display and search text, objects as indented JSON (cached per object) */
+export function metadataValueText(value: SchemaMetadataValue | undefined): string | undefined {
+  if (value === undefined || typeof value === "string") return value;
+  let text = metadataTextCache.get(value);
+  if (text === undefined) {
+    text = JSON.stringify(value, null, "\t");
+    metadataTextCache.set(value, text);
+  }
+  return text;
+}
+
+/** MNetworkOverride text like "CBaseEntity::m_fFlags" */
+export function parseNetworkOverride(text: string): { className: string; field: string } | null {
+  const m = /^"?(\w+)::(\w+)"?$/.exec(text);
+  return m ? { className: m[1], field: m[2] } : null;
+}
+
 export function formatHexOffset(value: number): string {
   const hexDigits = value.toString(16).toUpperCase();
   const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;

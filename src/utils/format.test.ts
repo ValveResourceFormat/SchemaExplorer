@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { formatHexOffset, formatEnumHex } from "./format";
+import { describe, it, expect, vi } from "vitest";
+import { formatHexOffset, formatEnumHex, metadataValueText, parseNetworkOverride } from "./format";
 
 describe("formatHexOffset", () => {
   it("formats zero", () => {
@@ -102,5 +102,41 @@ describe("formatEnumHex", () => {
     it("still returns hex for non-negative values", () => {
       expect(formatEnumHex(42, "unknown")).toBe("0x2A");
     });
+  });
+});
+
+describe("parseNetworkOverride", () => {
+  it("splits the class and field", () => {
+    expect(parseNetworkOverride('"CBaseEntity::m_fFlags"')).toEqual({
+      className: "CBaseEntity",
+      field: "m_fFlags",
+    });
+  });
+
+  it("returns null for anything else", () => {
+    expect(parseNetworkOverride('"m_lifeState"')).toBeNull();
+  });
+});
+
+describe("metadataValueText", () => {
+  it("returns text values as-is", () => {
+    expect(metadataValueText('"fish_pos_x"')).toBe('"fish_pos_x"');
+    expect(metadataValueText(undefined)).toBeUndefined();
+  });
+
+  it("stringifies each object once", () => {
+    const value = { m_a: [1, 2] };
+    const stringify = vi.spyOn(JSON, "stringify");
+    try {
+      const first = metadataValueText(value);
+      expect(metadataValueText(value)).toBe(first);
+      expect(stringify).toHaveBeenCalledTimes(1);
+    } finally {
+      stringify.mockRestore();
+    }
+  });
+
+  it("formats object values as indented JSON", () => {
+    expect(metadataValueText({ m_a: 1 })).toBe('{\n\t"m_a": 1\n}');
   });
 });

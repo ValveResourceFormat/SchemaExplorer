@@ -11,6 +11,7 @@ import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsC
 import { getGameDef, GameId } from "../../games-list";
 import { ICONS_URL } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";
+import { deepEqual } from "../../data/schemas";
 
 type DiffStatus = "identical" | "offsets_only" | "differs";
 
@@ -43,7 +44,7 @@ function typesEqual(a: SchemaFieldType, b: SchemaFieldType): boolean {
       return a.count === (b as typeof a).count && typesEqual(a.inner, (b as typeof a).inner);
     case "atomic": {
       const ba = b as typeof a;
-      if (a.name !== ba.name) return false;
+      if (a.name !== ba.name || a.count !== ba.count) return false;
       if ((a.inner == null) !== (ba.inner == null)) return false;
       if (a.inner && ba.inner && !typesEqual(a.inner, ba.inner)) return false;
       if ((a.inner2 == null) !== (ba.inner2 == null)) return false;
@@ -58,7 +59,8 @@ function typesEqual(a: SchemaFieldType, b: SchemaFieldType): boolean {
 function metadataEqual(a: SchemaMetadataEntry[], b: SchemaMetadataEntry[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].name !== b[i].name || a[i].value !== b[i].value) return false;
+    if (a[i].name !== b[i].name) return false;
+    if (!deepEqual(a[i].value, b[i].value)) return false;
   }
   return true;
 }

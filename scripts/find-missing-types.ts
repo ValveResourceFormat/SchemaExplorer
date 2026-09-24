@@ -33,6 +33,8 @@ function collectMissing(
       break;
     case "declared_class":
     case "declared_enum": {
+      // Classes without a module are not in any schema scope
+      if (!type.module) break;
       const key = declarationKey(type.module, type.name);
       if (!knownKeys.has(key)) {
         if (!declared.has(key)) declared.set(key, { sources: new Set(), count: 0 });

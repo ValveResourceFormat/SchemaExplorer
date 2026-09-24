@@ -72,20 +72,35 @@ not the on-disk resource layout.
 
 \`\`\`
 { generator, revision, version_date, version_time, classes: Class[], enums: Enum[] }
-Class  { module, name, size, parents?: {module,name}[], fields?: Field[], metadata?: Meta[] }
-       // size in bytes; parents = direct base classes only; fields = own only, not inherited
+Class  { module, name, size, alignment?, flags?: string[], parents?: {module,name,offset?}[],
+         fields?: Field[], metadata?: Meta[] }
+       // size and alignment in bytes, alignment omitted when unknown; flags: abstract,
+       // trivial_constructor, trivial_destructor, construct_disallowed; parents = direct base
+       // classes only, offset (non-zero only) is where a later base in multiple inheritance starts,
+       // its fields are at offset + field offset; fields = own only, not inherited
 Field  { name, offset, type: Type, metadata?: Meta[] }   // offset in bytes from class start
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
        // alignment = underlying C type as a string, e.g. "uint8_t"; value is a number
-Meta   { name, value?: string }
-       // value is raw unparsed text (string literals keep their quotes); absent for flag-only entries like MNotSaved.
-       // Common: MPropertyFriendlyName, MPropertyDescription, MGetKV3ClassDefaults (class defaults as KV3-ish JSON text).
+Meta   { name, value?: string | object }
+       // value is raw unparsed text (string literals keep their quotes); absent for flag-only entries like
+       // MNotSaved and class tags like MNetworkNoBase. Common: MPropertyFriendlyName,
+       // MPropertyDescription, MGetKV3ClassDefaults (class defaults).
+       // MGetKV3ClassDefaults value is a JSON object (hidden fields omitted, keys sorted, NaN and
+       // infinity as strings like "-nan", values that differ between runs zeroed), the string
+       // "Could not parse KV3 Defaults", or absent when the class has no defaults. The object only
+       // has the keys that differ from the first parent's full defaults; for a class's full
+       // defaults, merge recursively: its own keys win, then each parent's full defaults in order.
+       // MNetworkOverride value is "Class::field".
        // Networking metadata (MNetworkEnable, MNetworkVarNames, ...) is present only in ${netGames}.
 Type   { category, ...fields by category }
-       builtin {name} | declared_class {module,name} | declared_enum {module,name} | ptr {inner: Type}
-       fixed_array {inner: Type, count} | atomic {name, inner?: Type, inner2?: Type} | bitfield {count}
-       // atomic = template container, e.g. CUtlVector<inner>, CUtlMap<inner,inner2>, CHandle<inner>
+       builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner: Type}
+       fixed_array {inner: Type, count} | atomic {name, inner?: Type, inner2?: Type, count?}
+       | bitfield {count}
+       // atomic = template container, e.g. CUtlVector<inner>, CUtlMap<inner,inner2>, CHandle<inner>;
+       // count is an integer last template argument, e.g. CBitVec<count>,
+       // CUtlVectorFixedGrowable<inner,count>
        // bitfield = count bits; bit position is not encoded (offset is always 0)
+       // declared_class without module is a class that is not in any schema scope
 \`\`\`
 
 Declarations are keyed by (module, name). Besides "client" and "server" there are ~40 engine modules

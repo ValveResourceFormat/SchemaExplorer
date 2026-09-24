@@ -456,6 +456,8 @@ export const intrinsicDeclarations = new Map<string, Declaration>(
       kind: "class",
       name: c.name,
       module: INTRINSIC_MODULE,
+      size: c.size,
+      flags: [],
       parents: [],
       fields: (c.fields ?? []).map((f) => ({ ...f, metadata: [] })),
       metadata: [],

@@ -175,13 +175,14 @@ export const SchemaClassView: React.FC<{
           <GitHubFileLink module={declaration.module} name={declaration.name} />
         </CommonGroupSignature>
       </DeclarationHeader>
-      <MetadataTags metadata={declaration.metadata} game={game} />
+      <MetadataTags metadata={declaration.metadata} game={game} module={declaration.module} />
       {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
       {declaration.fields.length > 0 && (
         <ClassMembers>
           {declaration.fields.map((field) => (
             <SchemaFieldView
               key={`${field.name}-${field.offset}`}
+              owner={declaration}
               field={field}
               fieldUrlBase={declPath}
               game={game}
@@ -340,12 +341,14 @@ const BitfieldPadding = styled.li`
 `;
 
 function SchemaFieldView({
+  owner,
   field,
   fieldUrlBase,
   game,
   bitfield,
   anchored,
 }: {
+  owner: { name: string; module: string };
   field: api.SchemaField;
   fieldUrlBase: string;
   game: string;
@@ -384,7 +387,7 @@ function SchemaFieldView({
               {field.offset} ({offsetHex})
             </FieldOffset>
           </MemberSignature>
-          <MetadataTags metadata={field.metadata} game={game} />
+          <MetadataTags metadata={field.metadata} game={game} module={owner.module} />
         </GridContent>
       </FieldRow>
       {bitfield && bitfield.totalBits > 0 && (

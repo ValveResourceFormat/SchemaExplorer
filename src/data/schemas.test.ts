@@ -1,71 +1,33 @@
 import { describe, it, expect } from "vitest";
-import { parseKV3Defaults, diffObject, resolveLeafType, HIDDEN_SENTINEL } from "./schemas";
+import {
+  parseKV3Defaults,
+  parseSchemas,
+  diffObject,
+  resolveLeafType,
+  type SchemasJson,
+} from "./schemas";
 import type { SchemaClass } from "./types";
+import { parseSearch, searchDeclarations } from "../utils/filtering";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
 // ==================== parseKV3Defaults ====================
 
 describe("parseKV3Defaults", () => {
-  it("parses simple JSON object", () => {
-    const result = parseKV3Defaults('{\n\t"m_x": 1,\n\t"m_y": "hello"\n}');
-    expect(result).toEqual({ m_x: 1, m_y: "hello" });
+  it("uses object defaults as-is", () => {
+    const value = { m_x: 1, m_inner: { m_y: null } };
+    expect(parseKV3Defaults(value)).toBe(value);
   });
 
-  it("returns null for 'Could not parse' strings", () => {
+  it("returns null for missing values", () => {
+    expect(parseKV3Defaults(undefined)).toBeNull();
+  });
+
+  it("returns null for the unparseable marker", () => {
     expect(parseKV3Defaults("Could not parse KV3 Defaults")).toBeNull();
   });
 
-  it("returns null for empty string", () => {
-    expect(parseKV3Defaults("")).toBeNull();
-  });
-
-  it("returns null for non-object JSON", () => {
-    expect(parseKV3Defaults("[1, 2, 3]")).toBeNull();
-    expect(parseKV3Defaults('"hello"')).toBeNull();
-    expect(parseKV3Defaults("42")).toBeNull();
-  });
-
-  it("replaces <HIDDEN FOR DIFF> with sentinel string", () => {
-    const result = parseKV3Defaults('{\n\t"m_id": <HIDDEN FOR DIFF>,\n\t"m_name": "test"\n}');
-    expect(result).toEqual({ m_id: HIDDEN_SENTINEL, m_name: "test" });
-  });
-
-  it("handles multiple <HIDDEN FOR DIFF> tokens", () => {
-    const result = parseKV3Defaults('{\n\t"a": <HIDDEN FOR DIFF>,\n\t"b": <HIDDEN FOR DIFF>\n}');
-    expect(result).toEqual({ a: HIDDEN_SENTINEL, b: HIDDEN_SENTINEL });
-  });
-
-  it("handles trailing comma before closing brace", () => {
-    const result = parseKV3Defaults('{\n\t"m_id": <HIDDEN FOR DIFF>,\n}');
-    expect(result).not.toBeNull();
-    expect(result!.m_id).toBe(HIDDEN_SENTINEL);
-  });
-
-  it("handles trailing comma before closing bracket", () => {
-    const result = parseKV3Defaults('{\n\t"arr": [1, 2,\n]\n}');
-    expect(result).toEqual({ arr: [1, 2] });
-  });
-
-  it("replaces -nan with null", () => {
-    const result = parseKV3Defaults('{\n\t"m_val": -nan\n}');
-    expect(result).toEqual({ m_val: null });
-  });
-
-  it("does not replace -nan inside strings", () => {
-    const result = parseKV3Defaults('{\n\t"m_name": "urban-nancy"\n}');
-    expect(result).toEqual({ m_name: "urban-nancy" });
-  });
-
-  it("handles nested objects with hidden tokens and trailing commas", () => {
-    const input = '{\n\t"m_outer": {\n\t\t"m_id": <HIDDEN FOR DIFF>,\n\t},\n\t"m_val": 5\n}';
-    const result = parseKV3Defaults(input);
-    expect(result).not.toBeNull();
-    expect(result!.m_val).toBe(5);
-    expect((result!.m_outer as Record<string, unknown>).m_id).toBe(HIDDEN_SENTINEL);
-  });
-
-  it("returns null for completely broken JSON", () => {
-    expect(parseKV3Defaults("{not valid json at all}")).toBeNull();
+  it("returns null for array values", () => {
+    expect(parseKV3Defaults([1, 2] as unknown as Record<string, unknown>)).toBeNull();
   });
 });
 
@@ -92,12 +54,6 @@ describe("diffObject", () => {
   it("skips _class key", () => {
     const embedded = { _class: "Foo", a: 1 };
     const own = { _class: "Bar", a: 1 };
-    expect(diffObject(embedded, own)).toBeNull();
-  });
-
-  it("skips hidden sentinel values", () => {
-    const embedded = { a: HIDDEN_SENTINEL, b: 1 };
-    const own = { a: 5, b: 1 };
     expect(diffObject(embedded, own)).toBeNull();
   });
 
@@ -212,9 +168,9 @@ describe("assignDefaults via parseSchemas", () => {
     // TestChildClass overrides parent's m_flB from 20 to 99
     const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
     expect(meta).toBeDefined();
-    const value = JSON.parse(meta!.value!);
+    const value = meta!.value as Record<string, unknown>;
     expect(value.m_flB).toBe(99);
-    // m_flA is same as parent (10), should NOT be in unconsumed
+    // m_flA is the same as the parent's, the dump leaves it out
     expect(value.m_flA).toBeUndefined();
   });
 
@@ -245,9 +201,17 @@ describe("assignDefaults via parseSchemas", () => {
     expect(getField(cls, "m_flX").defaultValue).toBeUndefined();
   });
 
-  it("handles -nan values (treated as null, skipped as zero)", () => {
+  it("skips null values", () => {
     const cls = getClass("TestNanDefaults");
     expect(getField(cls, "m_flVal").defaultValue).toBeUndefined();
+  });
+
+  it("shows NaN and infinite float defaults unquoted, like the engine prints them", () => {
+    const cls = getClass("TestNanDefaults");
+    expect(getField(cls, "m_flNan").defaultValue).toBe("-nan");
+    expect(getField(cls, "m_flInf").defaultValue).toBe("inf");
+    // Only floats, a string field keeps its quotes
+    expect(getField(cls, "m_szNan").defaultValue).toBe('"nan"');
   });
 
   it("assigns non-empty arrays, skips empty and all-zero arrays", () => {
@@ -296,18 +260,11 @@ describe("assignDefaults via parseSchemas", () => {
     expect(getField(cls, "m_flX").defaultValue).toBe("3");
     const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
     expect(meta).toBeDefined();
-    const value = JSON.parse(meta!.value!);
+    const value = meta!.value as Record<string, unknown>;
     expect(value.m_unknown).toBe(77);
     expect(value.m_extra).toBe("data");
     // Consumed fields should not appear
-    expect(value._class).toBeUndefined();
     expect(value.m_flX).toBeUndefined();
-  });
-
-  it("consumes _class when value matches the class name", () => {
-    const cls = getClass("TestSimpleDefaults");
-    // _class was the only unconsumed key, so metadata should be removed entirely
-    expect(cls.metadata.some((m) => m.name === "MGetKV3ClassDefaults")).toBe(false);
   });
 
   it("removes metadata entirely when no unconsumed keys", () => {
@@ -340,19 +297,6 @@ describe("assignDefaults via parseSchemas", () => {
 // ==================== parseSchemas basics ====================
 
 describe("parseSchemas", () => {
-  it("deduplicates classes by module/name", () => {
-    // CEffectData appears in both client and server modules — both should exist
-    expect(parsedSchemas.declarations.get("client")?.has("CEffectData")).toBe(true);
-    expect(parsedSchemas.declarations.get("server")?.has("CEffectData")).toBe(true);
-    // But exact duplicates (same module+name) should be deduped — each module map has at most one entry per name
-    let skyCount = 0;
-    for (const moduleMap of parsedSchemas.declarations.values()) {
-      if (moduleMap.has("sky3dparams_t")) skyCount++;
-    }
-    // Each module containing sky3dparams_t has exactly one entry (Map keys are unique)
-    expect(skyCount).toBeGreaterThanOrEqual(1);
-  });
-
   it("sorts declarations alphabetically by name within each module", () => {
     for (const moduleMap of parsedSchemas.declarations.values()) {
       const names = [...moduleMap.keys()];
@@ -481,5 +425,129 @@ describe("parseSchemas", () => {
     expect(clientSky).not.toBe(serverSky);
     expect(clientSky!.module).toBe("client");
     expect(serverSky!.module).toBe("server");
+  });
+});
+
+// ==================== object defaults ====================
+
+describe("assignDefaults with object defaults", () => {
+  const float = { category: "builtin", name: "float32" } as const;
+  const data: SchemasJson = {
+    classes: [
+      {
+        name: "ObjBase",
+        module: "m",
+        size: 8,
+        fields: [
+          { name: "m_flA", offset: 0, type: float },
+          { name: "m_flB", offset: 4, type: float },
+        ],
+        metadata: [{ name: "MGetKV3ClassDefaults", value: { m_flA: 10, m_flB: 20 } }],
+      },
+      {
+        name: "ObjChild",
+        module: "m",
+        size: 16,
+        parents: [{ name: "ObjBase", module: "m" }],
+        fields: [
+          { name: "m_flC", offset: 8, type: float },
+          { name: "m_flNull", offset: 12, type: float },
+        ],
+        // Only keys that differ from the parent's full defaults, nulls are skipped
+        metadata: [
+          {
+            name: "MGetKV3ClassDefaults",
+            value: { m_flB: 99, m_flC: 5, m_flNull: null, m_extra: "x" },
+          },
+        ],
+      },
+      {
+        name: "ObjHolder",
+        module: "m",
+        size: 32,
+        fields: [
+          {
+            name: "m_same",
+            offset: 0,
+            type: { category: "declared_class", module: "m", name: "ObjChild" },
+          },
+          {
+            name: "m_diff",
+            offset: 16,
+            type: { category: "declared_class", module: "m", name: "ObjChild" },
+          },
+        ],
+        metadata: [
+          {
+            name: "MGetKV3ClassDefaults",
+            value: {
+              m_diff: { m_flA: 1, m_flB: 99, m_flC: 5 },
+              m_same: { m_flA: 10, m_flB: 99, m_flC: 5 },
+            },
+          },
+        ],
+      },
+      {
+        name: "ObjBroken",
+        module: "m",
+        size: 4,
+        fields: [{ name: "m_flX", offset: 0, type: float }],
+        metadata: [{ name: "MGetKV3ClassDefaults", value: "Could not parse KV3 Defaults" }],
+      },
+      {
+        name: "ObjNoDefaults",
+        module: "m",
+        size: 4,
+        fields: [{ name: "m_flX", offset: 0, type: float }],
+        metadata: [{ name: "MGetKV3ClassDefaults" }, { name: "MNotSaved" }],
+      },
+    ],
+    enums: [],
+  };
+  const parsed = parseSchemas(structuredClone(data));
+  const cls = (name: string) => parsed.declarations.get("m")!.get(name) as SchemaClass;
+  const field = (c: SchemaClass, name: string) => c.fields.find((f) => f.name === name)!;
+  const defaults = (c: SchemaClass) =>
+    c.metadata.find((m) => m.name === "MGetKV3ClassDefaults")?.value;
+
+  it("assigns own field defaults", () => {
+    expect(field(cls("ObjBase"), "m_flA").defaultValue).toBe("10");
+    expect(field(cls("ObjChild"), "m_flC").defaultValue).toBe("5");
+  });
+
+  it("skips null values", () => {
+    expect(field(cls("ObjChild"), "m_flNull").defaultValue).toBeUndefined();
+  });
+
+  it("keeps unconsumed keys and inherited overrides as an object", () => {
+    expect(defaults(cls("ObjChild"))).toEqual({ m_flB: 99, m_extra: "x" });
+    expect(defaults(cls("ObjBase"))).toBeUndefined();
+  });
+
+  it("diffs an embedded class against its defaults merged with its parents'", () => {
+    // ObjChild's full defaults are m_flA 10 from ObjBase, m_flB 99 and m_flC 5
+    expect(field(cls("ObjHolder"), "m_same").defaultValue).toBeUndefined();
+    expect(field(cls("ObjHolder"), "m_diff").defaultValue).toBe('{"m_flA":1}');
+  });
+
+  it("keeps unparseable defaults as text", () => {
+    expect(defaults(cls("ObjBroken"))).toBe("Could not parse KV3 Defaults");
+    expect(field(cls("ObjBroken"), "m_flX").defaultValue).toBeUndefined();
+  });
+
+  it("keeps MGetKV3ClassDefaults without defaults as a tag", () => {
+    expect(cls("ObjNoDefaults").metadata).toEqual([
+      { name: "MGetKV3ClassDefaults" },
+      { name: "MNotSaved" },
+    ]);
+    expect(field(cls("ObjNoDefaults"), "m_flX").defaultValue).toBeUndefined();
+  });
+
+  it("searches object values as their JSON text", () => {
+    const found = searchDeclarations(
+      parsed.declarations.get("m")!.values(),
+      parseSearch("metadatavalue:m_extra"),
+    );
+    expect(found.map((d) => d.name)).toEqual(["ObjChild"]);
   });
 });

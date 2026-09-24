@@ -2,6 +2,7 @@
   "_note": "Frozen subset schemas for test stability. Do not regenerate from live data.",
   "classes": [
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_BuoyancyHelper",
@@ -20,9 +21,11 @@
           "module": "client",
           "name": "C_BaseModelEntity"
         }
-      ]
+      ],
+      "size": 4528
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -55,9 +58,11 @@
           "module": "client",
           "name": "C_BarnLight"
         }
-      ]
+      ],
+      "size": 5040
     },
     {
+      "alignment": 16,
       "fields": [
         {
           "metadata": [
@@ -161,9 +166,11 @@
           "module": "client",
           "name": "C_CSWeaponBase"
         }
-      ]
+      ],
+      "size": 8000
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -258,6 +265,7 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [
         {
           "name": "MNetworkVarNames",
@@ -285,9 +293,11 @@
         }
       ],
       "module": "client",
-      "name": "sky3dparams_t"
+      "name": "sky3dparams_t",
+      "size": 144
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -657,9 +667,11 @@
           "module": "client",
           "name": "C_BaseCombatCharacter"
         }
-      ]
+      ],
+      "size": 5056
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_OnPlay",
@@ -782,9 +794,11 @@
           "module": "client",
           "name": "C_BaseEntity"
         }
-      ]
+      ],
+      "size": 1680
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -1202,9 +1216,11 @@
           "module": "client",
           "name": "CBaseAnimGraph"
         }
-      ]
+      ],
+      "size": 4952
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -2796,9 +2812,11 @@
           "module": "entity2",
           "name": "CEntityInstance"
         }
-      ]
+      ],
+      "size": 1536
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_bStartActive",
@@ -3102,9 +3120,11 @@
           "module": "client",
           "name": "C_BaseEntity"
         }
-      ]
+      ],
+      "size": 1808
     },
     {
+      "alignment": 16,
       "fields": [
         {
           "name": "m_flTimeToDetonate",
@@ -3138,9 +3158,11 @@
           "module": "server",
           "name": "CBaseCSGrenadeProjectile"
         }
-      ]
+      ],
+      "size": 2896
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_BuoyancyHelper",
@@ -3159,9 +3181,11 @@
           "module": "server",
           "name": "CBaseModelEntity"
         }
-      ]
+      ],
+      "size": 2408
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -3256,6 +3280,7 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [
         {
           "name": "MNetworkVarNames",
@@ -3283,9 +3308,11 @@
         }
       ],
       "module": "server",
-      "name": "sky3dparams_t"
+      "name": "sky3dparams_t",
+      "size": 144
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_OnPlay",
@@ -3408,9 +3435,11 @@
           "module": "server",
           "name": "CBaseEntity"
         }
-      ]
+      ],
+      "size": 1336
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -3439,9 +3468,11 @@
           "module": "client",
           "name": "C_SoundAreaEntityBase"
         }
-      ]
+      ],
+      "size": 1584
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -3490,9 +3521,11 @@
           "module": "client",
           "name": "C_BaseModelEntity"
         }
-      ]
+      ],
+      "size": 4264
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -3521,9 +3554,11 @@
           "module": "client",
           "name": "C_SoundEventEntity"
         }
-      ]
+      ],
+      "size": 1736
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_flRadius",
@@ -3541,7 +3576,8 @@
           "module": "client",
           "name": "CBaseFilter"
         }
-      ]
+      ],
+      "size": 1600
     },
     {
       "fields": [
@@ -3873,6 +3909,7 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [
         {
           "name": "MNetworkVarNames",
@@ -3960,9 +3997,11 @@
         }
       ],
       "module": "client",
-      "name": "CEffectData"
+      "name": "CEffectData",
+      "size": 120
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_nDamage",
@@ -4026,9 +4065,11 @@
           "module": "server",
           "name": "CPointEntity"
         }
-      ]
+      ],
+      "size": 1224
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_flRadius",
@@ -4054,9 +4095,11 @@
           "module": "server",
           "name": "CPointEntity"
         }
-      ]
+      ],
+      "size": 1208
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_bStartActive",
@@ -4360,9 +4403,11 @@
           "module": "server",
           "name": "CBaseEntity"
         }
-      ]
+      ],
+      "size": 1424
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -4478,9 +4523,11 @@
           "module": "server",
           "name": "CPointEntity"
         }
-      ]
+      ],
+      "size": 1256
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_iszEnemyName",
@@ -4530,9 +4577,11 @@
           "module": "server",
           "name": "CBaseFilter"
         }
-      ]
+      ],
+      "size": 1280
     },
     {
+      "alignment": 16,
       "fields": [
         {
           "name": "m_OnMagnetAttach",
@@ -4646,9 +4695,11 @@
           "module": "server",
           "name": "CBaseAnimGraph"
         }
-      ]
+      ],
+      "size": 2736
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_iSearchType",
@@ -4690,9 +4741,11 @@
           "module": "server",
           "name": "CBaseEntity"
         }
-      ]
+      ],
+      "size": 1224
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_bEnabled",
@@ -4763,9 +4816,11 @@
           "module": "server",
           "name": "CPointEntity"
         }
-      ]
+      ],
+      "size": 1232
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -4794,9 +4849,11 @@
           "module": "server",
           "name": "CSoundEventEntity"
         }
-      ]
+      ],
+      "size": 1392
     },
     {
+      "alignment": 16,
       "fields": [
         {
           "name": "m_iszEntry",
@@ -5460,9 +5517,11 @@
           "module": "server",
           "name": "CBaseEntity"
         }
-      ]
+      ],
+      "size": 1776
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -5491,9 +5550,11 @@
           "module": "server",
           "name": "CSoundAreaEntityBase"
         }
-      ]
+      ],
+      "size": 1232
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_flRadius",
@@ -5511,9 +5572,11 @@
           "module": "server",
           "name": "CBaseFilter"
         }
-      ]
+      ],
+      "size": 1256
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_flWait",
@@ -5548,7 +5611,8 @@
           "module": "server",
           "name": "CPointEntity"
         }
-      ]
+      ],
+      "size": 1248
     },
     {
       "fields": [
@@ -5880,6 +5944,7 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [
         {
           "name": "MNetworkVarNames",
@@ -5967,7 +6032,8 @@
         }
       ],
       "module": "server",
-      "name": "CEffectData"
+      "name": "CEffectData",
+      "size": 112
     },
     {
       "fields": [
@@ -5995,9 +6061,11 @@
           "module": "navlib",
           "name": "CNavVolume"
         }
-      ]
+      ],
+      "size": 136
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6158,9 +6226,11 @@
           "module": "particles",
           "name": "CParticleFunctionRenderer"
         }
-      ]
+      ],
+      "size": 600
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6215,9 +6285,11 @@
           "module": "particles",
           "name": "CParticleFunctionRenderer"
         }
-      ]
+      ],
+      "size": 1320
     },
     {
+      "alignment": 4,
       "fields": [
         {
           "name": "m_vPosition",
@@ -6308,11 +6380,14 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [],
       "module": "toolscene",
-      "name": "CLightRigLight"
+      "name": "CLightRigLight",
+      "size": 64
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_nCounterMin",
@@ -6394,9 +6469,11 @@
       ],
       "metadata": [],
       "module": "mapdoclib",
-      "name": "CSprayedDataPreset"
+      "name": "CSprayedDataPreset",
+      "size": 48
     },
     {
+      "alignment": 16,
       "fields": [
         {
           "name": "m_vWsPosition",
@@ -6423,6 +6500,7 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [],
       "module": "animgraphlib",
       "name": "CAnimationGraphVisualizerSphere",
@@ -6431,9 +6509,11 @@
           "module": "animgraphlib",
           "name": "CAnimationGraphVisualizerPrimitiveBase"
         }
-      ]
+      ],
+      "size": 96
     },
     {
+      "alignment": 4,
       "fields": [
         {
           "name": "m_vCenter",
@@ -6468,11 +6548,14 @@
           }
         }
       ],
+      "flags": ["trivial_constructor", "trivial_destructor"],
       "metadata": [],
       "module": "physicslib",
-      "name": "RnSoftbodyCapsule_t"
+      "name": "RnSoftbodyCapsule_t",
+      "size": 32
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6537,9 +6620,11 @@
       ],
       "metadata": [],
       "module": "particles",
-      "name": "CParticleMassCalculationParameters"
+      "name": "CParticleMassCalculationParameters",
+      "size": 1136
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "originParentSpace",
@@ -6574,10 +6659,13 @@
           }
         }
       ],
+      "flags": ["trivial_constructor", "trivial_destructor"],
       "module": "client",
-      "name": "ragdollelement_t"
+      "name": "ragdollelement_t",
+      "size": 48
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6652,9 +6740,11 @@
           "module": "particles",
           "name": "CParticleFunctionInitializer"
         }
-      ]
+      ],
+      "size": 1256
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "name": "m_vRayStart",
@@ -6709,11 +6799,14 @@
           }
         }
       ],
+      "flags": ["trivial_constructor", "trivial_destructor"],
       "metadata": [],
       "module": "physicslib",
-      "name": "CastSphereSATParams_t"
+      "name": "CastSphereSATParams_t",
+      "size": 48
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6842,9 +6935,11 @@
           "module": "particles",
           "name": "CParticleFunctionRenderer"
         }
-      ]
+      ],
+      "size": 4200
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -6973,9 +7068,11 @@
           "module": "particles",
           "name": "CParticleFunctionOperator"
         }
-      ]
+      ],
+      "size": 616
     },
     {
+      "alignment": 4,
       "fields": [
         {
           "name": "m_flVignetteStrength",
@@ -7026,11 +7123,14 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [],
       "module": "materialsystem2",
-      "name": "PostProcessingVignetteParameters_t"
+      "name": "PostProcessingVignetteParameters_t",
+      "size": 36
     },
     {
+      "alignment": 8,
       "fields": [
         {
           "metadata": [
@@ -7159,9 +7259,11 @@
           "module": "particles",
           "name": "CParticleFunctionOperator"
         }
-      ]
+      ],
+      "size": 632
     },
     {
+      "alignment": 4,
       "fields": [
         {
           "name": "m_vCenter",
@@ -7184,93 +7286,247 @@
           }
         }
       ],
+      "flags": ["trivial_destructor"],
       "metadata": [],
       "module": "physicslib",
-      "name": "RnCapsule_t"
+      "name": "RnCapsule_t",
+      "size": 28
     },
     {
       "fields": [
-        { "name": "m_flValue", "offset": 0, "type": { "category": "builtin", "name": "float32" } },
-        { "name": "m_nCount", "offset": 4, "type": { "category": "builtin", "name": "int32" } },
-        { "name": "m_bEnabled", "offset": 8, "type": { "category": "builtin", "name": "bool" } },
+        {
+          "name": "m_flValue",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nCount",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_bEnabled",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "bool"
+          }
+        },
         {
           "name": "m_szName",
           "offset": 16,
-          "type": { "category": "builtin", "name": "CUtlString" }
+          "type": {
+            "category": "builtin",
+            "name": "CUtlString"
+          }
         },
-        { "name": "m_hTarget", "offset": 24, "type": { "category": "builtin", "name": "CHandle" } }
+        {
+          "name": "m_hTarget",
+          "offset": 24,
+          "type": {
+            "category": "builtin",
+            "name": "CHandle"
+          }
+        }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"_class\": \"TestSimpleDefaults\",\n\t\"m_flValue\": 1.500000,\n\t\"m_nCount\": 42,\n\t\"m_bEnabled\": true,\n\t\"m_szName\": \"hello\",\n\t\"m_hTarget\": null\n}"
+          "value": {
+            "m_flValue": 1.5,
+            "m_nCount": 42,
+            "m_bEnabled": true,
+            "m_szName": "hello",
+            "m_hTarget": null
+          }
         }
       ],
       "module": "test",
-      "name": "TestSimpleDefaults"
+      "name": "TestSimpleDefaults",
+      "size": 32
     },
     {
       "fields": [
-        { "name": "m_nSeed", "offset": 0, "type": { "category": "builtin", "name": "int32" } },
-        { "name": "m_flRate", "offset": 4, "type": { "category": "builtin", "name": "float32" } }
+        {
+          "name": "m_nSeed",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_flRate",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_nSeed\": <HIDDEN FOR DIFF>,\n\t\"m_flRate\": 0.500000\n}"
+          "value": {
+            "m_flRate": 0.5
+          }
         }
       ],
       "module": "test",
-      "name": "TestHiddenValues"
+      "name": "TestHiddenValues",
+      "size": 16
     },
     {
       "fields": [
-        { "name": "m_flA", "offset": 0, "type": { "category": "builtin", "name": "float32" } },
-        { "name": "m_flB", "offset": 4, "type": { "category": "builtin", "name": "float32" } }
+        {
+          "name": "m_flA",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flB",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_flA\": 10.000000,\n\t\"m_flB\": 20.000000\n}"
+          "value": {
+            "m_flA": 10,
+            "m_flB": 20
+          }
         }
       ],
       "module": "test",
-      "name": "TestBaseClass"
+      "name": "TestBaseClass",
+      "size": 16
     },
     {
       "fields": [
-        { "name": "m_flC", "offset": 8, "type": { "category": "builtin", "name": "float32" } },
+        {
+          "name": "m_flC",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
         {
           "name": "m_inner",
           "offset": 12,
-          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          "type": {
+            "category": "declared_class",
+            "module": "test",
+            "name": "TestBaseClass"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"_class\": \"TestChildClass\",\n\t\"m_flA\": 10.000000,\n\t\"m_flB\": 99.000000,\n\t\"m_flC\": 5.000000,\n\t\"m_inner\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 20.000000\n\t}\n}"
+          "value": {
+            "m_flB": 99,
+            "m_flC": 5,
+            "m_inner": {
+              "m_flA": 10,
+              "m_flB": 20
+            }
+          }
         }
       ],
       "module": "test",
       "name": "TestChildClass",
-      "parents": [{ "module": "test", "name": "TestBaseClass" }]
+      "parents": [
+        {
+          "module": "test",
+          "name": "TestBaseClass"
+        }
+      ],
+      "size": 24
     },
     {
       "fields": [
-        { "name": "m_flX", "offset": 0, "type": { "category": "builtin", "name": "float32" } }
+        {
+          "name": "m_flX",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
       ],
-      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "Could not parse KV3 Defaults" }],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": "Could not parse KV3 Defaults"
+        }
+      ],
       "module": "test",
-      "name": "TestBrokenDefaults"
+      "name": "TestBrokenDefaults",
+      "size": 8
     },
     {
       "fields": [
-        { "name": "m_flVal", "offset": 0, "type": { "category": "builtin", "name": "float32" } }
+        {
+          "name": "m_flVal",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flNan",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flInf",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "float64"
+          }
+        },
+        {
+          "name": "m_szNan",
+          "offset": 16,
+          "type": {
+            "category": "atomic",
+            "name": "CUtlString"
+          }
+        }
       ],
-      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_flVal\": -nan\n}" }],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": {
+            "m_flInf": "inf",
+            "m_flNan": "-nan",
+            "m_flVal": null,
+            "m_szNan": "nan"
+          }
+        }
+      ],
       "module": "test",
-      "name": "TestNanDefaults"
+      "name": "TestNanDefaults",
+      "size": 24
     },
     {
       "fields": [
@@ -7280,7 +7536,10 @@
           "type": {
             "category": "atomic",
             "name": "CUtlVector",
-            "inner": { "category": "builtin", "name": "int32" }
+            "inner": {
+              "category": "builtin",
+              "name": "int32"
+            }
           }
         },
         {
@@ -7289,112 +7548,187 @@
           "type": {
             "category": "atomic",
             "name": "CUtlVector",
-            "inner": { "category": "builtin", "name": "int32" }
+            "inner": {
+              "category": "builtin",
+              "name": "int32"
+            }
           }
         },
         {
           "name": "m_vecZero",
           "offset": 48,
-          "type": { "category": "atomic", "name": "Vector" }
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
         },
         {
           "name": "m_vecNonZero",
           "offset": 60,
-          "type": { "category": "atomic", "name": "Vector" }
+          "type": {
+            "category": "atomic",
+            "name": "Vector"
+          }
         },
         {
           "name": "m_color",
           "offset": 72,
-          "type": { "category": "atomic", "name": "Color" }
+          "type": {
+            "category": "atomic",
+            "name": "Color"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_items\": [1, 2, 3],\n\t\"m_empty\": [],\n\t\"m_vecZero\": [0, 0, 0],\n\t\"m_vecNonZero\": [1, 0, 0],\n\t\"m_color\": [255, 128, 0, 255]\n}"
+          "value": {
+            "m_items": [1, 2, 3],
+            "m_empty": [],
+            "m_vecZero": [0, 0, 0],
+            "m_vecNonZero": [1, 0, 0],
+            "m_color": [255, 128, 0, 255]
+          }
         }
       ],
       "module": "test",
-      "name": "TestArrayDefaults"
+      "name": "TestArrayDefaults",
+      "size": 80
     },
     {
       "fields": [
         {
           "name": "m_data",
           "offset": 0,
-          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          "type": {
+            "category": "declared_class",
+            "module": "test",
+            "name": "TestBaseClass"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_data\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 77.000000\n\t}\n}"
+          "value": {
+            "m_data": {
+              "m_flA": 10,
+              "m_flB": 77
+            }
+          }
         }
       ],
       "module": "test",
-      "name": "TestObjectDiff"
+      "name": "TestObjectDiff",
+      "size": 8
     },
     {
       "fields": [
         {
           "name": "m_data",
           "offset": 0,
-          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          "type": {
+            "category": "declared_class",
+            "module": "test",
+            "name": "TestBaseClass"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_data\": {\n\t\t\"m_flA\": 10.000000,\n\t\t\"m_flB\": 20.000000\n\t}\n}"
+          "value": {
+            "m_data": {
+              "m_flA": 10,
+              "m_flB": 20
+            }
+          }
         }
       ],
       "module": "test",
-      "name": "TestObjectRedundant"
+      "name": "TestObjectRedundant",
+      "size": 8
     },
     {
       "fields": [
         {
           "name": "m_curve",
           "offset": 0,
-          "type": { "category": "atomic", "name": "CPiecewiseCurve" }
+          "type": {
+            "category": "atomic",
+            "name": "CPiecewiseCurve"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_curve\": {\n\t\t\"m_spline\": [],\n\t\t\"m_tangents\": []\n\t}\n}"
+          "value": {
+            "m_curve": {
+              "m_spline": [],
+              "m_tangents": []
+            }
+          }
         }
       ],
       "module": "test",
-      "name": "TestAtomicObject"
+      "name": "TestAtomicObject",
+      "size": 8
     },
     {
       "fields": [
-        { "name": "m_id", "offset": 0, "type": { "category": "builtin", "name": "int32" } },
-        { "name": "m_name", "offset": 4, "type": { "category": "builtin", "name": "CUtlString" } }
+        {
+          "name": "m_id",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_name",
+          "offset": 4,
+          "type": {
+            "category": "builtin",
+            "name": "CUtlString"
+          }
+        }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_id\": <HIDDEN FOR DIFF>,\n\t\"m_name\": <HIDDEN FOR DIFF>\n}"
+          "value": {}
         }
       ],
       "module": "test",
-      "name": "TestAllHidden"
+      "name": "TestAllHidden",
+      "size": 16
     },
     {
       "fields": [
         {
           "name": "m_inner",
           "offset": 0,
-          "type": { "category": "declared_class", "module": "test", "name": "TestMissingClass" }
+          "type": {
+            "category": "declared_class",
+            "module": "test",
+            "name": "TestMissingClass"
+          }
         }
       ],
       "metadata": [
-        { "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_inner\": {\n\t\t\"m_x\": 5\n\t}\n}" }
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": {
+            "m_inner": {
+              "m_x": 5
+            }
+          }
+        }
       ],
       "module": "test",
-      "name": "TestMissingTarget"
+      "name": "TestMissingTarget",
+      "size": 8
     },
     {
       "fields": [
@@ -7403,13 +7737,25 @@
           "offset": 0,
           "type": {
             "category": "ptr",
-            "inner": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+            "inner": {
+              "category": "declared_class",
+              "module": "test",
+              "name": "TestBaseClass"
+            }
           }
         }
       ],
-      "metadata": [{ "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_ptr\": null\n}" }],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": {
+            "m_ptr": null
+          }
+        }
+      ],
       "module": "test",
-      "name": "TestPtrField"
+      "name": "TestPtrField",
+      "size": 8
     },
     {
       "fields": [
@@ -7433,17 +7779,27 @@
         }
       ],
       "metadata": [
-        { "name": "MGetKV3ClassDefaults", "value": "{\n\t\"m_eColor\": 2,\n\t\"m_eTeam\": 0\n}" }
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": {
+            "m_eColor": 2,
+            "m_eTeam": 0
+          }
+        }
       ],
       "module": "test",
-      "name": "TestEnumDefaults"
+      "name": "TestEnumDefaults",
+      "size": 16
     },
     {
       "fields": [
         {
           "name": "m_szLabel",
           "offset": 0,
-          "type": { "category": "atomic", "name": "CUtlString" }
+          "type": {
+            "category": "atomic",
+            "name": "CUtlString"
+          }
         },
         {
           "name": "m_nZero",
@@ -7457,68 +7813,97 @@
         {
           "name": "m_bOff",
           "offset": 12,
-          "type": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+          "type": {
+            "category": "declared_class",
+            "module": "test",
+            "name": "TestBaseClass"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_szLabel\": \"\",\n\t\"m_nZero\": 0,\n\t\"m_bOff\": false\n}"
+          "value": {
+            "m_szLabel": "",
+            "m_nZero": 0,
+            "m_bOff": false
+          }
         }
       ],
       "module": "test",
-      "name": "TestZeroNonBuiltin"
+      "name": "TestZeroNonBuiltin",
+      "size": 24
     },
     {
       "fields": [
         {
           "name": "m_flX",
           "offset": 0,
-          "type": { "category": "builtin", "name": "float32" }
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"_class\": \"TestUnknownKeys\",\n\t\"m_flX\": 3.0,\n\t\"m_unknown\": 77,\n\t\"m_extra\": \"data\"\n}"
+          "value": {
+            "m_flX": 3,
+            "m_unknown": 77,
+            "m_extra": "data"
+          }
         }
       ],
       "module": "test",
-      "name": "TestUnknownKeys"
+      "name": "TestUnknownKeys",
+      "size": 8
     },
     {
       "fields": [
         {
           "name": "m_flVal",
           "offset": 0,
-          "type": { "category": "builtin", "name": "float32" }
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_flVal\": 100\n}"
+          "value": {
+            "m_flVal": 100
+          }
         }
       ],
       "module": "modA",
-      "name": "TestSameNameClass"
+      "name": "TestSameNameClass",
+      "size": 8
     },
     {
       "fields": [
         {
           "name": "m_flVal",
           "offset": 0,
-          "type": { "category": "builtin", "name": "float32" }
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_flVal\": 200\n}"
+          "value": {
+            "m_flVal": 200
+          }
         }
       ],
       "module": "modB",
-      "name": "TestSameNameClass"
+      "name": "TestSameNameClass",
+      "size": 8
     },
     {
       "fields": [
@@ -7528,19 +7913,32 @@
           "type": {
             "category": "atomic",
             "name": "CUtlHashMap",
-            "inner": { "category": "builtin", "name": "uint64" },
-            "inner2": { "category": "declared_class", "module": "test", "name": "TestBaseClass" }
+            "inner": {
+              "category": "builtin",
+              "name": "uint64"
+            },
+            "inner2": {
+              "category": "declared_class",
+              "module": "test",
+              "name": "TestBaseClass"
+            }
           }
         }
       ],
       "metadata": [
         {
           "name": "MGetKV3ClassDefaults",
-          "value": "{\n\t\"m_map\": {\"m_flA\": 10, \"m_flB\": 77}\n}"
+          "value": {
+            "m_map": {
+              "m_flA": 10,
+              "m_flB": 77
+            }
+          }
         }
       ],
       "module": "test",
-      "name": "TestMapInner2"
+      "name": "TestMapInner2",
+      "size": 8
     }
   ],
   "enums": [

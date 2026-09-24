@@ -35,12 +35,11 @@ export function formatFieldType(type: SchemaFieldType): string {
       return `${formatFieldType(type.inner)}*`;
     case "fixed_array":
       return `${formatFieldType(type.inner)}[${type.count}]`;
-    case "atomic":
-      if (type.inner) {
-        const inner2 = type.inner2 ? `, ${formatFieldType(type.inner2)}` : "";
-        return `${type.name}< ${formatFieldType(type.inner)}${inner2} >`;
-      }
-      return type.name;
+    case "atomic": {
+      const args = [type.inner, type.inner2].filter((t) => t != null).map(formatFieldType);
+      if (type.count != null) args.push(String(type.count));
+      return args.length > 0 ? `${type.name}< ${args.join(", ")} >` : type.name;
+    }
     case "bitfield":
       return `bitfield:${type.count}`;
   }

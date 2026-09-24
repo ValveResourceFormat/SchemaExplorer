@@ -4,6 +4,7 @@ import { SearchContext } from "../components/search/SearchContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import { allDeclarations } from "../data/derived";
 import * as api from "../data/types";
+import { metadataValueText } from "./format";
 
 function useHydrated(): boolean {
   const [hydrated, setHydrated] = useState(false);
@@ -304,7 +305,7 @@ function lowerMetaVals(
   metadata: api.SchemaMetadataEntry[] | undefined,
 ): (string | undefined)[] | undefined {
   if (!metadata || metadata.length === 0) return undefined;
-  return metadata.map((m) => m.value?.toLowerCase());
+  return metadata.map((m) => metadataValueText(m.value)?.toLowerCase());
 }
 
 export function matchesMetadataKeys(

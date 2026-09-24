@@ -28,6 +28,21 @@ describe("formatFieldType", () => {
       }),
     ).toBe("float32[4]");
   });
+
+  it("renders an integer template argument last", () => {
+    expect(formatFieldType({ category: "atomic", name: "CBitVec", count: 10 })).toBe(
+      "CBitVec< 10 >",
+    );
+    expect(
+      formatFieldType({
+        category: "atomic",
+        name: "CUtlVectorFixedGrowable",
+        inner: { category: "builtin", name: "int16" },
+        count: 4,
+      }),
+    ).toBe("CUtlVectorFixedGrowable< int16, 4 >");
+    expect(formatFieldType({ category: "atomic", name: "CUtlString" })).toBe("CUtlString");
+  });
 });
 
 describe("buildComponentEmbed", () => {
@@ -51,6 +66,8 @@ describe("buildComponentEmbed", () => {
       kind: "class",
       name: "CBig",
       module: "client",
+      size: 2000,
+      flags: [],
       parents: [],
       metadata: [],
       fields: Array.from({ length: 500 }, (_, i) => ({

@@ -68,7 +68,7 @@ function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   switch (type.category) {
     case "declared_class":
     case "declared_enum":
-      out.add(declarationKey(type.module, type.name));
+      if (type.module) out.add(declarationKey(type.module, type.name));
       break;
     case "ptr":
     case "fixed_array":
@@ -133,6 +133,19 @@ export function crossModuleName(name: string): string | null {
   if (name.startsWith("C_")) return "C" + name.slice(2);
   if (name.startsWith("C") && name[1] !== "_") return "C_" + name.slice(1);
   return null;
+}
+
+/** First declaration with a name in any module, when the module is unknown */
+export function findDeclarationByName(
+  declarations: Map<string, Map<string, Declaration>>,
+  name: string,
+  kind?: Declaration["kind"],
+): Declaration | undefined {
+  for (const moduleMap of declarations.values()) {
+    const d = moduleMap.get(name);
+    if (d && (!kind || d.kind === kind)) return d;
+  }
+  return undefined;
 }
 
 // -- Game context store --

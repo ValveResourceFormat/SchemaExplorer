@@ -2,31 +2,28 @@ import type {
   Declaration,
   SchemaEnum,
   SchemaClass,
+  SchemaClassFlag,
+  SchemaParent,
   SchemaField,
   SchemaFieldType,
   SchemaMetadataEntry,
+  SchemaMetadataValue,
 } from "./types.ts";
 import { compareModuleNames } from "../games-list.ts";
 import { intrinsicDeclarations } from "./intrinsics.ts";
 
-export const HIDDEN_SENTINEL = "__HIDDEN_FOR_DIFF__";
-
-/** @internal Exported for testing */
-export function parseKV3Defaults(value: string): Record<string, unknown> | null {
-  if (!value || value.startsWith("Could not")) return null;
-  let s = value.replace(/<HIDDEN FOR DIFF>/g, `"${HIDDEN_SENTINEL}"`);
-  s = s.replace(/:\s*-nan\b/g, ": null");
-  s = s.replace(/,(\s*[}\]])/g, "$1");
-  try {
-    const parsed = JSON.parse(s);
-    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) return parsed;
-  } catch {
-    /* skip unparseable */
-  }
-  return null;
+/**
+ * MGetKV3ClassDefaults as an object. DumpSource2 writes it parsed (hidden fields omitted,
+ * NaN and infinity as strings like "-nan"), or the string "Could not parse KV3 Defaults".
+ * @internal Exported for testing
+ */
+export function parseKV3Defaults(
+  value: SchemaMetadataValue | undefined,
+): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value : null;
 }
 
-function deepEqual(a: unknown, b: unknown): boolean {
+export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a === null || b === null || typeof a !== typeof b) return false;
   if (typeof a !== "object") return false;
@@ -55,7 +52,7 @@ export function diffObject(
   const diff: Record<string, unknown> = {};
   let hasDiff = false;
   for (const [k, v] of Object.entries(embedded)) {
-    if (k === "_class" || v === HIDDEN_SENTINEL) continue;
+    if (k === "_class") continue;
     if (!deepEqual(v, ownDefaults[k])) {
       diff[k] = v;
       hasDiff = true;
@@ -75,23 +72,50 @@ function isAllZeroArray(value: unknown[]): boolean {
   return value.every((v) => v === 0);
 }
 
-function stringifyDefault(value: unknown): string {
-  if (typeof value === "string") return JSON.stringify(value);
-  return String(value);
+const FLOAT_TYPES = new Set(["float32", "float64"]);
+
+/** Floats that are NaN or infinite are written as strings like "-nan" and "inf" */
+function isNonFiniteFloat(value: string, type: SchemaFieldType): boolean {
+  return (
+    type.category === "builtin" && FLOAT_TYPES.has(type.name) && /^[-+]?(nan|inf)/i.test(value)
+  );
+}
+
+function stringifyDefault(value: unknown, type: SchemaFieldType): string {
+  if (typeof value !== "string") return String(value);
+  return isNonFiniteFloat(value, type) ? value : JSON.stringify(value);
 }
 
 function assignDefaults(classes: SchemaClass[]) {
   const classMap = new Map<string, SchemaClass>();
   for (const cls of classes) classMap.set(`${cls.module}/${cls.name}`, cls);
 
-  // Pre-parse all KV3 defaults before the main loop mutates metadata
-  const parsedDefaults = new Map<string, Record<string, unknown> | null>();
+  // Pre-parse all KV3 defaults before the main loop mutates metadata. Each class only has the
+  // keys that differ from its first parent's full defaults
+  const ownDefaults = new Map<string, Record<string, unknown> | null>();
   for (const cls of classes) {
-    const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults" && m.value);
-    parsedDefaults.set(`${cls.module}/${cls.name}`, meta ? parseKV3Defaults(meta.value!) : null);
+    const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
+    ownDefaults.set(`${cls.module}/${cls.name}`, parseKV3Defaults(meta?.value));
   }
-  function getDefaults(module: string, name: string): Record<string, unknown> | null {
-    return parsedDefaults.get(`${module}/${name}`) ?? null;
+
+  // Full defaults: the parents' merged defaults, earlier parents first, then the class's own keys
+  const mergedCache = new Map<string, Record<string, unknown>>();
+  function parentDefaults(cls: SchemaClass): Record<string, unknown> {
+    const merged: Record<string, unknown> = {};
+    for (const p of cls.parents.toReversed()) {
+      const parent = classMap.get(`${p.module}/${p.name}`);
+      if (parent) Object.assign(merged, getDefaults(parent));
+    }
+    return merged;
+  }
+  function getDefaults(cls: SchemaClass): Record<string, unknown> {
+    const key = `${cls.module}/${cls.name}`;
+    let merged = mergedCache.get(key);
+    if (!merged) {
+      merged = { ...parentDefaults(cls), ...ownDefaults.get(key) };
+      mergedCache.set(key, merged);
+    }
+    return merged;
   }
 
   // Cache all field names (including inherited) per class
@@ -111,7 +135,7 @@ function assignDefaults(classes: SchemaClass[]) {
   }
 
   for (const cls of classes) {
-    const defaults = getDefaults(cls.module, cls.name);
+    const defaults = ownDefaults.get(`${cls.module}/${cls.name}`);
     if (!defaults) continue;
 
     // Only assign defaults to the class's own fields, not inherited ones
@@ -119,31 +143,19 @@ function assignDefaults(classes: SchemaClass[]) {
     for (const f of cls.fields) ownFields.set(f.name, f);
 
     const allFieldNames = getAllFieldNames(cls);
+    const inherited = parentDefaults(cls);
     const unconsumed: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(defaults)) {
-      if (value === HIDDEN_SENTINEL) continue;
-
       if (!allFieldNames.has(key)) {
-        if (key === "_class" && value === cls.name) continue;
         unconsumed[key] = value;
         continue;
       }
 
       const field = ownFields.get(key);
       if (!field) {
-        // Inherited field — put into unconsumed if child overrides the parent's default
-        let parentDefault: unknown;
-        for (const p of cls.parents) {
-          const pd = getDefaults(p.module, p.name);
-          if (pd && key in pd) {
-            parentDefault = pd[key];
-            break;
-          }
-        }
-        if (parentDefault !== undefined && !deepEqual(value, parentDefault)) {
-          unconsumed[key] = value;
-        }
+        // Inherited field, the class overrides a parent's default
+        if (key in inherited && !deepEqual(value, inherited[key])) unconsumed[key] = value;
         continue;
       }
 
@@ -152,18 +164,20 @@ function assignDefaults(classes: SchemaClass[]) {
       if (typeof value !== "object") {
         // Skip zero values (0, false, "")
         if (value === 0 || value === "" || value === false) continue;
-        field.defaultValue = stringifyDefault(value);
+        field.defaultValue = stringifyDefault(value, field.type);
       } else if (Array.isArray(value)) {
         // Skip empty arrays and all-zero arrays (e.g. Vector [0,0,0])
         if (value.length === 0 || isAllZeroArray(value)) continue;
         field.defaultValue = JSON.stringify(value);
       } else {
-        // For declared_class fields, diff against target's own defaults to avoid redundancy
+        // For declared_class fields, diff against the target's full defaults to avoid redundancy
         const leaf = resolveLeafType(field.type);
-        const targetDefaults =
-          leaf.category === "declared_class" ? getDefaults(leaf.module, leaf.name) : null;
-        const obj = targetDefaults
-          ? diffObject(value as Record<string, unknown>, targetDefaults)
+        const target =
+          leaf.category === "declared_class" && leaf.module
+            ? classMap.get(`${leaf.module}/${leaf.name}`)
+            : undefined;
+        const obj = target
+          ? diffObject(value as Record<string, unknown>, getDefaults(target))
           : (value as Record<string, unknown>);
         if (obj) field.defaultValue = JSON.stringify(obj);
       }
@@ -172,10 +186,7 @@ function assignDefaults(classes: SchemaClass[]) {
     // Rewrite metadata: replace MGetKV3ClassDefaults with unconsumed remainder, or remove if empty
     cls.metadata = cls.metadata.filter((m) => m.name !== "MGetKV3ClassDefaults");
     if (Object.keys(unconsumed).length > 0) {
-      cls.metadata.push({
-        name: "MGetKV3ClassDefaults",
-        value: JSON.stringify(unconsumed, null, "\t"),
-      });
+      cls.metadata.push({ name: "MGetKV3ClassDefaults", value: unconsumed });
     }
   }
 }
@@ -184,7 +195,10 @@ function assignDefaults(classes: SchemaClass[]) {
 interface RawSchemaClass {
   name: string;
   module: string;
-  parents?: { name: string; module: string }[];
+  size: number;
+  alignment?: number;
+  flags?: SchemaClassFlag[];
+  parents?: SchemaParent[];
   fields?: {
     name: string;
     offset: number;
@@ -226,6 +240,7 @@ export function parseSchemas(data: SchemasJson) {
   const classes = data.classes as SchemaClass[];
   for (const c of classes) {
     c.kind = "class";
+    c.flags ??= [];
     c.parents ??= [];
     c.metadata ??= [];
     for (const f of (c.fields ??= [])) {
@@ -260,9 +275,7 @@ export function parseSchemas(data: SchemasJson) {
       moduleMap = new Map();
       declarations.set(d.module, moduleMap);
     }
-    if (!moduleMap.has(d.name)) {
-      moduleMap.set(d.name, d);
-    }
+    moduleMap.set(d.name, d);
   }
 
   return {
