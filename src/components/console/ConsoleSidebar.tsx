@@ -238,6 +238,7 @@ const FilterItem = styled.button`
   }
 
   &[data-state="exclude"] {
+    background: color-mix(in srgb, var(--flag-cheat) 9%, transparent);
     border-left-color: var(--flag-cheat);
     color: var(--text-dim);
 
