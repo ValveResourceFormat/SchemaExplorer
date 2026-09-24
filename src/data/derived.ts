@@ -1,4 +1,13 @@
-import type { Declaration, SchemaField, SchemaFieldType, SchemaParent } from "./types.ts";
+import type {
+  ConsoleItem,
+  Declaration,
+  EntityClass,
+  EntityKey,
+  SchemaClass,
+  SchemaField,
+  SchemaFieldType,
+  SchemaParent,
+} from "./types.ts";
 import type { ParsedSchemas } from "./schemas.ts";
 import type { GameId } from "../games-list.ts";
 import { GAME_LIST } from "../games-list.ts";
@@ -13,13 +22,38 @@ export type ReferenceEntry = {
   relation: "field" | "class";
 };
 
-export type GameContext = {
+export type EntityKeyRef = { entity: EntityClass; key: EntityKey };
+
+export type EntityLookups = {
+  entities: EntityClass[];
+  /** declarationKey(classModule, class) → entities; CEntityInstance is the root of both client and server */
+  entityByClass: Map<string, EntityClass[]>;
+  /** module → design name → entity */
+  entityByDesignName: Map<string, Map<string, EntityClass>>;
+  /** declarationKey(module, class) → entity, for walking baseClass */
+  entityByModuleClass: Map<string, EntityClass>;
+  /** declarationKey(owner module, owner class)/field → keys bound to that schema field */
+  keyByField: Map<string, EntityKeyRef[]>;
+  /** declarationKey(enumModule, enum) → keys using the enum */
+  enumKeyRefs: Map<string, EntityKeyRef[]>;
+  /** Schema class that owns each key's field, see resolveKeyField */
+  keyOwners: Map<EntityKey, { module: string; name: string }>;
+  /** Entities of each schema class, keyed by the class object for per-keystroke search */
+  entitiesByDeclaration: Map<Declaration, EntityClass[]>;
+  /** Deduplicated design names of each schema class (CEntityInstance is "root" twice) */
+  designNamesByDeclaration: Map<Declaration, string[]>;
+  /** Every design name, sorted, for search suggestions */
+  designNames: string[];
+};
+
+export type GameContext = EntityLookups & {
   game: GameId;
   declarations: Map<string, Map<string, Declaration>>;
   metadata: ParsedSchemas["metadata"];
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
   crossModuleLookup: Map<string, Declaration>;
+  consoleItems: ConsoleItem[];
   error: string | null;
 };
 
@@ -27,6 +61,12 @@ export type GameContext = {
 
 export function declarationKey(module: string, name: string): string {
   return `${module}/${name}`;
+}
+
+function pushTo<T>(map: Map<string, T[]>, key: string, value: T) {
+  let list = map.get(key);
+  if (!list) map.set(key, (list = []));
+  list.push(value);
 }
 
 export function* allDeclarations(
@@ -87,22 +127,13 @@ function buildReferences(
 ): Map<string, ReferenceEntry[]> {
   const refs = new Map<string, ReferenceEntry[]>();
 
-  function addRef(target: string, entry: ReferenceEntry) {
-    let list = refs.get(target);
-    if (!list) {
-      list = [];
-      refs.set(target, list);
-    }
-    list.push(entry);
-  }
-
   const typeKeys = new Set<string>();
 
   for (const decl of allDeclarations(declarations)) {
     if (decl.kind === "class") {
       const selfKey = declarationKey(decl.module, decl.name);
       for (const parent of decl.parents) {
-        addRef(declarationKey(parent.module, parent.name), {
+        pushTo(refs, declarationKey(parent.module, parent.name), {
           declarationName: decl.name,
           declarationModule: decl.module,
           relation: "class",
@@ -113,7 +144,7 @@ function buildReferences(
         collectTypeKeys(field.type, typeKeys);
         for (const key of typeKeys) {
           if (key !== selfKey) {
-            addRef(key, {
+            pushTo(refs, key, {
               declarationName: decl.name,
               declarationModule: decl.module,
               fieldName: field.name,
@@ -180,6 +211,146 @@ export function inheritedBases(
   return bases;
 }
 
+// -- Entities --
+
+/**
+ * Finds the schema class that owns a key's field: the declaredIn class, then its schema
+ * parents when declaredIn only inherits the field.
+ */
+export function resolveKeyField(
+  declarations: Map<string, Map<string, Declaration>>,
+  key: EntityKey,
+): { module: string; name: string } | null {
+  if (!key.field) return null;
+
+  const start = declarations.get(key.declaredInModule)?.get(key.declaredIn);
+  if (start?.kind !== "class") return null;
+
+  const visited = new Set<SchemaClass>();
+  const stack: SchemaClass[] = [start];
+  while (stack.length > 0) {
+    const cls = stack.pop()!;
+    if (visited.has(cls)) continue;
+    visited.add(cls);
+    if (cls.fields.some((f) => f.name === key.field)) return { module: cls.module, name: cls.name };
+    for (const p of cls.parents) {
+      const parent = declarations.get(p.module)?.get(p.name);
+      if (parent?.kind === "class") stack.push(parent);
+    }
+  }
+
+  // The field is not in the schema, link to the declaring class anyway
+  return { module: start.module, name: start.name };
+}
+
+export function keyFieldKey(module: string, name: string, field: string): string {
+  return `${declarationKey(module, name)}/${field}`;
+}
+
+export function buildEntityLookups(
+  entities: EntityClass[],
+  declarations: Map<string, Map<string, Declaration>>,
+): EntityLookups {
+  const entityByClass = new Map<string, EntityClass[]>();
+  const entityByDesignName = new Map<string, Map<string, EntityClass>>();
+  const entityByModuleClass = new Map<string, EntityClass>();
+  const keyByField = new Map<string, EntityKeyRef[]>();
+  const enumKeyRefs = new Map<string, EntityKeyRef[]>();
+  const keyOwners = new Map<EntityKey, { module: string; name: string }>();
+  const entitiesByDeclaration = new Map<Declaration, EntityClass[]>();
+  const designNamesByDeclaration = new Map<Declaration, string[]>();
+  const designNames = new Set<string>();
+
+  for (const entity of entities) {
+    pushTo(entityByClass, declarationKey(entity.classModule, entity.class), entity);
+    entityByModuleClass.set(declarationKey(entity.module, entity.class), entity);
+
+    const decl = declarations.get(entity.classModule)?.get(entity.class);
+    if (decl) {
+      const list = entitiesByDeclaration.get(decl);
+      if (list) list.push(entity);
+      else entitiesByDeclaration.set(decl, [entity]);
+    }
+
+    if (entity.designName) {
+      let byName = entityByDesignName.get(entity.module);
+      if (!byName) entityByDesignName.set(entity.module, (byName = new Map()));
+      byName.set(entity.designName, entity);
+      designNames.add(entity.designName);
+      const names = decl && designNamesByDeclaration.get(decl);
+      if (!names) {
+        if (decl) designNamesByDeclaration.set(decl, [entity.designName]);
+      } else if (!names.includes(entity.designName)) names.push(entity.designName);
+    }
+
+    for (const key of entity.keys) {
+      const ref = { entity, key };
+      const owner = resolveKeyField(declarations, key);
+      if (owner) {
+        keyOwners.set(key, owner);
+        pushTo(keyByField, keyFieldKey(owner.module, owner.name, key.field!), ref);
+      }
+      if (key.enum && key.enumModule) {
+        pushTo(enumKeyRefs, declarationKey(key.enumModule, key.enum), ref);
+      }
+    }
+  }
+
+  return {
+    entities,
+    entityByClass,
+    entityByDesignName,
+    entityByModuleClass,
+    keyByField,
+    enumKeyRefs,
+    keyOwners,
+    entitiesByDeclaration,
+    designNamesByDeclaration,
+    designNames: [...designNames].sort(),
+  };
+}
+
+const chainCache = new WeakMap<EntityClass, EntityClass[]>();
+
+/** Bases of an entity from the nearest up to the root, excluding the entity itself */
+export function entityChain(
+  lookups: Pick<EntityLookups, "entityByModuleClass">,
+  entity: EntityClass,
+): EntityClass[] {
+  const cached = chainCache.get(entity);
+  if (cached) return cached;
+  const chain: EntityClass[] = [];
+  const seen = new Set<EntityClass>([entity]);
+  let base = entity.baseClass
+    ? lookups.entityByModuleClass.get(declarationKey(entity.module, entity.baseClass))
+    : undefined;
+  while (base && !seen.has(base)) {
+    seen.add(base);
+    chain.push(base);
+    base = base.baseClass
+      ? lookups.entityByModuleClass.get(declarationKey(base.module, base.baseClass))
+      : undefined;
+  }
+  chainCache.set(entity, chain);
+  return chain;
+}
+
+/** Finds an entity by design name, preferring the server */
+export function findEntityByDesignName(
+  lookups: Pick<EntityLookups, "entityByDesignName">,
+  designName: string,
+  module?: string,
+): EntityClass | undefined {
+  if (module) return lookups.entityByDesignName.get(module)?.get(designName);
+  const server = lookups.entityByDesignName.get("server")?.get(designName);
+  if (server) return server;
+  for (const byName of lookups.entityByDesignName.values()) {
+    const found = byName.get(designName);
+    if (found) return found;
+  }
+  return undefined;
+}
+
 // -- Game context store --
 
 const contexts = new Map<GameId, GameContext>();
@@ -235,6 +406,8 @@ export function buildAllGameContexts(
       references: buildReferences(declarations),
       otherGamesLookup,
       crossModuleLookup,
+      consoleItems: schema?.consoleItems ?? [],
+      ...buildEntityLookups(schema?.entities ?? [], declarations),
       error: errors.get(g.id) ?? null,
     });
   }

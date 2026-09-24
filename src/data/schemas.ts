@@ -1,5 +1,14 @@
 import type {
+  ConCommand,
+  ConsoleItem,
+  ConVar,
   Declaration,
+  EntityClass,
+  EntityComponent,
+  EntityInput,
+  EntityKey,
+  EntityOutput,
+  EntityParam,
   SchemaEnum,
   SchemaClass,
   SchemaClassFlag,
@@ -98,21 +107,24 @@ function assignDefaults(classes: SchemaClass[]) {
     ownDefaults.set(`${cls.module}/${cls.name}`, parseKV3Defaults(meta?.value));
   }
 
-  // Full defaults: the parents' merged defaults, earlier parents first, then the class's own keys
+  // Full defaults: the parents' merged defaults, earlier parents first, then the class's own keys.
+  // They are shared between classes, never mutated, and only copied when there is more to merge
+  const noDefaults: Record<string, unknown> = {};
   const mergedCache = new Map<string, Record<string, unknown>>();
   function parentDefaults(cls: SchemaClass): Record<string, unknown> {
-    const merged: Record<string, unknown> = {};
-    for (const p of cls.parents.toReversed()) {
-      const parent = classMap.get(`${p.module}/${p.name}`);
-      if (parent) Object.assign(merged, getDefaults(parent));
-    }
-    return merged;
+    const parents = cls.parents
+      .map((p) => classMap.get(`${p.module}/${p.name}`))
+      .filter((p) => p !== undefined);
+    if (parents.length === 0) return noDefaults;
+    if (parents.length === 1) return getDefaults(parents[0]);
+    return Object.assign({}, ...parents.toReversed().map(getDefaults));
   }
   function getDefaults(cls: SchemaClass): Record<string, unknown> {
     const key = `${cls.module}/${cls.name}`;
     let merged = mergedCache.get(key);
     if (!merged) {
-      merged = { ...parentDefaults(cls), ...ownDefaults.get(key) };
+      const own = ownDefaults.get(key);
+      merged = own ? { ...parentDefaults(cls), ...own } : parentDefaults(cls);
       mergedCache.set(key, merged);
     }
     return merged;
@@ -220,9 +232,52 @@ interface RawSchemaEnum {
   metadata?: SchemaMetadataEntry[];
 }
 
+interface RawConVar {
+  name: string;
+  type: string;
+  default?: string;
+  min?: string;
+  max?: string;
+  flags?: string[];
+  modules?: string[];
+  help?: string;
+}
+
+interface RawConCommand {
+  name: string;
+  flags?: string[];
+  modules?: string[];
+  help?: string;
+}
+
+interface RawEntityClass {
+  class: string;
+  module: string;
+  classModule?: string;
+  designName?: string;
+  baseClass?: string;
+  spawnable: boolean;
+  flags?: string[];
+  spawnOrder?: number;
+  components?: EntityComponent[];
+  keys?: (Omit<EntityKey, "declaredIn" | "declaredInModule"> & {
+    declaredIn?: string;
+    declaredInModule?: string;
+  })[];
+  inputs?: (Omit<EntityInput, "params" | "returns" | "pulseNode"> & {
+    params?: EntityParam[];
+    returns?: EntityParam[];
+    pulseNode?: boolean;
+  })[];
+  outputs?: (Omit<EntityOutput, "params"> & { params?: EntityParam[] })[];
+}
+
 export interface SchemasJson {
   classes: RawSchemaClass[];
   enums: RawSchemaEnum[];
+  convars?: RawConVar[];
+  commands?: RawConCommand[];
+  entities?: RawEntityClass[];
   revision?: number;
   version_date?: string;
   version_time?: string;
@@ -235,6 +290,63 @@ export interface SchemaMetadata {
 }
 
 export type ParsedSchemas = ReturnType<typeof parseSchemas>;
+
+function compareNames(a: { name: string }, b: { name: string }): number {
+  if (a.name < b.name) return -1;
+  if (a.name > b.name) return 1;
+  return 0;
+}
+
+function normalizeConsoleItem<T extends RawConCommand>(item: T) {
+  return {
+    ...item,
+    flags: item.flags ?? [],
+    modules: item.modules ?? [],
+  };
+}
+
+/** Convars and commands in one list, sorted by name */
+export function parseConsole(data: Pick<SchemasJson, "convars" | "commands">): ConsoleItem[] {
+  const convars: ConVar[] = (data.convars ?? []).map((c) => ({
+    ...normalizeConsoleItem(c),
+    kind: "convar",
+  }));
+  const commands: ConCommand[] = (data.commands ?? []).map((c) => ({
+    ...normalizeConsoleItem(c),
+    kind: "command",
+  }));
+  return [...convars, ...commands].sort(compareNames);
+}
+
+/** @internal Exported for testing */
+export function parseEntities(raw: RawEntityClass[]): EntityClass[] {
+  return raw.map((e) => {
+    // The dump omits classModule when it's module, and a key's declaredIn(Module) when it's
+    // the entity's class
+    const classModule = e.classModule ?? e.module;
+    return {
+      ...e,
+      classModule,
+      flags: e.flags ?? [],
+      spawnOrder: e.spawnOrder ?? 0,
+      components: e.components ?? [],
+      keys: (e.keys ?? []).map((k) => ({
+        ...k,
+        declaredIn: k.declaredIn ?? e.class,
+        declaredInModule: k.declaredInModule ?? classModule,
+      })),
+      inputs: (e.inputs ?? [])
+        .map((i) => ({
+          ...i,
+          params: i.params ?? [],
+          returns: i.returns ?? [],
+          pulseNode: i.pulseNode ?? false,
+        }))
+        .sort(compareNames),
+      outputs: (e.outputs ?? []).map((o) => ({ ...o, params: o.params ?? [] })).sort(compareNames),
+    };
+  });
+}
 
 export function parseSchemas(data: SchemasJson) {
   const classes = data.classes as SchemaClass[];
@@ -260,13 +372,7 @@ export function parseSchemas(data: SchemasJson) {
 
   // Sort all declarations by module then name, build map in one pass
   const all: Declaration[] = [...classes, ...enums, ...intrinsicDeclarations.values()];
-  all.sort((a, b) => {
-    const mc = compareModuleNames(a.module, b.module);
-    if (mc !== 0) return mc;
-    if (a.name < b.name) return -1;
-    if (a.name > b.name) return 1;
-    return 0;
-  });
+  all.sort((a, b) => compareModuleNames(a.module, b.module) || compareNames(a, b));
 
   const declarations = new Map<string, Map<string, Declaration>>();
   for (const d of all) {
@@ -280,6 +386,8 @@ export function parseSchemas(data: SchemasJson) {
 
   return {
     declarations,
+    consoleItems: parseConsole(data),
+    entities: parseEntities(data.entities ?? []),
     metadata: {
       revision: data.revision ?? 0,
       versionDate: data.version_date ?? "",

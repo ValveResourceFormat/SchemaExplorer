@@ -78,3 +78,86 @@ export interface SchemaEnum {
 }
 
 export type Declaration = SchemaClass | SchemaEnum;
+
+// Console variables and commands. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
+export interface ConVar {
+  kind: "convar";
+  name: string;
+  type: string;
+  default?: string;
+  min?: string;
+  max?: string;
+  flags: string[];
+  modules: string[];
+  help?: string;
+}
+
+export interface ConCommand {
+  kind: "command";
+  name: string;
+  flags: string[];
+  modules: string[];
+  help?: string;
+}
+
+export type ConsoleItem = ConVar | ConCommand;
+
+// Entity classes (CS2 only for now). Keys, inputs and outputs are only the ones added since baseClass.
+export interface EntityKey {
+  name: string;
+  type: string;
+  field?: string;
+  /** Schema class of the field, the dump omits it when it's the entity's class */
+  declaredIn: string;
+  /** The dump omits it when it's the entity's classModule */
+  declaredInModule: string;
+  path?: string;
+  enum?: string;
+  enumModule?: string;
+  procedural?: boolean;
+  removed?: boolean;
+  arrayStart?: number;
+  arrayCount?: number;
+}
+
+export interface EntityParam {
+  name: string;
+  type: string;
+  /** Module of a PVAL_SCHEMA_ENUM param's enum */
+  enumModule?: string;
+}
+
+export interface EntityInput {
+  name: string;
+  params: EntityParam[];
+  returns: EntityParam[];
+  description?: string;
+  pulseNode: boolean;
+}
+
+export interface EntityOutput {
+  name: string;
+  params: EntityParam[];
+  description?: string;
+}
+
+export interface EntityComponent {
+  base: string;
+  override: string;
+}
+
+export interface EntityClass {
+  class: string;
+  module: string;
+  /** Module of the schema class, the dump omits it when it's module */
+  classModule: string;
+  designName?: string;
+  baseClass?: string;
+  spawnable: boolean;
+  flags: string[];
+  spawnOrder: number;
+  components: EntityComponent[];
+  keys: EntityKey[];
+  inputs: EntityInput[];
+  outputs: EntityOutput[];
+}

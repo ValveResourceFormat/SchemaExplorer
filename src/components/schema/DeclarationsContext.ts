@@ -2,6 +2,7 @@ import { createContext } from "react";
 import { href } from "react-router";
 import type { GameContext } from "../../data/derived";
 import { DEFAULT_GAME } from "../../games-list";
+import { buildEntityLookups } from "../../data/derived";
 
 export type { GameContext } from "../../data/derived";
 export { declarationKey } from "../../data/derived";
@@ -17,5 +18,7 @@ export const DeclarationsContext = createContext<GameContext>({
   references: new Map(),
   otherGamesLookup: new Map(),
   crossModuleLookup: new Map(),
+  consoleItems: [],
+  ...buildEntityLookups([], new Map()),
   error: null,
 });

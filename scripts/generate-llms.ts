@@ -31,6 +31,7 @@ const games = await Promise.all(
       revision: raw.revision,
       date: raw.version_date,
       hasNetwork: json.includes('"MNetworkEnable"'),
+      hasEntities: (raw.entities?.length ?? 0) > 0,
     };
   }),
 );
@@ -43,6 +44,12 @@ const gameLines = games
   .join("\n");
 
 const exampleFile = games[0].file;
+const entityGames =
+  games
+    .filter((g) => g.hasEntities)
+    .map((g) => g.name)
+    .join(", ") || "no game";
+
 const netGames =
   games
     .filter((g) => g.hasNetwork)
@@ -54,7 +61,8 @@ const netGames =
 // and SchemaFieldType / SchemaMetadataEntry in src/data/types.ts.
 const text = `# Source 2 Schema Explorer
 
-Browsable UI for the engine schemas (classes, enums, fields, metadata) of Source 2 games.
+Browsable UI for the engine schemas (classes, enums, fields, metadata), entity classes,
+console variables and commands of Source 2 games.
 Every class and enum has a prerendered HTML page, but crawling them is slow and the pages
 contain no more data than the JSON below. Do not crawl the site.
 
@@ -71,7 +79,8 @@ not the on-disk resource layout.
 ## JSON structure
 
 \`\`\`
-{ generator, revision, version_date, version_time, classes: Class[], enums: Enum[] }
+{ generator, revision, version_date, version_time, classes: Class[], enums: Enum[],
+  convars?: ConVar[], commands?: Command[], entities?: Entity[] }
 Class  { module, name, size, alignment?, flags?: string[], parents?: {module,name,offset?}[],
          fields?: Field[], metadata?: Meta[] }
        // size and alignment in bytes, alignment omitted when unknown; flags: abstract,
@@ -101,6 +110,33 @@ Type   { category, ...fields by category }
        // CUtlVectorFixedGrowable<inner,count>
        // bitfield = count bits; bit position is not encoded (offset is always 0)
        // declared_class without module is a class that is not in any schema scope
+ConVar  { name, type, default?, min?, max?, flags: string[], modules: string[], help? }
+       // type: bool, int16, uint16, int32, uint32, int64, uint64, float32, float64, string, color,
+       // vector2, vector3, vector4, qangle, vector_ws. default/min/max are strings; vectors and
+       // colors look like "[0.707, 0.707, 0]". modules = declaring modules, empty (with the
+       // "reference" flag) when only referenced. Unnamed flag bits show as flag_N. flags leave out
+       // gamedll when modules has server and clientdll when it has client.
+Command { name, flags: string[], modules: string[], help? }
+Entity  { class, module, classModule?, designName?, baseClass?, spawnable, flags?, spawnOrder?,
+          components?: {base, override}[], keys?: Key[], inputs?: Input[], outputs?: Output[] }
+       // Present only in ${entityGames}. class is a schema class in classModule (omitted when it's
+       // module); module links the entity class list. keys/inputs/outputs are only the ones added
+       // since baseClass (the nearest base entity in the same module), like FGD; walk baseClass for
+       // inherited ones.
+       // The root, CEntityInstance (designName "root"), holds the inputs/outputs of every entity.
+Key     { name, type, field?, declaredIn?, declaredInModule?, path?, enum?, enumModule?,
+          procedural?, removed?, arrayStart?, arrayCount? }
+       // type is FIELD_*; field is the C++ member in class declaredIn (in declaredInModule), under
+       // path (dotted) when it is in an embedded struct. declaredIn is omitted when it's the
+       // entity's class, declaredInModule when it's the entity's classModule. With arrayCount, name
+       // is a printf pattern like "Case%02d".
+Input   { name, params?: Param[], returns?: Param[], description?, pulseNode? }
+Output  { name, params?: Param[], description? }
+       // empty params/returns and a false pulseNode are omitted
+Param   { name, type, enumModule? }
+       // type is PVAL_*, optionally with a subtype like "PVAL_EHANDLE:func_mover";
+       // enumModule is the module of a PVAL_SCHEMA_ENUM:Name enum, also when nested like
+       // PVAL_ARRAY:PVAL_SCHEMA_ENUM:Name
 \`\`\`
 
 Declarations are keyed by (module, name). Besides "client" and "server" there are ~40 engine modules
