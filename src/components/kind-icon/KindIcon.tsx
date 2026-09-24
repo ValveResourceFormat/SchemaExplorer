@@ -18,6 +18,7 @@ export type IconKind =
   | "output"
   | "convar"
   | "command"
+  | "module"
   | "hammer"
   | "lock"
   | "code"

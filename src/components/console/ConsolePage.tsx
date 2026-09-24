@@ -194,21 +194,6 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
   const { game, metadata } = useContext(DeclarationsContext);
   const { kind, nameParam, parsed, visible, includeTag, selectName } = filters;
 
-  // Expanded rows, and the #name= permalink row
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const toggle = useCallback((name: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
-  }, []);
-
-  const expand = useCallback((name: string) => {
-    setExpanded((prev) => (prev.has(name) ? prev : new Set(prev).add(name)));
-  }, []);
-
   // The prerendered page has every row for search engines, hydration has to match it
   // before switching to the virtualized list
   const hydrated = useHydrated();
@@ -221,19 +206,16 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
     const clicked = nameParam != null && nameParam === clickedRef.current;
     clickedRef.current = null;
     setScrollTarget(nameParam && !clicked ? nameParam : null);
-    if (nameParam) expand(nameParam);
-  }, [nameParam, expand]);
+  }, [nameParam]);
 
   const onNavigate = useCallback(
     (name: string, e: React.MouseEvent) => {
       if (!isPlainLeftClick(e)) return;
       e.preventDefault();
       clickedRef.current = name;
-      // The hash doesn't change when the name is already the permalink, expand it here
-      expand(name);
       selectName(name);
     },
-    [expand, selectName],
+    [selectName],
   );
 
   const gameName = getGameDef(game)?.name ?? game;
@@ -262,10 +244,8 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
         hydrated ? (
           <VirtualConsoleList
             items={visible}
-            expanded={expanded}
             nameParam={nameParam}
             scrollTarget={scrollTarget}
-            onToggle={toggle}
             onNavigate={onNavigate}
             onFilter={includeTag}
           />
@@ -278,9 +258,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
                 <ConsoleRow
                   key={`${item.kind}/${item.name}`}
                   item={item}
-                  expanded={false}
                   anchored={false}
-                  onToggle={toggle}
                   onNavigate={onNavigate}
                 />
               ) : (
@@ -308,18 +286,14 @@ const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "mousedown"] as co
 
 function VirtualConsoleList({
   items,
-  expanded,
   nameParam,
   scrollTarget,
-  onToggle,
   onNavigate,
   onFilter,
 }: {
   items: ConsoleItem[];
-  expanded: Set<string>;
   nameParam: string | null;
   scrollTarget: string | null;
-  onToggle: (name: string) => void;
   onNavigate: (name: string, e: React.MouseEvent) => void;
   onFilter: (tag: FilterTag, value: string) => void;
 }) {
@@ -402,9 +376,7 @@ function VirtualConsoleList({
             index={row.index}
             top={row.start - offset}
             item={item}
-            expanded={expanded.has(item.name)}
             anchored={nameParam === item.name}
-            onToggle={onToggle}
             onNavigate={onNavigate}
             onFilter={onFilter}
           />
@@ -465,7 +437,6 @@ function OtherGameConsoleRows({ gameId, items }: { gameId: GameId; items: Consol
           <ConsoleRow
             key={`${item.kind}/${item.name}`}
             item={item}
-            expanded={false}
             anchored={false}
             pageHref={pageHref}
             onNavigate={onNavigate}

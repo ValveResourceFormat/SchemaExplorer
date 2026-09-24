@@ -1,11 +1,12 @@
-import React, { memo } from "react";
+import { memo, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
+import { KindIcon } from "../kind-icon/KindIcon";
 import { useTooltip } from "../Tooltip";
 import { FlagContent, FlagTooltipContent } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup } from "./flags";
 import type { FilterTag } from "../../utils/console-filtering";
-import { formatDefault, formatModules, formatRange, parseColor } from "../../utils/console-format";
+import { formatDefault, formatRange, parseColor } from "../../utils/console-format";
 
 /** Sets --c to the color of the element's data-group flag group */
 export const flagColorVars = `
@@ -68,9 +69,6 @@ const FlagChip = styled.span`
 const FlagChipButton = styled.button`
   ${flagChipStyles}
   cursor: pointer;
-  font-size: 13px;
-  line-height: 22px;
-  padding: 0 8px;
 
   &:hover {
     border-color: var(--c);
@@ -114,8 +112,25 @@ function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => v
   );
 }
 
+/** The module badge from the schema pages (icon + name pill), sized to sit inline with flags */
+function ModuleBadge({ module, onClick }: { module: string; onClick?: () => void }) {
+  const content = (
+    <>
+      <KindIcon kind="module" size={12} />
+      {module}
+    </>
+  );
+  return onClick ? (
+    <FlagChipButton onClick={onClick} title={`Filter by module:${module}`}>
+      {content}
+    </FlagChipButton>
+  ) : (
+    <FlagChip>{content}</FlagChip>
+  );
+}
+
 /** Modified clicks open links normally instead of navigating in place */
-export function isPlainLeftClick(e: React.MouseEvent): boolean {
+export function isPlainLeftClick(e: MouseEvent): boolean {
   return e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey;
 }
 
@@ -125,7 +140,6 @@ const Row = styled.li`
   padding: 6px 12px;
   border-bottom: 1px solid var(--group-separator);
   box-sizing: border-box;
-  cursor: pointer;
   word-break: normal;
   overflow-wrap: anywhere;
 
@@ -135,12 +149,6 @@ const Row = styled.li`
 
   &:hover {
     background: color-mix(in srgb, var(--group-members) 60%, transparent);
-  }
-
-  &[data-expanded] {
-    cursor: auto;
-    /* A tint, the neutral chips and buttons inside use --group-members */
-    background: color-mix(in srgb, var(--highlight) 6%, var(--group));
   }
 
   &[data-anchored] {
@@ -214,11 +222,12 @@ const Swatch = styled.span`
   border: 1px solid var(--group-border);
 `;
 
-const Modules = styled.span`
+const Chips = styled.div`
   margin-left: auto;
-  font-size: 13px;
-  color: var(--text-dim);
-  white-space: nowrap;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 
   @media (max-width: 768px) {
     margin-left: 0;
@@ -235,11 +244,6 @@ const Help = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
 
-  &[data-expanded] {
-    white-space: pre-wrap;
-    color: var(--text);
-  }
-
   &[data-missing] {
     font-style: italic;
     opacity: 0.7;
@@ -250,55 +254,13 @@ const Help = styled.div`
   }
 `;
 
-const Details = styled.div`
-  margin: 8px 0 4px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--text-dim);
-  cursor: auto;
-`;
-
-const DetailLine = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
-`;
-
-const DetailLabel = styled.span`
-  min-width: 56px;
-`;
-
-const ActionButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font: inherit;
-  font-size: 13px;
-  padding: 1px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--group-border);
-  background: var(--group-members);
-  color: var(--text);
-  text-decoration: none;
-  cursor: pointer;
-
-  &:hover {
-    border-color: var(--highlight);
-  }
-`;
-
 export interface ConsoleRowProps {
   item: ConsoleItem;
-  expanded: boolean;
   anchored: boolean;
   /** href of the page the row links to, without hash, when it isn't the current page */
   pageHref?: string;
-  /** Rows without it can't be expanded */
-  onToggle?: (name: string) => void;
-  onNavigate: (name: string, e: React.MouseEvent) => void;
+  onNavigate: (name: string, e: MouseEvent) => void;
+  /** Rows without it show flags and modules as plain, non-clickable badges */
   onFilter?: (tag: FilterTag, value: string) => void;
   /** Set by the virtualized list */
   rowRef?: (el: HTMLLIElement | null) => void;
@@ -308,10 +270,8 @@ export interface ConsoleRowProps {
 
 export const ConsoleRow = memo(function ConsoleRow({
   item,
-  expanded,
   anchored,
   pageHref = "",
-  onToggle,
   onNavigate,
   onFilter,
   rowRef,
@@ -325,15 +285,7 @@ export const ConsoleRow = memo(function ConsoleRow({
   const range = convar ? formatRange(convar.min, convar.max) : null;
   const isReference = item.modules.length === 0;
 
-  function onRowClick(e: React.MouseEvent) {
-    if (expanded || !onToggle) return;
-    if ((e.target as HTMLElement).closest("a, button")) return;
-    if (window.getSelection()?.toString()) return;
-    onToggle(item.name);
-  }
-
   return (
-    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <Row
       ref={rowRef}
       data-index={index}
@@ -349,8 +301,6 @@ export const ConsoleRow = memo(function ConsoleRow({
           : undefined
       }
       data-anchored={anchored || undefined}
-      data-expanded={expanded || undefined}
-      onClick={onRowClick}
     >
       <Line>
         <Name
@@ -368,67 +318,23 @@ export const ConsoleRow = memo(function ConsoleRow({
           </Value>
         )}
         {range && <Range>{range}</Range>}
-        <Modules title={item.modules.length > 2 ? item.modules.join(", ") : undefined}>
-          {formatModules(item.modules)}
-        </Modules>
-        {item.flags.map((f) => (
-          <FlagBadge key={f} flag={f} />
-        ))}
+        <Chips>
+          {item.modules.map((m) => (
+            <ModuleBadge key={m} module={m} onClick={onFilter && (() => onFilter("module:", m))} />
+          ))}
+          {item.flags.map((f) =>
+            onFilter ? (
+              <FilterableFlagBadge key={f} flag={f} onClick={() => onFilter("flag:", f)} />
+            ) : (
+              <FlagBadge key={f} flag={f} />
+            ),
+          )}
+        </Chips>
       </Line>
       {item.help ? (
-        <Help data-expanded={expanded || undefined}>{item.help}</Help>
+        <Help>{item.help}</Help>
       ) : (
         isReference && <Help data-missing>referenced, never declared</Help>
-      )}
-      {expanded && (
-        <Details>
-          <DetailLine>
-            <DetailLabel>Flags</DetailLabel>
-            {item.flags.length === 0 && "none"}
-            {item.flags.map((f) =>
-              onFilter ? (
-                <FilterableFlagBadge key={f} flag={f} onClick={() => onFilter("flag:", f)} />
-              ) : (
-                <FlagBadge key={f} flag={f} />
-              ),
-            )}
-          </DetailLine>
-          {convar && (convar.min != null || convar.max != null) && (
-            <DetailLine>
-              <DetailLabel>Range</DetailLabel>
-              {convar.min != null && <Range>min {convar.min}</Range>}
-              {convar.max != null && <Range>max {convar.max}</Range>}
-            </DetailLine>
-          )}
-          <DetailLine>
-            <DetailLabel>Modules</DetailLabel>
-            {item.modules.length === 0 && "none"}
-            {item.modules.map((m) =>
-              onFilter ? (
-                <FlagChipButton
-                  key={m}
-                  onClick={() => onFilter("module:", m)}
-                  title={`Filter by module:${m}`}
-                >
-                  {m}
-                </FlagChipButton>
-              ) : (
-                <FlagChip key={m}>{m}</FlagChip>
-              ),
-            )}
-          </DetailLine>
-          <DetailLine>
-            <ActionButton onClick={() => navigator.clipboard?.writeText(item.name)}>
-              Copy name
-            </ActionButton>
-            <ActionButton
-              onClick={() => navigator.clipboard?.writeText(new URL(href, location.href).href)}
-            >
-              Copy link
-            </ActionButton>
-            {onToggle && <ActionButton onClick={() => onToggle(item.name)}>Collapse</ActionButton>}
-          </DetailLine>
-        </Details>
       )}
     </Row>
   );

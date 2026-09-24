@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatDefault, formatModules, formatRange, parseColor } from "./console-format";
+import { formatDefault, formatRange, parseColor } from "./console-format";
 import type { ConVar } from "../data/types";
 
 const convar = (type: string, value?: string): ConVar => ({
@@ -49,17 +49,5 @@ describe("formatRange", () => {
     expect(formatRange("0")).toBe("[≥ 0]");
     expect(formatRange(undefined, "5")).toBe("[≤ 5]");
     expect(formatRange()).toBeNull();
-  });
-});
-
-describe("formatModules", () => {
-  it("lists up to two modules", () => {
-    expect(formatModules([])).toBe("");
-    expect(formatModules(["server"])).toBe("server");
-    expect(formatModules(["client", "server"])).toBe("client, server");
-  });
-
-  it("shortens longer lists", () => {
-    expect(formatModules(["client", "engine2", "server"])).toBe("client +2");
   });
 });

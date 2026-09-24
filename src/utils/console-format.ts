@@ -20,9 +20,3 @@ export function formatRange(min?: string, max?: string): string | null {
   if (max != null) return `[≤ ${max}]`;
   return null;
 }
-
-/** Up to two modules, then the first one and how many more */
-export function formatModules(modules: string[]): string {
-  if (modules.length <= 2) return modules.join(", ");
-  return `${modules[0]} +${modules.length - 1}`;
-}
