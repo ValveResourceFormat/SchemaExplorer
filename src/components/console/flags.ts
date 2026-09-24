@@ -117,6 +117,19 @@ const FLAG_DESCRIPTIONS: Record<string, string> = {
   unlogged: "Meant to keep changes out of the server log. Nothing checks it in current games.",
   notconnected:
     "Meant to block changes while connected to a server. Nothing checks it in current games.",
+
+  // Half-Life: Alyx still uses these Source 1 names, described by their Source 1 SDK meaning
+  unregistered: "Source 1 flag: not added to the list of registered cvars.",
+  printableonly: "Source 1 flag: the value can't contain unprintable characters.",
+  never_as_string: "Source 1 flag: the value is never printed as a string.",
+  ss: "Source 1 flag: splitscreen copies of this cvar (name2, name3, …) are created for the other splitscreen players.",
+  ss_added: "Source 1 flag: one of the copies created for another splitscreen player.",
+  reload_materials: "Source 1 flag: changing it reloads materials.",
+  reload_textures: "Source 1 flag: changing it reloads textures.",
+  material_system_thread: "Source 1 flag: read from the material system thread.",
+  archive_xbox: "Source 1 flag: saved to the config file on Xbox.",
+  accessible_from_threads:
+    "Source 1 flag: may be read from other threads, used to debug material system thread cvars.",
 };
 
 export function flagDescription(flag: string): string | undefined {

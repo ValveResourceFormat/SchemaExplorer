@@ -67,12 +67,14 @@ function metadataEqual(a: SchemaMetadataEntry[], b: SchemaMetadataEntry[]): bool
 
 function compareClasses(a: SchemaClass, b: SchemaClass): DiffStatus {
   if (a.parents.length !== b.parents.length) return "differs";
-  // Size, alignment and base offsets are layout, like field offsets
-  let offsetsDiffer = a.size !== b.size || a.alignment !== b.alignment;
+  // Size, alignment and base offsets are layout, like field offsets. Dumps that are not kept up
+  // to date have no layout, there is nothing to compare then
+  const hasLayout = a.size != null && b.size != null;
+  let offsetsDiffer = hasLayout && (a.size !== b.size || a.alignment !== b.alignment);
   for (let i = 0; i < a.parents.length; i++) {
     if (a.parents[i].name !== b.parents[i].name || a.parents[i].module !== b.parents[i].module)
       return "differs";
-    if (a.parents[i].offset !== b.parents[i].offset) offsetsDiffer = true;
+    if (hasLayout && a.parents[i].offset !== b.parents[i].offset) offsetsDiffer = true;
   }
   if (a.flags.join() !== b.flags.join()) return "differs";
   if (a.fields.length !== b.fields.length) return "differs";
@@ -81,7 +83,7 @@ function compareClasses(a: SchemaClass, b: SchemaClass): DiffStatus {
     if (!typesEqual(a.fields[i].type, b.fields[i].type)) return "differs";
     if (!metadataEqual(a.fields[i].metadata, b.fields[i].metadata)) return "differs";
     if (a.fields[i].defaultValue !== b.fields[i].defaultValue) return "differs";
-    if (a.fields[i].offset !== b.fields[i].offset) offsetsDiffer = true;
+    if (hasLayout && a.fields[i].offset !== b.fields[i].offset) offsetsDiffer = true;
   }
   if (!metadataEqual(a.metadata, b.metadata)) return "differs";
   return offsetsDiffer ? "offsets_only" : "identical";
