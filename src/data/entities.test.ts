@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { parseEntities, parseSchemas, type SchemasJson } from "./schemas";
 import {
+  allDeclarations,
   buildEntityLookups,
   declarationKey,
   entityChain,
@@ -9,6 +10,8 @@ import {
   keyFieldKey,
   resolveKeyField,
 } from "./derived";
+import { parseSearch, searchDeclarations } from "../utils/filtering";
+import { formatKeyName, formatKeyPattern, formatKeyType } from "../utils/entity-format";
 
 const data: SchemasJson = {
   classes: [
@@ -188,11 +191,12 @@ describe("entity lookups", () => {
     expect(entityChain(lookups, clientRoot)).toEqual([]);
   });
 
-  it("finds entities by design name, preferring the server", () => {
+  it("finds entities by design name, in the preferred module, then the server", () => {
     expect(findEntityByDesignName(lookups, "trigger_multiple")?.class).toBe("CTriggerMultiple");
     expect(findEntityByDesignName(lookups, "root")?.module).toBe("server");
     expect(findEntityByDesignName(lookups, "root", "client")?.module).toBe("client");
-    expect(findEntityByDesignName(lookups, "trigger_multiple", "client")).toBeUndefined();
+    expect(findEntityByDesignName(lookups, "trigger_multiple", "client")?.module).toBe("server");
+    expect(findEntityByDesignName(lookups, "missing")).toBeUndefined();
   });
 
   it("indexes keys by the schema class that owns the field", () => {
@@ -228,11 +232,77 @@ describe("entity lookups", () => {
   });
 });
 
+describe("entity search", () => {
+  const decls = [...allDeclarations(parsed.declarations)];
+  const search = (q: string) =>
+    searchDeclarations(decls, parseSearch(q), lookups).map((d) => d.name);
+
+  it("matches design names", () => {
+    expect(search("trigger_multiple")).toEqual(["CTriggerMultiple"]);
+  });
+
+  it("filters by entity:", () => {
+    expect(search("entity:trigger")).toEqual(["CTriggerMultiple"]);
+    expect(search("entity:root")).toEqual(["CEntityInstance"]);
+  });
+
+  it("filters by own inputs and outputs only", () => {
+    expect(search("output:OnTrigger")).toEqual(["CTriggerMultiple"]);
+    // Kill is on the root and redeclared on the trigger, AddOutput only on the root
+    expect(search("input:addoutput")).toEqual(["CEntityInstance"]);
+    expect(search("input:kill").sort()).toEqual(["CEntityInstance", "CTriggerMultiple"]);
+  });
+
+  it("needs every input: tag to match one of the inputs", () => {
+    expect(search("input:kill input:addoutput")).toEqual(["CEntityInstance"]);
+    expect(search("input:kill input:missing")).toEqual([]);
+    const [root] = searchDeclarations(decls, parseSearch("input:kill input:addoutput"), lookups);
+    expect(root.kind === "class" && root.entityMatches?.inputs.map((i) => i.name)).toEqual([
+      "AddOutput",
+      "Kill",
+    ]);
+  });
+
+  it("carries the matching inputs and outputs", () => {
+    const [result] = searchDeclarations(decls, parseSearch("output:ontrig"), lookups);
+    expect(result.kind === "class" && result.entityMatches?.outputs.map((o) => o.name)).toEqual([
+      "OnTrigger",
+    ]);
+  });
+
+  it("ignores a bare entity: tag", () => {
+    expect(search("entity:")).toEqual([]);
+  });
+});
+
+describe("key formatting", () => {
+  it("strips FIELD_ from types", () => {
+    expect(formatKeyType("FIELD_FLOAT32")).toBe("float32");
+  });
+
+  it("expands array patterns", () => {
+    expect(formatKeyPattern("Case%02d", 1)).toBe("Case01");
+    expect(formatKeyPattern("position%d", 7)).toBe("position7");
+    expect(formatKeyName({ name: "Case%02d", arrayStart: 1, arrayCount: 16 })).toBe(
+      "Case01 … Case16",
+    );
+    expect(formatKeyName({ name: "weapon%d", procedural: true })).toBe("weapon%d");
+  });
+});
+
 describe("findDeclarationByName", () => {
   it("finds a declaration in any module, optionally by kind", () => {
     expect(findDeclarationByName(parsed.declarations, "hudtextparms_t")?.module).toBe("client");
     expect(findDeclarationByName(parsed.declarations, "RenderMode_t", "enum")?.kind).toBe("enum");
     expect(findDeclarationByName(parsed.declarations, "RenderMode_t", "class")).toBeUndefined();
     expect(findDeclarationByName(parsed.declarations, "Missing")).toBeUndefined();
+  });
+
+  it("looks in the preferred module first", () => {
+    const find = (module: string) =>
+      findDeclarationByName(parsed.declarations, "CEntityInstance", "class", module)?.module;
+    expect(find("entity2")).toBe("entity2");
+    // Not in that module, any module
+    expect(find("client")).toBe("entity2");
   });
 });

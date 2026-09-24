@@ -137,6 +137,25 @@ export const SectionToggle = styled.button`
   }
 `;
 
+export const Dim = styled.span`
+  color: var(--text-dim);
+  font-weight: 400;
+`;
+
+/** Inherited members, a lighter tint than the declaration's own */
+export const InheritedMembers = styled(CommonGroupMembers)`
+  background-color: color-mix(in srgb, var(--group-members) 50%, var(--group));
+`;
+
+export const InheritedLabel = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+`;
+
 export const GridIcon = styled.div`
   grid-column: 1;
   grid-row: 1 / -1;

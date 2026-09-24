@@ -11,7 +11,7 @@ import { useParams } from "react-router";
 import { styled } from "@linaria/react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import type { Range } from "@tanstack/react-virtual";
-import { DeclarationsContext } from "./schema/DeclarationsContext";
+import { DeclarationsContext, type GameContext } from "./schema/DeclarationsContext";
 import { Declaration } from "../data/types";
 import {
   DeclarationSidebarElement,
@@ -35,6 +35,16 @@ type SidebarRows = { rows: SidebarRow[]; stickyIndexes: number[] };
 
 const unfilteredRowsCache = new WeakMap<Map<string, Map<string, Declaration>>, SidebarRows>();
 
+function matchesDeclaration(
+  d: Declaration,
+  nameWords: string[],
+  designNamesByDeclaration: GameContext["designNamesByDeclaration"],
+): boolean {
+  if (matchesWords(d.name, nameWords)) return true;
+  const names = designNamesByDeclaration.get(d);
+  return !!names?.some((n) => matchesWords(n, nameWords));
+}
+
 /**
  * With no search and nothing collapsed the row list is the same for every page of
  * a game, so it is cached instead of rebuilt per render. Prerendering only ever
@@ -42,6 +52,7 @@ const unfilteredRowsCache = new WeakMap<Map<string, Map<string, Declaration>>, S
  */
 function buildRows(
   declarations: Map<string, Map<string, Declaration>>,
+  designNamesByDeclaration: GameContext["designNamesByDeclaration"],
   nameWords: string[],
   moduleWords: string[],
   collapsed: Set<string>,
@@ -66,7 +77,7 @@ function buildRows(
     // Collect matching items (or all items if no filter)
     const items: Declaration[] = [];
     for (const d of moduleMap.values()) {
-      if (hasNameFilter && !matchesWords(d.name, nameWords)) continue;
+      if (hasNameFilter && !matchesDeclaration(d, nameWords, designNamesByDeclaration)) continue;
       items.push(d);
     }
     if (items.length === 0) continue;
@@ -245,7 +256,7 @@ export const DeclarationsSidebar = ({
   onNavigate?: () => void;
   sidebarOpen?: boolean;
 }) => {
-  const { declarations } = useContext(DeclarationsContext);
+  const { declarations, designNamesByDeclaration } = useContext(DeclarationsContext);
   const { nameWords, moduleWords } = useParsedSearch();
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
@@ -253,8 +264,8 @@ export const DeclarationsSidebar = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const { rows, stickyIndexes } = useMemo(
-    () => buildRows(declarations, nameWords, moduleWords, collapsed),
-    [declarations, nameWords, moduleWords, collapsed],
+    () => buildRows(declarations, designNamesByDeclaration, nameWords, moduleWords, collapsed),
+    [declarations, designNamesByDeclaration, nameWords, moduleWords, collapsed],
   );
 
   const activeIndex = useMemo(() => {

@@ -13,6 +13,7 @@ import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { useAnchoredRef } from "./useAnchoredRow";
+import { UsedByKeyvalues } from "./EntitySections";
 import {
   AnchorName,
   CommonGroupMembers,
@@ -114,6 +115,7 @@ export const SchemaEnumView: React.FC<{
         </EnumMembers>
       )}
       {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
+      {!isSearchResult && <UsedByKeyvalues name={declaration.name} module={declaration.module} />}
       {!isSearchResult && <CrossGameRefs declaration={declaration} />}
     </CommonGroupWrapper>
   );

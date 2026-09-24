@@ -1,10 +1,27 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import type { MetaFunction } from "react-router";
-import type { Declaration } from "../data/types";
-import { isGameId, DEFAULT_GAME, GAME_LIST, getGameDef, canonicalUrl } from "../games-list";
+import type { Declaration, EntityClass } from "../data/types";
+import {
+  isGameId,
+  DEFAULT_GAME,
+  GAME_LIST,
+  getGameDef,
+  canonicalUrl,
+  pageMeta,
+} from "../games-list";
 import { INTRINSIC_MODULE } from "../data/intrinsics";
-import { getGameContext } from "../data/derived";
+import { buildInheritedGroups, type Entry } from "../utils/entity-format";
+import { plural } from "../utils/format";
+import {
+  declarationKey,
+  entityChain,
+  findDeclarationByName,
+  findEntityByDesignName,
+  getGameContext,
+  type EntityLookups,
+  type GameContext,
+} from "../data/derived";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import DeclarationsPage from "../components/DeclarationsPage";
 
@@ -25,11 +42,38 @@ function truncateList(prefix: string, items: string[], suffix: string): string {
   return desc + suffix;
 }
 
+function designNamesFor(context: GameContext, module: string, scope: string) {
+  const decl = context.declarations.get(module)?.get(scope);
+  return decl && context.designNamesByDeclaration.get(decl);
+}
+
+function describeEntity(d: Declaration, gameName: string, lookups: EntityLookups): string | null {
+  if (d.kind !== "class") return null;
+  const entities = lookups.entityByClass.get(declarationKey(d.module, d.name));
+  // CEntityInstance (entity2) is the root of both client and server, prefer server
+  const entity =
+    entities?.find((e) => e.module === d.module) ??
+    entities?.find((e) => e.module === "server") ??
+    entities?.[0];
+  if (!entity?.designName) return null;
+  const chain = entityChain(lookups, entity);
+  // Own and inherited, as listed on the page
+  const count = (pick: (e: EntityClass) => Entry[], word: string) => {
+    const n =
+      pick(entity).length +
+      buildInheritedGroups(entity, chain, pick).reduce((sum, g) => sum + g.count, 0);
+    return plural(n, word);
+  };
+  let desc = `${d.name} is the ${entity.designName} entity in ${entity.module}.dll (${gameName}) with ${count((e) => e.keys, "keyvalue")}, ${count((e) => e.inputs, "input")} and ${count((e) => e.outputs, "output")}`;
+  if (entity.baseClass) desc += `; extends ${entity.baseClass}`;
+  return desc + ".";
+}
+
 function describeDeclaration(d: Declaration, gameName: string): string {
   if (d.module === INTRINSIC_MODULE) {
     if (d.kind === "class" && d.fields.length > 0) {
       return truncateList(
-        `${d.name} is an intrinsic Source 2 engine type with ${d.fields.length} field${d.fields.length !== 1 ? "s" : ""}: `,
+        `${d.name} is an intrinsic Source 2 engine type with ${plural(d.fields.length, "field")}: `,
         d.fields.map((f) => f.name),
         ".",
       );
@@ -43,7 +87,7 @@ function describeDeclaration(d: Declaration, gameName: string): string {
       prefix += ` extending ${d.parents.map((p) => p.name).join(", ")}`;
     }
     if (d.fields.length > 0) {
-      prefix += ` with ${d.fields.length} field${d.fields.length !== 1 ? "s" : ""}: `;
+      prefix += ` with ${plural(d.fields.length, "field")}: `;
       return truncateList(
         prefix,
         d.fields.map((f) => f.name),
@@ -55,7 +99,7 @@ function describeDeclaration(d: Declaration, gameName: string): string {
 
   let prefix = `${d.name} is an enum`;
   if (d.alignment) prefix += ` (${d.alignment})`;
-  prefix += ` in ${location} with ${d.members.length} value${d.members.length !== 1 ? "s" : ""}`;
+  prefix += ` in ${location} with ${plural(d.members.length, "value")}`;
   if (d.members.length > 0) {
     prefix += `: `;
     return truncateList(
@@ -71,14 +115,18 @@ export const meta: MetaFunction = ({ params }) => {
   const gameName = params.game && isGameId(params.game) ? getGameDef(params.game)?.name : null;
   const { module, scope } = params;
 
-  const parts = [scope, module, gameName, "Source 2 Schema Explorer"].filter(Boolean);
+  const context = params.game && isGameId(params.game) ? getGameContext(params.game) : null;
+  const designNames = (context && module && scope && designNamesFor(context, module, scope)) || [];
+  const scopeTitle =
+    scope && designNames.length > 0 ? `${scope} (${designNames.join(", ")})` : scope;
+  const parts = [scopeTitle, module, gameName, "Source 2 Schema Explorer"].filter(Boolean);
   const title = parts.join(" - ");
 
   let description: string;
-  if (scope && gameName && isGameId(params.game!)) {
-    const decl = getGameContext(params.game!).declarations.get(module!)?.get(scope!);
+  if (scope && gameName && context) {
+    const decl = context.declarations.get(module!)?.get(scope!);
     description = decl
-      ? describeDeclaration(decl, gameName)
+      ? (describeEntity(decl, gameName, context) ?? describeDeclaration(decl, gameName))
       : `View the ${scope} schema definition in the ${module} module for ${gameName}.`;
   } else if (module && gameName) {
     description = `Browse all classes and enums in the ${module} module for ${gameName} Source 2 engine schemas.`;
@@ -91,16 +139,7 @@ export const meta: MetaFunction = ({ params }) => {
     description = `Browse and explore Valve Source 2 engine schemas, classes, enums, and types for ${gameList}.`;
   }
 
-  const url = canonicalUrl(params.game, params.module, params.scope);
-
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:url", content: url },
-    { tagName: "link", rel: "canonical", href: url },
-  ];
+  return pageMeta(title, description, canonicalUrl(params.game, params.module, params.scope));
 };
 
 export default function SchemasPage() {
@@ -118,6 +157,7 @@ export default function SchemasPage() {
   const { declarations } = context;
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Redirect invalid URLs: try to find the scope in any game, otherwise strip invalid segments
   useEffect(() => {
@@ -127,13 +167,29 @@ export default function SchemasPage() {
 
     if (validScope || (validModule && !scope) || (!module && (!gameParam || validGame))) return;
 
+    // Entity design names: /cs2/server/trigger_multiple and /cs2/trigger_multiple
+    const designName = scope ?? (validGame && !validModule ? module : undefined);
+    if (designName) {
+      const entity = findEntityByDesignName(
+        context,
+        designName,
+        scope && validModule ? module : undefined,
+      );
+      if (entity && context.declarations.get(entity.classModule)?.has(entity.class)) {
+        navigate(
+          { pathname: schemaPath(game, entity.classModule, entity.class), hash: location.hash },
+          { replace: true },
+        );
+        return;
+      }
+    }
+
     if (scope) {
       // Check if the scope exists in another module of the current game
-      for (const [mod, moduleMap] of declarations) {
-        if (moduleMap.has(scope)) {
-          navigate(schemaPath(game, mod, scope), { replace: true });
-          return;
-        }
+      const other = findDeclarationByName(declarations, scope);
+      if (other) {
+        navigate(schemaPath(game, other.module, scope), { replace: true });
+        return;
       }
 
       // Check if the scope exists in another game
@@ -149,7 +205,7 @@ export default function SchemasPage() {
     navigate(schemaPath(validGame ? game : DEFAULT_GAME, validModule ? module : undefined), {
       replace: true,
     });
-  }, [gameParam, game, declarations, module, scope, navigate, context.otherGamesLookup]);
+  }, [gameParam, game, declarations, module, scope, navigate, context, location.hash]);
 
   return <DeclarationsPage context={context} />;
 }

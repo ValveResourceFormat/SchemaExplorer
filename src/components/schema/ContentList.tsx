@@ -16,9 +16,10 @@ import { SchemaEnumView } from "./SchemaEnum";
 import { Declaration } from "../../data/types";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { getGameContext } from "../../data/derived";
 import { GameId } from "../../games-list";
 import { CardBlock, SectionLink } from "./styles";
-import { ClassTree } from "./ClassTree";
+import { ClassTree, EntityTree } from "./ClassTree";
 import { SchemaHome } from "./SchemaHome";
 
 const ModuleChipsBlock = styled(CardBlock)`
@@ -36,7 +37,7 @@ function OtherGamesResults() {
     const result: { gameId: GameId; found: Declaration[] }[] = [];
     for (const [gameId, lookup] of ctx.otherGamesLookup) {
       if (gameId === ctx.game) continue;
-      const found = searchDeclarations(lookup.values(), parsed);
+      const found = searchDeclarations(lookup.values(), parsed, getGameContext(gameId));
       if (found.length > 0) {
         result.push({ gameId, found });
       }
@@ -52,7 +53,7 @@ function OtherGamesResults() {
         return (
           <React.Fragment key={gameId}>
             <OtherGameHeading gameId={gameId} />
-            <DeclarationsContext.Provider value={{ ...ctx, game: gameId }}>
+            <DeclarationsContext.Provider value={getGameContext(gameId)}>
               <LazyList data={found} render={renderSearchResult} />
             </DeclarationsContext.Provider>
           </React.Fragment>
@@ -99,8 +100,8 @@ const renderSearchResult = (declaration: Declaration) => renderItem(declaration,
 
 export function ContentList() {
   const context = useContext(DeclarationsContext);
-  const { declarations, metadata, error } = context;
-  const { data, isSearching } = useFilteredData(declarations);
+  const { metadata, error } = context;
+  const { data, isSearching } = useFilteredData(context);
   const { game: gameParam, module } = useParams();
 
   return (
@@ -121,7 +122,14 @@ export function ContentList() {
       ) : (
         <>
           <SchemaHome isRoot={!gameParam} />
-          {module ? <ClassTree module={module} /> : gameParam && <ModuleList />}
+          {module ? (
+            <>
+              <EntityTree module={module} />
+              <ClassTree module={module} />
+            </>
+          ) : (
+            gameParam && <ModuleList />
+          )}
         </>
       )}
       {module !== INTRINSIC_MODULE && (

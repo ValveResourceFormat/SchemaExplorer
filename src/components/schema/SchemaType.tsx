@@ -6,15 +6,11 @@ import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
-import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
+import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
+import { Dim } from "./styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText, parseNetworkOverride } from "../../utils/format";
 import { findDeclarationByName } from "../../data/derived";
-
-const AngleBracket = styled.span`
-  color: var(--text-dim);
-  font-weight: 400;
-`;
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
@@ -75,14 +71,14 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       return (
         <span>
           <IntrinsicLink name={type.name} kind="container" />
-          <AngleBracket>&lt; </AngleBracket>
+          <Dim>&lt; </Dim>
           {args.map((arg, i) => (
             <Fragment key={i}>
               {i > 0 && ", "}
               {arg}
             </Fragment>
           ))}
-          <AngleBracket> &gt;</AngleBracket>
+          <Dim> &gt;</Dim>
         </span>
       );
     }
@@ -188,17 +184,10 @@ function MetadataValueText({
   const { game, declarations } = useContext(DeclarationsContext);
   const override = name === "MNetworkOverride" ? parseNetworkOverride(text) : null;
   if (!override) return text;
-  const target =
-    (module && declarations.get(module)?.get(override.className)) ||
-    findDeclarationByName(declarations, override.className, "class");
+  const target = findDeclarationByName(declarations, override.className, "class", module);
   if (!target) return text;
   return (
-    <MetadataValueLink
-      to={{
-        pathname: schemaPath(game, target.module, target.name),
-        hash: `field=${encodeURIComponent(override.field)}`,
-      }}
-    >
+    <MetadataValueLink to={fieldLink(game, target.module, target.name, override.field)}>
       {text}
     </MetadataValueLink>
   );

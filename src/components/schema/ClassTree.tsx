@@ -1,10 +1,11 @@
 import { useContext, useMemo } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
-import { Declaration, SchemaClass, SchemaEnum } from "../../data/types";
-import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { Declaration, EntityClass, SchemaClass, SchemaEnum } from "../../data/types";
+import { DeclarationsContext, declarationKey, entityPath, schemaPath } from "./DeclarationsContext";
+import { entityLabel } from "../../utils/entity-format";
 import { CardBlock } from "./styles";
-import { ICONS_URL } from "../kind-icon/KindIcon";
+import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
 
 interface TreeNode {
   cls: SchemaClass;
@@ -196,6 +197,87 @@ export function ClassTree({ module }: { module?: string }) {
           </RootList>
         </>
       )}
+    </TreeContainer>
+  );
+}
+
+interface EntityNode {
+  entity: EntityClass;
+  children: EntityNode[];
+}
+
+function byLabel(a: EntityNode, b: EntityNode) {
+  const x = entityLabel(a.entity);
+  const y = entityLabel(b.entity);
+  return x < y ? -1 : x > y ? 1 : 0;
+}
+
+const EntityClassName = styled.span`
+  color: var(--text-dim);
+  margin-left: 6px;
+`;
+
+const EntityLink = styled(ClassLink)`
+  &[data-dim] {
+    color: var(--text-dim);
+  }
+`;
+
+function EntityNodeView({ node, game }: { node: EntityNode; game: string }) {
+  const { entity } = node;
+  return (
+    <li>
+      <EntityLink
+        to={entityPath(game, entity)}
+        title={entity.spawnable ? entity.class : `${entity.class} (not spawnable)`}
+        data-dim={!entity.spawnable || undefined}
+      >
+        {entityLabel(entity)}
+        {entity.designName && <EntityClassName>{entity.class}</EntityClassName>}
+      </EntityLink>
+      {node.children.length > 0 && (
+        <TreeList>
+          {node.children.map((child) => (
+            <EntityNodeView key={child.entity.class} node={child} game={game} />
+          ))}
+        </TreeList>
+      )}
+    </li>
+  );
+}
+
+/** Entity classes linked by a module, as a tree of their entity base classes */
+export function EntityTree({ module }: { module: string }) {
+  const { entities, game } = useContext(DeclarationsContext);
+
+  const { roots, count } = useMemo(() => {
+    const nodes = new Map<string, EntityNode>();
+    for (const entity of entities) {
+      if (entity.module === module) nodes.set(entity.class, { entity, children: [] });
+    }
+    const roots: EntityNode[] = [];
+    for (const node of nodes.values()) {
+      const base = node.entity.baseClass ? nodes.get(node.entity.baseClass) : undefined;
+      (base ? base.children : roots).push(node);
+    }
+    for (const node of nodes.values()) node.children.sort(byLabel);
+    roots.sort(byLabel);
+    return { roots, count: nodes.size };
+  }, [entities, module]);
+
+  if (count === 0) return null;
+
+  return (
+    <TreeContainer>
+      <TreeHeading>
+        <KindIcon kind="entity" size={24} />
+        Entities in {module} ({count})
+      </TreeHeading>
+      <RootList>
+        {roots.map((node) => (
+          <EntityNodeView key={node.entity.class} node={node} game={game} />
+        ))}
+      </RootList>
     </TreeContainer>
   );
 }

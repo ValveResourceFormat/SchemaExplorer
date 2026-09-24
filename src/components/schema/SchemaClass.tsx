@@ -11,9 +11,10 @@ import { inheritedBases, type InheritedBase } from "../../data/derived";
 import { dumpFileUrl } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { searchLink, useFieldParam } from "../../utils/filtering";
-import { formatHexOffset } from "../../utils/format";
+import { formatHexOffset, plural } from "../../utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
 import { useAnchoredRef } from "./useAnchoredRow";
+import { DesignNameChips, EntityCards, EntityMatches, KeyvalueChips } from "./EntitySections";
 import {
   AnchorName,
   CommonGroupMembers,
@@ -24,6 +25,8 @@ import {
   DeclarationNameLink,
   GridContent,
   GridIcon,
+  InheritedLabel,
+  InheritedMembers,
   MemberSignature,
   SectionBadge,
   SectionLink,
@@ -133,8 +136,9 @@ export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
   isSearchResult?: boolean;
 }> = ({ declaration, isSearchResult }) => {
-  const { game, declarations } = useContext(DeclarationsContext);
+  const { game, declarations, entityByClass } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
+  const entities = entityByClass.get(declarationKey(declaration.module, declaration.name));
 
   const inheritedGroups = useMemo(
     () => (isSearchResult ? [] : inheritedBases(declarations, declaration.parents)),
@@ -145,6 +149,7 @@ export const SchemaClassView: React.FC<{
   const declPath = schemaPath(game, declaration.module, declaration.name);
 
   return (
+    <>
       <CommonGroupWrapper>
         <DeclarationHeader>
           <CommonGroupSignature>
@@ -159,6 +164,7 @@ export const SchemaClassView: React.FC<{
                 abstract
               </SectionBadge>
             )}
+            <DesignNameChips entities={entities} />
             <ClassLayout declaration={declaration} />
             {isSearchResult && <ModuleBadge module={declaration.module} />}
             <GitHubFileLink module={declaration.module} name={declaration.name} />
@@ -181,9 +187,18 @@ export const SchemaClassView: React.FC<{
             ))}
           </ClassMembers>
         )}
+        {isSearchResult && declaration.entityMatches && (
+          <EntityMatches
+            matches={declaration.entityMatches}
+            module={declaration.module}
+            anchorBase={declPath}
+          />
+        )}
         {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
         {!isSearchResult && <CrossGameRefs declaration={declaration} />}
       </CommonGroupWrapper>
+      {!isSearchResult && entities && <EntityCards entities={entities} anchorBase={declPath} />}
+    </>
   );
 };
 
@@ -199,7 +214,7 @@ function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
   const { size, alignment } = declaration;
   return (
     <LayoutText>
-      {size} byte{size !== 1 && "s"} ({formatHexOffset(size)})
+      {plural(size, "byte")} ({formatHexOffset(size)})
       {alignment != null && `, align ${alignment}`}
     </LayoutText>
   );
@@ -254,7 +269,7 @@ function InheritedSection({ groups }: { groups: InheritedBase[] }) {
   }
 
   return (
-    <InheritedMembers>
+    <InheritedFields>
       {groups.map((group) => (
         <React.Fragment key={`inherited-${group.parent.module}/${group.parent.name}`}>
           <InheritedGroupLabel>
@@ -272,6 +287,7 @@ function InheritedSection({ groups }: { groups: InheritedBase[] }) {
           {group.fields.map((field) => (
             <InheritedFieldView
               key={`${group.parent.name}-${field.name}-${field.offset}`}
+              owner={group.parent}
               field={field}
               baseOffset={group.offset}
             />
@@ -281,26 +297,15 @@ function InheritedSection({ groups }: { groups: InheritedBase[] }) {
       <li>
         <SectionToggle onClick={() => setExpanded(false)}>collapse inherited</SectionToggle>
       </li>
-    </InheritedMembers>
+    </InheritedFields>
   );
 }
 
-const InheritedMembers = styled(CommonGroupMembers)`
-  background-color: color-mix(in srgb, var(--group-members) 50%, var(--group));
+const InheritedFields = styled(InheritedMembers)`
   border-bottom: 1px solid var(--group-separator);
-
-  > :not(:last-child) {
-    margin-bottom: 4px;
-  }
 `;
 
-const InheritedGroupLabel = styled.li`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dim);
+const InheritedGroupLabel = styled(InheritedLabel)`
   padding: 2px 4px;
 `;
 
@@ -327,9 +332,11 @@ const InheritedFieldOffset = styled.span`
 `;
 
 function InheritedFieldView({
+  owner,
   field,
   baseOffset,
 }: {
+  owner: { name: string; module: string };
   field: api.SchemaField;
   baseOffset: number;
 }) {
@@ -338,6 +345,7 @@ function InheritedFieldView({
     <InheritedRow>
       <KindIcon kind="field" size="small" />
       <span>{field.name}:</span> <SchemaTypeView type={field.type} />
+      <KeyvalueChips owner={owner} field={field.name} />
       <InheritedFieldOffset>
         {offset} ({formatHexOffset(offset)})
       </InheritedFieldOffset>
@@ -407,6 +415,7 @@ function SchemaFieldView({
             {field.defaultValue != null && (
               <DefaultValueSpan> = {field.defaultValue}</DefaultValueSpan>
             )}
+            <KeyvalueChips owner={owner} field={field.name} />
             {bitfield && (
               <BitRange>
                 bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}

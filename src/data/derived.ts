@@ -63,7 +63,7 @@ export function declarationKey(module: string, name: string): string {
   return `${module}/${name}`;
 }
 
-function pushTo<T>(map: Map<string, T[]>, key: string, value: T) {
+function pushTo<K, T>(map: Map<K, T[]>, key: K, value: T) {
   let list = map.get(key);
   if (!list) map.set(key, (list = []));
   list.push(value);
@@ -166,15 +166,19 @@ export function crossModuleName(name: string): string | null {
   return null;
 }
 
-/** First declaration with a name in any module, when the module is unknown */
+/** A declaration by name when the module is unknown: in the preferred module, then any */
 export function findDeclarationByName(
   declarations: Map<string, Map<string, Declaration>>,
   name: string,
   kind?: Declaration["kind"],
+  preferModule?: string,
 ): Declaration | undefined {
+  const matches = (d: Declaration | undefined) => d != null && (!kind || d.kind === kind);
+  const preferred = preferModule && declarations.get(preferModule)?.get(name);
+  if (preferred && matches(preferred)) return preferred;
   for (const moduleMap of declarations.values()) {
     const d = moduleMap.get(name);
-    if (d && (!kind || d.kind === kind)) return d;
+    if (matches(d)) return d;
   }
   return undefined;
 }
@@ -265,22 +269,20 @@ export function buildEntityLookups(
     pushTo(entityByClass, declarationKey(entity.classModule, entity.class), entity);
     entityByModuleClass.set(declarationKey(entity.module, entity.class), entity);
 
+    const { designName } = entity;
     const decl = declarations.get(entity.classModule)?.get(entity.class);
     if (decl) {
-      const list = entitiesByDeclaration.get(decl);
-      if (list) list.push(entity);
-      else entitiesByDeclaration.set(decl, [entity]);
+      pushTo(entitiesByDeclaration, decl, entity);
+      if (designName && !designNamesByDeclaration.get(decl)?.includes(designName)) {
+        pushTo(designNamesByDeclaration, decl, designName);
+      }
     }
 
-    if (entity.designName) {
+    if (designName) {
       let byName = entityByDesignName.get(entity.module);
       if (!byName) entityByDesignName.set(entity.module, (byName = new Map()));
-      byName.set(entity.designName, entity);
-      designNames.add(entity.designName);
-      const names = decl && designNamesByDeclaration.get(decl);
-      if (!names) {
-        if (decl) designNamesByDeclaration.set(decl, [entity.designName]);
-      } else if (!names.includes(entity.designName)) names.push(entity.designName);
+      byName.set(designName, entity);
+      designNames.add(designName);
     }
 
     for (const key of entity.keys) {
@@ -335,15 +337,15 @@ export function entityChain(
   return chain;
 }
 
-/** Finds an entity by design name, preferring the server */
+/** Finds an entity by design name, in the preferred module first, then the server, then any */
 export function findEntityByDesignName(
   lookups: Pick<EntityLookups, "entityByDesignName">,
   designName: string,
-  module?: string,
+  preferModule?: string,
 ): EntityClass | undefined {
-  if (module) return lookups.entityByDesignName.get(module)?.get(designName);
-  const server = lookups.entityByDesignName.get("server")?.get(designName);
-  if (server) return server;
+  const inModule = (module: string) => lookups.entityByDesignName.get(module)?.get(designName);
+  const preferred = (preferModule && inModule(preferModule)) || inModule("server");
+  if (preferred) return preferred;
   for (const byName of lookups.entityByDesignName.values()) {
     const found = byName.get(designName);
     if (found) return found;

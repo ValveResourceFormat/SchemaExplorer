@@ -1,22 +1,29 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useLocation, useParams } from "react-router";
 import { SearchContext } from "../components/search/SearchContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
-import { allDeclarations } from "../data/derived";
+import { allDeclarations, type EntityLookups } from "../data/derived";
 import * as api from "../data/types";
 import { metadataValueText } from "./format";
 
-// Once the app has hydrated, components mounted by client-side navigation can skip the
-// hydration-safe first render, like rendering every prerendered row before virtualizing
-let appHydrated = false;
+type EntitySearchLookups = Pick<
+  EntityLookups,
+  "entities" | "entitiesByDeclaration" | "designNamesByDeclaration"
+>;
 
+const subscribeNever = () => () => {};
+
+/**
+ * False while prerendering and hydrating, true after. Components mounted later by client-side
+ * navigation get true right away and skip the hydration-safe first render, like rendering
+ * every prerendered row before virtualizing
+ */
 export function useHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(appHydrated);
-  useEffect(() => {
-    appHydrated = true;
-    setHydrated(true);
-  }, []);
-  return hydrated;
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
 }
 
 export function useHashParam(key: string): string | null {
@@ -50,6 +57,9 @@ interface ParsedSearch {
   enumValues: Set<number>;
   metadataKeys: string[];
   metadataValues: string[];
+  entityWords: string[];
+  inputWords: string[];
+  outputWords: string[];
 }
 
 export const EMPTY_PARSED: ParsedSearch = {
@@ -59,16 +69,24 @@ export const EMPTY_PARSED: ParsedSearch = {
   enumValues: new Set(),
   metadataKeys: [],
   metadataValues: [],
+  entityWords: [],
+  inputWords: [],
+  outputWords: [],
 };
 
+const FILTER_TAGS = [
+  "module:",
+  "offset:",
+  "enumvalue:",
+  "metadata:",
+  "metadatavalue:",
+  "entity:",
+  "input:",
+  "output:",
+];
+
 export function isFilterPrefix(word: string): boolean {
-  return (
-    word.startsWith("module:") ||
-    word.startsWith("offset:") ||
-    word.startsWith("enumvalue:") ||
-    word.startsWith("metadata:") ||
-    word.startsWith("metadatavalue:")
-  );
+  return FILTER_TAGS.some((tag) => word.startsWith(tag));
 }
 
 export function parseIntValue(value: string): number | null {
@@ -81,33 +99,28 @@ export function parseIntValue(value: string): number | null {
 export function parseSearch(search: string): ParsedSearch {
   const words = search.toLowerCase().split(" ").filter(Boolean);
   const nameWords = words.filter((x) => !isFilterPrefix(x));
-  const moduleWords = words
-    .filter((x) => x.startsWith("module:"))
-    .map((x) => x.slice(7))
-    .filter(Boolean);
-  const offsetValues = words
-    .filter((x) => x.startsWith("offset:"))
-    .map((x) => parseIntValue(x.slice(7)))
-    .filter((x): x is number => x !== null);
-  const enumValueValues = words
-    .filter((x) => x.startsWith("enumvalue:"))
-    .map((x) => parseIntValue(x.slice(10)))
-    .filter((x): x is number => x !== null);
-  const metadataKeys = words
-    .filter((x) => x.startsWith("metadata:") && !x.startsWith("metadatavalue:"))
-    .map((x) => x.slice(9))
-    .filter(Boolean);
-  const metadataValues = words
-    .filter((x) => x.startsWith("metadatavalue:"))
-    .map((x) => x.slice(14))
-    .filter(Boolean);
+  const tagValues = (prefix: string) =>
+    words
+      .filter((x) => x.startsWith(prefix))
+      .map((x) => x.slice(prefix.length))
+      .filter(Boolean);
+  const numbers = (prefix: string) =>
+    new Set(
+      tagValues(prefix)
+        .map(parseIntValue)
+        .filter((x) => x !== null),
+    );
   return {
     nameWords,
-    moduleWords,
-    offsets: new Set(offsetValues),
-    enumValues: new Set(enumValueValues),
-    metadataKeys,
-    metadataValues,
+    moduleWords: tagValues("module:"),
+    offsets: numbers("offset:"),
+    enumValues: numbers("enumvalue:"),
+    // metadata: is a prefix of metadatavalue:, so its values can't start with "value:"
+    metadataKeys: tagValues("metadata:").filter((x) => !x.startsWith("value:")),
+    metadataValues: tagValues("metadatavalue:"),
+    entityWords: tagValues("entity:"),
+    inputWords: tagValues("input:"),
+    outputWords: tagValues("output:"),
   };
 }
 
@@ -116,7 +129,12 @@ export function useParsedSearch(): ParsedSearch {
   return useMemo(() => (search ? parseSearch(search) : EMPTY_PARSED), [search]);
 }
 
-export function useFilteredData(declarations: Map<string, Map<string, api.Declaration>>) {
+export function useFilteredData(
+  context: EntitySearchLookups & {
+    declarations: Map<string, Map<string, api.Declaration>>;
+  },
+) {
+  const { declarations } = context;
   const { search } = useContext(SearchContext);
   const parsed = useParsedSearch();
   const { module = "", scope = "" } = useParams();
@@ -124,7 +142,7 @@ export function useFilteredData(declarations: Map<string, Map<string, api.Declar
   return useMemo(() => {
     if (search) {
       return {
-        data: searchDeclarations(allDeclarations(declarations), parsed),
+        data: searchDeclarations(allDeclarations(declarations), parsed, context),
         isSearching: true,
       };
     }
@@ -138,7 +156,7 @@ export function useFilteredData(declarations: Map<string, Map<string, api.Declar
     }
 
     return { data: [] as api.Declaration[], isSearching: false };
-  }, [declarations, search, parsed, module, scope]);
+  }, [declarations, context, search, parsed, module, scope]);
 }
 
 export function useFieldParam(): string | null {
@@ -343,9 +361,36 @@ const MAX_SEARCH_RESULTS = 500;
 const emptyFields: api.SchemaField[] = [];
 const emptyMembers: api.SchemaEnumMember[] = [];
 
+/** Items matching any of the words, or none unless every word matched an item (like metadata:) */
+function namesMatching<T extends { name: string }>(lists: T[][], words: string[]): T[] {
+  if (words.length === 0) return [];
+  const result: T[] = [];
+  const seen = new Set<string>();
+  const matchedWords = new Set<string>();
+  for (const list of lists) {
+    for (const item of list) {
+      if (seen.has(item.name)) continue;
+      const lower = item.name.toLowerCase();
+      let matched = false;
+      for (const w of words) {
+        if (lower.includes(w)) {
+          matchedWords.add(w);
+          matched = true;
+        }
+      }
+      if (matched) {
+        seen.add(item.name);
+        result.push(item);
+      }
+    }
+  }
+  return words.every((w) => matchedWords.has(w)) ? result : [];
+}
+
 export function searchDeclarations(
   declarations: Iterable<api.Declaration>,
   parsed: ParsedSearch,
+  entities?: EntitySearchLookups,
 ): api.Declaration[] {
   const {
     nameWords,
@@ -354,18 +399,26 @@ export function searchDeclarations(
     enumValues: enumValueSet,
     metadataKeys,
     metadataValues,
+    entityWords,
+    inputWords,
+    outputWords,
   } = parsed;
+  // Games without entities skip the per-declaration lookups
+  const lookups = entities?.entities.length ? entities : undefined;
 
   const hasNameFilter = nameWords.length > 0;
   const hasOffsetFilter = offsetSet.size > 0;
   const hasEnumValueFilter = enumValueSet.size > 0;
   const hasMetadataFilter = metadataKeys.length > 0 || metadataValues.length > 0;
+  const hasIOFilter = inputWords.length > 0 || outputWords.length > 0;
+  const hasEntityFilter = entityWords.length > 0 || hasIOFilter;
 
   if (
     !hasNameFilter &&
     !hasOffsetFilter &&
     !hasEnumValueFilter &&
     !hasMetadataFilter &&
+    !hasEntityFilter &&
     moduleWords.length === 0
   ) {
     return [];
@@ -419,11 +472,43 @@ export function searchDeclarations(
       if (!moduleWords.some((w) => mod.includes(w))) continue;
     }
 
-    // Fuzzy-score each name word against the declaration name
+    const ents = lookups?.entitiesByDeclaration.get(declaration);
+    const designNames = lookups?.designNamesByDeclaration.get(declaration);
+
+    // Entity filters (OR across entity: words, like module:)
+    if (entityWords.length > 0) {
+      const matches = designNames?.some((n) =>
+        entityWords.some((w) => n.toLowerCase().includes(w)),
+      );
+      if (!matches) continue;
+    }
+
+    // Only the entity's own inputs/outputs, inherited ones would match every entity
+    let entityMatches: api.SchemaClass["entityMatches"];
+    if (hasIOFilter) {
+      if (!ents) continue;
+      const inputs = namesMatching(
+        ents.map((e) => e.inputs),
+        inputWords,
+      );
+      const outputs = namesMatching(
+        ents.map((e) => e.outputs),
+        outputWords,
+      );
+      if (inputWords.length > 0 && inputs.length === 0) continue;
+      if (outputWords.length > 0 && outputs.length === 0) continue;
+      entityMatches = { inputs, outputs };
+    }
+
+    // Fuzzy-score each name word against the declaration name and entity design names
     let nameFuzzyScore = 0;
     const remainingWords: string[] = [];
     for (const w of nameWords) {
-      const s = fuzzyScore(w, declaration.name);
+      let s = fuzzyScore(w, declaration.name);
+      for (const n of designNames ?? []) {
+        const ds = fuzzyScore(w, n);
+        if (ds !== null && (s === null || ds < s)) s = ds;
+      }
       if (s === null) {
         remainingWords.push(w);
       } else {
@@ -446,10 +531,10 @@ export function searchDeclarations(
 
     if (!hasFieldFilter) {
       // Declaration-level match (name / module / metadata) — include without fields
-      if (hasNameFilter || moduleWords.length > 0 || declMetaSatisfied) {
+      if (hasNameFilter || moduleWords.length > 0 || declMetaSatisfied || hasEntityFilter) {
         const stripped =
           declaration.kind === "class"
-            ? { ...declaration, fields: emptyFields }
+            ? { ...declaration, fields: emptyFields, entityMatches }
             : { ...declaration, members: emptyMembers };
         const score = hasNameFilter ? nameFuzzyScore : 3000;
         results.push({ declaration: stripped, score });
@@ -471,7 +556,7 @@ export function searchDeclarations(
         isFieldMatch(f, f.offset, remainingWords, declMetaSatisfied),
       );
       if (fields.length > 0) {
-        results.push({ declaration: { ...declaration, fields }, score });
+        results.push({ declaration: { ...declaration, fields, entityMatches }, score });
       }
     } else {
       const members = declaration.members.filter((m) =>

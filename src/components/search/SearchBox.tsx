@@ -82,6 +82,30 @@ const SEARCH_TAGS: readonly SearchTag[] = [
     description: "Filter by metadata value",
     example: "e.g. metadatavalue:true",
   },
+  {
+    tag: "entity:",
+    icon: "entity",
+    label: "Entity",
+    description: "Filter entity classes by design name",
+    example: "e.g. entity:trigger_",
+    entities: true,
+  },
+  {
+    tag: "input:",
+    icon: "input",
+    label: "Input",
+    description: "Filter entities by their own inputs",
+    example: "e.g. input:Enable",
+    entities: true,
+  },
+  {
+    tag: "output:",
+    icon: "output",
+    label: "Output",
+    description: "Filter entities by their own outputs",
+    example: "e.g. output:OnTrigger",
+    entities: true,
+  },
 ];
 
 const CONSOLE_SEARCH_TAGS: readonly SearchTag[] = [
@@ -417,7 +441,8 @@ export function SearchBox({
   mode?: SearchMode;
 }) {
   const { search } = useContext(SearchContext);
-  const { game, declarations, entities, consoleItems } = useContext(DeclarationsContext);
+  const { game, declarations, entities, designNames, consoleItems } =
+    useContext(DeclarationsContext);
   const baseUrl = mode === "console" ? consolePath(game) : schemaPath(game);
   const hasEntities = entities.length > 0;
   const tags = getSearchTags(mode, hasEntities);
@@ -445,8 +470,11 @@ export function SearchBox({
       { tag: "module:", header: "Modules", values: [...declarations.keys()] },
       { tag: "metadata:", header: "Metadata Keys", values: getMetadataKeys(declarations) },
     ];
+    if (hasEntities) {
+      list.push({ tag: "entity:", header: "Entities", values: designNames });
+    }
     return list;
-  }, [mode, consoleItems, declarations]);
+  }, [mode, consoleItems, declarations, hasEntities, designNames]);
 
   const lastWord = getLastWord(inputValue);
   const filteredTags = filterTags(tags, lastWord, mode);

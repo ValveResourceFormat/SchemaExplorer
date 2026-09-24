@@ -129,7 +129,10 @@ function SearchFilters({ isRoot }: { isRoot?: boolean }) {
     <Block>
       <dl>
         <dt>Search by name, filters can be combined</dt>
-        <dd>Type any text to match class, field, or enum names.</dd>
+        <dd>
+          Type any text to match class, field, or enum names
+          {hasEntities && ", or entity design names"}.
+        </dd>
         {tags.map((t) => (
           <React.Fragment key={t.tag}>
             <dt>

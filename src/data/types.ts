@@ -60,6 +60,8 @@ export interface SchemaClass {
   parents: SchemaParent[];
   fields: SchemaField[];
   metadata: SchemaMetadataEntry[];
+  /** Set on search results filtered by input:/output: */
+  entityMatches?: { inputs: EntityInput[]; outputs: EntityOutput[] };
 }
 
 export interface SchemaEnumMember {

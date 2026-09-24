@@ -19,6 +19,11 @@ export function parseNetworkOverride(text: string): { className: string; field: 
   return m ? { className: m[1], field: m[2] } : null;
 }
 
+/** "1 field", "2 fields" */
+export function plural(n: number, word: string): string {
+  return `${n} ${word}${n !== 1 ? "s" : ""}`;
+}
+
 export function formatHexOffset(value: number): string {
   const hexDigits = value.toString(16).toUpperCase();
   const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
