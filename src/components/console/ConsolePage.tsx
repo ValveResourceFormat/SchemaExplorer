@@ -37,7 +37,6 @@ import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../la
 import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { ConsoleSidebar } from "./ConsoleSidebar";
-import { FlagBanners } from "./FlagBanners";
 
 // DumpSource2 files with the same entries as the list
 const DUMP_FILES = ["convars.txt", "commands.txt"];
@@ -258,8 +257,6 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
           );
         })}
       </Header>
-
-      <FlagBanners flags={parsed.flags} />
 
       {visible.length > 0 ? (
         hydrated ? (
