@@ -59,6 +59,9 @@ function extractLastModified(repoDir: string): Promise<Record<string, string>> {
 }
 
 async function processGame(game: (typeof GAME_LIST)[number]): Promise<void> {
+  // One-off dumps have no history to take dates from
+  if (!game.repo) return;
+
   const repoUrl = `https://github.com/${game.repo}.git`;
   const repoDir = resolve(tmpdir(), `lastmod-${game.id}-${Date.now()}`);
 

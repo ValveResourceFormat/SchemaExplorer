@@ -8,7 +8,8 @@ describe("dumpFileUrl", () => {
     );
   });
 
-  it("returns null for unknown games", () => {
+  it("returns null for unknown games and games without a repository", () => {
     expect(dumpFileUrl("hl3", "convars.txt")).toBeNull();
+    expect(dumpFileUrl("hlvr", "convars.txt")).toBeNull();
   });
 });

@@ -39,7 +39,7 @@ const games = await Promise.all(
 const gameLines = games
   .map(
     (g) =>
-      `- ${g.name}: ${g.url}\n  (${g.sizeGz} MB gzipped / ${g.sizeRaw} MB raw, revision ${g.revision}, ${g.date})`,
+      `- ${g.name}: ${g.url}\n  (${g.sizeGz} MB gzipped / ${g.sizeRaw} MB raw${g.revision ? `, revision ${g.revision}, ${g.date}` : ""})`,
   )
   .join("\n");
 
@@ -89,6 +89,8 @@ Class  { module, name, size?, alignment?, flags?: string[], parents?: {module,na
        // classes only, offset (non-zero only) is where a later base in multiple inheritance starts,
        // its fields are at offset + field offset; fields = own only, not inherited
 Field  { name, offset?, type: Type, metadata?: Meta[] }   // offset in bytes from class start
+       // some games also list static members, after the others, tagged with a {name: "static"}
+       // metadata entry (not a Valve one) and without offset
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
        // alignment = underlying C type as a string, e.g. "uint8_t"; value is a number
 Meta   { name, value?: string | object }
@@ -113,7 +115,8 @@ Type   { category, ...fields by category }
        // declared_class without module is a class that is not in any schema scope
 ConVar  { name, type, default?, min?, max?, flags: string[], modules: string[], help? }
        // type: bool, int16, uint16, int32, uint32, int64, uint64, float32, float64, string, color,
-       // vector2, vector3, vector4, qangle, vector_ws. default/min/max are strings; vectors and
+       // vector2, vector3, vector4, qangle, vector_ws; always string in some games, which also use
+       // Source 1 style flag names. default/min/max are strings; vectors and
        // colors look like "[0.707, 0.707, 0]". modules = declaring modules, empty (with the
        // "reference" flag) when only referenced. Unnamed flag bits show as flag_N. flags leave out
        // gamedll when modules has server and clientdll when it has client.

@@ -1,11 +1,20 @@
-export const GAME_LIST = [
+const GAMES = [
   { id: "cs2", name: "Counter-Strike 2", repo: "SteamTracking/GameTracking-CS2" },
   { id: "dota2", name: "Dota 2", repo: "SteamTracking/GameTracking-Dota2" },
   { id: "deadlock", name: "Deadlock", repo: "SteamTracking/GameTracking-Deadlock" },
+  { id: "hlvr", name: "Half-Life: Alyx" },
 ] as const;
 
-type GameDef = (typeof GAME_LIST)[number];
-export type GameId = GameDef["id"];
+export type GameId = (typeof GAMES)[number]["id"];
+
+interface GameDef {
+  id: GameId;
+  name: string;
+  /** GameTracking repository, games without one are a one-off dump that is never updated */
+  repo?: string;
+}
+
+export const GAME_LIST: readonly GameDef[] = GAMES;
 export const DEFAULT_GAME: GameId = GAME_LIST[0].id;
 
 export function getGameDef(id: string): GameDef | undefined {
@@ -14,8 +23,8 @@ export function getGameDef(id: string): GameDef | undefined {
 
 /** A file DumpSource2 wrote into the game's GameTracking repository */
 export function dumpFileUrl(id: string, path: string): string | null {
-  const game = getGameDef(id);
-  return game ? `https://github.com/${game.repo}/blob/master/DumpSource2/${path}` : null;
+  const repo = getGameDef(id)?.repo;
+  return repo ? `https://github.com/${repo}/blob/master/DumpSource2/${path}` : null;
 }
 
 export function isGameId(id: string): id is GameId {
