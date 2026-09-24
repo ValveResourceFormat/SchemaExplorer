@@ -37,8 +37,17 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
 }: {
   filters: ConsoleFilters;
 }) {
-  const { kind, kindCounts, moduleCounts, stats, parsed, setKind, cycleTag, clearFilters } =
-    filters;
+  const {
+    kind,
+    kindCounts,
+    moduleCounts,
+    flagCounts,
+    stats,
+    parsed,
+    setKind,
+    cycleTag,
+    clearFilters,
+  } = filters;
   const hasFilters =
     kind !== "all" ||
     parsed.modules.length + parsed.notModules.length + parsed.flags.length > 0 ||
@@ -68,7 +77,7 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
           title="Flags"
           tag="flag:"
           values={stats.sorted.flags}
-          counts={stats.flags}
+          counts={flagCounts}
           parsed={parsed}
           onToggle={cycleTag}
         />

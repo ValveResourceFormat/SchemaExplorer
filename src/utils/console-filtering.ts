@@ -173,6 +173,16 @@ export function filterConsoleItems(
   return results.map((r) => r.item);
 }
 
+/** Parsed search with one flag's own include/exclude lifted, every other filter untouched */
+export function withoutFlag(parsed: ParsedConsoleSearch, flag: string): ParsedConsoleSearch {
+  if (!parsed.flags.includes(flag) && !parsed.notFlags.includes(flag)) return parsed;
+  return {
+    ...parsed,
+    flags: parsed.flags.filter((f) => f !== flag),
+    notFlags: parsed.notFlags.filter((f) => f !== flag),
+  };
+}
+
 /** Adds, removes or negates a tag:value word in a search string */
 export function setSearchTag(search: string, tag: string, value: string, state: TagState): string {
   const lowerValue = value.toLowerCase();

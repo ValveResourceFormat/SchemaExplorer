@@ -2,7 +2,8 @@ import React, { memo } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
 import { KindIcon } from "../kind-icon/KindIcon";
-import { flagGroup, flagIcon } from "./flags";
+import { useTooltip } from "../Tooltip";
+import { flagDescription, flagGroup, flagIcon } from "./flags";
 import type { FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatModules, formatRange, parseColor } from "../../utils/console-format";
 
@@ -88,10 +89,32 @@ function FlagContent({ flag }: { flag: string }) {
 }
 
 function FlagBadge({ flag }: { flag: string }) {
+  const { referenceProps, tooltip } = useTooltip(flagDescription(flag));
   return (
-    <FlagChip data-group={flagGroup(flag)}>
-      <FlagContent flag={flag} />
-    </FlagChip>
+    <>
+      <FlagChip data-group={flagGroup(flag)} {...referenceProps}>
+        <FlagContent flag={flag} />
+      </FlagChip>
+      {tooltip}
+    </>
+  );
+}
+
+/** Same badge, clickable to add a flag filter. Its tooltip covers both what the flag means
+ *  and what clicking it does, since flags without a description would otherwise show nothing */
+function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => void }) {
+  const description = flagDescription(flag);
+  const content = description
+    ? `${description}\n\nClick to filter by this flag.`
+    : `Filter by flag:${flag}`;
+  const { referenceProps, tooltip } = useTooltip(content);
+  return (
+    <>
+      <FlagChipButton data-group={flagGroup(flag)} onClick={onClick} {...referenceProps}>
+        <FlagContent flag={flag} />
+      </FlagChipButton>
+      {tooltip}
+    </>
   );
 }
 
@@ -368,14 +391,7 @@ export const ConsoleRow = memo(function ConsoleRow({
             {item.flags.length === 0 && "none"}
             {item.flags.map((f) =>
               onFilter ? (
-                <FlagChipButton
-                  key={f}
-                  data-group={flagGroup(f)}
-                  onClick={() => onFilter("flag:", f)}
-                  title={`Filter by flag:${f}`}
-                >
-                  <FlagContent flag={f} />
-                </FlagChipButton>
+                <FilterableFlagBadge key={f} flag={f} onClick={() => onFilter("flag:", f)} />
               ) : (
                 <FlagBadge key={f} flag={f} />
               ),

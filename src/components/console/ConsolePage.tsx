@@ -25,6 +25,7 @@ import {
   parseConsoleSearch,
   setSearchTag,
   stripConsoleFilters,
+  withoutFlag,
   type ConsoleKind,
   type FilterTag,
   type ParsedConsoleSearch,
@@ -74,7 +75,7 @@ function useConsoleFilters() {
   const deferredSearch = useDeferredValue(search);
   const parsed = useMemo(() => parseConsoleSearch(deferredSearch), [deferredSearch]);
 
-  const { visible, kindCounts, moduleCounts } = useMemo(() => {
+  const { visible, kindCounts, moduleCounts, flagCounts } = useMemo(() => {
     // One scored pass without module filters, which the per-module counts ignore anyway
     const base = filterConsoleItems(consoleItems, parsed, { ignoreModules: true });
     const matchesModules = moduleFilter(parsed, stats);
@@ -84,10 +85,24 @@ function useConsoleFilters() {
     let convars = 0;
     for (const item of allKinds) if (item.kind === "convar") convars++;
     const visible = kind === "all" ? allKinds : allKinds.filter(ofKind);
+
+    // Every other active flag already narrowed `visible`, so counting flags there gives each
+    // unselected flag's count. A flag that's currently included/excluded needs its own filter
+    // lifted first, otherwise it would just show 0 or the full visible count right back.
+    const flagCounts = countBy(visible, (i) => i.flags);
+    for (const flag of [...parsed.flags, ...parsed.notFlags]) {
+      let count = 0;
+      for (const item of filterConsoleItems(consoleItems, withoutFlag(parsed, flag), { kind })) {
+        if (item.flags.includes(flag)) count++;
+      }
+      flagCounts.set(flag, count);
+    }
+
     return {
       visible,
       kindCounts: { all: allKinds.length, convars, commands: allKinds.length - convars },
       moduleCounts: countBy(matchesModules ? base.filter(ofKind) : visible, (i) => i.modules),
+      flagCounts,
     };
   }, [consoleItems, parsed, kind, stats]);
 
@@ -151,6 +166,7 @@ function useConsoleFilters() {
       visible,
       kindCounts,
       moduleCounts,
+      flagCounts,
       cycleTag,
       includeTag,
       setKind,
@@ -165,6 +181,7 @@ function useConsoleFilters() {
       visible,
       kindCounts,
       moduleCounts,
+      flagCounts,
       cycleTag,
       includeTag,
       setKind,
