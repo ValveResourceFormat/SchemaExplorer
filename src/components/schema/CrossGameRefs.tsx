@@ -67,12 +67,15 @@ function metadataEqual(a: SchemaMetadataEntry[], b: SchemaMetadataEntry[]): bool
 
 function compareClasses(a: SchemaClass, b: SchemaClass): DiffStatus {
   if (a.parents.length !== b.parents.length) return "differs";
+  // Size, alignment and base offsets are layout, like field offsets
+  let offsetsDiffer = a.size !== b.size || a.alignment !== b.alignment;
   for (let i = 0; i < a.parents.length; i++) {
     if (a.parents[i].name !== b.parents[i].name || a.parents[i].module !== b.parents[i].module)
       return "differs";
+    if (a.parents[i].offset !== b.parents[i].offset) offsetsDiffer = true;
   }
+  if (a.flags.join() !== b.flags.join()) return "differs";
   if (a.fields.length !== b.fields.length) return "differs";
-  let offsetsDiffer = false;
   for (let i = 0; i < a.fields.length; i++) {
     if (a.fields[i].name !== b.fields[i].name) return "differs";
     if (!typesEqual(a.fields[i].type, b.fields[i].type)) return "differs";
@@ -158,7 +161,7 @@ export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
               status === "identical"
                 ? "Identical"
                 : status === "offsets_only"
-                  ? "Only offsets differ"
+                  ? "Only offsets and size differ"
                   : "Differs"
             }
           >

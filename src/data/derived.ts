@@ -1,4 +1,4 @@
-import type { Declaration, SchemaFieldType } from "./types.ts";
+import type { Declaration, SchemaField, SchemaFieldType, SchemaParent } from "./types.ts";
 import type { ParsedSchemas } from "./schemas.ts";
 import type { GameId } from "../games-list.ts";
 import { GAME_LIST } from "../games-list.ts";
@@ -146,6 +146,38 @@ export function findDeclarationByName(
     if (d && (!kind || d.kind === kind)) return d;
   }
   return undefined;
+}
+
+export interface InheritedBase {
+  parent: SchemaParent;
+  /** Where the base starts in the derived class, non-zero for later bases in multiple inheritance */
+  offset: number;
+  fields: SchemaField[];
+}
+
+/**
+ * Every base of a class, the farthest first. A later base in multiple inheritance sits at an
+ * offset, and its fields and own bases move with it.
+ */
+export function inheritedBases(
+  declarations: Map<string, Map<string, Declaration>>,
+  parents: SchemaParent[],
+): InheritedBase[] {
+  const bases: InheritedBase[] = [];
+  const visited = new Set<string>();
+  function collect(parents: SchemaParent[], baseOffset: number) {
+    for (const parent of parents) {
+      const key = declarationKey(parent.module, parent.name);
+      if (visited.has(key)) continue;
+      visited.add(key);
+      const offset = baseOffset + (parent.offset ?? 0);
+      const decl = declarations.get(parent.module)?.get(parent.name);
+      if (decl?.kind === "class") collect(decl.parents, offset);
+      bases.push({ parent, offset, fields: decl?.kind === "class" ? decl.fields : [] });
+    }
+  }
+  collect(parents, 0);
+  return bases;
 }
 
 // -- Game context store --

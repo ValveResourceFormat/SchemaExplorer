@@ -7,6 +7,7 @@ import { ReferencedBy } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { inheritedBases, type InheritedBase } from "../../data/derived";
 import { getGameDef } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { searchLink, useFieldParam } from "../../utils/filtering";
@@ -24,6 +25,7 @@ import {
   GridContent,
   GridIcon,
   MemberSignature,
+  SectionBadge,
   SectionLink,
   SectionList,
   SectionTitle,
@@ -136,73 +138,93 @@ export const SchemaClassView: React.FC<{
   const { game, declarations } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
 
-  const inheritedGroups = useMemo(() => {
-    if (isSearchResult) return [];
-    const groups: { parent: { name: string; module: string }; fields: api.SchemaField[] }[] = [];
-    const visited = new Set<string>();
-    function collect(parents: { name: string; module: string }[]) {
-      for (const p of parents) {
-        const key = declarationKey(p.module, p.name);
-        if (visited.has(key)) continue;
-        visited.add(key);
-        const parentDecl = declarations.get(p.module)?.get(p.name);
-        if (parentDecl?.kind === "class") {
-          collect(parentDecl.parents);
-          groups.push({ parent: p, fields: parentDecl.fields });
-        } else {
-          groups.push({ parent: p, fields: [] });
-        }
-      }
-    }
-    collect(declaration.parents);
-    return groups;
-  }, [declaration.parents, declarations, isSearchResult]);
+  const inheritedGroups = useMemo(
+    () => (isSearchResult ? [] : inheritedBases(declarations, declaration.parents)),
+    [declaration.parents, declarations, isSearchResult],
+  );
 
   const bitfieldInfo = useMemo(() => computeBitfieldInfo(declaration.fields), [declaration.fields]);
   const declPath = schemaPath(game, declaration.module, declaration.name);
 
   return (
-    <CommonGroupWrapper>
-      <DeclarationHeader>
-        <CommonGroupSignature>
-          <KindIcon kind="class" size="big" />
-          <DeclarationHeading>
-            <DeclarationNameLink to={declPath} title={`class in ${declaration.module}`}>
-              {declaration.name}
-            </DeclarationNameLink>
-          </DeclarationHeading>
-          {isSearchResult && <ModuleBadge module={declaration.module} />}
-          <GitHubFileLink module={declaration.module} name={declaration.name} />
-        </CommonGroupSignature>
-      </DeclarationHeader>
-      <MetadataTags metadata={declaration.metadata} game={game} module={declaration.module} />
-      {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
-      {declaration.fields.length > 0 && (
-        <ClassMembers>
-          {declaration.fields.map((field) => (
-            <SchemaFieldView
-              key={`${field.name}-${field.offset}`}
-              owner={declaration}
-              field={field}
-              fieldUrlBase={declPath}
-              game={game}
-              bitfield={bitfieldInfo.get(field)}
-              anchored={fieldParam === field.name}
-            />
-          ))}
-        </ClassMembers>
-      )}
-      {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
-      {!isSearchResult && <CrossGameRefs declaration={declaration} />}
-    </CommonGroupWrapper>
+      <CommonGroupWrapper>
+        <DeclarationHeader>
+          <CommonGroupSignature>
+            <KindIcon kind="class" size="big" />
+            <DeclarationHeading>
+              <DeclarationNameLink to={declPath} title={`class in ${declaration.module}`}>
+                {declaration.name}
+              </DeclarationNameLink>
+            </DeclarationHeading>
+            {declaration.flags.includes("abstract") && (
+              <SectionBadge title="Abstract class, only derived classes are instantiated">
+                abstract
+              </SectionBadge>
+            )}
+            <ClassLayout declaration={declaration} />
+            {isSearchResult && <ModuleBadge module={declaration.module} />}
+            <GitHubFileLink module={declaration.module} name={declaration.name} />
+          </CommonGroupSignature>
+        </DeclarationHeader>
+        <MetadataTags metadata={declaration.metadata} game={game} module={declaration.module} />
+        {inheritedGroups.length > 0 && <InheritedSection groups={inheritedGroups} />}
+        {declaration.fields.length > 0 && (
+          <ClassMembers>
+            {declaration.fields.map((field) => (
+              <SchemaFieldView
+                key={`${field.name}-${field.offset}`}
+                owner={declaration}
+                field={field}
+                fieldUrlBase={declPath}
+                game={game}
+                bitfield={bitfieldInfo.get(field)}
+                anchored={fieldParam === field.name}
+              />
+            ))}
+          </ClassMembers>
+        )}
+        {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
+        {!isSearchResult && <CrossGameRefs declaration={declaration} />}
+      </CommonGroupWrapper>
   );
 };
 
-function InheritedSection({
-  groups,
-}: {
-  groups: { parent: { name: string; module: string }; fields: api.SchemaField[] }[];
-}) {
+const LayoutText = styled.span`
+  font-size: 13px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+`;
+
+/** Size and alignment of a class */
+function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
+  const { size, alignment } = declaration;
+  return (
+    <LayoutText>
+      {size} byte{size !== 1 && "s"} ({formatHexOffset(size)})
+      {alignment != null && `, align ${alignment}`}
+    </LayoutText>
+  );
+}
+
+const BaseOffsetText = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+`;
+
+/** "at 4712 (0x1268)" for a base that doesn't start at 0 */
+function BaseOffset({ offset }: { offset: number }) {
+  if (offset === 0) return null;
+  return (
+    <BaseOffsetText>
+      at {offset} ({formatHexOffset(offset)})
+    </BaseOffsetText>
+  );
+}
+
+function InheritedSection({ groups }: { groups: InheritedBase[] }) {
   const { game } = useContext(DeclarationsContext);
   const [expanded, setExpanded] = useState(false);
   const totalFields = groups.reduce((sum, g) => sum + g.fields.length, 0);
@@ -222,6 +244,7 @@ function InheritedSection({
             >
               <KindIcon kind="inherited-class" size="small" />
               {group.parent.name}
+              <BaseOffset offset={group.offset} />
             </SectionLink>
           ))}
           {totalFields > 0 && (
@@ -246,11 +269,13 @@ function InheritedSection({
                 module: group.parent.module,
               }}
             />
+            <BaseOffset offset={group.offset} />
           </InheritedGroupLabel>
           {group.fields.map((field) => (
             <InheritedFieldView
               key={`${group.parent.name}-${field.name}-${field.offset}`}
               field={field}
+              baseOffset={group.offset}
             />
           ))}
         </React.Fragment>
@@ -303,13 +328,20 @@ const InheritedFieldOffset = styled.span`
   white-space: nowrap;
 `;
 
-function InheritedFieldView({ field }: { field: api.SchemaField }) {
+function InheritedFieldView({
+  field,
+  baseOffset,
+}: {
+  field: api.SchemaField;
+  baseOffset: number;
+}) {
+  const offset = baseOffset + field.offset;
   return (
     <InheritedRow>
       <KindIcon kind="field" size="small" />
       <span>{field.name}:</span> <SchemaTypeView type={field.type} />
       <InheritedFieldOffset>
-        {field.offset} ({formatHexOffset(field.offset)})
+        {offset} ({formatHexOffset(offset)})
       </InheritedFieldOffset>
     </InheritedRow>
   );

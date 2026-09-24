@@ -8,6 +8,7 @@ import {
 } from "./schemas";
 import type { SchemaClass } from "./types";
 import { parseSearch, searchDeclarations } from "../utils/filtering";
+import { inheritedBases } from "./derived";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
 // ==================== parseKV3Defaults ====================
@@ -425,6 +426,62 @@ describe("parseSchemas", () => {
     expect(clientSky).not.toBe(serverSky);
     expect(clientSky!.module).toBe("client");
     expect(serverSky!.module).toBe("server");
+  });
+});
+
+// ==================== class layout ====================
+
+describe("class layout and bases", () => {
+  const int = { category: "builtin", name: "int32" } as const;
+  const { declarations } = parseSchemas({
+    classes: [
+      { name: "CRoot", module: "m", size: 8, fields: [{ name: "m_root", offset: 0, type: int }] },
+      {
+        name: "CBase",
+        module: "m",
+        size: 16,
+        alignment: 8,
+        flags: ["abstract"],
+        parents: [{ name: "CRoot", module: "m" }],
+        fields: [{ name: "m_base", offset: 8, type: int }],
+      },
+      { name: "IAttrBase", module: "m", size: 8, fields: [{ name: "m_vt", offset: 0, type: int }] },
+      {
+        name: "IAttr",
+        module: "m",
+        size: 16,
+        parents: [{ name: "IAttrBase", module: "m" }],
+        fields: [{ name: "m_attr", offset: 8, type: int }],
+      },
+      {
+        name: "CDerived",
+        module: "m",
+        size: 48,
+        parents: [
+          { name: "CBase", module: "m" },
+          { name: "IAttr", module: "m", offset: 32 },
+        ],
+      },
+    ],
+    enums: [],
+  });
+  const cls = (name: string) => declarations.get("m")!.get(name) as SchemaClass;
+
+  it("keeps size, alignment and flags, flags default to none", () => {
+    expect(cls("CBase")).toMatchObject({ size: 16, alignment: 8, flags: ["abstract"] });
+    expect(cls("CRoot").flags).toEqual([]);
+    expect(cls("CRoot").alignment).toBeUndefined();
+  });
+
+  it("places a later base and everything it inherits at its offset", () => {
+    const bases = inheritedBases(declarations, cls("CDerived").parents);
+    expect(bases.map((b) => [b.parent.name, b.offset])).toEqual([
+      ["CRoot", 0],
+      ["CBase", 0],
+      ["IAttrBase", 32],
+      ["IAttr", 32],
+    ]);
+    expect(bases[3].fields.map((f) => f.name)).toEqual(["m_attr"]);
   });
 });
 
