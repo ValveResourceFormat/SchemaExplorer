@@ -34,12 +34,18 @@ export const SearchInput = styled.input`
   }
 `;
 
+declare global {
+  interface Window {
+    /** Set by search-prehydrate.js */
+    stopSearchPrehydrate?: () => void;
+  }
+}
+
 export type SearchMode = "schemas" | "console";
 
 export interface SearchTag {
   tag: string;
   icon: IconKind;
-  label: string;
   description: string;
   example: string;
   /** Only shown for games that have entities */
@@ -50,42 +56,36 @@ const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "module:",
     icon: "field",
-    label: "Module",
     description: "Filter by module name",
     example: "e.g. module:client",
   },
   {
     tag: "offset:",
     icon: "meta-default",
-    label: "Offset",
     description: "Filter by byte offset",
     example: "e.g. offset:0x1A0",
   },
   {
     tag: "enumvalue:",
     icon: "enum-member",
-    label: "Enum Value",
     description: "Filter by enum member value",
     example: "e.g. enumvalue:4",
   },
   {
     tag: "metadata:",
     icon: "meta-tag",
-    label: "Metadata",
     description: "Filter by metadata key name",
     example: "e.g. metadata:MPropertyFriendlyName",
   },
   {
     tag: "metadatavalue:",
     icon: "meta-variable",
-    label: "Metadata Value",
     description: "Filter by metadata value",
     example: "e.g. metadatavalue:true",
   },
   {
     tag: "entity:",
     icon: "entity",
-    label: "Entity",
     description: "Filter entity classes by design name",
     example: "e.g. entity:trigger_",
     entities: true,
@@ -93,7 +93,6 @@ const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "input:",
     icon: "input",
-    label: "Input",
     description: "Filter entities by their own inputs",
     example: "e.g. input:Enable",
     entities: true,
@@ -101,7 +100,6 @@ const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "output:",
     icon: "output",
-    label: "Output",
     description: "Filter entities by their own outputs",
     example: "e.g. output:OnTrigger",
     entities: true,
@@ -112,21 +110,18 @@ const CONSOLE_SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "module:",
     icon: "field",
-    label: "Module",
     description: "Filter by declaring module",
     example: "e.g. module:server",
   },
   {
     tag: "flag:",
     icon: "meta-tag",
-    label: "Flag",
     description: "Filter by flag, -flag: excludes",
     example: "e.g. flag:cheat -flag:hidden",
   },
   {
     tag: "type:",
     icon: "convar",
-    label: "Type",
     description: "Filter convars by value type",
     example: "e.g. type:float32",
   },
@@ -158,10 +153,11 @@ function filterTags(tags: readonly SearchTag[], lastWord: string, mode: SearchMo
   return tags.filter((t) => t.tag.includes(lower));
 }
 
-function insertTag(inputValue: string, tag: string, mode: SearchMode): string {
-  if (inputValue === "" || inputValue.endsWith(" ")) return inputValue + tag;
+/** Replaces the word being typed, or appends one after a space */
+function replaceLastWord(inputValue: string, word: string): string {
+  if (inputValue === "" || inputValue.endsWith(" ")) return inputValue + word;
   const parts = inputValue.split(" ");
-  parts[parts.length - 1] = negationPrefix(parts[parts.length - 1], mode) + tag;
+  parts[parts.length - 1] = word;
   return parts.join(" ");
 }
 
@@ -198,13 +194,6 @@ function getConsoleSuggestions(items: GameContext["consoleItems"]): ValueSuggest
     { tag: "flag:", header: "Flags", values: sorted.flags, counts: flags },
     { tag: "type:", header: "Types", values: sorted.types, counts: types },
   ];
-}
-
-function insertValue(inputValue: string, tagPrefix: string, value: string): string {
-  if (inputValue === "" || inputValue.endsWith(" ")) return inputValue + tagPrefix + value;
-  const parts = inputValue.split(" ");
-  parts[parts.length - 1] = tagPrefix + value;
-  return parts.join(" ");
 }
 
 const SearchBoxWrapper = styled.div`
@@ -452,15 +441,14 @@ export function SearchBox({
   const navigate = useNavigate();
   const location = useLocation();
   const [, startTransition] = useTransition();
-  const ownNavigateRef = useRef(false);
+  // The search this box last wrote to the URL, the input already shows it
+  const ownSearchRef = useRef(search);
 
   // Sync input value from URL (back/forward navigation, clicking links)
   useEffect(() => {
-    if (ownNavigateRef.current) {
-      ownNavigateRef.current = false;
-      return;
-    }
     const urlSearch = new URLSearchParams(location.hash.slice(1)).get("search") ?? "";
+    if (urlSearch === ownSearchRef.current) return;
+    ownSearchRef.current = urlSearch;
     setInputValue(urlSearch);
   }, [location.hash]);
 
@@ -501,29 +489,27 @@ export function SearchBox({
 
   const applyNewValue = (newValue: string) => {
     setInputValue(newValue);
-    ownNavigateRef.current = true;
     const replace = inputValue !== "" || newValue === "";
     // Other hash params, like the convars page kind filter, stay when searching on the same page.
     // A directly loaded prerendered page can have a trailing slash
     const samePage = location.pathname.replace(/\/$/, "") === baseUrl;
     const params = Object.fromEntries(new URLSearchParams(samePage ? location.hash.slice(1) : ""));
+    const hash = buildHash({ ...params, name: null, search: newValue });
+    ownSearchRef.current = newValue;
     startTransition(() => {
-      navigate(
-        { pathname: baseUrl, hash: buildHash({ ...params, name: null, search: newValue }) },
-        { replace },
-      );
+      navigate({ pathname: baseUrl, hash }, { replace });
     });
     setActiveIndex(0);
     ref.current?.focus();
   };
 
   const handleTagSelect = (tag: string) => {
-    applyNewValue(insertTag(inputValue, tag, mode));
+    applyNewValue(replaceLastWord(inputValue, negationPrefix(lastWord, mode) + tag));
   };
 
   const handleValueSelect = (value: string) => {
     if (!secondLevel) return;
-    applyNewValue(insertValue(inputValue, secondLevel.prefix, value));
+    applyNewValue(replaceLastWord(inputValue, secondLevel.prefix + value));
   };
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = ({ target: { value } }) => {
@@ -549,6 +535,8 @@ export function SearchBox({
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter" || e.key === "Tab") {
+      // Tab only completes a word being typed, otherwise it moves focus on
+      if (e.key === "Tab" && lastWord === "") return;
       e.preventDefault();
       if (showFirstLevel && filteredTags[activeIndex])
         handleTagSelect(filteredTags[activeIndex].tag);
@@ -558,6 +546,11 @@ export function SearchBox({
   };
 
   const ref = useRef<HTMLInputElement>(null);
+
+  // React owns the input now, stop the pre-hydration script from rewriting the history entry
+  useEffect(() => {
+    window.stopSearchPrehydrate?.();
+  }, []);
 
   // "/" focuses the search from anywhere outside an input
   useEffect(() => {
