@@ -61,7 +61,7 @@ export function flagIcon(flag: string): IconKind | undefined {
 // Shown above the list while filtering by the flag
 const FLAG_DESCRIPTIONS: Record<string, string> = {
   workshop_whitelisted:
-    "Listed in the workshop cvar whitelist, so workshop maps are allowed to change it.",
+    "Listed in the workshop cvar whitelist, so workshop maps are allowed to change it. Added by this site from workshop_cvar_whitelist.txt, it isn't one of the game's own flags.",
   cheat:
     "Only works with sv_cheats 1 or during demo playback. Goes back to its default when sv_cheats is turned off or when you join a remote server.",
   developmentonly:
