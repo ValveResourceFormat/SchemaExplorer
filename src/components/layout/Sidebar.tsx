@@ -26,7 +26,6 @@ const SidebarLink = styled(NavLink)`
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  box-sizing: border-box;
   font-size: 14px;
   transition:
     background 0.1s,
@@ -88,7 +87,6 @@ export const SidebarGroupHeader = styled.button`
   width: 100%;
   padding: 0 8px;
   height: 28px;
-  box-sizing: border-box;
   font: inherit;
   font-size: 14px;
   font-weight: 600;

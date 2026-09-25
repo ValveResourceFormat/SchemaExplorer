@@ -8,28 +8,7 @@ import { FlagContent, FlagTooltipContent } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup } from "./flags";
 import type { FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatRange, parseColor } from "../../utils/console-format";
-
-/** Sets --c to the color of the element's data-group flag group */
-export const flagColorVars = `
-  &[data-group="workshop"] {
-    --c: var(--flag-workshop);
-  }
-  &[data-group="cheat"] {
-    --c: var(--flag-cheat);
-  }
-  &[data-group="devonly"] {
-    --c: var(--flag-devonly);
-  }
-  &[data-group="restricted"] {
-    --c: var(--flag-restricted);
-  }
-  &[data-group="network"] {
-    --c: var(--flag-network);
-  }
-  &[data-group="saved"] {
-    --c: var(--flag-saved);
-  }
-`;
+import { flagColorVars } from "./flag-styles";
 
 const flagChipStyles = `
   display: inline-flex;
@@ -113,7 +92,7 @@ function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => v
   );
 }
 
-/** The module badge from the schema pages (icon + name pill), sized to sit inline with flags */
+/** A module, styled like the flags it sits inline with */
 function ModuleBadge({ module, onClick }: { module: string; onClick?: () => void }) {
   const content = (
     <>
@@ -137,10 +116,10 @@ export function isPlainLeftClick(e: MouseEvent): boolean {
 
 // -- Row --
 
+/** Lines, hover and the anchored row like the schema tables */
 const Row = styled.li`
   padding: 6px 12px;
-  border-bottom: 1px solid var(--group-separator);
-  box-sizing: border-box;
+  border-bottom: 1px solid var(--row-line);
   word-break: normal;
   overflow-wrap: anywhere;
 
@@ -149,11 +128,12 @@ const Row = styled.li`
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--group-members) 60%, transparent);
+    background: var(--row-hover);
   }
 
   &[data-anchored] {
     background: var(--search-highlight);
+    box-shadow: inset 2px 0 0 var(--highlight);
   }
 `;
 
@@ -194,16 +174,17 @@ const Name = styled.a`
   }
 `;
 
+/** Blue like builtin types on the schema pages */
 const Type = styled.span`
   font-family: var(--font-mono);
   font-size: 14px;
-  color: var(--syntax-interface);
+  color: var(--syntax-literal);
 `;
 
 const Value = styled.span`
   font-family: var(--font-mono);
   font-size: 14px;
-  color: var(--syntax-literal);
+  color: var(--text);
   display: inline-flex;
   align-items: center;
   gap: 4px;

@@ -4,12 +4,12 @@ import { GAME_LIST } from "../../games-list";
 import { getSearchTags } from "../search/SearchBox";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { CardBlock, InlineList } from "./styles";
+import { subtleUnderline } from "./link-styles";
 import { Link } from "../Link";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 
 const InfoBlock = styled(CardBlock)`
   margin-top: 32px;
-  color: var(--text);
 
   p {
     margin: 0;
@@ -22,6 +22,7 @@ const InfoBlock = styled(CardBlock)`
 
 const InfoLink = styled.a`
   color: var(--highlight);
+  ${subtleUnderline}
 
   &:hover {
     color: var(--text);
@@ -29,15 +30,12 @@ const InfoLink = styled.a`
 `;
 
 const SearchFiltersBlock = styled(CardBlock)`
-  color: var(--text);
-
   dl {
     margin: 0;
   }
 
   dt {
     font-weight: 600;
-    color: var(--text);
   }
 
   dd {
@@ -66,23 +64,19 @@ const InfoRow = styled.div`
   ${InfoBlock}, ${SearchFiltersBlock} {
     flex: 1 1 360px;
     margin-top: 0;
-    max-width: none;
   }
 `;
 
 const HomepageSearchFilters = styled(SearchFiltersBlock)`
   margin-top: 32px;
-  color: var(--text);
 `;
 
 const HomepageCard = styled(CardBlock)`
   margin-top: 32px;
-  color: var(--text);
 
   h2 {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text);
     margin: 0 0 8px;
   }
 

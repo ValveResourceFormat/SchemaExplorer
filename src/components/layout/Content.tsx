@@ -2,6 +2,7 @@ import { styled } from "@linaria/react";
 import { BASE_PATH, getGameDef, type GameId } from "../../games-list";
 import type { SchemaMetadata } from "../../data/schemas";
 import { ICONS_URL } from "../kind-icon/KindIcon";
+import { subtleUnderline } from "../schema/link-styles";
 
 export const ContentWrapper = styled.main`
   padding-bottom: 24px;
@@ -44,6 +45,7 @@ const PageFooter = styled.footer`
 
   a {
     color: inherit;
+    ${subtleUnderline}
 
     &:hover {
       color: var(--text);

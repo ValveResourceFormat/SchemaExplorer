@@ -9,7 +9,7 @@ export const CardBlock = styled.div`
   border: 1px solid var(--group-border);
   border-radius: 10px;
   box-shadow: var(--group-shadow);
-  color: var(--text-dim);
+  color: var(--text);
   font-size: 16px;
   line-height: 1.6;
 `;

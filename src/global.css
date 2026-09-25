@@ -9,7 +9,6 @@
   --group: #ffffff;
   --group-members: #f0f1f5;
   --group-shadow: 0 1px 3px #0000000a, 0 1px 2px #0000000f;
-  --group-separator: #e0e2e8;
   --group-border: #e0e2e8;
   --search-highlight: #fef9c3;
   --row-line: #0000000f;
@@ -49,7 +48,6 @@
   --group: #181a21;
   --group-members: #1e2028;
   --group-shadow: 0 1px 3px #00000033, 0 1px 2px #00000044;
-  --group-separator: #262930;
   --group-border: #262930;
   --search-highlight: #6dbf3a20;
   --row-line: #ffffff0f;

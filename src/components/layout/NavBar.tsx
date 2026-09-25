@@ -276,6 +276,7 @@ const SwitcherOption = styled.button`
   padding: 10px 14px;
   border: none;
   background: transparent;
+  font: inherit;
   color: var(--text);
   font-size: 14px;
   cursor: pointer;

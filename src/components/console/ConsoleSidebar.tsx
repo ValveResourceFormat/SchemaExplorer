@@ -12,7 +12,7 @@ import { BrandRow } from "../layout/NavBar";
 import { SidebarGroupHeader, SidebarHeader, SidebarList, SidebarWrapper } from "../layout/Sidebar";
 import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
 import { useTooltip } from "../Tooltip";
-import { flagColorVars } from "./ConsoleRow";
+import { flagColorVars } from "./flag-styles";
 import { FlagTooltipContent } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
 import type { ConsoleFilters } from "./ConsolePage";
@@ -275,7 +275,6 @@ const FilterItem = styled.button`
   width: 100%;
   height: 28px;
   padding: 0 8px;
-  box-sizing: border-box;
   border: none;
   border-left: 2px solid transparent;
   background: transparent;
@@ -294,7 +293,6 @@ const FilterItem = styled.button`
   &[data-group="hidden"] > ${Dot} {
     background: transparent;
     border: 1px dashed var(--text-dim);
-    box-sizing: border-box;
   }
 
   &:hover {

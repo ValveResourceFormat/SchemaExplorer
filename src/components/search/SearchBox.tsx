@@ -10,7 +10,6 @@ import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 
 export const SearchInput = styled.input`
   width: 100%;
-  box-sizing: border-box;
   padding: 8px 14px;
   border: none;
   border-radius: 8px;
@@ -275,6 +274,7 @@ const TagItem = styled.button`
   padding: 7px 12px;
   border: none;
   background: transparent;
+  font: inherit;
   color: var(--text);
   font-size: 14px;
   cursor: pointer;
@@ -296,7 +296,7 @@ const TagItemText = styled.div`
 const TagItemName = styled.span`
   font-weight: 600;
   font-size: 13px;
-  font-family: monospace;
+  font-family: var(--font-mono);
 `;
 
 const TagItemDesc = styled.span`
@@ -308,7 +308,7 @@ const TagItemExample = styled.span`
   font-size: 11px;
   color: var(--text-dim);
   opacity: 0.6;
-  font-family: monospace;
+  font-family: var(--font-mono);
   flex-shrink: 0;
 `;
 

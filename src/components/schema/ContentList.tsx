@@ -72,10 +72,11 @@ function ModuleList() {
       <CardBody>
         <InlineList>
           {[...declarations].map(([mod, moduleMap]) => (
-            <Link key={mod} to={schemaPath(game, mod)} title={`${moduleMap.size} declarations`}>
-              {mod}
+            // The count sits outside the link, so only the name is underlined
+            <span key={mod} title={`${moduleMap.size} declarations`}>
+              <Link to={schemaPath(game, mod)}>{mod}</Link>
               <Dim>{moduleMap.size}</Dim>
-            </Link>
+            </span>
           ))}
         </InlineList>
       </CardBody>

@@ -31,6 +31,7 @@ import {
   type ParsedConsoleSearch,
 } from "../../utils/console-filtering";
 import { DeclarationsContext, consolePath } from "../schema/DeclarationsContext";
+import { PageTitle } from "../schema/styles";
 import { SearchContext } from "../search/SearchContext";
 import { PageProviders, PageShell } from "../layout/PageShell";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
@@ -260,7 +261,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
   return (
     <ContentWrapper>
       <Header>
-        <Title>{gameName} Console Commands &amp; ConVars</Title>
+        <PageTitle>{gameName} Console Commands &amp; ConVars</PageTitle>
         <ResultCount>
           {visible.length.toLocaleString("en-US")} result{visible.length !== 1 && "s"}
         </ResultCount>
@@ -516,12 +517,6 @@ const ResultCount = styled.span`
   color: var(--text-dim);
 `;
 
-const Title = styled.h1`
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-`;
-
 const ListCard = styled.ul`
   margin: 12px 0 0;
   padding: 0;
@@ -544,7 +539,7 @@ const StaticListCard = styled(ListCard)`
 
   > li:not([class]) {
     padding: 6px 12px 6px 36px;
-    border-bottom: 1px solid var(--group-separator);
+    border-bottom: 1px solid var(--row-line);
     font-size: 14px;
     color: var(--text-dim);
     white-space: nowrap;
