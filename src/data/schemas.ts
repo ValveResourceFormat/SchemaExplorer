@@ -19,7 +19,7 @@ import type {
   SchemaMetadataValue,
 } from "./types.ts";
 import { compareModuleNames } from "../games-list.ts";
-import { intrinsicDeclarations } from "./intrinsics.ts";
+import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics.ts";
 
 /**
  * MGetKV3ClassDefaults as an object. DumpSource2 writes it parsed (hidden fields omitted,
@@ -203,6 +203,69 @@ function assignDefaults(classes: SchemaClass[]) {
   }
 }
 
+interface AtomicLayout {
+  size: number;
+  alignment?: number;
+}
+
+/**
+ * Size and alignment of each atomic the fields use, null when its instantiations disagree, like
+ * CBitVec<N>. Dumps that are not kept up to date have none
+ */
+function collectAtomicLayouts(classes: SchemaClass[]): Map<string, AtomicLayout | null> {
+  const layouts = new Map<string, AtomicLayout | null>();
+  function visit(type: SchemaFieldType) {
+    switch (type.category) {
+      case "ptr":
+      case "fixed_array":
+        visit(type.inner);
+        break;
+      case "atomic": {
+        if (type.size != null) {
+          const seen = layouts.get(type.name);
+          if (seen === undefined) {
+            layouts.set(type.name, { size: type.size, alignment: type.alignment });
+          } else if (seen && (seen.size !== type.size || seen.alignment !== type.alignment)) {
+            layouts.set(type.name, null);
+          }
+        }
+        if (type.inner) visit(type.inner);
+        if (type.inner2) visit(type.inner2);
+        break;
+      }
+    }
+  }
+  for (const c of classes) for (const f of c.fields) visit(f.type);
+  return layouts;
+}
+
+/**
+ * The shared intrinsics with this game's size where all its uses agree, copied since they are
+ * reused across games, plus the atomics they don't describe, with only a size
+ */
+function gameIntrinsics(classes: SchemaClass[]): Declaration[] {
+  const layouts = collectAtomicLayouts(classes);
+  const result: Declaration[] = [];
+  for (const d of intrinsicDeclarations.values()) {
+    const layout = layouts.get(d.name);
+    result.push(layout && d.kind === "class" ? { ...d, ...layout } : d);
+  }
+  for (const [name, layout] of layouts) {
+    if (intrinsicDeclarations.has(name)) continue;
+    result.push({
+      kind: "class",
+      name,
+      module: INTRINSIC_MODULE,
+      ...layout,
+      flags: [],
+      parents: [],
+      fields: [],
+      metadata: [],
+    });
+  }
+  return result;
+}
+
 // Raw shapes of the JSON dump. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
 interface RawSchemaClass {
   name: string;
@@ -373,7 +436,7 @@ export function parseSchemas(data: SchemasJson) {
   assignDefaults(classes);
 
   // Sort all declarations by module then name, build map in one pass
-  const all: Declaration[] = [...classes, ...enums, ...intrinsicDeclarations.values()];
+  const all: Declaration[] = [...classes, ...enums, ...gameIntrinsics(classes)];
   all.sort((a, b) => compareModuleNames(a.module, b.module) || compareNames(a, b));
 
   const declarations = new Map<string, Map<string, Declaration>>();

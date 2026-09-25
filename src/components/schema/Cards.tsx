@@ -3,6 +3,7 @@ import { styled } from "@linaria/react";
 import { KindIcon, type IconKind } from "../kind-icon/KindIcon";
 import { dumpFileUrl } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
+import { hasIntrinsicLayout } from "../../data/derived";
 import { keepInPlace } from "../../utils/keep-in-place";
 import type { Declaration } from "../../data/types";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
@@ -119,8 +120,10 @@ export function GitHubFileLink({
   name: string;
   button?: boolean;
 }) {
-  const { game } = useContext(DeclarationsContext);
+  const { game, declarations } = useContext(DeclarationsContext);
   const isIntrinsic = module === INTRINSIC_MODULE;
+  // Intrinsics without a layout only come from the dump, there's no source to show
+  if (isIntrinsic && !hasIntrinsicLayout(declarations, name)) return null;
   const url = isIntrinsic
     ? INTRINSIC_SOURCE_URL
     : dumpFileUrl(game, `schemas/${module}/${name.replace(/:/g, "_")}.h`);

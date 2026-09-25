@@ -6,9 +6,10 @@ import {
   resolveLeafType,
   type SchemasJson,
 } from "./schemas";
-import type { SchemaClass } from "./types";
+import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
+import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics";
 import { parseSearch, searchDeclarations } from "../utils/filtering";
-import { inheritedBases } from "./derived";
+import { hasIntrinsicLayout, inheritedBases } from "./derived";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
 // ==================== parseKV3Defaults ====================
@@ -482,6 +483,77 @@ describe("class layout and bases", () => {
       ["IAttr", 32],
     ]);
     expect(bases[3].fields.map((f) => f.name)).toEqual(["m_attr"]);
+  });
+});
+
+describe("atomic sizes", () => {
+  const float = { category: "builtin", name: "float32" } as const;
+  const atomic = (name: string, layout?: { size: number; alignment: number }) =>
+    ({ category: "atomic", name, inner: float, ...layout }) as const;
+  const intrinsics = (...types: SchemaFieldType[]) =>
+    parseSchemas({
+      classes: [
+        {
+          name: "CHolder",
+          module: "m",
+          fields: types.map((type, i) => ({ name: `m_${i}`, offset: 0, type })),
+        },
+      ],
+      enums: [],
+    }).declarations.get(INTRINSIC_MODULE)!;
+  const cls = (declarations: Map<string, Declaration>, name: string) =>
+    declarations.get(name) as SchemaClass | undefined;
+
+  it("uses the game's size where every use agrees, without changing the shared intrinsic", () => {
+    const declarations = intrinsics(
+      atomic("CUtlVector", { size: 32, alignment: 16 }),
+      { category: "ptr", inner: atomic("CUtlVector", { size: 32, alignment: 16 }) },
+      // Inside another atomic's arguments
+      { ...atomic("CUtlLeanVector"), inner: atomic("CHandle", { size: 4, alignment: 4 }) },
+    );
+    expect(cls(declarations, "CUtlVector")).toMatchObject({ size: 32, alignment: 16 });
+    expect(cls(declarations, "CUtlVector")!.fields).toHaveLength(4);
+    expect(cls(declarations, "CHandle")).toMatchObject({ size: 4, alignment: 4 });
+    expect(intrinsicDeclarations.get("CUtlVector")).toMatchObject({ size: 24 });
+  });
+
+  it("keeps the intrinsic's size when the uses disagree", () => {
+    const declarations = intrinsics(
+      atomic("CUtlVectorFixedGrowable", { size: 48, alignment: 8 }),
+      atomic("CUtlVectorFixedGrowable", { size: 32, alignment: 8 }),
+      atomic("Color", { size: 4, alignment: 4 }),
+      atomic("Color", { size: 4, alignment: 1 }),
+    );
+    expect(cls(declarations, "CUtlVectorFixedGrowable")).toBe(
+      intrinsicDeclarations.get("CUtlVectorFixedGrowable"),
+    );
+    expect(cls(declarations, "Color")).toBe(intrinsicDeclarations.get("Color"));
+  });
+
+  it("adds atomics intrinsics.ts doesn't describe, with only a size", () => {
+    const declarations = intrinsics(
+      atomic("CPiecewiseCurve", { size: 64, alignment: 8 }),
+      atomic("CBitVec", { size: 4, alignment: 4 }),
+      atomic("CBitVec", { size: 8, alignment: 4 }),
+    );
+    expect(cls(declarations, "CPiecewiseCurve")).toMatchObject({
+      module: INTRINSIC_MODULE,
+      size: 64,
+      alignment: 8,
+      fields: [],
+    });
+    expect(cls(declarations, "CBitVec")).toMatchObject({ module: INTRINSIC_MODULE, fields: [] });
+    expect(cls(declarations, "CBitVec")!.size).toBeUndefined();
+    const all = new Map([[INTRINSIC_MODULE, declarations]]);
+    expect(hasIntrinsicLayout(all, "CPiecewiseCurve")).toBe(false);
+    expect(hasIntrinsicLayout(all, "CUtlVector")).toBe(true);
+  });
+
+  it("keeps every intrinsic as is in dumps without sizes", () => {
+    const declarations = intrinsics(atomic("CUtlVector"), atomic("CPiecewiseCurve"));
+    expect(declarations.size).toBe(intrinsicDeclarations.size);
+    for (const [name, d] of intrinsicDeclarations) expect(declarations.get(name)).toBe(d);
+    expect(declarations.has("CPiecewiseCurve")).toBe(false);
   });
 });
 

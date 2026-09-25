@@ -12,7 +12,7 @@ import { Detail, ExpandToggle } from "./Detail";
 import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText, parseNetworkOverride } from "../../utils/format";
-import { findDeclarationByName } from "../../data/derived";
+import { findDeclarationByName, hasIntrinsicLayout } from "../../data/derived";
 import { tip } from "../Tooltip";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
@@ -77,10 +77,11 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
         type.inner2 && <SchemaTypeView type={type.inner2} />,
         type.count != null && <ColoredSyntax kind="literal">{type.count}</ColoredSyntax>,
       ].filter(Boolean);
-      if (args.length === 0) return <IntrinsicLink name={type.name} />;
+      const link = <IntrinsicLink name={type.name} size={type.size} alignment={type.alignment} />;
+      if (args.length === 0) return link;
       return (
         <span>
-          <IntrinsicLink name={type.name} />
+          {link}
           <Dim>&lt;</Dim>
           {args.map((arg, i) => (
             <Fragment key={i}>
@@ -99,18 +100,27 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
   }
 }
 
-function IntrinsicLink({ name }: { name: string }) {
-  const { game } = useContext(DeclarationsContext);
+/** Size and alignment are the instantiation's, template arguments can change them */
+function IntrinsicLink({
+  name,
+  size,
+  alignment,
+}: {
+  name: string;
+  size?: number;
+  alignment?: number;
+}) {
+  const { game, declarations } = useContext(DeclarationsContext);
   const to = schemaPath(game, INTRINSIC_MODULE, name);
+  let text = hasIntrinsicLayout(declarations, name)
+    ? "An engine type the schemas use but don't describe, its layout here comes from this site."
+    : "An engine type the schemas use but don't describe.";
+  if (size != null) {
+    text += ` This one is ${size} bytes${alignment != null ? `, align ${alignment}` : ""}.`;
+  }
 
   return (
-    <TypeLink
-      to={to}
-      className="intrinsic"
-      {...tip(
-        "An engine type the schemas use but don't describe, its layout here comes from this site.",
-      )}
-    >
+    <TypeLink to={to} className="intrinsic" {...tip(text)}>
       {name}
     </TypeLink>
   );

@@ -191,6 +191,15 @@ export function findDeclarationByName(
   return undefined;
 }
 
+/** Whether intrinsics.ts lays out an intrinsic, the others only have their size from the dump */
+export function hasIntrinsicLayout(
+  declarations: Map<string, Map<string, Declaration>>,
+  name: string,
+): boolean {
+  const d = declarations.get(INTRINSIC_MODULE)?.get(name);
+  return d?.kind === "class" && d.fields.length > 0;
+}
+
 export interface InheritedBase {
   parent: SchemaParent;
   /** Where the base starts in the derived class, non-zero for later bases in multiple inheritance */

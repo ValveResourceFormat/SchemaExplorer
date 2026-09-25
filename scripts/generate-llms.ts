@@ -106,11 +106,12 @@ Meta   { name, value?: string | object }
        // Networking metadata (MNetworkEnable, MNetworkVarNames, ...) is present only in ${netGames}.
 Type   { category, ...fields by category }
        builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner: Type}
-       fixed_array {inner: Type, count} | atomic {name, inner?: Type, inner2?: Type, count?}
-       | bitfield {count}
+       fixed_array {inner: Type, count}
+       | atomic {name, inner?: Type, inner2?: Type, count?, size?, alignment?} | bitfield {count}
        // atomic = template container, e.g. CUtlVector<inner>, CUtlMap<inner,inner2>, CHandle<inner>;
        // count is an integer last template argument, e.g. CBitVec<count>,
-       // CUtlVectorFixedGrowable<inner,count>
+       // CUtlVectorFixedGrowable<inner,count>; size and alignment in bytes are of that exact
+       // instantiation, so they can differ between uses of the same name; omitted like class sizes
        // bitfield = count bits; bit position is not encoded (offset is always 0)
        // declared_class without module is a class that is not in any schema scope
 ConVar  { name, type, default?, min?, max?, enum?, enumModule?, flags: string[], modules: string[], help? }
