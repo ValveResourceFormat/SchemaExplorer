@@ -8,7 +8,7 @@ import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
 import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
 import { Dim } from "./styles";
-import { Detail } from "./Detail";
+import { Detail, ExpandToggle } from "./Detail";
 import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText, parseNetworkOverride } from "../../utils/format";
@@ -219,39 +219,6 @@ function MetadataValueText({
   );
 }
 
-const MetadataToggle = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--text-dim);
-  cursor: pointer;
-  user-select: none;
-  font-size: 14px;
-  text-align: left;
-
-  &:hover {
-    color: var(--text);
-  }
-
-  &::before {
-    content: "·";
-    margin-right: 4px;
-    opacity: 0.5;
-  }
-
-  /* Its own line under a details label */
-  &[data-in-label] {
-    display: block;
-    margin-top: 2px;
-    color: var(--highlight);
-
-    &::before {
-      content: none;
-    }
-  }
-`;
-
 const MAX_COLLAPSED_LINES = 6;
 
 function countLines(groups: { name: string; values: (string | undefined)[] }[]): number {
@@ -373,13 +340,9 @@ function useMetadata(metadata: SchemaMetadataEntry[]): MetadataState {
   };
 }
 
-function MetadataToggleButton({ state, inLabel }: { state: MetadataState; inLabel?: boolean }) {
-  if (!state.hasMore) return null;
-  return (
-    <MetadataToggle data-in-label={inLabel || undefined} onClick={state.toggle}>
-      {state.expanded ? "collapse" : "expand…"}
-    </MetadataToggle>
-  );
+function metadataToggle(state: MetadataState) {
+  if (!state.hasMore) return undefined;
+  return { expanded: state.expanded, onToggle: state.toggle, more: "Show all" };
 }
 
 /** Metadata as a details row, the expand toggle under the label where it can't be missed */
@@ -394,14 +357,8 @@ export function MetadataDetail({
 }) {
   const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
-  const label = (
-    <>
-      Metadata
-      <MetadataToggleButton state={state} inLabel />
-    </>
-  );
   return (
-    <Detail label={label}>
+    <Detail label="Metadata" toggle={metadataToggle(state)}>
       <MetadataEntries state={state} game={game} module={module} />
     </Detail>
   );
@@ -422,7 +379,7 @@ export function MetadataTags({
   return (
     <>
       <MetadataEntries state={state} game={game} module={module} />
-      <MetadataToggleButton state={state} />
+      {state.hasMore && <ExpandToggle {...metadataToggle(state)!} />}
     </>
   );
 }

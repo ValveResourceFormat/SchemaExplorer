@@ -14,20 +14,6 @@ export const CardBlock = styled.div`
   line-height: 1.6;
 `;
 
-export const SectionToggle = styled.button`
-  background: none;
-  border: none;
-  font: inherit;
-  color: var(--text-dim);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 4px;
-
-  &:hover {
-    color: var(--text);
-  }
-`;
-
 export const Dim = styled.span`
   color: var(--text-dim);
   font-weight: 400;

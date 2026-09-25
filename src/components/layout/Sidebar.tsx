@@ -5,6 +5,7 @@ import { KindIcon } from "../kind-icon/KindIcon";
 import { Declaration } from "../../data/types";
 import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
 import { sidebarRow, sidebarRowSelected } from "./sidebar-styles";
+import { chevronBefore } from "../chevron-styles";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const SidebarLink = styled(NavLink)`
@@ -41,8 +42,6 @@ export const DeclarationSidebarElement = ({
   );
 };
 
-const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
-
 /** A collapsible group's header, its name lines up with the rows' names below it */
 export const SidebarGroupHeader = styled.button`
   display: flex;
@@ -68,19 +67,7 @@ export const SidebarGroupHeader = styled.button`
     color: var(--text);
   }
 
-  &::before {
-    content: "";
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    background: currentColor;
-    mask: ${CHEVRON} center / contain no-repeat;
-    transition: rotate 0.1s;
-  }
-
-  &[data-collapsed]::before {
-    rotate: -90deg;
-  }
+  ${chevronBefore}
 `;
 
 /** A dim count at the end of a row */

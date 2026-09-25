@@ -10,7 +10,7 @@ import {
   schemaPath,
 } from "./DeclarationsContext";
 import { KindIcon } from "../kind-icon/KindIcon";
-import { InlineList, SectionToggle } from "./styles";
+import { InlineList } from "./styles";
 import { Detail } from "./Detail";
 
 const COLLAPSE_THRESHOLD = 8;
@@ -39,23 +39,17 @@ export function CollapsibleLinkDetail<T>({
 
   const collapsible = items.length > COLLAPSE_THRESHOLD;
   const visible = collapsible && !expanded ? items.slice(0, COLLAPSE_THRESHOLD) : items;
-  const toggleLabel = expanded ? "show less" : `+${items.length - COLLAPSE_THRESHOLD} more…`;
+  const toggle = collapsible
+    ? {
+        expanded,
+        onToggle: () => setExpanded(!expanded),
+        more: `Show all ${items.length.toLocaleString("en-US")}`,
+      }
+    : undefined;
 
   return (
-    <Detail label={title}>
-      <InlineList>
-        {visible.map(render)}
-        {collapsible && (
-          <SectionToggle
-            onClick={() => setExpanded(!expanded)}
-            // The visible text, and which section it belongs to
-            aria-label={`${toggleLabel} (${title})`}
-            aria-expanded={expanded}
-          >
-            {toggleLabel}
-          </SectionToggle>
-        )}
-      </InlineList>
+    <Detail label={title} toggle={toggle}>
+      <InlineList>{visible.map(render)}</InlineList>
     </Detail>
   );
 }
