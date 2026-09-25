@@ -31,7 +31,8 @@ export default defineConfig(({ mode }) => {
       reactRouter(),
       wyw({
         include: "src/**/*.tsx",
-        classNameSlug: mode === "development" ? "[title]" : "[hash]",
+        // The hash keeps same-named components in different files apart
+        classNameSlug: mode === "development" ? "[title]_[hash]" : "[hash]",
         sourceMap: true,
       }),
       {
