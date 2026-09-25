@@ -1,13 +1,14 @@
-import { memo, useContext, type MouseEvent } from "react";
+import { memo, useContext, useState, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
 import { EXCLUSIVE_FLAG } from "../../data/derived";
 import { KindIcon } from "../kind-icon/KindIcon";
+import { tip } from "../Tooltip";
 import { SchemaTypeView } from "../schema/SchemaType";
 import { FlagContent, flagTip } from "./FlagTooltipContent";
 import { flagDescription, flagGroup } from "./flags";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
-import type { FilterTag } from "../../utils/console-filtering";
+import { getConsoleStats, type FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatRange, parseColor } from "../../utils/console-format";
 import { flagColorVars } from "./flag-styles";
 
@@ -253,10 +254,30 @@ export interface ConsoleRowProps {
   onNavigate: (name: string, e: MouseEvent) => void;
   /** Rows without it show flags and modules as plain, non-clickable badges */
   onFilter?: (tag: FilterTag, value: string) => void;
+  /** The module: filter's values, their modules are shown before the others */
+  filteredModules?: readonly string[];
   /** Set by the virtualized list */
   rowRef?: (el: HTMLLIElement | null) => void;
   index?: number;
   top?: number;
+}
+
+const MODULES_SHOWN = 2;
+
+/**
+ * The modules a filter asks for first, then the rarest, which tell the entry apart. The ones
+ * nearly everything is in, like client and server, say the least
+ */
+function orderModules(
+  modules: readonly string[],
+  counts: ReadonlyMap<string, number>,
+  filtered: readonly string[] = [],
+): string[] {
+  const isFiltered = (m: string) => filtered.some((f) => m.includes(f));
+  return [...modules].sort(
+    (a, b) =>
+      Number(isFiltered(b)) - Number(isFiltered(a)) || (counts.get(a) ?? 0) - (counts.get(b) ?? 0),
+  );
 }
 
 export const ConsoleRow = memo(function ConsoleRow({
@@ -265,6 +286,7 @@ export const ConsoleRow = memo(function ConsoleRow({
   pageHref = "",
   onNavigate,
   onFilter,
+  filteredModules,
   rowRef,
   index,
   top,
@@ -276,6 +298,16 @@ export const ConsoleRow = memo(function ConsoleRow({
   const range = convar ? formatRange(convar.min, convar.max) : null;
   const isReference = item.modules.length === 0;
 
+  // Some are in dozens of modules, the rarest few are enough until asked for the rest
+  const { consoleItems } = useContext(DeclarationsContext);
+  const [showAllModules, setShowAllModules] = useState(false);
+  const manyModules = item.modules.length > MODULES_SHOWN + 1;
+  const ordered = manyModules
+    ? orderModules(item.modules, getConsoleStats(consoleItems).modules, filteredModules)
+    : item.modules;
+  const collapseModules = manyModules && !showAllModules;
+  const modules = collapseModules ? ordered.slice(0, MODULES_SHOWN) : ordered;
+  const hiddenModules = collapseModules ? ordered.slice(MODULES_SHOWN) : [];
 
   return (
     <Row
@@ -321,9 +353,18 @@ export const ConsoleRow = memo(function ConsoleRow({
         )}
         {range && <Range>{range}</Range>}
         <Chips>
-          {item.modules.map((m) => (
+          {modules.map((m) => (
             <ModuleBadge key={m} module={m} onClick={onFilter && (() => onFilter("module:", m))} />
           ))}
+          {hiddenModules.length > 0 && (
+            <FlagChipButton
+              aria-expanded={false}
+              onClick={() => setShowAllModules(true)}
+              {...tip(hiddenModules.join(", "))}
+            >
+              +{hiddenModules.length} modules
+            </FlagChipButton>
+          )}
           {item.flags.map((f) =>
             onFilter ? (
               <FilterableFlagBadge key={f} flag={f} onClick={() => onFilter("flag:", f)} />

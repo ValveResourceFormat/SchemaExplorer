@@ -257,6 +257,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
             scrollTarget={scrollTarget}
             onNavigate={onNavigate}
             onFilter={includeTag}
+            filteredModules={parsed.modules}
           />
         ) : (
           <StaticListCard>
@@ -300,12 +301,14 @@ function VirtualConsoleList({
   scrollTarget,
   onNavigate,
   onFilter,
+  filteredModules,
 }: {
   items: ConsoleItem[];
   nameParam: string | null;
   scrollTarget: string | null;
   onNavigate: (name: string, e: React.MouseEvent) => void;
   onFilter: (tag: FilterTag, value: string) => void;
+  filteredModules: string[];
 }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [offset, setOffset] = useState(0);
@@ -389,6 +392,7 @@ function VirtualConsoleList({
             anchored={nameParam === item.name}
             onNavigate={onNavigate}
             onFilter={onFilter}
+            filteredModules={filteredModules}
           />
         );
       })}
