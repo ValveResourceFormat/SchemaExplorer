@@ -63,7 +63,8 @@ export const PageTitle = styled.h1`
   font-size: 24px;
   font-weight: 700;
   line-height: 1.25;
-  word-break: break-all;
+  /* Long class names break anywhere, titles with spaces between words */
+  overflow-wrap: anywhere;
 
   > svg {
     flex-shrink: 0;
