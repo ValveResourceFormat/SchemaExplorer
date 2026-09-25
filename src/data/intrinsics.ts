@@ -178,6 +178,14 @@ const types: IntrinsicDef[] = [
     ],
     size: 32,
   },
+  {
+    name: "CTransformWS",
+    fields: [
+      { name: "m_vPosition", offset: 0, type: { category: "atomic", name: "VectorWS" } },
+      { name: "m_orientation", offset: 16, type: { category: "atomic", name: "Quaternion" } },
+    ],
+    size: 32,
+  },
 
   // ---- Entity / Handle types ----
 
@@ -249,14 +257,77 @@ const types: IntrinsicDef[] = [
     size: 4,
   },
   {
+    // Interned string, _MakeGlobalSymbol returns the pointer
     name: "CGlobalSymbol",
-    fields: [{ name: "m_Id", offset: 0, type: b("uint32") }],
-    size: 4,
+    fields: [{ name: "m_pString", offset: 0, type: { category: "ptr", inner: b("char") } }],
+    size: 8,
   },
   {
     name: "CGlobalSymbolCaseSensitive",
-    fields: [{ name: "m_Id", offset: 0, type: b("uint32") }],
+    fields: [{ name: "m_pString", offset: 0, type: { category: "ptr", inner: b("char") } }],
+    size: 8,
+  },
+  {
+    // m_pszString points into the inline storage
+    name: "CKV3MemberNameWithStorage",
+    fields: [
+      { name: "m_nHashCode", offset: 0, type: b("uint32") },
+      { name: "m_SymId", offset: 4, type: b("int32") },
+      { name: "m_pszString", offset: 8, type: { category: "ptr", inner: b("char") } },
+      { name: "m_nLength", offset: 16, type: b("int32") },
+      { name: "m_nAllocatedSize", offset: 20, type: b("int32") },
+      {
+        name: "m_szString",
+        offset: 24,
+        type: { category: "fixed_array", inner: b("char"), count: 32 },
+      },
+    ],
+    size: 56,
+  },
+  {
+    name: "CUtlStringTokenNoRegistration",
+    fields: [{ name: "m_nHashCode", offset: 0, type: b("uint32") }],
     size: 4,
+  },
+  {
+    name: "CSoundEventName",
+    fields: [
+      { name: "m_nLength", offset: 0, type: b("int32") },
+      { name: "m_nAllocatedSize", offset: 4, type: b("int32") },
+      {
+        name: "m_szString",
+        offset: 8,
+        type: { category: "fixed_array", inner: b("char"), count: 8 },
+      },
+    ],
+    size: 16,
+  },
+  {
+    // CBufferString with 200 bytes inline, followed by two unknown 8 byte fields
+    name: "CResourceName",
+    fields: [
+      { name: "m_nLength", offset: 0, type: b("int32") },
+      { name: "m_nAllocatedSize", offset: 4, type: b("int32") },
+      {
+        name: "m_szString",
+        offset: 8,
+        type: { category: "fixed_array", inner: b("char"), count: 200 },
+      },
+    ],
+    size: 224,
+  },
+  {
+    name: "CResourceNameTyped",
+    fields: [
+      { name: "m_nLength", offset: 0, type: b("int32") },
+      { name: "m_nAllocatedSize", offset: 4, type: b("int32") },
+      {
+        name: "m_szString",
+        offset: 8,
+        type: { category: "fixed_array", inner: b("char"), count: 200 },
+      },
+    ],
+    size: 224,
   },
   {
     name: "WorldGroupId_t",
@@ -277,6 +348,27 @@ const types: IntrinsicDef[] = [
     size: 24,
   },
   {
+    name: "CNetworkUtlVectorBase",
+    fields: [
+      { name: "m_Size", offset: 0, type: b("int32") },
+      { name: "m_pMemory", offset: 8, type: { category: "ptr", inner: b("void") } },
+      { name: "m_nAllocationCount", offset: 16, type: b("int32") },
+      { name: "m_nGrowSize", offset: 20, type: b("int32") },
+    ],
+    size: 24,
+  },
+  {
+    name: "C_NetworkUtlVectorBase",
+    fields: [
+      { name: "m_Size", offset: 0, type: b("int32") },
+      { name: "m_pMemory", offset: 8, type: { category: "ptr", inner: b("void") } },
+      { name: "m_nAllocationCount", offset: 16, type: b("int32") },
+      { name: "m_nGrowSize", offset: 20, type: b("int32") },
+    ],
+    size: 24,
+  },
+  {
+    // Followed by N inline elements, the size depends on them
     name: "CUtlVectorFixedGrowable",
     fields: [
       { name: "m_Size", offset: 0, type: b("int32") },
@@ -287,17 +379,69 @@ const types: IntrinsicDef[] = [
     size: 24,
   },
   {
+    name: "CUtlLeanVector",
+    fields: [
+      { name: "m_nCount", offset: 0, type: b("int32") },
+      { name: "m_nAllocated", offset: 4, type: b("int32") },
+      { name: "m_pElements", offset: 8, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 16,
+  },
+  {
+    // Elements are inline at offset 8 until it grows, the size depends on them
+    name: "CUtlLeanVectorFixedGrowable",
+    fields: [
+      { name: "m_nCount", offset: 0, type: b("int32") },
+      { name: "m_nAllocated", offset: 4, type: b("int32") },
+      { name: "m_pElements", offset: 8, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 16,
+  },
+  {
     name: "CUtlHashtable",
     fields: [
-      { name: "m_table", offset: 0, type: { category: "ptr", inner: b("void") } },
-      { name: "m_nUsed", offset: 24, type: b("int32") },
-      { name: "m_nTableSize", offset: 28, type: b("int32") },
-      { name: "m_nMinSize", offset: 32, type: b("int32") },
-      { name: "m_bSizeLocked", offset: 36, type: b("bool") },
-      { name: "m_eq", offset: 40, type: { category: "ptr", inner: b("void") } },
-      { name: "m_hash", offset: 48, type: { category: "ptr", inner: b("void") } },
+      { name: "m_table", offset: 0, type: { category: "atomic", name: "CUtlLeanVector" } },
+      { name: "m_nUsed", offset: 16, type: b("int32") },
+      { name: "m_nTableSize", offset: 20, type: b("int32") },
+      { name: "m_nMinSize", offset: 24, type: b("int32") },
+      { name: "m_bSizeLocked", offset: 28, type: b("bool") },
     ],
-    size: 56,
+    size: 32,
+  },
+  {
+    // Red-black tree
+    name: "CUtlOrderedMap",
+    fields: [
+      { name: "m_LessFunc", offset: 0, type: { category: "ptr", inner: b("void") } },
+      { name: "m_Elements", offset: 8, type: { category: "atomic", name: "CUtlLeanVector" } },
+      { name: "m_Root", offset: 24, type: b("int32") },
+      { name: "m_NumElements", offset: 28, type: b("int32") },
+      { name: "m_FirstFree", offset: 32, type: b("int32") },
+      { name: "m_LastAlloc", offset: 36, type: b("int32") },
+    ],
+    size: 40,
+  },
+  {
+    // CUtlMap of names
+    name: "CUtlDict",
+    fields: [
+      { name: "m_LessFunc", offset: 0, type: { category: "ptr", inner: b("void") } },
+      { name: "m_Elements", offset: 8, type: { category: "atomic", name: "CUtlLeanVector" } },
+      { name: "m_Root", offset: 24, type: b("int32") },
+      { name: "m_NumElements", offset: 28, type: b("int32") },
+      { name: "m_FirstFree", offset: 32, type: b("int32") },
+      { name: "m_LastAlloc", offset: 36, type: b("int32") },
+    ],
+    size: 40,
+  },
+  {
+    name: "CUtlBinaryBlock",
+    fields: [
+      { name: "m_nActualLength", offset: 0, type: b("int32") },
+      { name: "m_nAllocationCount", offset: 4, type: b("int32") },
+      { name: "m_pMemory", offset: 8, type: { category: "ptr", inner: b("uint8") } },
+    ],
+    size: 16,
   },
 
   // ---- KeyValues3 types ----
@@ -424,7 +568,7 @@ const types: IntrinsicDef[] = [
       { name: "m_type", offset: 8, type: b("int16") },
       { name: "m_flags", offset: 10, type: b("uint16") },
     ],
-    size: 12,
+    size: 16,
   },
 
   // ---- Misc types ----
@@ -432,9 +576,25 @@ const types: IntrinsicDef[] = [
   {
     name: "SndOpEventGuid_t",
     fields: [
-      { name: "m_nGuid", offset: 0, type: b("int32") },
+      { name: "m_nGuid", offset: 0, type: b("uint32") },
       { name: "m_hStackHash", offset: 4, type: b("uint32") },
+      { name: "m_nFlags", offset: 8, type: b("int32") },
+      { name: "m_nRecipients", offset: 12, type: b("uint64") },
     ],
+    size: 20,
+  },
+  {
+    // Polymorphic, the vtable is CEmbeddedSubclass<T>'s own
+    name: "CEmbeddedSubclass",
+    fields: [
+      { name: "__vftable", offset: 0, type: { category: "ptr", inner: b("void") } },
+      { name: "m_pData", offset: 8, type: { category: "ptr", inner: b("void") } },
+    ],
+    size: 16,
+  },
+  {
+    name: "HSCRIPT",
+    fields: [{ name: "m_pScript", offset: 0, type: { category: "ptr", inner: b("void") } }],
     size: 8,
   },
   {
