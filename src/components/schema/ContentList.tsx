@@ -1,21 +1,12 @@
 import React, { useContext, useMemo } from "react";
 import { useParams } from "react-router";
 import { styled } from "@linaria/react";
-import {
-  ContentWrapper,
-  ListItem,
-  OtherGameHeading,
-  SiteFooter,
-  TextMessage,
-} from "../layout/Content";
+import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
 import { LazyList, ScrollableList } from "../Lists";
 import { useFilteredData, useParsedSearch, searchDeclarations } from "../../utils/filtering";
-import { DeclarationBreadcrumb } from "./Breadcrumb";
-import { SchemaClassView } from "./SchemaClass";
-import { SchemaEnumView } from "./SchemaEnum";
 import { Declaration } from "../../data/types";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
-import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { getGameContext } from "../../data/derived";
 import { GameId } from "../../games-list";
 import { CardBody, Dim, InlineList, PageHeader, PageTitle } from "./styles";
@@ -24,6 +15,8 @@ import { Link } from "../Link";
 import { TitledCard } from "./Cards";
 import { ClassTree, EntityTree } from "./ClassTree";
 import { SchemaHome } from "./SchemaHome";
+import { OtherSectionMatches } from "../search/OtherSectionMatches";
+import { renderDeclaration, renderSearchResult } from "./renderDeclaration";
 
 /** Below the introduction, with the same space above as the cards there */
 const Section = styled.div`
@@ -84,44 +77,26 @@ function ModuleList() {
   );
 }
 
-function renderItem(declaration: Declaration, isSearchResult?: boolean) {
-  return (
-    <ListItem key={declarationKey(declaration.module, declaration.name)}>
-      {!isSearchResult && (
-        <DeclarationBreadcrumb
-          module={declaration.module}
-          name={declaration.name}
-          parent={declaration.kind === "class" ? declaration.parents[0] : undefined}
-        />
-      )}
-      {declaration.kind === "class" ? (
-        <SchemaClassView declaration={declaration} isSearchResult={isSearchResult} />
-      ) : (
-        <SchemaEnumView declaration={declaration} isSearchResult={isSearchResult} />
-      )}
-    </ListItem>
-  );
-}
-
-const renderSearchResult = (declaration: Declaration) => renderItem(declaration, true);
-
-export function ContentList() {
-  const context = useContext(DeclarationsContext);
-  const { metadata, error } = context;
-  const { data, isSearching } = useFilteredData(context);
+export function ContentList({ filtered }: { filtered: ReturnType<typeof useFilteredData> }) {
+  const { metadata, error } = useContext(DeclarationsContext);
+  const { data, isSearching } = filtered;
   const { game: gameParam, module } = useParams();
 
   return (
     <ContentWrapper>
       {data.length > 0 ? (
         isSearching ? (
-          <LazyList data={data} render={renderSearchResult} />
+          <>
+            <OtherSectionMatches section="schemas" own={data} />
+            <LazyList data={data} render={renderSearchResult} />
+          </>
         ) : (
-          <ScrollableList data={data} render={renderItem} />
+          <ScrollableList data={data} render={renderDeclaration} />
         )
       ) : isSearching ? (
         <>
           <TextMessage>No results found</TextMessage>
+          <OtherSectionMatches section="schemas" own={data} />
           <OtherGamesResults />
         </>
       ) : error ? (

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { styled } from "@linaria/react";
 import { NavBar } from "./NavBar";
-import type { SearchMode } from "../search/SearchBox";
+import type { SearchMode } from "../../utils/section-search";
 import { SearchContext } from "../search/SearchContext";
+import { OtherSectionContext, useOtherSection } from "../search/useOtherSection";
 import { DeclarationsContext, type GameContext } from "../schema/DeclarationsContext";
 import { useHashParam } from "../../utils/filtering";
 import { closeOnEscape } from "../useDismiss";
@@ -40,6 +41,7 @@ export function PageShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
+  const otherSection = useOtherSection(section);
 
   // While the mobile drawer is open, arm a CloseWatcher so the back gesture,
   // Escape, and other close requests dismiss it instead of navigating away.
@@ -67,23 +69,25 @@ export function PageShell({
   }, [sidebarOpen, closeSidebar]);
 
   return (
-    <PageGrid>
-      <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
-      <SidebarPanel
-        ref={panelRef}
-        data-open={sidebarOpen || undefined}
-        tabIndex={sidebarOpen ? -1 : undefined}
-        role={sidebarOpen ? "dialog" : undefined}
-        aria-modal={sidebarOpen || undefined}
-        aria-label={sidebarOpen ? "Sidebar" : undefined}
-      >
-        {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
-      </SidebarPanel>
-      <ContentColumn>
-        <NavBar onMenuClick={openSidebar} section={section} />
-        {children}
-      </ContentColumn>
-    </PageGrid>
+    <OtherSectionContext.Provider value={otherSection}>
+      <PageGrid>
+        <MobileSidebarOverlay data-open={sidebarOpen || undefined} onClick={closeSidebar} />
+        <SidebarPanel
+          ref={panelRef}
+          data-open={sidebarOpen || undefined}
+          tabIndex={sidebarOpen ? -1 : undefined}
+          role={sidebarOpen ? "dialog" : undefined}
+          aria-modal={sidebarOpen || undefined}
+          aria-label={sidebarOpen ? "Sidebar" : undefined}
+        >
+          {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
+        </SidebarPanel>
+        <ContentColumn>
+          <NavBar onMenuClick={openSidebar} section={section} />
+          {children}
+        </ContentColumn>
+      </PageGrid>
+    </OtherSectionContext.Provider>
   );
 }
 

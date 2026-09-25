@@ -12,3 +12,9 @@ export const subtleUnderline = `
     text-decoration-color: currentColor;
   }
 `;
+
+/** A link in the highlight color, for the few that should stand out from the text */
+export const highlightLink = `
+  color: var(--highlight);
+  ${subtleUnderline}
+`;

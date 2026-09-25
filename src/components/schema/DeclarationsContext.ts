@@ -3,6 +3,7 @@ import { href } from "react-router";
 import type { GameContext } from "../../data/derived";
 import { DEFAULT_GAME } from "../../games-list";
 import { buildEntityLookups } from "../../data/derived";
+import type { SearchMode } from "../../utils/section-search";
 
 export type { GameContext } from "../../data/derived";
 export { declarationKey } from "../../data/derived";
@@ -32,6 +33,11 @@ export function keyvalueLink(
 
 export function consolePath(game: string): string {
   return href("/:game/convars", { game });
+}
+
+/** Where a section starts, the game's home or its convars page */
+export function sectionPath(game: string, section: SearchMode): string {
+  return section === "console" ? consolePath(game) : schemaPath(game);
 }
 
 export const DeclarationsContext = createContext<GameContext>({

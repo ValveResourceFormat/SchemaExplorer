@@ -4,9 +4,10 @@ import { buildHash } from "../../utils/filtering";
 import { getConsoleStats } from "../../utils/console-filtering";
 import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
-import { DeclarationsContext, consolePath, schemaPath } from "../schema/DeclarationsContext";
+import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
 import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
+import type { SearchMode } from "../../utils/section-search";
 
 export const SearchInput = styled.input`
   width: 100%;
@@ -39,8 +40,6 @@ declare global {
     stopSearchPrehydrate?: () => void;
   }
 }
-
-export type SearchMode = "schemas" | "console";
 
 export interface SearchTag {
   tag: string;
@@ -432,7 +431,7 @@ export function SearchBox({
   const { search } = useContext(SearchContext);
   const { game, declarations, entities, designNames, consoleItems } =
     useContext(DeclarationsContext);
-  const baseUrl = mode === "console" ? consolePath(game) : schemaPath(game);
+  const baseUrl = sectionPath(game, mode);
   const hasEntities = entities.length > 0;
   const tags = getSearchTags(mode, hasEntities);
   const [inputValue, setInputValue] = useState(search);
@@ -572,7 +571,8 @@ export function SearchBox({
       </SearchIcon>
       {!inputValue && !isFocused && (
         <SearchPlaceholder>
-          Type <kbd>/</kbd> <span>to search{mode === "console" && " convars and commands"}</span>
+          Type <kbd>/</kbd>{" "}
+          <span>to search {mode === "console" ? "convars and commands" : "schemas"}</span>
         </SearchPlaceholder>
       )}
       <MainSearchInput

@@ -21,7 +21,7 @@ export interface ParsedConsoleSearch {
 
 const CONSOLE_TAGS = ["module:", "type:", "flag:"] as const;
 
-function isConsoleFilterWord(word: string): boolean {
+export function isConsoleFilterWord(word: string): boolean {
   const w = word.startsWith("-") ? word.slice(1) : word;
   return CONSOLE_TAGS.some((t) => w.startsWith(t));
 }

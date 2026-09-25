@@ -316,6 +316,38 @@ export function fuzzyScore(pattern: string, target: string): number | null {
   return Math.min(greedyScore, boundaryScore);
 }
 
+/** How a score from fuzzyScore matched: 0 exact, 1 prefix, 2 substring, 3 fuzzy */
+function scoreTier(score: number): number {
+  if (score === 0) return 0;
+  if (score < 200) return 1;
+  if (score < 1000) return 2;
+  return 3;
+}
+
+/**
+ * How well the best of `names` matches the worst-matching word: 0 exact, 1 prefix,
+ * 2 substring, 3 fuzzy, 4 not at all (like a class found through its field names).
+ * Comparable between schemas and convars, which are both ranked by fuzzyScore
+ */
+export function nameMatchTier(names: readonly string[], words: readonly string[]): number {
+  const bestTier = (pattern: string) => {
+    let best: number | null = null;
+    for (const name of names) {
+      const s = fuzzyScore(pattern, name);
+      if (s !== null && (best === null || s < best)) best = s;
+    }
+    return best === null ? 4 : scoreTier(best);
+  };
+
+  let tier = 0;
+  for (const w of words) tier = Math.max(tier, bestTier(w));
+  // A space often stands for an underscore or nothing, "cl color" is an exact cl_color
+  if (words.length > 1 && tier > 0) {
+    tier = Math.min(tier, bestTier(words.join("_")), bestTier(words.join("")));
+  }
+  return tier;
+}
+
 function matchesLoweredKeys(lowerNames: string[] | undefined, keys: string[]): boolean {
   if (!lowerNames || lowerNames.length === 0) return false;
   return keys.every((key) => lowerNames.some((n) => n.includes(key)));
@@ -357,7 +389,7 @@ export function matchesMetadataValues(
   return matchesLoweredValues(lowerMetaVals(metadata), values);
 }
 
-const MAX_SEARCH_RESULTS = 500;
+export const MAX_SEARCH_RESULTS = 500;
 const emptyFields: api.SchemaField[] = [];
 const emptyMembers: api.SchemaEnumMember[] = [];
 

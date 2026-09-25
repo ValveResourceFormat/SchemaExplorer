@@ -53,7 +53,8 @@ const PageFooter = styled.footer`
   }
 `;
 
-const GameHeadingWrapper = styled.div`
+/** Icon and name above a group of results, like another game's */
+export const ResultsHeading = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
@@ -71,12 +72,12 @@ const GameHeadingWrapper = styled.div`
 /** Heading above results from another game */
 export function OtherGameHeading({ gameId }: { gameId: GameId }) {
   return (
-    <GameHeadingWrapper>
+    <ResultsHeading>
       <svg width="24" height="24">
         <use href={`${ICONS_URL}#game-${gameId}`} />
       </svg>
       {getGameDef(gameId)?.name}
-    </GameHeadingWrapper>
+    </ResultsHeading>
   );
 }
 

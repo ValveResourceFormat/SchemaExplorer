@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useHref, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
@@ -30,13 +30,16 @@ import {
   type FilterTag,
   type ParsedConsoleSearch,
 } from "../../utils/console-filtering";
-import { DeclarationsContext, consolePath } from "../schema/DeclarationsContext";
+import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { PageTitle } from "../schema/styles";
 import { SearchContext } from "../search/SearchContext";
+import { OtherSectionMatches } from "../search/OtherSectionMatches";
 import { PageProviders, PageShell } from "../layout/PageShell";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
 import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
+import { ConsoleRowsCard } from "./ConsoleRowsCard";
 import { GitHubButton } from "../schema/Cards";
+import { ListCard } from "./styles";
 import { ConsoleSidebar } from "./ConsoleSidebar";
 
 // DumpSource2 files with the same entries as the list
@@ -243,6 +246,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
         </HeaderActions>
       </Header>
 
+      {visible.length > 0 && <OtherSectionMatches section="console" own={visible} />}
       {visible.length > 0 ? (
         hydrated ? (
           <VirtualConsoleList
@@ -276,6 +280,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
       ) : (
         <>
           <TextMessage>No results found</TextMessage>
+          <OtherSectionMatches section="console" own={visible} />
           <OtherGamesConsoleResults parsed={parsed} kind={kind} />
         </>
       )}
@@ -414,41 +419,11 @@ function OtherGamesConsoleResults({
   return (
     <>
       {results.map(({ gameId, found }) => (
-        <OtherGameConsoleRows key={gameId} gameId={gameId} items={found} />
+        <React.Fragment key={gameId}>
+          <OtherGameHeading gameId={gameId} />
+          <ConsoleRowsCard gameId={gameId} items={found} />
+        </React.Fragment>
       ))}
-    </>
-  );
-}
-
-function OtherGameConsoleRows({ gameId, items }: { gameId: GameId; items: ConsoleItem[] }) {
-  const navigate = useNavigate();
-  const pageHref = useHref(consolePath(gameId));
-  const onNavigate = useCallback(
-    (name: string, e: React.MouseEvent) => {
-      if (!isPlainLeftClick(e)) return;
-      e.preventDefault();
-      navigate({ pathname: consolePath(gameId), hash: buildHash({ name }) });
-    },
-    [navigate, gameId],
-  );
-
-  return (
-    <>
-      <OtherGameHeading gameId={gameId} />
-      {/* The rows' own game, for its icon on the exclusive flag */}
-      <DeclarationsContext.Provider value={getGameContext(gameId)}>
-        <ListCard>
-          {items.map((item) => (
-            <ConsoleRow
-              key={`${item.kind}/${item.name}`}
-              item={item}
-              anchored={false}
-              pageHref={pageHref}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </ListCard>
-      </DeclarationsContext.Provider>
     </>
   );
 }
@@ -463,28 +438,16 @@ const Header = styled.div`
   margin: 4px 0 0 4px;
 `;
 
-const HeaderActions = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-left: auto;
-`;
-
 const ResultCount = styled.span`
   font-size: 14px;
   color: var(--text-dim);
 `;
 
-const ListCard = styled.ul`
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-  background: var(--group);
-  border: 1px solid var(--group-border);
-  border-radius: 10px;
-  box-shadow: var(--group-shadow);
-  overflow: hidden;
-  position: relative;
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-left: auto;
 `;
 
 const STATIC_FULL_ROWS = 40;

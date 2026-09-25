@@ -4,7 +4,7 @@ import { GAME_LIST } from "../../games-list";
 import { getSearchTags } from "../search/SearchBox";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
 import { CardBlock, InlineList } from "./styles";
-import { subtleUnderline } from "./link-styles";
+import { highlightLink } from "./link-styles";
 import { Link } from "../Link";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 
@@ -21,8 +21,7 @@ const InfoBlock = styled(CardBlock)`
 `;
 
 const InfoLink = styled.a`
-  color: var(--highlight);
-  ${subtleUnderline}
+  ${highlightLink}
 
   &:hover {
     color: var(--text);
