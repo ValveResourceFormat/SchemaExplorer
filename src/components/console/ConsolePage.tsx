@@ -36,7 +36,7 @@ import { SearchContext } from "../search/SearchContext";
 import { PageProviders, PageShell } from "../layout/PageShell";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
 import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
-import { KindIcon } from "../kind-icon/KindIcon";
+import { GitHubButton } from "../schema/Cards";
 import { ConsoleSidebar } from "./ConsoleSidebar";
 
 // DumpSource2 files with the same entries as the list
@@ -265,17 +265,16 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
         <ResultCount>
           {visible.length.toLocaleString("en-US")} result{visible.length !== 1 && "s"}
         </ResultCount>
-        {DUMP_FILES.map((file) => {
-          const url = dumpFileUrl(game, file);
-          return (
-            url && (
-              <DumpLink key={file} href={url} target="_blank" rel="noopener noreferrer">
-                <KindIcon kind="github" size={14} />
-                {file}
-              </DumpLink>
-            )
-          );
-        })}
+        <HeaderActions>
+          {DUMP_FILES.map((file) => {
+            const url = dumpFileUrl(game, file);
+            return (
+              url && (
+                <GitHubButton key={file} href={url} title={`View ${file} on GitHub`} label={file} />
+              )
+            );
+          })}
+        </HeaderActions>
       </Header>
 
       {visible.length > 0 ? (
@@ -495,21 +494,11 @@ const Header = styled.div`
   margin: 4px 0 0 4px;
 `;
 
-const DumpLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: var(--text-dim);
-  text-decoration: none;
-
-  &:hover {
-    color: var(--highlight);
-  }
-
-  &:first-of-type {
-    margin-left: auto;
-  }
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-left: auto;
 `;
 
 const ResultCount = styled.span`

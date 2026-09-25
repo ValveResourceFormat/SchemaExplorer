@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { styled } from "@linaria/react";
-import { KindIcon, ICONS_URL, type IconKind } from "../kind-icon/KindIcon";
+import { KindIcon, type IconKind } from "../kind-icon/KindIcon";
 import { dumpFileUrl } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { keepInPlace } from "../../utils/keep-in-place";
@@ -126,17 +126,34 @@ export function GitHubFileLink({
     : dumpFileUrl(game, `schemas/${module}/${name.replace(/:/g, "_")}.h`);
   if (!url) return null;
   return (
-    <GitHubLink
+    <GitHubButton
       href={url}
+      title={isIntrinsic ? "View intrinsic type definitions" : `View ${name}.h on GitHub`}
+      label={button ? "Source" : undefined}
+    />
+  );
+}
+
+/** A file on GitHub, a button when it has a label and only the icon without */
+export function GitHubButton({
+  href,
+  title,
+  label,
+}: {
+  href: string;
+  title?: string;
+  label?: string;
+}) {
+  return (
+    <GitHubLink
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
-      title={isIntrinsic ? "View intrinsic type definitions" : `View ${name}.h on GitHub`}
-      data-button={button || undefined}
+      title={title}
+      data-button={label ? true : undefined}
     >
-      <svg width="16" height="16" aria-hidden="true">
-        <use href={`${ICONS_URL}#ki-github`} />
-      </svg>
-      {button && "Source"}
+      <KindIcon kind="github" size={16} />
+      {label}
     </GitHubLink>
   );
 }
