@@ -8,7 +8,7 @@ import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { MetadataTags } from "./SchemaType";
 import { formatEnumHex } from "../../utils/format";
 import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "../../utils/enum-flags";
-import { ReferencedBy } from "./ReferencedBy";
+import { ReferencedBy, UsedByConVars } from "./ReferencedBy";
 import { CrossGameRefs } from "./CrossGameRefs";
 import { ModuleBadge, GitHubFileLink } from "./SchemaClass";
 import { searchLink, useFieldParam } from "../../utils/filtering";
@@ -116,6 +116,7 @@ export const SchemaEnumView: React.FC<{
       )}
       {!isSearchResult && <ReferencedBy name={declaration.name} module={declaration.module} />}
       {!isSearchResult && <UsedByKeyvalues name={declaration.name} module={declaration.module} />}
+      {!isSearchResult && <UsedByConVars name={declaration.name} module={declaration.module} />}
       {!isSearchResult && <CrossGameRefs declaration={declaration} />}
     </CommonGroupWrapper>
   );

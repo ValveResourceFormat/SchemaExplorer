@@ -1,5 +1,6 @@
 import type {
   ConsoleItem,
+  ConVar,
   Declaration,
   EntityClass,
   EntityKey,
@@ -56,6 +57,8 @@ export type GameContext = EntityLookups & {
   consoleItems: ConsoleItem[];
   /** Lowercase names of the console items that another game has too */
   sharedConsoleNames: Set<string>;
+  /** declarationKey(enumModule, enum) → convars using the enum */
+  enumConVars: Map<string, ConVar[]>;
   error: string | null;
 };
 
@@ -355,6 +358,16 @@ export function findEntityByDesignName(
   return undefined;
 }
 
+function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {
+  const map = new Map<string, ConVar[]>();
+  for (const item of items) {
+    if (item.kind === "convar" && item.enum && item.enumModule) {
+      pushTo(map, declarationKey(item.enumModule, item.enum), item);
+    }
+  }
+  return map;
+}
+
 // -- Game context store --
 
 const contexts = new Map<GameId, GameContext>();
@@ -422,6 +435,7 @@ export function buildAllGameContexts(
           GAME_LIST.some((other) => other.id !== g.id && consoleNames.get(other.id)!.has(name)),
         ),
       ),
+      enumConVars: buildEnumConVars(schema?.consoleItems ?? []),
       ...buildEntityLookups(schema?.entities ?? [], declarations),
       error: errors.get(g.id) ?? null,
     });

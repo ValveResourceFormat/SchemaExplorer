@@ -90,6 +90,9 @@ export interface ConVar {
   default?: string;
   min?: string;
   max?: string;
+  /** Schema enum of enum_value convars, whose string value is enumerator names */
+  enum?: string;
+  enumModule?: string;
   flags: string[];
   modules: string[];
   help?: string;

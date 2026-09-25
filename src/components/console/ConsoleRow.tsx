@@ -2,6 +2,7 @@ import { memo, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
 import { KindIcon } from "../kind-icon/KindIcon";
+import { SchemaTypeView } from "../schema/SchemaType";
 import { useTooltip } from "../Tooltip";
 import { FlagContent, FlagTooltipContent } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup } from "./flags";
@@ -310,7 +311,17 @@ export const ConsoleRow = memo(function ConsoleRow({
         >
           {item.name}
         </Name>
-        {convar && <Type>{convar.type}</Type>}
+        {convar && (
+          <Type>
+            {convar.enum && convar.enumModule ? (
+              <SchemaTypeView
+                type={{ category: "declared_enum", name: convar.enum, module: convar.enumModule }}
+              />
+            ) : (
+              convar.type
+            )}
+          </Type>
+        )}
         {defaultValue != null && (
           <Value>
             {"= " + defaultValue}

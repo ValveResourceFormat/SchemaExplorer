@@ -228,6 +228,31 @@ describe("context structure", () => {
     expect(getGameContext("deadlock").sharedConsoleNames.size).toBe(0);
   });
 
+  it("stores the convars of each enum", () => {
+    const loaded = new Map<GameId, ParsedSchemas>([
+      [
+        "cs2",
+        parseSchemas({
+          classes: [],
+          enums: [],
+          convars: [
+            { name: "sc_mode", type: "string", enum: "EMode", enumModule: "scenesystem" },
+            { name: "sc_other", type: "string", enum: "EMode", enumModule: "scenesystem" },
+            { name: "sv_cheats", type: "bool" },
+          ],
+        }),
+      ],
+    ]);
+    buildAllGameContexts(loaded, new Map());
+
+    const { enumConVars } = getGameContext("cs2");
+    expect(enumConVars.get(declarationKey("scenesystem", "EMode"))?.map((c) => c.name)).toEqual([
+      "sc_mode",
+      "sc_other",
+    ]);
+    expect(enumConVars.size).toBe(1);
+  });
+
   it("stores error message when provided", () => {
     const loaded = new Map<GameId, ParsedSchemas>();
     loaded.set("cs2", parsedSchemas);

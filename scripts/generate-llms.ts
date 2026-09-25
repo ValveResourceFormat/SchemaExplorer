@@ -113,13 +113,15 @@ Type   { category, ...fields by category }
        // CUtlVectorFixedGrowable<inner,count>
        // bitfield = count bits; bit position is not encoded (offset is always 0)
        // declared_class without module is a class that is not in any schema scope
-ConVar  { name, type, default?, min?, max?, flags: string[], modules: string[], help? }
+ConVar  { name, type, default?, min?, max?, enum?, enumModule?, flags: string[], modules: string[], help? }
        // type: bool, int16, uint16, int32, uint32, int64, uint64, float32, float64, string, color,
        // vector2, vector3, vector4, qangle, vector_ws; always string in some games, which also use
        // Source 1 style flag names. default/min/max are strings; vectors and
        // colors look like "[0.707, 0.707, 0]". modules = declaring modules, empty (with the
        // "reference" flag) when only referenced. Unnamed flag bits show as flag_N. flags leave out
-       // gamedll when modules has server and clientdll when it has client.
+       // gamedll when modules has server and clientdll when it has client. enum (in enumModule) is the
+       // schema enum of convars with the "enum_value" flag, whose string value is an enumerator name
+       // (several joined with | for flag enums).
 Command { name, flags: string[], modules: string[], help? }
 Entity  { class, module, classModule?, designName?, baseClass?, spawnable, flags?, spawnOrder?,
           components?: {base, override}[], keys?: Key[], inputs?: Input[], outputs?: Output[] }

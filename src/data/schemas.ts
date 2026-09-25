@@ -238,6 +238,8 @@ interface RawConVar {
   default?: string;
   min?: string;
   max?: string;
+  enum?: string;
+  enumModule?: string;
   flags?: string[];
   modules?: string[];
   help?: string;

@@ -1,6 +1,11 @@
 import React, { useContext, useState } from "react";
 import { styled } from "@linaria/react";
-import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
+import {
+  DeclarationsContext,
+  consolePath,
+  declarationKey,
+  schemaPath,
+} from "./DeclarationsContext";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { SectionWrapper, SectionTitle, SectionList, SectionLink, SectionToggle } from "./styles";
 
@@ -51,6 +56,26 @@ export function CollapsibleChipSection<T>({
         )}
       </SectionList>
     </SectionWrapper>
+  );
+}
+
+/** Convars whose value is an enumerator of this enum */
+export function UsedByConVars({ name, module }: { name: string; module: string }) {
+  const { game, enumConVars } = useContext(DeclarationsContext);
+  return (
+    <CollapsibleChipSection
+      title="Used by convars"
+      items={enumConVars.get(declarationKey(module, name))}
+      render={(convar) => (
+        <SectionLink
+          key={convar.name}
+          to={{ pathname: consolePath(game), hash: `name=${encodeURIComponent(convar.name)}` }}
+        >
+          <KindIcon kind="convar" size={18} />
+          <span>{convar.name}</span>
+        </SectionLink>
+      )}
+    />
   );
 }
 
