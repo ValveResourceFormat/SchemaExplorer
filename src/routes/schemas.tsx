@@ -17,7 +17,7 @@ import {
   declarationKey,
   entityChain,
   findDeclarationByName,
-  findEntityByDesignName,
+  designNameEntity,
   getGameContext,
   type EntityLookups,
   type GameContext,
@@ -111,11 +111,26 @@ function describeDeclaration(d: Declaration, gameName: string): string {
   return `${prefix}.`;
 }
 
+/**
+ * The entity of a design name link, /cs2/logic_relay or /cs2/server/logic_relay, when the URL
+ * isn't a module or declaration itself
+ */
+function linkedEntity(context: GameContext, module?: string, scope?: string) {
+  const validModule = module != null && context.declarations.has(module);
+  if (scope ? context.declarations.get(module!)?.has(scope) : validModule) return undefined;
+  const designName = scope ?? module;
+  if (!designName) return undefined;
+  return designNameEntity(context, designName, scope && validModule ? module : undefined);
+}
+
 export const meta: MetaFunction = ({ params }) => {
   const gameName = params.game && isGameId(params.game) ? getGameDef(params.game)?.name : null;
-  const { module, scope } = params;
-
   const context = params.game && isGameId(params.game) ? getGameContext(params.game) : null;
+  // The redirect to the class page only happens in the browser, link previews need its meta
+  const entity = context ? linkedEntity(context, params.module, params.scope) : undefined;
+  const module = entity ? entity.classModule : params.module;
+  const scope = entity ? entity.class : params.scope;
+
   const designNames = (context && module && scope && designNamesFor(context, module, scope)) || [];
   const scopeTitle =
     scope && designNames.length > 0 ? `${scope} (${designNames.join(", ")})` : scope;
@@ -139,7 +154,7 @@ export const meta: MetaFunction = ({ params }) => {
     description = `Browse and explore Valve Source 2 engine schemas, classes, enums, and types for ${gameList}.`;
   }
 
-  return pageMeta(title, description, canonicalUrl(params.game, params.module, params.scope));
+  return pageMeta(title, description, canonicalUrl(params.game, module, scope));
 };
 
 export default function SchemasPage() {
@@ -168,20 +183,13 @@ export default function SchemasPage() {
     if (validScope || (validModule && !scope) || (!module && (!gameParam || validGame))) return;
 
     // Entity design names: /cs2/server/trigger_multiple and /cs2/trigger_multiple
-    const designName = scope ?? (validGame && !validModule ? module : undefined);
-    if (designName) {
-      const entity = findEntityByDesignName(
-        context,
-        designName,
-        scope && validModule ? module : undefined,
+    const entity = validGame ? linkedEntity(context, module, scope) : undefined;
+    if (entity) {
+      navigate(
+        { pathname: schemaPath(game, entity.classModule, entity.class), hash: location.hash },
+        { replace: true },
       );
-      if (entity && context.declarations.get(entity.classModule)?.has(entity.class)) {
-        navigate(
-          { pathname: schemaPath(game, entity.classModule, entity.class), hash: location.hash },
-          { replace: true },
-        );
-        return;
-      }
+      return;
     }
 
     if (scope) {
