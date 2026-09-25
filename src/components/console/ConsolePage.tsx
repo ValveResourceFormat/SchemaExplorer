@@ -63,14 +63,11 @@ export type ConsoleFilters = ReturnType<typeof useConsoleFilters>;
 
 /** Filter state shared by the sidebar and the list, all of it lives in the URL hash */
 function useConsoleFilters() {
-  const { consoleItems, sharedConsoleNames } = useContext(DeclarationsContext);
+  const { consoleItems } = useContext(DeclarationsContext);
   const { search } = useContext(SearchContext);
   const kindParam = useHashParam("kind");
   const nameParam = useHashParam("name");
-  const uniqueParam = useHashParam("unique");
   const kind: ConsoleKind = kindParam === "convars" || kindParam === "commands" ? kindParam : "all";
-  // Only the items no other game has, leaving out what the engine shares between them
-  const unique = uniqueParam != null;
 
   const navigate = useNavigate();
   const stats = getConsoleStats(consoleItems);
@@ -78,10 +75,9 @@ function useConsoleFilters() {
   const deferredSearch = useDeferredValue(search);
   const parsed = useMemo(() => parseConsoleSearch(deferredSearch), [deferredSearch]);
 
-  const { visible, kindCounts, moduleCounts, flagCounts, uniqueCount } = useMemo(() => {
-    const hideNames = unique ? sharedConsoleNames : undefined;
+  const { visible, kindCounts, moduleCounts, flagCounts } = useMemo(() => {
     // One scored pass without module filters, which the per-module counts ignore anyway
-    const base = filterConsoleItems(consoleItems, parsed, { ignoreModules: true, hideNames });
+    const base = filterConsoleItems(consoleItems, parsed, { ignoreModules: true });
     const matchesModules = moduleFilter(parsed, stats);
     const ofKind = (i: ConsoleItem) =>
       kind === "all" || (kind === "convars") === (i.kind === "convar");
@@ -97,16 +93,10 @@ function useConsoleFilters() {
     for (const flag of [...parsed.flags, ...parsed.notFlags]) {
       let count = 0;
       const others = withoutFlag(parsed, flag);
-      for (const item of filterConsoleItems(consoleItems, others, { kind, hideNames })) {
+      for (const item of filterConsoleItems(consoleItems, others, { kind })) {
         if (item.flags.includes(flag)) count++;
       }
       flagCounts.set(flag, count);
-    }
-
-    let uniqueCount = visible.length;
-    if (!unique) {
-      for (const item of visible)
-        if (sharedConsoleNames.has(item.name.toLowerCase())) uniqueCount--;
     }
 
     return {
@@ -114,21 +104,17 @@ function useConsoleFilters() {
       kindCounts: { all: allKinds.length, convars, commands: allKinds.length - convars },
       moduleCounts: countBy(matchesModules ? base.filter(ofKind) : visible, (i) => i.modules),
       flagCounts,
-      uniqueCount,
     };
-  }, [consoleItems, sharedConsoleNames, parsed, kind, unique, stats]);
+  }, [consoleItems, parsed, kind, stats]);
 
   // Callbacks read the hash through a ref so they stay stable for the memoized rows
-  const hashRef = useRef({ search, kindParam, uniqueParam });
+  const hashRef = useRef({ search, kindParam });
   useLayoutEffect(() => {
-    hashRef.current = { search, kindParam, uniqueParam };
+    hashRef.current = { search, kindParam };
   });
 
   const setHash = useCallback(
-    (
-      params: { kind?: string | null; unique?: string | null; search?: string; name?: string },
-      replace = false,
-    ) => {
+    (params: { kind?: string | null; search?: string; name?: string }, replace = false) => {
       navigate({ hash: buildHash(params) }, { replace, preventScrollReset: true });
     },
     [navigate],
@@ -136,14 +122,10 @@ function useConsoleFilters() {
 
   const cycleTag = useCallback(
     (tag: FilterTag, value: string) => {
-      const { search, kindParam, uniqueParam } = hashRef.current;
+      const { search, kindParam } = hashRef.current;
       const state = getTagState(parseConsoleSearch(search), tag, value);
       const next = nextTagState(tag, state);
-      setHash({
-        kind: kindParam,
-        unique: uniqueParam,
-        search: setSearchTag(search, tag, value, next),
-      });
+      setHash({ kind: kindParam, search: setSearchTag(search, tag, value, next) });
     },
     [setHash],
   );
@@ -151,28 +133,18 @@ function useConsoleFilters() {
   // Row chips only add a filter, cycling there would hide the row that was clicked
   const includeTag = useCallback(
     (tag: FilterTag, value: string) => {
-      const { search, kindParam, uniqueParam } = hashRef.current;
-      setHash({
-        kind: kindParam,
-        unique: uniqueParam,
-        search: setSearchTag(search, tag, value, "include"),
-      });
+      const { search, kindParam } = hashRef.current;
+      setHash({ kind: kindParam, search: setSearchTag(search, tag, value, "include") });
     },
     [setHash],
   );
 
   const setKind = useCallback(
     (k: ConsoleKind) => {
-      const { search, uniqueParam } = hashRef.current;
-      setHash({ kind: k === "all" ? null : k, unique: uniqueParam, search });
+      setHash({ kind: k === "all" ? null : k, search: hashRef.current.search });
     },
     [setHash],
   );
-
-  const toggleUnique = useCallback(() => {
-    const { search, kindParam, uniqueParam } = hashRef.current;
-    setHash({ kind: kindParam, unique: uniqueParam == null ? "1" : null, search });
-  }, [setHash]);
 
   const clearFilters = useCallback(
     () => setHash({ search: stripConsoleFilters(hashRef.current.search) }),
@@ -181,8 +153,8 @@ function useConsoleFilters() {
 
   const selectName = useCallback(
     (name: string) => {
-      const { search, kindParam, uniqueParam } = hashRef.current;
-      setHash({ kind: kindParam, unique: uniqueParam, search, name }, true);
+      const { search, kindParam } = hashRef.current;
+      setHash({ kind: kindParam, search, name }, true);
     },
     [setHash],
   );
@@ -191,7 +163,6 @@ function useConsoleFilters() {
   return useMemo(
     () => ({
       kind,
-      unique,
       nameParam,
       parsed,
       stats,
@@ -199,17 +170,14 @@ function useConsoleFilters() {
       kindCounts,
       moduleCounts,
       flagCounts,
-      uniqueCount,
       cycleTag,
       includeTag,
       setKind,
-      toggleUnique,
       clearFilters,
       selectName,
     }),
     [
       kind,
-      unique,
       nameParam,
       parsed,
       stats,
@@ -217,11 +185,9 @@ function useConsoleFilters() {
       kindCounts,
       moduleCounts,
       flagCounts,
-      uniqueCount,
       cycleTag,
       includeTag,
       setKind,
-      toggleUnique,
       clearFilters,
       selectName,
     ],
@@ -469,17 +435,20 @@ function OtherGameConsoleRows({ gameId, items }: { gameId: GameId; items: Consol
   return (
     <>
       <OtherGameHeading gameId={gameId} />
-      <ListCard>
-        {items.map((item) => (
-          <ConsoleRow
-            key={`${item.kind}/${item.name}`}
-            item={item}
-            anchored={false}
-            pageHref={pageHref}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </ListCard>
+      {/* The rows' own game, for its icon on the exclusive flag */}
+      <DeclarationsContext.Provider value={getGameContext(gameId)}>
+        <ListCard>
+          {items.map((item) => (
+            <ConsoleRow
+              key={`${item.kind}/${item.name}`}
+              item={item}
+              anchored={false}
+              pageHref={pageHref}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </ListCard>
+      </DeclarationsContext.Provider>
     </>
   );
 }

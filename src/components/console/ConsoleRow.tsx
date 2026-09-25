@@ -1,6 +1,7 @@
 import { memo, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
+import { EXCLUSIVE_FLAG } from "../../data/derived";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { SchemaTypeView } from "../schema/SchemaType";
 import { useTooltip } from "../Tooltip";
@@ -24,6 +25,7 @@ const flagChipStyles = `
   background: var(--group-members);
   color: var(--text-dim);
   white-space: nowrap;
+  position: relative;
   --c: var(--text-dim);
 
   > svg {
@@ -39,6 +41,20 @@ const flagChipStyles = `
   }
   &[data-group="hidden"] {
     border-style: dashed;
+  }
+
+  /* The exclusive flag is only the game's icon */
+  &[data-plain] {
+    padding: 0;
+    border: none;
+    background: none;
+
+    /* As tall and round as the pills next to it */
+    > svg {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
   }
 `;
 
@@ -63,8 +79,12 @@ function FlagBadge({ flag }: { flag: string }) {
   );
   return (
     <>
-      <FlagChip data-group={flagGroup(flag)} {...referenceProps}>
-        <FlagContent flag={flag} />
+      <FlagChip
+        data-group={flagGroup(flag)}
+        data-plain={flag === EXCLUSIVE_FLAG || undefined}
+        {...referenceProps}
+      >
+        <FlagContent flag={flag} compact />
       </FlagChip>
       {tooltip}
     </>
@@ -84,8 +104,13 @@ function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => v
   );
   return (
     <>
-      <FlagChipButton data-group={flagGroup(flag)} onClick={onClick} {...referenceProps}>
-        <FlagContent flag={flag} />
+      <FlagChipButton
+        data-group={flagGroup(flag)}
+        data-plain={flag === EXCLUSIVE_FLAG || undefined}
+        onClick={onClick}
+        {...referenceProps}
+      >
+        <FlagContent flag={flag} compact />
       </FlagChipButton>
       {tooltip}
     </>

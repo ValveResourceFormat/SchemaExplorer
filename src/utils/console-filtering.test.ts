@@ -159,14 +159,6 @@ describe("filterConsoleItems", () => {
       consoleItems.length,
     );
   });
-
-  it("leaves out hidden names", () => {
-    const hideNames = new Set(["exec", "sv_cheats"]);
-    const parsed = parseConsoleSearch("flag:replicated");
-    expect(filterConsoleItems(consoleItems, parsed, { hideNames }).map((i) => i.name)).toEqual([
-      "sv_gravity",
-    ]);
-  });
 });
 
 describe("setSearchTag / getTagState", () => {

@@ -5,6 +5,7 @@ import {
   allDeclarations,
   buildAllGameContexts,
   getGameContext,
+  EXCLUSIVE_FLAG,
 } from "./derived";
 import { parseSchemas, type ParsedSchemas } from "./schemas";
 import type { Declaration } from "./types";
@@ -211,21 +212,31 @@ describe("context structure", () => {
     expect(ctx.error).toBeNull();
   });
 
-  it("stores the console names another game has too", () => {
+  it("flags the console items no other game has", () => {
     const dump = (...names: string[]) =>
       parseSchemas({
         classes: [],
         enums: [],
         commands: names.map((name) => ({ name, flags: [], modules: ["engine2"] })),
       });
-    const loaded = new Map<GameId, ParsedSchemas>([
-      ["cs2", dump("quit", "Map", "cs2_only")],
-      ["dota2", dump("quit", "map", "dota_only")],
-    ]);
-    buildAllGameContexts(loaded, new Map());
+    const exclusive = (gameId: GameId) =>
+      getGameContext(gameId)
+        .consoleItems.filter((i) => i.flags.includes(EXCLUSIVE_FLAG))
+        .map((i) => i.name);
 
-    expect([...getGameContext("cs2").sharedConsoleNames].sort()).toEqual(["map", "quit"]);
-    expect(getGameContext("deadlock").sharedConsoleNames.size).toBe(0);
+    buildAllGameContexts(
+      new Map<GameId, ParsedSchemas>([
+        ["cs2", dump("quit", "Map", "cs2_only")],
+        ["dota2", dump("quit", "map", "dota_only")],
+      ]),
+      new Map(),
+    );
+    expect(exclusive("cs2")).toEqual(["cs2_only"]);
+    expect(exclusive("dota2")).toEqual(["dota_only"]);
+
+    // Nothing to compare to
+    buildAllGameContexts(new Map([["cs2", dump("quit", "cs2_only")]]), new Map());
+    expect(exclusive("cs2")).toEqual([]);
   });
 
   it("stores the convars of each enum", () => {

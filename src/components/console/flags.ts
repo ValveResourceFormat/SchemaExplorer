@@ -1,4 +1,5 @@
 import type { IconKind } from "../kind-icon/KindIcon";
+import { EXCLUSIVE_FLAG } from "../../data/derived";
 
 type FlagGroup = "workshop" | "cheat" | "devonly" | "restricted" | "network" | "saved" | "hidden";
 
@@ -60,6 +61,8 @@ export function flagIcon(flag: string): IconKind | undefined {
 
 // Shown above the list while filtering by the flag
 const FLAG_DESCRIPTIONS: Record<string, string> = {
+  [EXCLUSIVE_FLAG]:
+    "Only in this game, none of the other games here have a convar or command by this name. Added by this site, it isn't one of the game's own flags.",
   workshop_whitelisted:
     "Listed in the workshop cvar whitelist, so workshop maps are allowed to change it. Added by this site from workshop_cvar_whitelist.txt, it isn't one of the game's own flags.",
   cheat:

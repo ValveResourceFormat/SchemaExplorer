@@ -1,9 +1,33 @@
+import { useContext } from "react";
 import { styled } from "@linaria/react";
-import { KindIcon } from "../kind-icon/KindIcon";
+import { EXCLUSIVE_FLAG } from "../../data/derived";
+import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { flagIcon } from "./flags";
 
-/** Flag label, with an icon for the flags that need to stand out */
-export function FlagContent({ flag }: { flag: string }) {
+/** The exclusive flag's icon, the game's own */
+export function ExclusiveIcon({ size = 12 }: { size?: number }) {
+  const { game } = useContext(DeclarationsContext);
+  return (
+    <GameIcon width={size} height={size} aria-hidden="true">
+      <use href={`${ICONS_URL}#game-${game}`} />
+    </GameIcon>
+  );
+}
+
+/**
+ * Flag label, with an icon for the flags that need to stand out. The exclusive flag is only
+ * its icon in the lists, where every other row would repeat the same word
+ */
+export function FlagContent({ flag, compact }: { flag: string; compact?: boolean }) {
+  if (flag === EXCLUSIVE_FLAG) {
+    return (
+      <>
+        <ExclusiveIcon />
+        {compact ? <VisuallyHidden>{flag}</VisuallyHidden> : flag}
+      </>
+    );
+  }
   const icon = flagIcon(flag);
   return (
     <>
@@ -12,6 +36,21 @@ export function FlagContent({ flag }: { flag: string }) {
     </>
   );
 }
+
+const GameIcon = styled.svg`
+  flex-shrink: 0;
+  border-radius: 2px;
+`;
+
+/** Read by screen readers, not shown */
+export const VisuallyHidden = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+`;
 
 /** Tooltip body: the flag's own badge as a heading, colored to match, then its description.
  *  Shared by the row badges and the sidebar's flag filters so both look identical. */

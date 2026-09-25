@@ -58,9 +58,8 @@ export type GameContext = EntityLookups & {
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
   crossModuleLookup: Map<string, Declaration>;
+  /** With EXCLUSIVE_FLAG added to the ones no other game has */
   consoleItems: ConsoleItem[];
-  /** Lowercase names of the console items that another game has too */
-  sharedConsoleNames: Set<string>;
   /** declarationKey(enumModule, enum) → convars using the enum */
   enumConVars: Map<string, ConVar[]>;
   error: string | null;
@@ -398,6 +397,9 @@ function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {
 
 const contexts = new Map<GameId, GameContext>();
 
+/** Added to the convars and commands no other game has */
+export const EXCLUSIVE_FLAG = "exclusive";
+
 export function buildAllGameContexts(
   loaded: Map<GameId, ParsedSchemas>,
   errors: Map<GameId, string>,
@@ -448,6 +450,17 @@ export function buildAllGameContexts(
       }
     }
 
+    // The ones no other game has get a flag of their own, to filter by and show like any other.
+    // Without another game's list to compare to, nothing can be told apart
+    const otherNames = GAME_LIST.filter((o) => o.id !== g.id)
+      .map((o) => consoleNames.get(o.id)!)
+      .filter((names) => names.size > 0);
+    const consoleItems = (schema?.consoleItems ?? []).map((item) => {
+      const name = item.name.toLowerCase();
+      if (otherNames.length === 0 || otherNames.some((names) => names.has(name))) return item;
+      return { ...item, flags: [...item.flags, EXCLUSIVE_FLAG] };
+    });
+
     contexts.set(g.id, {
       game: g.id,
       declarations,
@@ -455,13 +468,8 @@ export function buildAllGameContexts(
       references: buildReferences(declarations),
       otherGamesLookup,
       crossModuleLookup,
-      consoleItems: schema?.consoleItems ?? [],
-      sharedConsoleNames: new Set(
-        [...consoleNames.get(g.id)!].filter((name) =>
-          GAME_LIST.some((other) => other.id !== g.id && consoleNames.get(other.id)!.has(name)),
-        ),
-      ),
-      enumConVars: buildEnumConVars(schema?.consoleItems ?? []),
+      consoleItems,
+      enumConVars: buildEnumConVars(consoleItems),
       ...buildEntityLookups(schema?.entities ?? [], declarations),
       error: errors.get(g.id) ?? null,
     });

@@ -1,7 +1,6 @@
-import { memo, useContext, useState } from "react";
+import { memo, useState } from "react";
 import { styled } from "@linaria/react";
-import { getGameDef } from "../../games-list";
-import { DeclarationsContext } from "../schema/DeclarationsContext";
+import { EXCLUSIVE_FLAG } from "../../data/derived";
 import {
   getTagState,
   type FilterTag,
@@ -10,10 +9,10 @@ import {
 } from "../../utils/console-filtering";
 import { BrandRow } from "../layout/NavBar";
 import { SidebarGroupHeader, SidebarHeader, SidebarList, SidebarWrapper } from "../layout/Sidebar";
-import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { KindIcon } from "../kind-icon/KindIcon";
 import { useTooltip } from "../Tooltip";
 import { flagColorVars } from "./flag-styles";
-import { FlagTooltipContent } from "./FlagTooltipContent";
+import { ExclusiveIcon, FlagTooltipContent } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
 import type { ConsoleFilters } from "./ConsolePage";
 
@@ -37,22 +36,17 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
 }) {
   const {
     kind,
-    unique,
     kindCounts,
     moduleCounts,
     flagCounts,
-    uniqueCount,
     stats,
     parsed,
     setKind,
-    toggleUnique,
     cycleTag,
     clearFilters,
   } = filters;
-  const { game } = useContext(DeclarationsContext);
   const hasFilters =
     kind !== "all" ||
-    unique ||
     parsed.modules.length + parsed.notModules.length + parsed.flags.length > 0 ||
     parsed.notFlags.length + parsed.types.length + parsed.notTypes.length > 0;
 
@@ -75,19 +69,6 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
               <ChipCount>{kindCounts[k].toLocaleString("en-US")}</ChipCount>
             </FilterItem>
           ))}
-          <FilterItem
-            data-state={unique ? "include" : "off"}
-            data-empty={uniqueCount === 0 || undefined}
-            aria-pressed={unique}
-            title="Hide the ones other games have too"
-            onClick={toggleUnique}
-          >
-            <GameIcon width="16" height="16" aria-hidden="true">
-              <use href={`${ICONS_URL}#game-${game}`} />
-            </GameIcon>
-            <ItemName>Only in {getGameDef(game)?.name ?? game}</ItemName>
-            <ChipCount>{uniqueCount.toLocaleString("en-US")}</ChipCount>
-          </FilterItem>
         </Group>
         <TagGroup
           title="Flags"
@@ -205,7 +186,13 @@ function FlagFilterItem({
         {...referenceProps}
       >
         {/* The flag's own icon takes the place of the color dot */}
-        {icon ? <FlagIcon kind={icon} size={12} /> : <Dot />}
+        {flag === EXCLUSIVE_FLAG ? (
+          <ExclusiveIcon size={16} />
+        ) : icon ? (
+          <FlagIcon kind={icon} size={12} />
+        ) : (
+          <Dot />
+        )}
         <ItemName>{flag}</ItemName>
         {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
         <ChipCount>{count.toLocaleString("en-US")}</ChipCount>
@@ -238,11 +225,6 @@ const GroupItems = styled.div`
 const Spacer = styled.span`
   width: 16px;
   flex-shrink: 0;
-`;
-
-const GameIcon = styled.svg`
-  flex-shrink: 0;
-  border-radius: 3px;
 `;
 
 const FlagIcon = styled(KindIcon)`
