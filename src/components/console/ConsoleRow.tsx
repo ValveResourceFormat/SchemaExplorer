@@ -1,12 +1,12 @@
-import { memo, type MouseEvent } from "react";
+import { memo, useContext, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
 import type { ConsoleItem } from "../../data/types";
 import { EXCLUSIVE_FLAG } from "../../data/derived";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { SchemaTypeView } from "../schema/SchemaType";
-import { useTooltip } from "../Tooltip";
-import { FlagContent, FlagTooltipContent } from "./FlagTooltipContent";
-import { flagAccent, flagDescription, flagGroup } from "./flags";
+import { FlagContent, flagTip } from "./FlagTooltipContent";
+import { flagDescription, flagGroup } from "./flags";
+import { DeclarationsContext } from "../schema/DeclarationsContext";
 import type { FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatRange, parseColor } from "../../utils/console-format";
 import { flagColorVars } from "./flag-styles";
@@ -72,48 +72,32 @@ const FlagChipButton = styled.button`
 `;
 
 function FlagBadge({ flag }: { flag: string }) {
-  const description = flagDescription(flag);
-  const { referenceProps, tooltip } = useTooltip(
-    description && <FlagTooltipContent flag={flag} description={description} />,
-    flagAccent(flag),
-  );
+  const { game } = useContext(DeclarationsContext);
   return (
-    <>
-      <FlagChip
-        data-group={flagGroup(flag)}
-        data-plain={flag === EXCLUSIVE_FLAG || undefined}
-        {...referenceProps}
-      >
-        <FlagContent flag={flag} compact />
-      </FlagChip>
-      {tooltip}
-    </>
+    <FlagChip
+      data-group={flagGroup(flag)}
+      data-plain={flag === EXCLUSIVE_FLAG || undefined}
+      tabIndex={flagDescription(flag) ? 0 : undefined}
+      {...flagTip(flag, game)}
+    >
+      <FlagContent flag={flag} compact />
+    </FlagChip>
   );
 }
 
 /** Same badge, clickable to add a flag filter. Its tooltip covers both what the flag means
  *  and what clicking it does, since flags without a description would otherwise show nothing */
 function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => void }) {
-  const { referenceProps, tooltip } = useTooltip(
-    <FlagTooltipContent
-      flag={flag}
-      description={flagDescription(flag)}
-      hint="Click to filter by this flag."
-    />,
-    flagAccent(flag),
-  );
+  const { game } = useContext(DeclarationsContext);
   return (
-    <>
-      <FlagChipButton
-        data-group={flagGroup(flag)}
-        data-plain={flag === EXCLUSIVE_FLAG || undefined}
-        onClick={onClick}
-        {...referenceProps}
-      >
-        <FlagContent flag={flag} compact />
-      </FlagChipButton>
-      {tooltip}
-    </>
+    <FlagChipButton
+      data-group={flagGroup(flag)}
+      data-plain={flag === EXCLUSIVE_FLAG || undefined}
+      onClick={onClick}
+      {...flagTip(flag, game, "Click to filter by this flag.")}
+    >
+      <FlagContent flag={flag} compact />
+    </FlagChipButton>
   );
 }
 
@@ -291,6 +275,7 @@ export const ConsoleRow = memo(function ConsoleRow({
   const color = convar?.type === "color" && convar.default ? parseColor(convar.default) : null;
   const range = convar ? formatRange(convar.min, convar.max) : null;
   const isReference = item.modules.length === 0;
+
 
   return (
     <Row

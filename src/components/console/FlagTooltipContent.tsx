@@ -1,9 +1,11 @@
 import { useContext } from "react";
 import { styled } from "@linaria/react";
-import { EXCLUSIVE_FLAG } from "../../data/derived";
+import { EXCLUSIVE_FLAG, getGameContext } from "../../data/derived";
+import { isGameId } from "../../games-list";
+import { registerTooltip } from "../Tooltip";
 import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
-import { flagIcon } from "./flags";
+import { flagAccent, flagDescription, flagIcon } from "./flags";
 
 /** The exclusive flag's icon, the game's own */
 export function ExclusiveIcon({ size = 12 }: { size?: number }) {
@@ -51,6 +53,32 @@ export const VisuallyHidden = styled.span`
   clip-path: inset(50%);
   white-space: nowrap;
 `;
+
+/** Tooltip props for a flag's badge or filter, `hint` says what clicking it does */
+export function flagTip(flag: string, game: string, hint?: string) {
+  return {
+    "data-tip-kind": "flag",
+    "data-flag": flag,
+    "data-tip-game": game,
+    "data-tip-hint": hint,
+    "data-tip-accent": flagAccent(flag),
+  };
+}
+
+registerTooltip("flag", (el) => {
+  const { flag = "", tipHint, tipGame } = el.dataset;
+  const description = flagDescription(flag);
+  if (!description && !tipHint) return null;
+  const content = <FlagTooltipContent flag={flag} description={description} hint={tipHint} />;
+  // The host sits outside the page, the exclusive flag's icon is the badge's game
+  return tipGame && isGameId(tipGame) ? (
+    <DeclarationsContext.Provider value={getGameContext(tipGame)}>
+      {content}
+    </DeclarationsContext.Provider>
+  ) : (
+    content
+  );
+});
 
 /** Tooltip body: the flag's own badge as a heading, colored to match, then its description.
  *  Shared by the row badges and the sidebar's flag filters so both look identical. */

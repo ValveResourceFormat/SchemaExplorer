@@ -13,6 +13,7 @@ import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText, parseNetworkOverride } from "../../utils/format";
 import { findDeclarationByName } from "../../data/derived";
+import { tip } from "../Tooltip";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
@@ -46,7 +47,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
     case "declared_enum":
       if (!type.module) {
         return (
-          <span title="Not in any schema scope">
+          <span {...tip("Not in any schema scope, so it has no page.")}>
             <ColoredSyntax kind="interface">{type.name}</ColoredSyntax>
           </span>
         );
@@ -103,7 +104,13 @@ function IntrinsicLink({ name }: { name: string }) {
   const to = schemaPath(game, INTRINSIC_MODULE, name);
 
   return (
-    <TypeLink to={to} title="intrinsic type" className="intrinsic">
+    <TypeLink
+      to={to}
+      className="intrinsic"
+      {...tip(
+        "An engine type the schemas use but don't describe, its layout here comes from this site.",
+      )}
+    >
       {name}
     </TypeLink>
   );

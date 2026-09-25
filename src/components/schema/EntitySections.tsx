@@ -54,6 +54,7 @@ import { CollapsedInheritedRow, TitledCard } from "./Cards";
 import { InheritedSwitch } from "./InheritedSwitch";
 import { RowIcon } from "./RowIcon";
 import { subtleUnderline } from "./link-styles";
+import { tip } from "../Tooltip";
 
 // -- Links to the entity sections of a class page --
 
@@ -75,7 +76,7 @@ export function EntityJumpPills({ entities }: { entities: EntityClass[] }) {
       key={entity.module}
       href={`#${entityAnchor(entity)}`}
       data-mono={entity.designName ? true : undefined}
-      title={entity.designName ? "Entity design name" : "Entity without a design name"}
+      {...tip(entity.designName ? "Entity design name" : "Entity without a design name")}
       onClick={(e) => scrollToEntity(e, entity)}
     >
       <KindIcon kind="entity" size={14} />
@@ -90,7 +91,7 @@ export function DesignNamePills({ entities }: { entities: EntityClass[] | undefi
   if (!entities) return null;
   const names = [...new Set(entities.flatMap((e) => (e.designName ? [e.designName] : [])))];
   return names.map((name) => (
-    <Pill key={name} data-mono title="Entity design name">
+    <Pill key={name} data-mono {...tip("Entity design name")}>
       <KindIcon kind="entity" size={14} />
       {name}
     </Pill>
@@ -284,7 +285,7 @@ function KeyType({ type }: { type: string }) {
     schemaType = mapped;
   }
   return (
-    <span title={type}>
+    <span {...tip(`Keyvalue type ${type}`)}>
       {schemaType ? (
         <SchemaTypeView type={schemaType} />
       ) : (
@@ -297,7 +298,8 @@ function KeyType({ type }: { type: string }) {
 function KeyFieldLink({ entityKey }: { entityKey: EntityKey }) {
   const { game, keyOwners } = useContext(DeclarationsContext);
   const owner = keyOwners.get(entityKey);
-  if (!entityKey.field) return <Pill title="Read by code, not bound to a field">procedural</Pill>;
+  if (!entityKey.field)
+    return <Pill {...tip("Read by code, not bound to a field.")}>procedural</Pill>;
 
   const text = entityKey.path ? `${entityKey.path}.${entityKey.field}` : entityKey.field;
   if (!owner) return <Dim>{text}</Dim>;

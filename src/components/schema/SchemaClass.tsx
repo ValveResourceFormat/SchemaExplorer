@@ -35,6 +35,7 @@ import { Detail, DetailsCard } from "./Detail";
 import { InheritedSwitch } from "./InheritedSwitch";
 import { CollapsedInheritedRow, GitHubFileLink, SearchResultCard, TitledCard } from "./Cards";
 import { RowIcon } from "./RowIcon";
+import { tip } from "../Tooltip";
 
 const SizeText = styled.span`
   font-size: 14px;
@@ -43,7 +44,7 @@ const SizeText = styled.span`
 `;
 
 const AbstractPill = () => (
-  <Pill title="Abstract class, only derived classes are instantiated">abstract</Pill>
+  <Pill {...tip("Abstract class, only derived classes are instantiated.")}>abstract</Pill>
 );
 
 // -- Class --

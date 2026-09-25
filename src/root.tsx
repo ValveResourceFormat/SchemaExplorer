@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useMemo } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useParams } from "react-router";
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
+import { TooltipHost } from "./components/Tooltip";
 import { BASE_PATH, SITE_ORIGIN, canonicalUrl, getGameDef, isGameId } from "./games-list";
 import { getGameContext } from "./data/derived";
 import { buildComponentEmbed } from "./utils/discord-embed";
@@ -64,6 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <TooltipHost />
         <script src={searchPrehydrate} />
         <ScrollRestoration />
         <Scripts />

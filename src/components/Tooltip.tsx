@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
 import { styled } from "@linaria/react";
 import {
   autoUpdate,
@@ -6,30 +6,44 @@ import {
   FloatingPortal,
   offset,
   shift,
-  useDismiss,
   useFloating,
-  useFocus,
-  useHover,
-  useInteractions,
-  useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
 
 /**
- * Reference props for a hover/focus tooltip, and the floating panel to render
- * alongside the trigger. Returns `null` content when there's nothing to show,
- * so callers can skip wrapping elements that have no description.
- *
- * `accent`, when given, tints the panel's border and background with that CSS
- * color so the tooltip reads as belonging to whatever it's attached to (e.g. a
- * colored badge), instead of a plain generic box.
+ * Tooltips are data attributes, one host shows them for the whole page. An element with
+ * `data-tip` shows that text, one with `data-tip-kind` gets its content from the renderer
+ * registered for the kind. `data-tip-accent` tints the panel with a CSS color, so it reads
+ * as belonging to a colored badge
  */
-export function useTooltip(content: ReactNode | undefined, accent?: string) {
+export function tip(text: string, accent?: string) {
+  return { "data-tip": text, "data-tip-accent": accent };
+}
+
+type Renderer = (el: HTMLElement) => ReactNode;
+const renderers = new Map<string, Renderer>();
+
+/** Content for the elements with data-tip-kind={kind}, read from their data attributes */
+export function registerTooltip(kind: string, render: Renderer) {
+  renderers.set(kind, render);
+}
+
+const SELECTOR = "[data-tip], [data-tip-kind]";
+const OPEN_DELAY = 600;
+
+function tooltipContent(el: HTMLElement): ReactNode {
+  const { tipKind, tip: text } = el.dataset;
+  return tipKind ? renderers.get(tipKind)?.(el) : text;
+}
+
+/** Shows the tooltip of whatever is hovered or focused with the keyboard, mounted once */
+export function TooltipHost() {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
-  const enabled = content != null;
+  const id = useId();
 
   const { refs, floatingStyles, context } = useFloating({
-    open: enabled && open,
+    open,
     onOpenChange: setOpen,
     placement: "top",
     // top/left instead of the default translate transform, which would otherwise
@@ -39,40 +53,101 @@ export function useTooltip(content: ReactNode | undefined, accent?: string) {
     whileElementsMounted: autoUpdate,
   });
 
-  const hover = useHover(context, { move: false, delay: { open: 600, close: 0 } });
-  const focus = useFocus(context);
-  const dismiss = useDismiss(context);
-  const role = useRole(context, { role: "tooltip" });
-
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role]);
-
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
     duration: 120,
     initial: { opacity: 0, transform: "translateY(2px)" },
   });
 
-  if (!enabled) return { referenceProps: {}, tooltip: null };
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let current: HTMLElement | null = null;
+    let shown = false;
 
-  const referenceProps = getReferenceProps({
-    ref: refs.setReference,
-    tabIndex: 0,
-  }) as ComponentProps<"span"> & ComponentProps<"button">;
+    const show = (el: HTMLElement, delay: number) => {
+      clearTimeout(timer);
+      current = el;
+      timer = setTimeout(() => {
+        if (!tooltipContent(el)) return;
+        refs.setReference(el);
+        setTarget(el);
+        setOpen(true);
+        shown = true;
+      }, delay);
+    };
+    const hide = () => {
+      clearTimeout(timer);
+      current = null;
+      shown = false;
+      setOpen(false);
+    };
+    const find = (node: EventTarget | null) =>
+      node instanceof Element ? node.closest<HTMLElement>(SELECTOR) : null;
 
-  const style: CSSProperties = {
-    ...floatingStyles,
-    ...transitionStyles,
-    ...(accent ? ({ "--accent": accent } as CSSProperties) : {}),
-  };
+    const onOver = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      const el = find(e.target);
+      if (el === current) return;
+      if (!el) return hide();
+      // Moving from one tooltip to the next while one is open switches right away
+      show(el, shown ? 0 : OPEN_DELAY);
+    };
+    const onLeaveWindow = (e: PointerEvent) => {
+      if (!e.relatedTarget) hide();
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      const el = find(e.target);
+      if (el && e.target instanceof Element && e.target.matches(":focus-visible")) show(el, 0);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") hide();
+    };
 
-  const tooltip = isMounted ? (
+    document.addEventListener("pointerover", onOver);
+    document.addEventListener("pointerout", onLeaveWindow);
+    document.addEventListener("pointerdown", hide);
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", hide);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("pointerout", onLeaveWindow);
+      document.removeEventListener("pointerdown", hide);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", hide);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [refs]);
+
+  // Screen readers read the tooltip as the element's description
+  useEffect(() => {
+    if (!open || !target) return;
+    target.setAttribute("aria-describedby", id);
+    return () => target.removeAttribute("aria-describedby");
+  }, [open, target, id]);
+
+  const content = target && tooltipContent(target);
+  if (!isMounted || !content) return null;
+
+  const accent = target.dataset.tipAccent;
+  return (
     <FloatingPortal>
-      <TooltipPanel ref={refs.setFloating} style={style} {...getFloatingProps()}>
+      <TooltipPanel
+        ref={refs.setFloating}
+        id={id}
+        role="tooltip"
+        style={
+          {
+            ...floatingStyles,
+            ...transitionStyles,
+            ...(accent ? { "--accent": accent } : {}),
+          } as CSSProperties
+        }
+      >
         {content}
       </TooltipPanel>
     </FloatingPortal>
-  ) : null;
-
-  return { referenceProps, tooltip };
+  );
 }
 
 const TooltipPanel = styled.div`

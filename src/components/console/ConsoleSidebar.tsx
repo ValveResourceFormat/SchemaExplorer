@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useContext, useState } from "react";
 import { styled } from "@linaria/react";
 import { EXCLUSIVE_FLAG } from "../../data/derived";
 import {
@@ -10,10 +10,10 @@ import {
 import { SidebarCount, SidebarGroupHeader, SidebarList } from "../layout/Sidebar";
 import { sidebarRow, sidebarRowSelected } from "../layout/sidebar-styles";
 import { KindIcon } from "../kind-icon/KindIcon";
-import { useTooltip } from "../Tooltip";
 import { flagColorVars } from "./flag-styles";
-import { ExclusiveIcon, FlagTooltipContent, VisuallyHidden } from "./FlagTooltipContent";
-import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
+import { ExclusiveIcon, flagTip, VisuallyHidden } from "./FlagTooltipContent";
+import { DeclarationsContext } from "../schema/DeclarationsContext";
+import { flagGroup, flagIcon } from "./flags";
 import type { ConsoleFilters } from "./ConsolePage";
 
 const KINDS = [
@@ -174,37 +174,30 @@ function FlagFilterItem({
   count: number;
   onClick: () => void;
 }) {
+  const { game } = useContext(DeclarationsContext);
   const icon = flagIcon(flag);
-  const description = flagDescription(flag);
-  const { referenceProps, tooltip } = useTooltip(
-    description && <FlagTooltipContent flag={flag} description={description} />,
-    flagAccent(flag),
-  );
 
   return (
-    <>
-      <FilterItem
-        data-group={flagGroup(flag)}
-        data-state={state}
-        data-empty={count === 0 || undefined}
-        aria-pressed={state === "include"}
-        onClick={onClick}
-        {...referenceProps}
-      >
-        {/* The flag's own icon takes the place of the color dot */}
-        {flag === EXCLUSIVE_FLAG ? (
-          <ExclusiveIcon size={16} />
-        ) : icon ? (
-          <FlagIcon kind={icon} size={12} />
-        ) : (
-          <Dot />
-        )}
-        <ItemName>{flag}</ItemName>
-        {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
-        <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
-      </FilterItem>
-      {tooltip}
-    </>
+    <FilterItem
+      data-group={flagGroup(flag)}
+      data-state={state}
+      data-empty={count === 0 || undefined}
+      aria-pressed={state === "include"}
+      onClick={onClick}
+      {...flagTip(flag, game)}
+    >
+      {/* The flag's own icon takes the place of the color dot */}
+      {flag === EXCLUSIVE_FLAG ? (
+        <ExclusiveIcon size={16} />
+      ) : icon ? (
+        <FlagIcon kind={icon} size={12} />
+      ) : (
+        <Dot />
+      )}
+      <ItemName>{flag}</ItemName>
+      {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
+      <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
+    </FilterItem>
   );
 }
 

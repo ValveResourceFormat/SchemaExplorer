@@ -12,6 +12,7 @@ import { getGameDef, GameId } from "../../games-list";
 import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
 import { InlineList, Pill, PillDot } from "./styles";
 import { Detail } from "./Detail";
+import { tip } from "../Tooltip";
 import { deepEqual } from "../../data/schemas";
 
 type DiffStatus = "identical" | "offsets_only" | "differs";
@@ -130,10 +131,14 @@ const STATUS: Record<
 > = {
   offsets_only: {
     text: "offsets differ",
-    title: "Only offsets and size differ",
+    title: "Only offsets, size or alignment differ, the fields are the same.",
     dot: "var(--cross-game-offsets)",
   },
-  differs: { text: "differs", title: "Differs", dot: "var(--cross-game-differs)" },
+  differs: {
+    text: "differs",
+    title: "Its fields, members, base classes, flags or metadata differ.",
+    dot: "var(--cross-game-differs)",
+  },
 };
 
 /** The same declaration in the other module and in other games, nothing when there is none */
@@ -162,7 +167,7 @@ export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
             <span key={gameId}>
               <Link
                 to={schemaPath(gameId, otherModule, declaration.name)}
-                title={info?.title ?? "Identical"}
+                {...(info ? {} : tip("Identical in this game."))}
               >
                 <svg width="16" height="16" aria-hidden="true">
                   <use href={`${ICONS_URL}#game-${gameId}`} />
@@ -170,7 +175,10 @@ export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
                 {gameName}
               </Link>
               {info && (
-                <Pill style={{ "--dot": info.dot } as React.CSSProperties} title={info.title}>
+                <Pill
+                  style={{ "--dot": info.dot } as React.CSSProperties}
+                  {...tip(info.title, info.dot)}
+                >
                   <PillDot />
                   {info.text}
                 </Pill>

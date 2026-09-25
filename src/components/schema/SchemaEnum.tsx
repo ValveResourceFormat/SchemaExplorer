@@ -17,6 +17,7 @@ import { UsedByKeyvalues } from "./EntitySections";
 import { AnchorName, PageHeader, PageTitle, Pill, Row, RowNotes, Table, TableHead } from "./styles";
 import { DetailsCard } from "./Detail";
 import { RowIcon } from "./RowIcon";
+import { tip } from "../Tooltip";
 
 const COLUMNS = "fit-content(28em) max-content minmax(0, 1fr)";
 
@@ -51,7 +52,7 @@ export const SchemaEnumView: React.FC<{
   const declPath = schemaPath(game, declaration.module, declaration.name);
 
   const typePill = (
-    <Pill data-mono title="Underlying type">
+    <Pill data-mono {...tip("Underlying type")}>
       {declaration.alignment}
     </Pill>
   );
