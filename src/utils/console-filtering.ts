@@ -123,12 +123,14 @@ export interface ConsoleFilterOptions {
   kind?: ConsoleKind;
   /** Skip module:/-module: filters, for per-module chip counts */
   ignoreModules?: boolean;
+  /** Lowercase names to leave out, like the ones other games have too */
+  hideNames?: ReadonlySet<string>;
 }
 
 export function filterConsoleItems(
   items: ConsoleItem[],
   parsed: ParsedConsoleSearch,
-  { kind = "all", ignoreModules = false }: ConsoleFilterOptions = {},
+  { kind = "all", ignoreModules = false, hideNames }: ConsoleFilterOptions = {},
 ): ConsoleItem[] {
   const stats = getConsoleStats(items);
   const { nameWords } = parsed;
@@ -143,6 +145,7 @@ export function filterConsoleItems(
   for (const item of items) {
     if (kind === "convars" && item.kind !== "convar") continue;
     if (kind === "commands" && item.kind !== "command") continue;
+    if (hideNames?.has(item.name.toLowerCase())) continue;
 
     if (types.length > 0 && (item.kind !== "convar" || !types.some((p) => p(item.type)))) continue;
     // Commands have no type, -type: only hides convars

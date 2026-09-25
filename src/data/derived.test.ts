@@ -6,7 +6,7 @@ import {
   buildAllGameContexts,
   getGameContext,
 } from "./derived";
-import type { ParsedSchemas } from "./schemas";
+import { parseSchemas, type ParsedSchemas } from "./schemas";
 import type { Declaration } from "./types";
 import type { GameId } from "../games-list";
 import { parsedSchemas, buildTestContext } from "./test-helpers";
@@ -209,6 +209,23 @@ describe("context structure", () => {
 
   it("stores error as null when no error", () => {
     expect(ctx.error).toBeNull();
+  });
+
+  it("stores the console names another game has too", () => {
+    const dump = (...names: string[]) =>
+      parseSchemas({
+        classes: [],
+        enums: [],
+        commands: names.map((name) => ({ name, flags: [], modules: ["engine2"] })),
+      });
+    const loaded = new Map<GameId, ParsedSchemas>([
+      ["cs2", dump("quit", "Map", "cs2_only")],
+      ["dota2", dump("quit", "map", "dota_only")],
+    ]);
+    buildAllGameContexts(loaded, new Map());
+
+    expect([...getGameContext("cs2").sharedConsoleNames].sort()).toEqual(["map", "quit"]);
+    expect(getGameContext("deadlock").sharedConsoleNames.size).toBe(0);
   });
 
   it("stores error message when provided", () => {

@@ -54,6 +54,8 @@ export type GameContext = EntityLookups & {
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
   crossModuleLookup: Map<string, Declaration>;
   consoleItems: ConsoleItem[];
+  /** Lowercase names of the console items that another game has too */
+  sharedConsoleNames: Set<string>;
   error: string | null;
 };
 
@@ -363,6 +365,12 @@ export function buildAllGameContexts(
 ): void {
   contexts.clear();
 
+  const consoleNames = new Map<GameId, Set<string>>();
+  for (const g of GAME_LIST) {
+    const items = loaded.get(g.id)?.consoleItems ?? [];
+    consoleNames.set(g.id, new Set(items.map((i) => i.name.toLowerCase())));
+  }
+
   for (const g of GAME_LIST) {
     const schema = loaded.get(g.id);
     const declarations = schema?.declarations ?? new Map<string, Map<string, Declaration>>();
@@ -409,6 +417,11 @@ export function buildAllGameContexts(
       otherGamesLookup,
       crossModuleLookup,
       consoleItems: schema?.consoleItems ?? [],
+      sharedConsoleNames: new Set(
+        [...consoleNames.get(g.id)!].filter((name) =>
+          GAME_LIST.some((other) => other.id !== g.id && consoleNames.get(other.id)!.has(name)),
+        ),
+      ),
       ...buildEntityLookups(schema?.entities ?? [], declarations),
       error: errors.get(g.id) ?? null,
     });
