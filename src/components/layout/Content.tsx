@@ -29,6 +29,11 @@ export const TextMessage = styled.div`
 
 export const ListItem = styled.div`
   padding: 5px 0;
+
+  /* Cards space themselves, the list already does between items */
+  > :last-child {
+    margin-bottom: 0;
+  }
 `;
 
 const PageFooter = styled.footer`

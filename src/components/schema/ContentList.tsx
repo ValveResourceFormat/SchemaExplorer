@@ -18,15 +18,16 @@ import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameContext } from "../../data/derived";
 import { GameId } from "../../games-list";
-import { CardBlock, SectionLink } from "./styles";
+import { CardBody, Dim, InlineList, PageHeader, PageTitle } from "./styles";
+import { KindIcon } from "../kind-icon/KindIcon";
+import { Link } from "../Link";
+import { TitledCard } from "./Cards";
 import { ClassTree, EntityTree } from "./ClassTree";
 import { SchemaHome } from "./SchemaHome";
 
-const ModuleChipsBlock = styled(CardBlock)`
+/** Below the introduction, with the same space above as the cards there */
+const Section = styled.div`
   margin-top: 32px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
 `;
 
 function OtherGamesResults() {
@@ -67,13 +68,18 @@ function ModuleList() {
   const { game, declarations } = useContext(DeclarationsContext);
 
   return (
-    <ModuleChipsBlock>
-      {[...declarations].map(([mod, moduleMap]) => (
-        <SectionLink key={mod} to={schemaPath(game, mod)}>
-          {mod} ({moduleMap.size})
-        </SectionLink>
-      ))}
-    </ModuleChipsBlock>
+    <TitledCard title="Modules" icon="module">
+      <CardBody>
+        <InlineList>
+          {[...declarations].map(([mod, moduleMap]) => (
+            <Link key={mod} to={schemaPath(game, mod)} title={`${moduleMap.size} declarations`}>
+              {mod}
+              <Dim>{moduleMap.size}</Dim>
+            </Link>
+          ))}
+        </InlineList>
+      </CardBody>
+    </TitledCard>
   );
 }
 
@@ -123,12 +129,22 @@ export function ContentList() {
         <>
           <SchemaHome isRoot={!gameParam} />
           {module ? (
-            <>
+            <Section>
+              <PageHeader>
+                <PageTitle>
+                  <KindIcon kind="module" size="big" />
+                  {module}
+                </PageTitle>
+              </PageHeader>
               <EntityTree module={module} />
               <ClassTree module={module} />
-            </>
+            </Section>
           ) : (
-            gameParam && <ModuleList />
+            gameParam && (
+              <Section>
+                <ModuleList />
+              </Section>
+            )
           )}
         </>
       )}

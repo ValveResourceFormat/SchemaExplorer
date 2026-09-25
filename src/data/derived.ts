@@ -3,6 +3,7 @@ import type {
   ConVar,
   Declaration,
   EntityClass,
+  EntityComponent,
   EntityKey,
   SchemaClass,
   SchemaField,
@@ -25,6 +26,9 @@ export type ReferenceEntry = {
 
 export type EntityKeyRef = { entity: EntityClass; key: EntityKey };
 
+/** An entity using a class as a component, as the base it replaces or as the replacement */
+export type ComponentRef = { entity: EntityClass; component: EntityComponent; replaced: boolean };
+
 export type EntityLookups = {
   entities: EntityClass[];
   /** declarationKey(classModule, class) → entities; CEntityInstance is the root of both client and server */
@@ -33,10 +37,10 @@ export type EntityLookups = {
   entityByDesignName: Map<string, Map<string, EntityClass>>;
   /** declarationKey(module, class) → entity, for walking baseClass */
   entityByModuleClass: Map<string, EntityClass>;
-  /** declarationKey(owner module, owner class)/field → keys bound to that schema field */
-  keyByField: Map<string, EntityKeyRef[]>;
   /** declarationKey(enumModule, enum) → keys using the enum */
   enumKeyRefs: Map<string, EntityKeyRef[]>;
+  /** declarationKey(module, class) → entities using the class as a component */
+  componentOf: Map<string, ComponentRef[]>;
   /** Schema class that owns each key's field, see resolveKeyField */
   keyOwners: Map<EntityKey, { module: string; name: string }>;
   /** Entities of each schema class, keyed by the class object for per-keystroke search */
@@ -252,10 +256,6 @@ export function resolveKeyField(
   return { module: start.module, name: start.name };
 }
 
-export function keyFieldKey(module: string, name: string, field: string): string {
-  return `${declarationKey(module, name)}/${field}`;
-}
-
 export function buildEntityLookups(
   entities: EntityClass[],
   declarations: Map<string, Map<string, Declaration>>,
@@ -263,8 +263,8 @@ export function buildEntityLookups(
   const entityByClass = new Map<string, EntityClass[]>();
   const entityByDesignName = new Map<string, Map<string, EntityClass>>();
   const entityByModuleClass = new Map<string, EntityClass>();
-  const keyByField = new Map<string, EntityKeyRef[]>();
   const enumKeyRefs = new Map<string, EntityKeyRef[]>();
+  const componentOf = new Map<string, ComponentRef[]>();
   const keyOwners = new Map<EntityKey, { module: string; name: string }>();
   const entitiesByDeclaration = new Map<Declaration, EntityClass[]>();
   const designNamesByDeclaration = new Map<Declaration, string[]>();
@@ -290,13 +290,24 @@ export function buildEntityLookups(
       designNames.add(designName);
     }
 
+    // Components are in the entity's schema module or the module linking it, like on its page
+    for (const component of entity.components) {
+      for (const [name, replaced] of [
+        [component.base, true],
+        [component.override, false],
+      ] as const) {
+        const module = [entity.classModule, entity.module].find((m) =>
+          declarations.get(m)?.has(name),
+        );
+        if (module)
+          pushTo(componentOf, declarationKey(module, name), { entity, component, replaced });
+      }
+    }
+
     for (const key of entity.keys) {
       const ref = { entity, key };
       const owner = resolveKeyField(declarations, key);
-      if (owner) {
-        keyOwners.set(key, owner);
-        pushTo(keyByField, keyFieldKey(owner.module, owner.name, key.field!), ref);
-      }
+      if (owner) keyOwners.set(key, owner);
       if (key.enum && key.enumModule) {
         pushTo(enumKeyRefs, declarationKey(key.enumModule, key.enum), ref);
       }
@@ -308,8 +319,8 @@ export function buildEntityLookups(
     entityByClass,
     entityByDesignName,
     entityByModuleClass,
-    keyByField,
     enumKeyRefs,
+    componentOf,
     keyOwners,
     entitiesByDeclaration,
     designNamesByDeclaration,
@@ -356,6 +367,21 @@ export function findEntityByDesignName(
     if (found) return found;
   }
   return undefined;
+}
+
+/**
+ * The entity a design name link like /cs2/logic_relay or /cs2/server/logic_relay stands for,
+ * only when its class page exists
+ */
+export function designNameEntity(
+  ctx: Pick<EntityLookups, "entityByDesignName"> & {
+    declarations: Map<string, Map<string, Declaration>>;
+  },
+  designName: string,
+  preferModule?: string,
+): EntityClass | undefined {
+  const entity = findEntityByDesignName(ctx, designName, preferModule);
+  return entity && ctx.declarations.get(entity.classModule)?.has(entity.class) ? entity : undefined;
 }
 
 function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {

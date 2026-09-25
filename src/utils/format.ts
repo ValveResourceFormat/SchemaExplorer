@@ -30,6 +30,11 @@ export function formatHexOffset(value: number): string {
   return `0x${paddedHex}`;
 }
 
+/** Pads a formatted 0x value to a number of hex digits, so a column of them lines up */
+export function padHex(hex: string, digits: number): string {
+  return `0x${hex.slice(2).padStart(digits, "0")}`;
+}
+
 const alignmentBits: Record<string, number> = {
   uint8_t: 8,
   uint16_t: 16,

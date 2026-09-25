@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@linaria/react";
 
-type ColoredSyntaxKind = "literal" | "interface" | "container" | "atomic";
+type ColoredSyntaxKind = "literal" | "interface";
 
 const Span = styled.span`
   &.literal {
@@ -9,12 +9,6 @@ const Span = styled.span`
   }
   &.interface {
     color: var(--syntax-interface);
-  }
-  &.container {
-    color: var(--syntax-container);
-  }
-  &.atomic {
-    color: var(--syntax-atomic);
   }
 `;
 

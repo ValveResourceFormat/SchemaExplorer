@@ -1,5 +1,18 @@
 import { describe, it, expect, vi } from "vitest";
-import { formatHexOffset, formatEnumHex, metadataValueText, parseNetworkOverride } from "./format";
+import {
+  formatHexOffset,
+  formatEnumHex,
+  metadataValueText,
+  padHex,
+  parseNetworkOverride,
+} from "./format";
+
+describe("padHex", () => {
+  it("pads to a number of hex digits", () => {
+    expect(padHex("0x08", 4)).toBe("0x0008");
+    expect(padHex("0x04A8", 4)).toBe("0x04A8");
+  });
+});
 
 describe("formatHexOffset", () => {
   it("formats zero", () => {

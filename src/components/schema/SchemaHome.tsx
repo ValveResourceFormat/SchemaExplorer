@@ -3,7 +3,8 @@ import { styled } from "@linaria/react";
 import { GAME_LIST } from "../../games-list";
 import { getSearchTags } from "../search/SearchBox";
 import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
-import { CardBlock, SectionLink } from "./styles";
+import { CardBlock, InlineList } from "./styles";
+import { Link } from "../Link";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 
 const InfoBlock = styled(CardBlock)`
@@ -105,19 +106,16 @@ const HomepageCard = styled(CardBlock)`
 
 function GameList() {
   return (
-    <>
-      {GAME_LIST.map((g, i) => (
-        <React.Fragment key={g.id}>
-          {i > 0 && " "}
-          <SectionLink to={schemaPath(g.id)}>
-            <svg width="24" height="24">
-              <use href={`${ICONS_URL}#game-${g.id}`} />
-            </svg>
-            {g.name}
-          </SectionLink>
-        </React.Fragment>
+    <InlineList>
+      {GAME_LIST.map((g) => (
+        <Link key={g.id} to={schemaPath(g.id)}>
+          <svg width="20" height="20" aria-hidden="true">
+            <use href={`${ICONS_URL}#game-${g.id}`} />
+          </svg>
+          {g.name}
+        </Link>
       ))}
-    </>
+    </InlineList>
   );
 }
 
@@ -174,9 +172,7 @@ export function SchemaHome({ isRoot }: { isRoot: boolean }) {
           <InfoLink href="https://github.com/ValveResourceFormat/SchemaExplorer">GitHub</InfoLink>.
         </p>
         <p>Currently tracking:</p>
-        <p>
-          <GameList />
-        </p>
+        <GameList />
       </InfoBlock>
       <SearchFilters />
     </InfoRow>
@@ -213,9 +209,7 @@ function HomepageContent() {
           dump". The code for this site is open source on{" "}
           <InfoLink href="https://github.com/ValveResourceFormat/SchemaExplorer">GitHub</InfoLink>.
         </p>
-        <p>
-          <GameList />
-        </p>
+        <GameList />
       </HomepageCard>
 
       <HomepageCard>

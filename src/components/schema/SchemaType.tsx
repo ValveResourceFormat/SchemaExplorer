@@ -8,22 +8,25 @@ import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
 import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
 import { Dim } from "./styles";
+import { Detail } from "./Detail";
+import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText, parseNetworkOverride } from "../../utils/format";
 import { findDeclarationByName } from "../../data/derived";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const TypeLink = styled(NavLink)`
-  font-weight: 600;
+  font-weight: inherit;
+  ${subtleUnderline}
 
   &.interface {
     color: var(--syntax-interface);
   }
-  &.container {
-    color: var(--syntax-container);
+  &.enum {
+    color: var(--syntax-enum);
   }
-  &.atomic {
-    color: var(--syntax-atomic);
+  &.intrinsic {
+    color: var(--syntax-intrinsic);
   }
 
   &:hover {
@@ -48,7 +51,13 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
           </span>
         );
       }
-      return <DeclarationLink name={type.name} module={type.module} />;
+      return (
+        <DeclarationLink
+          name={type.name}
+          module={type.module}
+          isEnum={type.category === "declared_enum"}
+        />
+      );
     case "ptr":
       return (
         <>
@@ -67,18 +76,18 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
         type.inner2 && <SchemaTypeView type={type.inner2} />,
         type.count != null && <ColoredSyntax kind="literal">{type.count}</ColoredSyntax>,
       ].filter(Boolean);
-      if (args.length === 0) return <IntrinsicLink name={type.name} kind="atomic" />;
+      if (args.length === 0) return <IntrinsicLink name={type.name} />;
       return (
         <span>
-          <IntrinsicLink name={type.name} kind="container" />
-          <Dim>&lt; </Dim>
+          <IntrinsicLink name={type.name} />
+          <Dim>&lt;</Dim>
           {args.map((arg, i) => (
             <Fragment key={i}>
-              {i > 0 && ", "}
+              {i > 0 && <Dim>, </Dim>}
               {arg}
             </Fragment>
           ))}
-          <Dim> &gt;</Dim>
+          <Dim>&gt;</Dim>
         </span>
       );
     }
@@ -89,23 +98,35 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
   }
 }
 
-function IntrinsicLink({ name, kind }: { name: string; kind: "atomic" | "container" }) {
+function IntrinsicLink({ name }: { name: string }) {
   const { game } = useContext(DeclarationsContext);
   const to = schemaPath(game, INTRINSIC_MODULE, name);
 
   return (
-    <TypeLink to={to} title="intrinsic type" className={kind}>
+    <TypeLink to={to} title="intrinsic type" className="intrinsic">
       {name}
     </TypeLink>
   );
 }
 
-function DeclarationLink({ name, module }: { name: string; module: string }) {
+function DeclarationLink({
+  name,
+  module,
+  isEnum,
+}: {
+  name: string;
+  module: string;
+  isEnum: boolean;
+}) {
   const { game } = useContext(DeclarationsContext);
   const to = schemaPath(game, module, name);
 
   return (
-    <TypeLink to={to} title={`in ${module}`} className="interface">
+    <TypeLink
+      to={to}
+      title={`${isEnum ? "enum" : "class"} in ${module}`}
+      className={isEnum ? "enum" : "interface"}
+    >
       {name}
     </TypeLink>
   );
@@ -114,9 +135,6 @@ function DeclarationLink({ name, module }: { name: string; module: string }) {
 const MetadataList = styled.div`
   font-size: 14px;
   color: var(--text-dim);
-  margin-top: 4px;
-  margin-bottom: 4px;
-  margin-left: 20px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -124,7 +142,7 @@ const MetadataList = styled.div`
 
 const MetadataGroupName = styled(Link)`
   color: var(--text-dim);
-  text-decoration: none;
+  ${subtleUnderline}
   display: flex;
   align-items: center;
 
@@ -151,7 +169,7 @@ const MetadataIcon = styled.span`
 
 const MetadataName = styled(Link)`
   color: var(--text-dim);
-  text-decoration: none;
+  ${subtleUnderline}
 
   &:hover {
     color: var(--highlight);
@@ -165,6 +183,7 @@ const MetadataValue = styled.span`
 
 const MetadataValueLink = styled(Link)`
   color: var(--text-dim);
+  ${subtleUnderline}
 
   &:hover {
     color: var(--highlight);
@@ -202,7 +221,6 @@ const MetadataToggle = styled.button`
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  margin-left: 20px;
   text-align: left;
 
   &:hover {
@@ -213,6 +231,17 @@ const MetadataToggle = styled.button`
     content: "·";
     margin-right: 4px;
     opacity: 0.5;
+  }
+
+  /* Its own line under a details label */
+  &[data-in-label] {
+    display: block;
+    margin-top: 2px;
+    color: var(--highlight);
+
+    &::before {
+      content: none;
+    }
   }
 `;
 
@@ -286,6 +315,91 @@ function truncateGroups(
   return result;
 }
 
+type MetadataGroup = { name: string; values: (string | undefined)[] };
+
+/** Entries grouped by name, the friendly name and description first, KV3 defaults last */
+function groupMetadata(metadata: SchemaMetadataEntry[]): MetadataGroup[] {
+  const groups: MetadataGroup[] = [];
+  const map = new Map<string, MetadataGroup>();
+  for (const entry of metadata) {
+    let group = map.get(entry.name);
+    if (!group) {
+      group = { name: entry.name, values: [] };
+      map.set(entry.name, group);
+      groups.push(group);
+    }
+    group.values.push(metadataValueText(entry.value));
+  }
+  const priority = (name: string) => {
+    if (name === "MPropertyFriendlyName" || name === "MPropertyDescription") return -1;
+    if (name === "MGetKV3ClassDefaults") return 1;
+    return 0;
+  };
+  groups.sort((a, b) => {
+    const p = priority(a.name) - priority(b.name);
+    if (p !== 0) return p;
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
+  return groups;
+}
+
+interface MetadataState {
+  grouped: MetadataGroup[];
+  /** More lines than fit collapsed */
+  hasMore: boolean;
+  expanded: boolean;
+  toggle: () => void;
+}
+
+/** Groups metadata once and keeps whether it's expanded, collapsed again for other metadata */
+function useMetadata(metadata: SchemaMetadataEntry[]): MetadataState {
+  const grouped = useMemo(() => groupMetadata(metadata), [metadata]);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => setExpanded(false), [metadata]);
+  return {
+    grouped,
+    hasMore: countLines(grouped) > MAX_COLLAPSED_LINES,
+    expanded,
+    toggle: () => setExpanded(!expanded),
+  };
+}
+
+function MetadataToggleButton({ state, inLabel }: { state: MetadataState; inLabel?: boolean }) {
+  if (!state.hasMore) return null;
+  return (
+    <MetadataToggle data-in-label={inLabel || undefined} onClick={state.toggle}>
+      {state.expanded ? "collapse" : "expand…"}
+    </MetadataToggle>
+  );
+}
+
+/** Metadata as a details row, the expand toggle under the label where it can't be missed */
+export function MetadataDetail({
+  metadata,
+  game,
+  module,
+}: {
+  metadata: SchemaMetadataEntry[];
+  game: string;
+  module?: string;
+}) {
+  const state = useMetadata(metadata);
+  if (metadata.length === 0) return null;
+  const label = (
+    <>
+      Metadata
+      <MetadataToggleButton state={state} inLabel />
+    </>
+  );
+  return (
+    <Detail label={label}>
+      <MetadataEntries state={state} game={game} module={module} />
+    </Detail>
+  );
+}
+
 export function MetadataTags({
   metadata,
   game,
@@ -296,93 +410,71 @@ export function MetadataTags({
   /** Module of the declaration, preferred when a value names a class */
   module?: string;
 }) {
-  const grouped = useMemo(() => {
-    const groups: { name: string; values: (string | undefined)[] }[] = [];
-    const map = new Map<string, { name: string; values: (string | undefined)[] }>();
-    for (const entry of metadata) {
-      let group = map.get(entry.name);
-      if (!group) {
-        group = { name: entry.name, values: [] };
-        map.set(entry.name, group);
-        groups.push(group);
-      }
-      group.values.push(metadataValueText(entry.value));
-    }
-    const priority = (name: string) => {
-      if (name === "MPropertyFriendlyName" || name === "MPropertyDescription") return -1;
-      if (name === "MGetKV3ClassDefaults") return 1;
-      return 0;
-    };
-    groups.sort((a, b) => {
-      const p = priority(a.name) - priority(b.name);
-      if (p !== 0) return p;
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
-    });
-    return groups;
-  }, [metadata]);
-
-  const [expanded, setExpanded] = useState(false);
-  useEffect(() => setExpanded(false), [metadata]);
-
+  const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
+  return (
+    <>
+      <MetadataEntries state={state} game={game} module={module} />
+      <MetadataToggleButton state={state} />
+    </>
+  );
+}
 
-  const totalLines = countLines(grouped);
-  const hasMore = totalLines > MAX_COLLAPSED_LINES;
+function MetadataEntries({
+  state,
+  game,
+  module,
+}: {
+  state: MetadataState;
+  game: string;
+  module?: string;
+}) {
+  const { grouped, hasMore, expanded } = state;
   const visible = expanded || !hasMore ? grouped : truncateGroups(grouped, MAX_COLLAPSED_LINES);
 
   return (
-    <>
-      <MetadataList>
-        {visible.map((group) => {
-          const iconKind = metadataIconMap[group.name] ?? "meta-default";
-          const metaTo = searchLink(game, `metadata:${group.name}`);
-          if (group.values.length === 1) {
-            return (
-              <MetadataEntry key={group.name}>
-                <MetadataIcon>
-                  <KindIcon kind={iconKind} size="small" />
-                </MetadataIcon>
-                <span>
-                  <MetadataName to={metaTo}>{group.name}</MetadataName>
-                  {group.values[0] !== undefined && (
-                    <MetadataValue>
-                      :{" "}
-                      <MetadataValueText name={group.name} text={group.values[0]} module={module} />
-                    </MetadataValue>
-                  )}
-                </span>
-              </MetadataEntry>
-            );
-          }
-
+    <MetadataList>
+      {visible.map((group) => {
+        const iconKind = metadataIconMap[group.name] ?? "meta-default";
+        const metaTo = searchLink(game, `metadata:${group.name}`);
+        if (group.values.length === 1) {
           return (
-            <div key={group.name}>
-              <MetadataGroupName to={metaTo}>
-                <MetadataIcon>
-                  <KindIcon kind={iconKind} size="small" />
-                </MetadataIcon>
-                {group.name}
-              </MetadataGroupName>
-              <MetadataGroupValues>
-                {group.values.map((v, i) => (
-                  <MetadataValue key={i}>
-                    {v !== undefined && (
-                      <MetadataValueText name={group.name} text={v} module={module} />
-                    )}
+            <MetadataEntry key={group.name}>
+              <MetadataIcon>
+                <KindIcon kind={iconKind} size="small" />
+              </MetadataIcon>
+              <span>
+                <MetadataName to={metaTo}>{group.name}</MetadataName>
+                {group.values[0] !== undefined && (
+                  <MetadataValue>
+                    : <MetadataValueText name={group.name} text={group.values[0]} module={module} />
                   </MetadataValue>
-                ))}
-              </MetadataGroupValues>
-            </div>
+                )}
+              </span>
+            </MetadataEntry>
           );
-        })}
-      </MetadataList>
-      {hasMore && (
-        <MetadataToggle onClick={() => setExpanded(!expanded)}>
-          {expanded ? "collapse" : "expand…"}
-        </MetadataToggle>
-      )}
-    </>
+        }
+
+        return (
+          <div key={group.name}>
+            <MetadataGroupName to={metaTo}>
+              <MetadataIcon>
+                <KindIcon kind={iconKind} size="small" />
+              </MetadataIcon>
+              {group.name}
+            </MetadataGroupName>
+            <MetadataGroupValues>
+              {group.values.map((v, i) => (
+                <MetadataValue key={i}>
+                  {v !== undefined && (
+                    <MetadataValueText name={group.name} text={v} module={module} />
+                  )}
+                </MetadataValue>
+              ))}
+            </MetadataGroupValues>
+          </div>
+        );
+      })}
+    </MetadataList>
   );
 }

@@ -1,11 +1,11 @@
-import { useContext, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { Declaration, EntityClass, SchemaClass, SchemaEnum } from "../../data/types";
 import { DeclarationsContext, declarationKey, entityPath, schemaPath } from "./DeclarationsContext";
 import { entityLabel } from "../../utils/entity-format";
-import { CardBlock } from "./styles";
-import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { CardBody } from "./styles";
+import { TitledCard } from "./Cards";
 
 interface TreeNode {
   cls: SchemaClass;
@@ -71,6 +71,7 @@ const ClassLink = styled(Link)`
 
   &:hover {
     color: var(--highlight);
+    text-decoration: underline;
   }
 `;
 
@@ -86,39 +87,22 @@ const RootList = styled.ul`
   list-style: none;
 `;
 
-const TreeHeading = styled.h1`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-
-  a {
-    display: flex;
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
-    border-radius: 3px;
-  }
-`;
-
-const EnumsHeading = styled.h2`
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-dim);
-  margin: 12px 0 6px;
-`;
-
-const TreeContainer = styled(CardBlock)`
-  margin-top: 32px;
-  overflow: hidden;
-`;
+/** A card listing declarations of a module */
+function TreeCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: "class" | "enum" | "entity";
+  children: React.ReactNode;
+}) {
+  return (
+    <TitledCard title={title} icon={icon}>
+      <CardBody>{children}</CardBody>
+    </TitledCard>
+  );
+}
 
 function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
   return (
@@ -165,27 +149,22 @@ export function ClassTree({ module }: { module?: string }) {
   const roots = useMemo(() => buildTree(classes, declarations), [classes, declarations]);
 
   return (
-    <TreeContainer>
-      <TreeHeading>
-        <Link to={schemaPath(game)}>
-          <svg width="24" height="24">
-            <use href={`${ICONS_URL}#game-${game}`} />
-          </svg>
-        </Link>
-        {module}
-      </TreeHeading>
-      <RootList>
-        {roots.map((node) => (
-          <TreeNodeView
-            key={declarationKey(node.cls.module, node.cls.name)}
-            node={node}
-            game={game}
-          />
-        ))}
-      </RootList>
+    <>
+      {roots.length > 0 && (
+        <TreeCard title="Classes" icon="class">
+          <RootList>
+            {roots.map((node) => (
+              <TreeNodeView
+                key={declarationKey(node.cls.module, node.cls.name)}
+                node={node}
+                game={game}
+              />
+            ))}
+          </RootList>
+        </TreeCard>
+      )}
       {enums.length > 0 && (
-        <>
-          <EnumsHeading>Enums</EnumsHeading>
+        <TreeCard title="Enums" icon="enum">
           <RootList>
             {enums.map((e) => (
               <li key={declarationKey(e.module, e.name)}>
@@ -195,9 +174,9 @@ export function ClassTree({ module }: { module?: string }) {
               </li>
             ))}
           </RootList>
-        </>
+        </TreeCard>
       )}
-    </TreeContainer>
+    </>
   );
 }
 
@@ -250,7 +229,7 @@ function EntityNodeView({ node, game }: { node: EntityNode; game: string }) {
 export function EntityTree({ module }: { module: string }) {
   const { entities, game } = useContext(DeclarationsContext);
 
-  const { roots, count } = useMemo(() => {
+  const roots = useMemo(() => {
     const nodes = new Map<string, EntityNode>();
     for (const entity of entities) {
       if (entity.module === module) nodes.set(entity.class, { entity, children: [] });
@@ -262,22 +241,18 @@ export function EntityTree({ module }: { module: string }) {
     }
     for (const node of nodes.values()) node.children.sort(byLabel);
     roots.sort(byLabel);
-    return { roots, count: nodes.size };
+    return roots;
   }, [entities, module]);
 
-  if (count === 0) return null;
+  if (roots.length === 0) return null;
 
   return (
-    <TreeContainer>
-      <TreeHeading>
-        <KindIcon kind="entity" size={24} />
-        Entities in {module} ({count})
-      </TreeHeading>
+    <TreeCard title="Entities" icon="entity">
       <RootList>
         {roots.map((node) => (
           <EntityNodeView key={node.entity.class} node={node} game={game} />
         ))}
       </RootList>
-    </TreeContainer>
+    </TreeCard>
   );
 }

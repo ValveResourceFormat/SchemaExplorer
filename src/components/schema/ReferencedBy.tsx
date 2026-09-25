@@ -1,13 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { styled } from "@linaria/react";
+import { Link } from "../Link";
+import type { ReferenceEntry } from "../../data/derived";
 import {
   DeclarationsContext,
   consolePath,
   declarationKey,
+  fieldLink,
   schemaPath,
 } from "./DeclarationsContext";
 import { KindIcon } from "../kind-icon/KindIcon";
-import { SectionWrapper, SectionTitle, SectionList, SectionLink, SectionToggle } from "./styles";
+import { InlineList, SectionToggle } from "./styles";
+import { Detail } from "./Detail";
 
 const COLLAPSE_THRESHOLD = 8;
 
@@ -19,8 +23,8 @@ export const RefField = styled.span`
   }
 `;
 
-/** A titled list of chips that collapses after a few items */
-export function CollapsibleChipSection<T>({
+/** A detail row of links that collapses after a few items */
+export function CollapsibleLinkDetail<T>({
   title,
   items,
   render,
@@ -38,11 +42,8 @@ export function CollapsibleChipSection<T>({
   const toggleLabel = expanded ? "show less" : `+${items.length - COLLAPSE_THRESHOLD} more…`;
 
   return (
-    <SectionWrapper>
-      <SectionTitle>
-        {title} ({items.length})
-      </SectionTitle>
-      <SectionList>
+    <Detail label={title}>
+      <InlineList>
         {visible.map(render)}
         {collapsible && (
           <SectionToggle
@@ -54,8 +55,8 @@ export function CollapsibleChipSection<T>({
             {toggleLabel}
           </SectionToggle>
         )}
-      </SectionList>
-    </SectionWrapper>
+      </InlineList>
+    </Detail>
   );
 }
 
@@ -63,41 +64,55 @@ export function CollapsibleChipSection<T>({
 export function UsedByConVars({ name, module }: { name: string; module: string }) {
   const { game, enumConVars } = useContext(DeclarationsContext);
   return (
-    <CollapsibleChipSection
+    <CollapsibleLinkDetail
       title="Used by convars"
       items={enumConVars.get(declarationKey(module, name))}
       render={(convar) => (
-        <SectionLink
+        <Link
           key={convar.name}
           to={{ pathname: consolePath(game), hash: `name=${encodeURIComponent(convar.name)}` }}
         >
-          <KindIcon kind="convar" size={18} />
-          <span>{convar.name}</span>
-        </SectionLink>
+          <KindIcon kind="convar" size="small" />
+          {convar.name}
+        </Link>
       )}
     />
   );
 }
 
+/** Classes deriving from a declaration, and fields using it as their type */
 export function ReferencedBy({ name, module }: { name: string; module: string }) {
   const { game, references } = useContext(DeclarationsContext);
+  const { derived, fields } = useMemo(() => {
+    const refs = references.get(declarationKey(module, name)) ?? [];
+    return {
+      derived: refs.filter((r) => r.relation === "class"),
+      fields: refs.filter((r) => r.relation === "field"),
+    };
+  }, [references, module, name]);
+
+  const render = (ref: ReferenceEntry, i: number) => (
+    <Link
+      key={`${ref.declarationModule}/${ref.declarationName}-${ref.fieldName ?? ""}-${i}`}
+      to={
+        ref.fieldName
+          ? fieldLink(game, ref.declarationModule, ref.declarationName, ref.fieldName)
+          : schemaPath(game, ref.declarationModule, ref.declarationName)
+      }
+      title={`class in ${ref.declarationModule}`}
+    >
+      <KindIcon kind={ref.relation} size="small" />
+      <span>
+        {ref.declarationName}
+        {ref.fieldName && <RefField>{ref.fieldName}</RefField>}
+      </span>
+    </Link>
+  );
+
   return (
-    <CollapsibleChipSection
-      title="Referenced by"
-      items={references.get(declarationKey(module, name))}
-      render={(ref, i) => (
-        <SectionLink
-          key={`${ref.declarationModule}/${ref.declarationName}-${ref.fieldName ?? ""}-${i}`}
-          to={schemaPath(game, ref.declarationModule, ref.declarationName)}
-          title={`${ref.relation} in ${ref.declarationModule}`}
-        >
-          <KindIcon kind={ref.relation} size={18} />
-          <span>
-            {ref.declarationName}
-            {ref.fieldName && <RefField>{ref.fieldName}</RefField>}
-          </span>
-        </SectionLink>
-      )}
-    />
+    <>
+      <CollapsibleLinkDetail title="Derived classes" items={derived} render={render} />
+      <CollapsibleLinkDetail title="Used by fields" items={fields} render={render} />
+    </>
   );
 }

@@ -10,6 +10,33 @@ export function formatKeyType(type: string): string {
   return type.replace(/^FIELD_/, "").toLowerCase();
 }
 
+/**
+ * Entity field types that are a schema type under another name, every bound field of theirs has
+ * that type. Worldspace, network and resource handle types have no single schema type.
+ */
+const KEY_SCHEMA_TYPES: Record<
+  string,
+  { category: "builtin" | "atomic" | "declared_class"; name: string }
+> = {
+  FIELD_BOOLEAN: { category: "builtin", name: "bool" },
+  FIELD_CHARACTER: { category: "builtin", name: "char" },
+  FIELD_VECTOR: { category: "atomic", name: "Vector" },
+  FIELD_VECTOR2D: { category: "atomic", name: "Vector2D" },
+  FIELD_QANGLE: { category: "atomic", name: "QAngle" },
+  FIELD_COLOR32: { category: "atomic", name: "Color" },
+  FIELD_UTLSTRING: { category: "atomic", name: "CUtlString" },
+  FIELD_UTLSTRINGTOKEN: { category: "atomic", name: "CUtlStringToken" },
+  FIELD_GLOBALSYMBOL: { category: "atomic", name: "CGlobalSymbol" },
+  FIELD_EHANDLE: { category: "atomic", name: "CHandle" },
+  FIELD_TICK: { category: "declared_class", name: "GameTick_t" },
+  FIELD_TIME: { category: "declared_class", name: "GameTime_t" },
+};
+
+/** The schema type an entity field type stands for, FIELD_QANGLE is QAngle */
+export function keySchemaType(type: string) {
+  return KEY_SCHEMA_TYPES[type];
+}
+
 /** Expands printf-style patterns like Case%02d for one index */
 export function formatKeyPattern(pattern: string, index: number): string {
   return pattern.replace(/%(0?)(\d*)d/g, (_, zero: string, width: string) =>

@@ -7,11 +7,15 @@ import {
   entityChain,
   findDeclarationByName,
   findEntityByDesignName,
-  keyFieldKey,
   resolveKeyField,
 } from "./derived";
 import { parseSearch, searchDeclarations } from "../utils/filtering";
-import { formatKeyName, formatKeyPattern, formatKeyType } from "../utils/entity-format";
+import {
+  formatKeyName,
+  formatKeyPattern,
+  formatKeyType,
+  keySchemaType,
+} from "../utils/entity-format";
 
 const data: SchemasJson = {
   classes: [
@@ -44,6 +48,8 @@ const data: SchemasJson = {
       parents: [{ name: "CBaseToggle", module: "server" }],
       fields: [],
     },
+    { name: "CBodyComponent", module: "server", size: 8, fields: [] },
+    { name: "CBodyComponentPoint", module: "server", size: 8, fields: [] },
     {
       name: "hudtextparms_t",
       module: "client",
@@ -72,6 +78,7 @@ const data: SchemasJson = {
       module: "server",
       baseClass: "CEntityInstance",
       spawnable: false,
+      components: [{ base: "CBodyComponent", override: "CBodyComponentPoint" }],
       keys: [
         { name: "health", type: "FIELD_INT32", field: "m_iHealth" },
         {
@@ -199,18 +206,14 @@ describe("entity lookups", () => {
     expect(findEntityByDesignName(lookups, "missing")).toBeUndefined();
   });
 
-  it("indexes keys by the schema class that owns the field", () => {
-    expect(
-      lookups.keyByField.get(keyFieldKey("server", "CBaseEntity", "m_iHealth"))?.[0].key.name,
-    ).toBe("health");
+  it("resolves keys to the schema class that owns the field", () => {
+    const owner = (name: string) =>
+      lookups.keyOwners.get(lookups.entities.flatMap((e) => e.keys).find((k) => k.name === name)!);
+    expect(owner("health")).toEqual({ module: "server", name: "CBaseEntity" });
     // declaredIn only inherits m_flWait, so it resolves to the parent that declares it
-    expect(
-      lookups.keyByField.get(keyFieldKey("server", "CBaseToggle", "m_flWait"))?.[0].key.name,
-    ).toBe("wait");
+    expect(owner("wait")).toEqual({ module: "server", name: "CBaseToggle" });
     // Embedded structs may only exist in another module, declaredInModule says which
-    expect(lookups.keyByField.get(keyFieldKey("client", "hudtextparms_t", "x"))?.[0].key.name).toBe(
-      "x",
-    );
+    expect(owner("x")).toEqual({ module: "client", name: "hudtextparms_t" });
   });
 
   it("keeps the resolved owner of every bound key", () => {
@@ -223,6 +226,15 @@ describe("entity lookups", () => {
   it("resolves procedural keys to nothing", () => {
     const origin = lookups.entityByModuleClass.get("server/CBaseEntity")!.keys[2];
     expect(resolveKeyField(parsed.declarations, origin)).toBeNull();
+  });
+
+  it("indexes the entities using a class as a component", () => {
+    const users = (name: string) =>
+      lookups.componentOf
+        .get(declarationKey("server", name))
+        ?.map((r) => `${r.entity.class}${r.replaced ? " replaced" : ""}`);
+    expect(users("CBodyComponent")).toEqual(["CBaseEntity replaced"]);
+    expect(users("CBodyComponentPoint")).toEqual(["CBaseEntity"]);
   });
 
   it("indexes enum keyvalue references", () => {
@@ -278,6 +290,15 @@ describe("entity search", () => {
 describe("key formatting", () => {
   it("strips FIELD_ from types", () => {
     expect(formatKeyType("FIELD_FLOAT32")).toBe("float32");
+  });
+
+  it("maps field types to the schema types they stand for", () => {
+    expect(keySchemaType("FIELD_BOOLEAN")).toEqual({ category: "builtin", name: "bool" });
+    expect(keySchemaType("FIELD_QANGLE")).toEqual({ category: "atomic", name: "QAngle" });
+    expect(keySchemaType("FIELD_TICK")?.name).toBe("GameTick_t");
+    // Worldspace and resource types have no single schema type
+    expect(keySchemaType("FIELD_POSITION_VECTOR")).toBeUndefined();
+    expect(keySchemaType("FIELD_SOUNDNAME")).toBeUndefined();
   });
 
   it("expands array patterns", () => {

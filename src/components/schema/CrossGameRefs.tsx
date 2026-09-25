@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { styled } from "@linaria/react";
+import React, { useContext, useMemo } from "react";
+import { Link } from "../Link";
 import {
   Declaration,
   SchemaClass,
@@ -9,26 +9,12 @@ import {
 } from "../../data/types";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameDef, GameId } from "../../games-list";
-import { ICONS_URL } from "../kind-icon/KindIcon";
-import { SectionWrapper, SectionTitle, SectionList, SectionLink } from "./styles";
+import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { InlineList, Pill, PillDot } from "./styles";
+import { Detail } from "./Detail";
 import { deepEqual } from "../../data/schemas";
 
 type DiffStatus = "identical" | "offsets_only" | "differs";
-
-const GameLink = styled(SectionLink)`
-  &[data-status="offsets_only"] {
-    border-color: var(--cross-game-offsets);
-  }
-
-  &[data-status="differs"] {
-    border-color: var(--cross-game-differs);
-  }
-`;
-
-const ModuleIconWrapper = styled.span`
-  display: flex;
-  flex-shrink: 0;
-`;
 
 function typesEqual(a: SchemaFieldType, b: SchemaFieldType): boolean {
   if (a.category !== b.category) return false;
@@ -108,72 +94,91 @@ function compareDeclarations(a: Declaration, b: Declaration): DiffStatus {
   return "differs";
 }
 
-export function CrossGameRefs({ declaration }: { declaration: Declaration }) {
-  const { game, otherGamesLookup, crossModuleLookup } = useContext(DeclarationsContext);
+interface CrossGameRefs {
+  /** The same class in the other of client and server */
+  crossModuleMatch?: Declaration;
+  gameMatches: { gameId: GameId; gameName: string; status: DiffStatus; module: string }[];
+}
 
-  const crossModuleMatch = crossModuleLookup.get(
-    declarationKey(declaration.module, declaration.name),
-  );
-
-  const gameMatches: {
-    gameId: GameId;
-    gameName: string;
-    status: DiffStatus;
-    module: string;
-  }[] = [];
-
-  for (const [gameId, lookup] of otherGamesLookup) {
-    const match = lookup.get(declaration.name);
-    if (match && match.kind === declaration.kind) {
-      const gameInfo = getGameDef(gameId);
-      gameMatches.push({
-        gameId,
-        gameName: gameInfo?.name ?? gameId,
-        status: compareDeclarations(declaration, match),
-        module: match.module,
-      });
+/** Where else a declaration exists, or null when nowhere */
+function useCrossGameRefs(declaration: Declaration): CrossGameRefs | null {
+  const { otherGamesLookup, crossModuleLookup } = useContext(DeclarationsContext);
+  return useMemo(() => {
+    const crossModuleMatch = crossModuleLookup.get(
+      declarationKey(declaration.module, declaration.name),
+    );
+    const gameMatches: CrossGameRefs["gameMatches"] = [];
+    for (const [gameId, lookup] of otherGamesLookup) {
+      const match = lookup.get(declaration.name);
+      if (match && match.kind === declaration.kind) {
+        gameMatches.push({
+          gameId,
+          gameName: getGameDef(gameId)?.name ?? gameId,
+          status: compareDeclarations(declaration, match),
+          module: match.module,
+        });
+      }
     }
-  }
+    if (!crossModuleMatch && gameMatches.length === 0) return null;
+    return { crossModuleMatch, gameMatches };
+  }, [declaration, otherGamesLookup, crossModuleLookup]);
+}
 
-  if (!crossModuleMatch && gameMatches.length === 0) return null;
+const STATUS: Record<
+  Exclude<DiffStatus, "identical">,
+  { text: string; title: string; dot: string }
+> = {
+  offsets_only: {
+    text: "offsets differ",
+    title: "Only offsets and size differ",
+    dot: "var(--cross-game-offsets)",
+  },
+  differs: { text: "differs", title: "Differs", dot: "var(--cross-game-differs)" },
+};
+
+/** The same declaration in the other module and in other games, nothing when there is none */
+export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
+  const { game } = useContext(DeclarationsContext);
+  const refs = useCrossGameRefs(declaration);
+  if (!refs) return null;
+  const { crossModuleMatch, gameMatches } = refs;
 
   return (
-    <SectionWrapper>
-      <SectionTitle>Also in</SectionTitle>
-      <SectionList>
+    <Detail label="Also in">
+      <InlineList>
         {crossModuleMatch && (
-          <GameLink
-            key={`module-${crossModuleMatch.module}`}
+          <Link
             to={schemaPath(game, crossModuleMatch.module, crossModuleMatch.name)}
+            title={`${crossModuleMatch.name} in ${crossModuleMatch.module}`}
           >
-            <ModuleIconWrapper>
-              <svg width="16" height="16" aria-hidden="true">
-                <use href={`${ICONS_URL}#ki-module`} />
-              </svg>
-            </ModuleIconWrapper>
-            {crossModuleMatch.module}.dll
-          </GameLink>
+            <KindIcon kind="module" size="small" />
+            {crossModuleMatch.module}
+          </Link>
         )}
-        {gameMatches.map(({ gameId, gameName, status, module: otherModule }) => (
-          <GameLink
-            key={gameId}
-            to={schemaPath(gameId, otherModule, declaration.name)}
-            data-status={status === "identical" ? undefined : status}
-            title={
-              status === "identical"
-                ? "Identical"
-                : status === "offsets_only"
-                  ? "Only offsets and size differ"
-                  : "Differs"
-            }
-          >
-            <svg width="24" height="24">
-              <use href={`${ICONS_URL}#game-${gameId}`} />
-            </svg>
-            {gameName}
-          </GameLink>
-        ))}
-      </SectionList>
-    </SectionWrapper>
+        {gameMatches.map(({ gameId, gameName, status, module: otherModule }) => {
+          const info = status === "identical" ? null : STATUS[status];
+          // The pill sits next to the link, a link underlines everything inside it
+          return (
+            <span key={gameId}>
+              <Link
+                to={schemaPath(gameId, otherModule, declaration.name)}
+                title={info?.title ?? "Identical"}
+              >
+                <svg width="16" height="16" aria-hidden="true">
+                  <use href={`${ICONS_URL}#game-${gameId}`} />
+                </svg>
+                {gameName}
+              </Link>
+              {info && (
+                <Pill style={{ "--dot": info.dot } as React.CSSProperties} title={info.title}>
+                  <PillDot />
+                  {info.text}
+                </Pill>
+              )}
+            </span>
+          );
+        })}
+      </InlineList>
+    </Detail>
   );
 }
