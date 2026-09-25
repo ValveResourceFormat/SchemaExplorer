@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { styled } from "@linaria/react";
 import { NavBar } from "./NavBar";
+import { SidebarWrapper } from "./Sidebar";
+import { SidebarTop } from "./SidebarTop";
 import type { SearchMode } from "../../utils/section-search";
 import { SearchContext } from "../search/SearchContext";
 import { OtherSectionContext, useOtherSection } from "../search/useOtherSection";
 import { DeclarationsContext, type GameContext } from "../schema/DeclarationsContext";
 import { useHashParam } from "../../utils/filtering";
-import { closeOnEscape } from "../useDismiss";
 
 /** The game's data and the #search= text, for everything on a page */
 export function PageProviders({
@@ -31,10 +32,14 @@ export function PageProviders({
  */
 export function PageShell({
   section,
+  count,
   sidebar,
   children,
 }: {
   section: SearchMode;
+  /** The page's result count while searching, or everything it filters itself */
+  count?: string;
+  /** The page's own list, below the games and sections */
   sidebar: (drawer: { onNavigate: () => void; sidebarOpen: boolean }) => React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -54,7 +59,12 @@ export function PageShell({
     panelRef.current?.focus();
 
     let watcher: CloseWatcher | undefined;
-    const onKeyDown = closeOnEscape(closeSidebar);
+    // Closes on an Escape nothing else handled, and cancels it
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      closeSidebar();
+    };
     if (typeof CloseWatcher !== "undefined") {
       watcher = new CloseWatcher();
       watcher.onclose = closeSidebar;
@@ -80,7 +90,15 @@ export function PageShell({
           aria-modal={sidebarOpen || undefined}
           aria-label={sidebarOpen ? "Sidebar" : undefined}
         >
-          {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
+          <SidebarWrapper aria-label="Sidebar">
+            <SidebarTop
+              section={section}
+              count={count}
+              onNavigate={closeSidebar}
+              sidebarOpen={sidebarOpen}
+            />
+            {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
+          </SidebarWrapper>
         </SidebarPanel>
         <ContentColumn>
           <NavBar onMenuClick={openSidebar} section={section} />
@@ -144,6 +162,10 @@ const PageGrid = styled.div`
   display: grid;
   grid-template-columns: 372px 1fr;
   min-height: 100dvh;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 300px 1fr;
+  }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;

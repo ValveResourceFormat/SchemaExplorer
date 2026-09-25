@@ -1,66 +1,24 @@
 import { useContext } from "react";
 import { NavLink } from "../Link";
 import { styled } from "@linaria/react";
-import { IconKind, KindIcon } from "../kind-icon/KindIcon";
+import { KindIcon } from "../kind-icon/KindIcon";
 import { Declaration } from "../../data/types";
 import { DeclarationsContext, schemaPath } from "../schema/DeclarationsContext";
+import { sidebarRow, sidebarRowSelected } from "./sidebar-styles";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
 const SidebarLink = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border-left: 2px solid transparent;
-  padding: 0 8px;
-  height: 28px;
-  text-decoration: none;
-  color: var(--text);
-  white-space: nowrap;
-
-  > svg {
-    flex-shrink: 0;
-  }
+  ${sidebarRow}
 
   > span {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  font-size: 14px;
-  transition:
-    background 0.1s,
-    color 0.1s;
-
-  &:hover {
-    background: var(--group-members);
-  }
 
   &.active {
-    font-weight: 600;
-    background: color-mix(in srgb, var(--highlight) 9%, transparent);
-    border-left: 2px solid var(--highlight);
-    color: var(--highlight);
+    ${sidebarRowSelected}
   }
 `;
-
-const SidebarElement = ({
-  to,
-  icon,
-  text,
-  title,
-  onClick,
-}: {
-  to: string;
-  icon: IconKind;
-  text: string;
-  title?: string;
-  onClick?: () => void;
-}) => (
-  <SidebarLink to={to} onClick={onClick} title={title}>
-    <KindIcon kind={icon} size="small" />
-    <span>{text}</span>
-  </SidebarLink>
-);
 
 export const DeclarationSidebarElement = ({
   declaration,
@@ -71,52 +29,67 @@ export const DeclarationSidebarElement = ({
 }) => {
   const { game } = useContext(DeclarationsContext);
   return (
-    <SidebarElement
+    <SidebarLink
       to={schemaPath(game, declaration.module, declaration.name)}
-      icon={declaration.kind}
-      text={declaration.name}
-      title={`${declaration.kind} in ${declaration.module}`}
       onClick={onClick}
-    />
+      // Long names are cut off, the tooltip has all of it
+      title={`${declaration.name}\n${declaration.kind} in ${declaration.module}`}
+    >
+      <KindIcon kind={declaration.kind} size="small" />
+      <span>{declaration.name}</span>
+    </SidebarLink>
   );
 };
 
+const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
+
+/** A collapsible group's header, its name lines up with the rows' names below it */
 export const SidebarGroupHeader = styled.button`
-  background: var(--sidebar);
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   width: 100%;
-  padding: 0 8px;
+  min-width: 0;
   height: 28px;
+  padding: 0 8px 0 10px;
+  border: none;
+  background: var(--sidebar);
   font: inherit;
   font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   text-align: left;
+  white-space: nowrap;
   color: var(--text-dim);
   cursor: pointer;
   user-select: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
   overflow: hidden;
-  white-space: nowrap;
-  min-width: 0;
-  transition: color 0.1s;
 
   &:hover {
     color: var(--text);
   }
 
   &::before {
-    content: "\\25BC";
-    font-size: 9px;
-    opacity: 0.6;
+    content: "";
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    mask: ${CHEVRON} center / contain no-repeat;
+    transition: rotate 0.1s;
   }
 
   &[data-collapsed]::before {
-    content: "\\25B6";
+    rotate: -90deg;
   }
+`;
+
+/** A dim count at the end of a row */
+export const SidebarCount = styled.span`
+  margin-left: auto;
+  padding-left: 8px;
+  font-weight: 400;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
 `;
 
 export const SidebarWrapper = styled.nav`
@@ -134,19 +107,15 @@ export const SidebarWrapper = styled.nav`
   height: 100dvh;
   align-self: start;
 
+  @media (max-width: 1100px) {
+    margin-right: 24px;
+  }
+
   @media (max-width: 768px) {
     margin-right: 0;
     flex: 1;
     min-height: 0;
   }
-`;
-
-export const SidebarHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 0;
-  flex-shrink: 0;
 `;
 
 export const SidebarList = styled.div`

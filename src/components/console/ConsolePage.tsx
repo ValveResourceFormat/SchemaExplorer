@@ -34,6 +34,7 @@ import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { PageTitle } from "../schema/styles";
 import { SearchContext } from "../search/SearchContext";
 import { OtherSectionMatches } from "../search/OtherSectionMatches";
+import { formatSectionCount } from "../search/useOtherSection";
 import { PageProviders, PageShell } from "../layout/PageShell";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
 import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
@@ -56,7 +57,11 @@ export default function ConsolePage({ context }: { context: GameContext }) {
 function ConsoleLayout() {
   const filters = useConsoleFilters();
   return (
-    <PageShell section="console" sidebar={() => <ConsoleSidebar filters={filters} />}>
+    <PageShell
+      section="console"
+      count={formatSectionCount(filters.visible.length)}
+      sidebar={() => <ConsoleSidebar filters={filters} />}
+    >
       <ConsoleContent filters={filters} />
     </PageShell>
   );
@@ -231,9 +236,6 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
     <ContentWrapper>
       <Header>
         <PageTitle>{gameName} Console Commands &amp; ConVars</PageTitle>
-        <ResultCount>
-          {visible.length.toLocaleString("en-US")} result{visible.length !== 1 && "s"}
-        </ResultCount>
         <HeaderActions>
           {DUMP_FILES.map((file) => {
             const url = dumpFileUrl(game, file);
@@ -436,11 +438,6 @@ const Header = styled.div`
   flex-wrap: wrap;
   gap: 4px 12px;
   margin: 4px 0 0 4px;
-`;
-
-const ResultCount = styled.span`
-  font-size: 14px;
-  color: var(--text-dim);
 `;
 
 const HeaderActions = styled.div`

@@ -7,12 +7,12 @@ import {
   type ParsedConsoleSearch,
   type TagState,
 } from "../../utils/console-filtering";
-import { BrandRow } from "../layout/NavBar";
-import { SidebarGroupHeader, SidebarHeader, SidebarList, SidebarWrapper } from "../layout/Sidebar";
+import { SidebarCount, SidebarGroupHeader, SidebarList } from "../layout/Sidebar";
+import { sidebarRow, sidebarRowSelected } from "../layout/sidebar-styles";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { useTooltip } from "../Tooltip";
 import { flagColorVars } from "./flag-styles";
-import { ExclusiveIcon, FlagTooltipContent } from "./FlagTooltipContent";
+import { ExclusiveIcon, FlagTooltipContent, VisuallyHidden } from "./FlagTooltipContent";
 import { flagAccent, flagDescription, flagGroup, flagIcon } from "./flags";
 import type { ConsoleFilters } from "./ConsolePage";
 
@@ -51,10 +51,7 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
     parsed.notFlags.length + parsed.types.length + parsed.notTypes.length > 0;
 
   return (
-    <SidebarWrapper aria-label="Filters">
-      <SidebarHeader>
-        <BrandRow section="console" />
-      </SidebarHeader>
+    <>
       <SidebarList>
         <Group title="Show">
           {KINDS.map(({ kind: k, label, icon }) => (
@@ -66,7 +63,7 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
             >
               {icon ? <KindIcon kind={icon} size="small" /> : <Spacer />}
               <ItemName>{label}</ItemName>
-              <ChipCount>{kindCounts[k].toLocaleString("en-US")}</ChipCount>
+              <SidebarCount>{kindCounts[k].toLocaleString("en-US")}</SidebarCount>
             </FilterItem>
           ))}
         </Group>
@@ -88,11 +85,19 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
         />
       </SidebarList>
       {hasFilters && <ClearButton onClick={clearFilters}>Clear filters</ClearButton>}
-    </SidebarWrapper>
+    </>
   );
 });
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count?: number;
+  children: React.ReactNode;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   return (
     <>
@@ -102,6 +107,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
         onClick={() => setCollapsed(!collapsed)}
       >
         {title}
+        {count !== undefined && <SidebarCount>{count}</SidebarCount>}
       </SidebarGroupHeader>
       {!collapsed && <GroupItems>{children}</GroupItems>}
     </>
@@ -124,7 +130,7 @@ function TagGroup({
   onToggle: (tag: FilterTag, value: string) => void;
 }) {
   return (
-    <Group title={`${title} (${values.length})`}>
+    <Group title={title} count={values.length}>
       {values.map((v) => {
         const state = getTagState(parsed, tag, v);
         const count = counts.get(v) ?? 0;
@@ -148,7 +154,7 @@ function TagGroup({
             <Spacer />
             <ItemName>{v}</ItemName>
             {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
-            <ChipCount>{count.toLocaleString("en-US")}</ChipCount>
+            <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
           </FilterItem>
         );
       })}
@@ -195,28 +201,12 @@ function FlagFilterItem({
         )}
         <ItemName>{flag}</ItemName>
         {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
-        <ChipCount>{count.toLocaleString("en-US")}</ChipCount>
+        <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
       </FilterItem>
       {tooltip}
     </>
   );
 }
-
-/** An excluded flag is only drawn differently, screen readers get it as text */
-const VisuallyHidden = styled.span`
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-`;
-
-const ChipCount = styled.span`
-  font-weight: 400;
-  opacity: 0.75;
-  font-variant-numeric: tabular-nums;
-`;
 
 const GroupItems = styled.div`
   padding-bottom: 8px;
@@ -250,35 +240,14 @@ const ItemName = styled.span`
 `;
 
 const FilterItem = styled.button`
+  ${sidebarRow}
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  height: 28px;
-  padding: 0 8px;
-  border: none;
-  border-left: 2px solid transparent;
-  background: transparent;
-  font: inherit;
-  font-size: 14px;
-  text-align: left;
-  color: var(--text);
-  cursor: pointer;
   --c: var(--group-border);
   ${flagColorVars}
-
-  > :last-child {
-    margin-left: auto;
-  }
 
   &[data-group="hidden"] > ${Dot} {
     background: transparent;
     border: 1px dashed var(--text-dim);
-  }
-
-  &:hover {
-    background: var(--group-members);
   }
 
   &[data-empty] {
@@ -286,10 +255,7 @@ const FilterItem = styled.button`
   }
 
   &[data-state="include"] {
-    font-weight: 600;
-    background: color-mix(in srgb, var(--highlight) 9%, transparent);
-    border-left-color: var(--highlight);
-    color: var(--highlight);
+    ${sidebarRowSelected}
   }
 
   &[data-state="exclude"] {

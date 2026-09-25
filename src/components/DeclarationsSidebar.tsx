@@ -15,13 +15,11 @@ import { DeclarationsContext, type GameContext } from "./schema/DeclarationsCont
 import { Declaration } from "../data/types";
 import {
   DeclarationSidebarElement,
+  SidebarCount,
   SidebarGroupHeader,
-  SidebarHeader,
   SidebarList,
-  SidebarWrapper,
 } from "./layout/Sidebar";
 import { matchesWords, useParsedSearch } from "../utils/filtering";
-import { BrandRow } from "./layout/NavBar";
 
 type SidebarRow =
   | { type: "header"; module: string; count: number }
@@ -105,7 +103,6 @@ const VirtualizedList = ({
   scope,
   sidebarOpen,
   onNavigate,
-  wrapperRef,
 }: {
   rows: SidebarRow[];
   stickyIndexes: number[];
@@ -116,7 +113,6 @@ const VirtualizedList = ({
   scope: string;
   sidebarOpen?: boolean;
   onNavigate?: () => void;
-  wrapperRef: React.RefObject<HTMLDivElement | null>;
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const activeStickyIndexRef = useRef(0);
@@ -182,10 +178,9 @@ const VirtualizedList = ({
       virtualizer.scrollToIndex(activeIndex, { align: "center" });
     }
     // Reset wrapper scroll in case the browser scrolled it
-    if (wrapperRef.current) {
-      wrapperRef.current.scrollTop = 0;
-    }
-  }, [activeModule, scope, activeIndex, virtualizer, wrapperRef]);
+    const wrapper = parentRef.current?.parentElement;
+    if (wrapper) wrapper.scrollTop = 0;
+  }, [activeModule, scope, activeIndex, virtualizer]);
 
   // When the mobile sidebar opens, the virtualizer's scroll element transitions
   // from display:none to display:flex. The element had zero dimensions while hidden,
@@ -231,9 +226,11 @@ const VirtualizedList = ({
               {isHeader ? (
                 <SidebarGroupHeader
                   data-collapsed={collapsed.has(row.module) || undefined}
+                  aria-expanded={!collapsed.has(row.module)}
                   onClick={() => toggleModule(row.module)}
                 >
-                  {row.module} ({row.count})
+                  {row.module}
+                  <SidebarCount>{row.count.toLocaleString("en-US")}</SidebarCount>
                 </SidebarGroupHeader>
               ) : (
                 <DeclarationSidebarElement
@@ -261,7 +258,6 @@ export const DeclarationsSidebar = ({
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const { rows, stickyIndexes } = useMemo(
     () => buildRows(declarations, designNamesByDeclaration, nameWords, moduleWords, collapsed),
@@ -313,10 +309,7 @@ export const DeclarationsSidebar = ({
   }, [activeModule, scope]);
 
   return (
-    <SidebarWrapper ref={wrapperRef} aria-label="Classes and enums">
-      <SidebarHeader>
-        <BrandRow />
-      </SidebarHeader>
+    <>
       {hydrated ? (
         <VirtualizedList
           rows={rows}
@@ -328,7 +321,6 @@ export const DeclarationsSidebar = ({
           scope={scope}
           sidebarOpen={sidebarOpen}
           onNavigate={onNavigate}
-          wrapperRef={wrapperRef}
         />
       ) : (
         <SidebarList>
@@ -337,7 +329,8 @@ export const DeclarationsSidebar = ({
               row.type === "header" ? (
                 <li key={`h-${row.module}`} style={{ height: ROW_HEIGHT }}>
                   <SidebarGroupHeader>
-                    {row.module} ({row.count})
+                    {row.module}
+                    <SidebarCount>{row.count.toLocaleString("en-US")}</SidebarCount>
                   </SidebarGroupHeader>
                 </li>
               ) : (
@@ -349,7 +342,7 @@ export const DeclarationsSidebar = ({
           </SidebarUl>
         </SidebarList>
       )}
-    </SidebarWrapper>
+    </>
   );
 };
 
