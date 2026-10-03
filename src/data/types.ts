@@ -117,7 +117,10 @@ export interface EntityKey {
   name: string;
   type: string;
   field?: string;
-  /** Schema class of the field, the dump omits it when it's the entity's class */
+  /**
+   * Class whose datadesc adds the key, the field can be inherited from its schema parents (see
+   * resolveKeyField). The dump omits it when it's the entity's class
+   */
   declaredIn: string;
   /** The dump omits it when it's the entity's classModule */
   declaredInModule: string;

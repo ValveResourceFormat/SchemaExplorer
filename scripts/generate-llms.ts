@@ -61,20 +61,13 @@ const netGames =
 // and SchemaFieldType / SchemaMetadataEntry in src/data/types.ts.
 const text = `# Source 2 Schema Explorer
 
-Browsable UI for the engine schemas (classes, enums, fields, metadata), entity classes,
-console variables and commands of Source 2 games.
-Every class and enum has a prerendered HTML page, but crawling them is slow and the pages
-contain no more data than the JSON below. Do not crawl the site.
-
-There is no search or JSON API. For any lookup, download the raw schema for the game and search it
-with a script (jq, node, ...). Only these games are available:
+Engine schemas, entity classes, convars and commands of Source 2 games. Don't crawl the site, and
+there is no API: download a game's JSON and query it with a script (jq, node). Games:
 
 ${gameLines}
 
-URLs are content-hashed and change with each schema update; fetch ${SITE_ORIGIN}${BASE_PATH}/llms.txt
-to get the current ones. Files are plain gzip of a single JSON document. Parse with a script,
-never paste the file into context. Offsets and sizes are the runtime in-memory layout on Windows,
-not the on-disk resource layout.
+URLs change with each update, get them from ${SITE_ORIGIN}${BASE_PATH}/llms.txt. Files are gzipped
+JSON; parse them, never paste them into context. Offsets and sizes are the Windows memory layout.
 
 ## JSON structure
 
@@ -83,94 +76,70 @@ not the on-disk resource layout.
   convars?: ConVar[], commands?: Command[], entities?: Entity[] }
 Class  { module, name, size?, alignment?, flags?: string[], parents?: {module,name,offset?}[],
          fields?: Field[], metadata?: Meta[] }
-       // size and alignment in bytes, alignment omitted when unknown; games that are not kept up
-       // to date omit size, alignment and all offsets, as they would go stale; flags: abstract,
-       // trivial_constructor, trivial_destructor, construct_disallowed; parents = direct base
-       // classes only, offset (non-zero only) is where a later base in multiple inheritance starts,
-       // its fields are at offset + field offset; fields = own only, not inherited
-Field  { name, offset?, type: Type, metadata?: Meta[] }   // offset in bytes from class start
-       // some games also list static members, after the others, tagged with a {name: "static"}
-       // metadata entry (not a Valve one) and without offset
+       // bytes; sizes and offsets omitted for games that aren't kept up to date. flags: abstract,
+       // trivial_constructor, trivial_destructor, construct_disallowed. parents: direct bases,
+       // offset = start of a later base (multiple inheritance). fields: own only
+Field  { name, offset?, type: Type, metadata?: Meta[] }
+       // static members (some games): last, no offset, tagged {name: "static"}
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
-       // alignment = underlying C type as a string, e.g. "uint8_t"; value is a number
+       // alignment: underlying type, e.g. "uint8_t"
 Meta   { name, value?: string | object }
-       // value is raw unparsed text (string literals keep their quotes); absent for flag-only entries like
-       // MNotSaved and class tags like MNetworkNoBase. Common: MPropertyFriendlyName,
-       // MPropertyDescription, MGetKV3ClassDefaults (class defaults).
-       // MGetKV3ClassDefaults value is a JSON object (hidden fields omitted, keys sorted, NaN and
-       // infinity as strings like "-nan", values that differ between runs zeroed), the string
-       // "Could not parse KV3 Defaults", or absent when the class has no defaults. The object only
-       // has the keys that differ from the first parent's full defaults; for a class's full
-       // defaults, merge recursively: its own keys win, then each parent's full defaults in order.
-       // MNetworkOverride value is "Class::field".
-       // Networking metadata (MNetworkEnable, MNetworkVarNames, ...) is present only in ${netGames}.
-Type   { category, ...fields by category }
-       builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner: Type}
-       fixed_array {inner: Type, count}
-       | atomic {name, inner?: Type, inner2?: Type, count?, size?, alignment?} | bitfield {count}
-       // atomic = template container, e.g. CUtlVector<inner>, CUtlMap<inner,inner2>, CHandle<inner>;
-       // count is an integer last template argument, e.g. CBitVec<count>,
-       // CUtlVectorFixedGrowable<inner,count>; size and alignment in bytes are of that exact
-       // instantiation, so they can differ between uses of the same name; omitted like class sizes
-       // bitfield = count bits; bit position is not encoded (offset is always 0)
-       // declared_class without module is a class that is not in any schema scope
+       // value: raw text, string literals quoted; absent for tags like MNotSaved.
+       // MGetKV3ClassDefaults: JSON object (keys sorted, NaN as "-nan", per-run values zeroed),
+       // "Could not parse KV3 Defaults", or absent. Omits top-level keys equal to the first
+       // parent's; full defaults = first parent's full defaults + own keys.
+       // MNetwork* metadata: only in ${netGames}.
+Type   builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner}
+       | fixed_array {inner, count} | atomic {name, inner?, inner2?, count?, size?, alignment?}
+       | bitfield {count}   (category = the kind)
+       // atomic: engine type not in the schemas, like Vector or CUtlVector<inner>; count =
+       // integer template argument, like CBitVec<count>; size/alignment of this instantiation.
+       // bitfield: bit position not encoded. declared_class without module: in no schema scope
 ConVar  { name, type, default?, min?, max?, enum?, enumModule?, flags: string[], modules: string[], help? }
-       // type: bool, int16, uint16, int32, uint32, int64, uint64, float32, float64, string, color,
-       // vector2, vector3, vector4, qangle, vector_ws; always string in some games, which also use
-       // Source 1 style flag names. default/min/max are strings; vectors and
-       // colors look like "[0.707, 0.707, 0]". modules = declaring modules, empty (with the
-       // "reference" flag) when only referenced. Unnamed flag bits show as flag_N. flags leave out
-       // gamedll when modules has server and clientdll when it has client. enum (in enumModule) is the
-       // schema enum of convars with the "enum_value" flag, whose string value is an enumerator name
-       // (several joined with | for flag enums).
+       // type: bool, (u)int16/32/64, float32/64, string, color, vector2/3/4, qangle, vector_ws
+       // (always string in some games, with Source 1 flag names). Values are strings, vectors
+       // like "[0.707, 0.707, 0]". modules: declaring modules, empty with flag "reference".
+       // Unnamed flag bits: flag_N; gamedll/clientdll omitted when modules has server/client.
+       // enum: schema enum of "enum_value" convars, value = enumerator names joined with |
 Command { name, flags: string[], modules: string[], help? }
 Entity  { class, module, classModule?, designName?, baseClass?, spawnable, flags?, spawnOrder?,
           components?: {base, override}[], keys?: Key[], inputs?: Input[], outputs?: Output[] }
-       // Present only in ${entityGames}. class is a schema class in classModule (omitted when it's
-       // module); module links the entity class list. keys/inputs/outputs are only the ones added
-       // since baseClass (the nearest base entity in the same module), like FGD; walk baseClass for
-       // inherited ones.
-       // The root, CEntityInstance (designName "root"), holds the inputs/outputs of every entity.
+       // Only in ${entityGames}.
+       // class: schema class in classModule (default module). baseClass: class of the nearest
+       // base entity in the module; keys/inputs/outputs are only those added since it, like FGD.
+       // Root: CEntityInstance (designName "root"), with the inputs/outputs of every entity
 Key     { name, type, field?, declaredIn?, declaredInModule?, path?, enum?, enumModule?,
           procedural?, removed?, arrayStart?, arrayCount? }
-       // type is FIELD_*; field is the C++ member in class declaredIn (in declaredInModule), under
-       // path (dotted) when it is in an embedded struct. declaredIn is omitted when it's the
-       // entity's class, declaredInModule when it's the entity's classModule. With arrayCount, name
-       // is a printf pattern like "Case%02d".
+       // type: FIELD_*. field: C++ member, under path (dotted) in embedded structs. declaredIn:
+       // class whose datadesc adds the key, field may be in its schema parents; defaults to the
+       // entity's class and classModule. With arrayCount, name is a pattern like "Case%02d"
 Input   { name, params?: Param[], returns?: Param[], description?, pulseNode? }
 Output  { name, params?: Param[], description? }
-       // empty params/returns and a false pulseNode are omitted
 Param   { name, type, enumModule? }
-       // type is PVAL_*, optionally with a subtype like "PVAL_EHANDLE:func_mover";
-       // enumModule is the module of a PVAL_SCHEMA_ENUM:Name enum, also when nested like
-       // PVAL_ARRAY:PVAL_SCHEMA_ENUM:Name
+       // type: PVAL_*, maybe with a subtype like "PVAL_EHANDLE:func_mover"; enumModule: module of
+       // a PVAL_SCHEMA_ENUM:Name enum, also nested
 \`\`\`
 
-Declarations are keyed by (module, name). Besides "client" and "server" there are ~40 engine modules
-(entity2, animationsystem, particles, ...). The same name can exist in several modules (client/server
-variants of an entity), and a type reference may point to another module than the class using it
-(server classes commonly reference enums declared in "client") — do not filter type refs by module.
+Declarations are keyed by (module, name). The same name can be in several modules, and types often
+point to other modules (server classes use client enums): don't filter type references by module.
 
-## Examples (jq; the node one-liner at the end works without jq)
+## Examples
 
 \`\`\`
-# A class with all its fields
+# Class with its fields
 gunzip -c ${exampleFile} | jq '.classes[] | select(.module=="server" and .name=="CBaseEntity")'
 
-# Which classes declare a field named m_iHealth (own fields only — check parents for inherited)
+# Classes with field m_iHealth (own fields only)
 gunzip -c ${exampleFile} | jq -r '.classes[] | select(any(.fields[]?; .name=="m_iHealth")) | .module + "/" + .name'
 
-# Fields whose type contains enum MoveType_t anywhere (inside ptr/array/template too)
+# Fields using enum MoveType_t anywhere in their type
 gunzip -c ${exampleFile} | jq -r '.classes[] | (.module + "/" + .name) as $c | .fields[]? | select(any(.type | ..; objects and .category=="declared_enum" and .name=="MoveType_t")) | $c + "." + .name'
 
 # Enum members
 gunzip -c ${exampleFile} | jq '.enums[] | select(.name=="MoveType_t").members[] | {name, value}'
 
-# Class not found? It may be renamed or in another module: search names by substring across all modules
+# Search class names by substring (renamed or in another module)
 gunzip -c ${exampleFile} | jq -r '.classes[] | select(.name | test("CreateWithinSphere")) | .module + "/" + .name'
-
-# All classes of one module (module list: [.classes[].module] | unique)
-gunzip -c ${exampleFile} | jq -c '.classes[] | select(.module=="navlib") | {name, fields: [.fields[]?.name]}'
 
 # Without jq
 node -e 'const d=JSON.parse(require("zlib").gunzipSync(require("fs").readFileSync("${exampleFile}")));console.log(d.enums.find(e=>e.name=="MoveType_t").members)'
