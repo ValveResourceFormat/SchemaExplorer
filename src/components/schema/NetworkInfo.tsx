@@ -1,8 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { styled } from "@linaria/react";
 import { Link } from "../Link";
-import type { FieldNetwork, NetworkOverride, SchemaClass, SchemaField } from "../../data/types";
-import { findDeclarationByName, type InheritedBase } from "../../data/derived";
+import type {
+  ClassNetwork,
+  FieldNetwork,
+  NetworkOverride,
+  SchemaClass,
+  SchemaField,
+} from "../../data/types";
+import { findDeclarationByName, inheritedBases, type InheritedBase } from "../../data/derived";
 import { isSameNetworkType } from "../../data/network";
 import { searchLink } from "../../utils/filtering";
 import { formatFieldType } from "../../utils/format";
@@ -10,6 +16,7 @@ import { formatRange } from "../../utils/console-format";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
 import { Detail } from "./Detail";
+import { Band } from "./styles";
 import { dimLink } from "./link-styles";
 import { tip } from "../Tooltip";
 
@@ -353,9 +360,72 @@ export function ClassNetworkDetail({
   declaration: SchemaClass;
   bases: InheritedBase[];
 }) {
-  const { network } = declaration;
-  if (!network) return null;
+  if (!declaration.network) return null;
+  const rows = networkRows(declaration, declaration.network, bases);
+  if (rows.length === 0) return null;
+  return (
+    <Detail label="Network">
+      <RowList rows={rows} />
+    </Detail>
+  );
+}
 
+const MatchBody = styled.div`
+  padding: 8px 16px 12px;
+`;
+
+/**
+ * The parts of a search result's network data that matched, under a band like other matches,
+ * nothing when it matched by its fields
+ */
+export function ClassNetworkMatch({
+  declaration,
+}: {
+  /** The search result, its fields left out */
+  declaration: SchemaClass;
+}) {
+  const { declarations } = useContext(DeclarationsContext);
+  const rows = useMemo(() => {
+    if (!declaration.networkMatch) return [];
+    // Field names link to the class or base that has them, which needs every field
+    const full = declarations.get(declaration.module)?.get(declaration.name);
+    const whole = full?.kind === "class" ? full : declaration;
+    const bases = inheritedBases(declarations, declaration.parents);
+    return networkRows(whole, declaration.networkMatch, bases);
+  }, [declarations, declaration]);
+  if (rows.length === 0) return null;
+  return (
+    <>
+      <Band>
+        <KindIcon kind="meta-broadcast" size={14} />
+        <strong>Network</strong>
+      </Band>
+      <MatchBody>
+        <RowList rows={rows} />
+      </MatchBody>
+    </>
+  );
+}
+
+function RowList({ rows }: { rows: Row[] }) {
+  return (
+    <NetworkList>
+      {rows.map((row) => (
+        <React.Fragment key={row.label}>
+          <ListLabel {...tip(row.tip)}>{row.label}</ListLabel>
+          <Items data-lines={row.lines || undefined}>{row.items}</Items>
+        </React.Fragment>
+      ))}
+    </NetworkList>
+  );
+}
+
+/** A row for each setting of the network data */
+function networkRows(
+  declaration: SchemaClass,
+  network: ClassNetwork,
+  bases: InheritedBase[],
+): Row[] {
   const field = (path: string, className?: string, showClass?: boolean) => (
     <FieldName
       key={path}
@@ -445,17 +515,5 @@ export function ClassNetworkDetail({
     });
   }
 
-  if (rows.length === 0) return null;
-  return (
-    <Detail label="Network">
-      <NetworkList>
-        {rows.map((row) => (
-          <React.Fragment key={row.label}>
-            <ListLabel {...tip(row.tip)}>{row.label}</ListLabel>
-            <Items data-lines={row.lines || undefined}>{row.items}</Items>
-          </React.Fragment>
-        ))}
-      </NetworkList>
-    </Detail>
-  );
+  return rows;
 }

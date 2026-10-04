@@ -3,31 +3,61 @@ import { allDeclarations } from "./derived.ts";
 
 const termsCache = new WeakMap<object, string[]>();
 
+/** Names and values in a part of the network data, lowercased */
+function collectTerms(value: unknown, list: string[] = []): string[] {
+  if (Array.isArray(value)) {
+    for (const v of value) collectTerms(v, list);
+  } else if (typeof value === "object" && value !== null) {
+    // The network data itself, overrides and replay fields name their parts, and
+    // varTypeOverrides is keyed by field
+    for (const [k, v] of Object.entries(value)) {
+      list.push(k.toLowerCase());
+      collectTerms(v, list);
+    }
+  } else {
+    list.push(String(value).toLowerCase());
+  }
+  return list;
+}
+
 /**
  * Property names and values of a field's or class's network data, lowercased, for the network:
  * search (cached per object)
  */
 export function networkTerms(network: FieldNetwork | ClassNetwork): string[] {
   let terms = termsCache.get(network);
-  if (terms) return terms;
-  const list: string[] = [];
-  function add(value: unknown) {
-    if (Array.isArray(value)) {
-      for (const v of value) add(v);
+  if (!terms) {
+    terms = collectTerms(network);
+    termsCache.set(network, terms);
+  }
+  return terms;
+}
+
+/**
+ * The parts of a class's network data with any of the lowercased words, to show why a class
+ * matched a network: search. A property whose name has a word is kept whole, otherwise only its
+ * entries with one
+ */
+export function matchingNetworkParts(network: ClassNetwork, words: string[]): ClassNetwork {
+  const has = (value: unknown) => {
+    const terms = collectTerms(value);
+    return words.some((w) => terms.some((t) => t.includes(w)));
+  };
+  const parts: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(network)) {
+    if (has(key)) {
+      parts[key] = value;
+    } else if (Array.isArray(value)) {
+      const kept = value.filter(has);
+      if (kept.length > 0) parts[key] = kept;
     } else if (typeof value === "object" && value !== null) {
-      // The network data itself, overrides and replay fields name their parts, and
-      // varTypeOverrides is keyed by field
-      for (const [k, v] of Object.entries(value)) {
-        list.push(k.toLowerCase());
-        add(v);
-      }
-    } else {
-      list.push(String(value).toLowerCase());
+      const kept = Object.entries(value).filter(has);
+      if (kept.length > 0) parts[key] = Object.fromEntries(kept);
+    } else if (has(value)) {
+      parts[key] = value;
     }
   }
-  add(network);
-  termsCache.set(network, list);
-  return list;
+  return parts as ClassNetwork;
 }
 
 const keysCache = new WeakMap<Map<string, Map<string, Declaration>>, string[]>();

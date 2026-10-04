@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getNetworkKeys, isSameNetworkType, networkTerms } from "./network";
+import { getNetworkKeys, isSameNetworkType, matchingNetworkParts, networkTerms } from "./network";
 import { parseSchemas } from "./schemas";
 import { parsedSchemas } from "./test-helpers";
 
@@ -38,6 +38,41 @@ describe("networkTerms", () => {
   it("caches per object", () => {
     const network = { type: "int" };
     expect(networkTerms(network)).toBe(networkTerms(network));
+  });
+});
+
+describe("matchingNetworkParts", () => {
+  const network = {
+    includeByUserGroup: ["Player", "LocalPlayerExclusive"],
+    excludeByUserGroup: ["FogController"],
+    overrides: [
+      { field: "m_lifeState", kind: "changeCallback", value: "OnLifeStateChanged" },
+      { field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" },
+    ],
+    varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices", m_pOther: "COther" },
+    outOfPVSUpdates: 4,
+    varsAtomic: true,
+  };
+
+  it("keeps only the entries with a word", () => {
+    expect(matchingNetworkParts(network, ["localplayer"])).toEqual({
+      includeByUserGroup: ["LocalPlayerExclusive"],
+      overrides: [{ field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" }],
+    });
+    expect(matchingNetworkParts(network, ["camera"])).toEqual({
+      varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices" },
+    });
+  });
+
+  it("keeps a property whole when its name has a word", () => {
+    expect(matchingNetworkParts(network, ["excludebyusergroup", "atomic"])).toEqual({
+      excludeByUserGroup: ["FogController"],
+      varsAtomic: true,
+    });
+  });
+
+  it("matches values that aren't strings", () => {
+    expect(matchingNetworkParts(network, ["4"])).toEqual({ outOfPVSUpdates: 4 });
   });
 });
 

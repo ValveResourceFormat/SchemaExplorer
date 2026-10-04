@@ -37,6 +37,7 @@ import { CollapsedInheritedRow, GitHubFileLink, SearchResultCard, TitledCard } f
 import { RowIcon } from "./RowIcon";
 import {
   ClassNetworkDetail,
+  ClassNetworkMatch,
   FieldNetworkLine,
   fieldNetworkAttrs,
   NetworkedMark,
@@ -81,6 +82,7 @@ export const SchemaClassView: React.FC<{
           </>
         }
       >
+        <ClassNetworkMatch declaration={declaration} />
         {declaration.fields.length > 0 && (
           <FieldTable declaration={declaration} declPath={declPath} bases={bases} />
         )}

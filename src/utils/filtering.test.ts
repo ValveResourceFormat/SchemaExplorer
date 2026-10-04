@@ -3068,6 +3068,22 @@ describe("network: search", () => {
     ]);
   });
 
+  it("names the parts of a class's network data that matched", () => {
+    const [result] = search("network:varsatomic") as SchemaClass[];
+    expect(result.networkMatch).toEqual({ varsAtomic: true });
+    const [observer] = search("network:CCSObserver_CameraServices") as SchemaClass[];
+    expect(observer.networkMatch).toEqual({
+      varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices" },
+    });
+  });
+
+  it("names no network parts when fields matched", () => {
+    const d = search("network:posx").find(
+      (r) => r.name === "CNetworkOriginCellCoordQuantizedVector",
+    );
+    expect((d as SchemaClass).networkMatch).toBeUndefined();
+  });
+
   it("leaves MNetwork* metadata to metadata:", () => {
     // C_Fish only has MNetworkEncoder metadata with "coord"
     expect(search("network:coord").map((d) => d.name)).not.toContain("C_Fish");

@@ -5,7 +5,7 @@ import { schemaPath } from "../components/schema/DeclarationsContext";
 import { allDeclarations, type EntityLookups } from "../data/derived";
 import * as api from "../data/types";
 import { metadataValueText } from "./format";
-import { networkTerms } from "../data/network";
+import { matchingNetworkParts, networkTerms } from "../data/network";
 
 type EntitySearchLookups = Pick<
   EntityLookups,
@@ -472,7 +472,7 @@ export function searchDeclarations(
     return [];
   }
 
-  const results: { declaration: api.Declaration; score: number }[] = [];
+  const results: { declaration: api.Declaration; score: number; networkMatched?: boolean }[] = [];
 
   function isFieldMatch(
     item: { name: string; metadata?: api.SchemaMetadataEntry[]; network?: api.FieldNetwork },
@@ -573,6 +573,8 @@ export function searchDeclarations(
         matchesMetadataValues(declaration.metadata, metadataValues)) &&
       (networkWords.length === 0 ||
         (declaration.kind === "class" && matchesNetwork(declaration.network, networkWords)));
+    // The class's own network data matched, then no field has to
+    const networkMatched = declMetaSatisfied && networkWords.length > 0;
 
     // Field-level filtering needed when there are remaining words, offset, enumvalue, or unsatisfied metadata
     const hasFieldFilter =
@@ -589,7 +591,7 @@ export function searchDeclarations(
             ? { ...declaration, fields: emptyFields, entityMatches }
             : { ...declaration, members: emptyMembers };
         const score = hasNameFilter ? nameFuzzyScore : 3000;
-        results.push({ declaration: stripped, score });
+        results.push({ declaration: stripped, score, networkMatched });
       }
       continue;
     }
@@ -611,7 +613,11 @@ export function searchDeclarations(
         isFieldMatch(f, f.offset, remainingWords, declMetaSatisfied),
       );
       if (fields.length > 0) {
-        results.push({ declaration: { ...declaration, fields, entityMatches }, score });
+        results.push({
+          declaration: { ...declaration, fields, entityMatches },
+          score,
+          networkMatched,
+        });
       }
     } else {
       const members = declaration.members.filter((m) =>
@@ -637,5 +643,10 @@ export function searchDeclarations(
     results.length = MAX_SEARCH_RESULTS;
   }
 
-  return results.map((r) => r.declaration);
+  // What of their network data matched, only for the results kept
+  return results.map(({ declaration: d, networkMatched }) =>
+    networkMatched && d.kind === "class" && d.network
+      ? { ...d, networkMatch: matchingNetworkParts(d.network, networkWords) }
+      : d,
+  );
 }

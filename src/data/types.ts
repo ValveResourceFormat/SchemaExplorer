@@ -131,6 +131,8 @@ export interface SchemaClass {
   network?: ClassNetwork;
   /** Set on search results filtered by input:/output: */
   entityMatches?: { inputs: EntityInput[]; outputs: EntityOutput[] };
+  /** Set on search results whose own network data matched network:, the parts that did */
+  networkMatch?: ClassNetwork;
 }
 
 export interface SchemaEnumMember {
