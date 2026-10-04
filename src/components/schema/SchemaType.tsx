@@ -182,7 +182,8 @@ const MetadataEntry = styled.div`
 
 const MetadataIcon = styled.span`
   display: inline-flex;
-  margin-right: 4px;
+  /* Under a row's icon in its notes */
+  margin: var(--metadata-icon-margin, 0 4px 0 0);
   flex-shrink: 0;
 `;
 

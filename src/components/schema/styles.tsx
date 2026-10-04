@@ -332,10 +332,13 @@ export const CollapsedText = styled.span`
   }
 `;
 
-/** Metadata and notes under a row's name, across the whole row */
+/**
+ * Metadata and notes under a row's name, across the whole row. They line up with the name, past
+ * the row's 16px icon and its 8px gap, and the metadata icons hang under the row's icon
+ */
 export const RowNotes = styled.div`
   grid-column: 1 / -1;
   margin-top: 4px;
-  padding-left: 10px;
-  border-left: 2px solid var(--row-line);
+  padding-left: 24px;
+  --metadata-icon-margin: 0 8px 0 -24px;
 `;

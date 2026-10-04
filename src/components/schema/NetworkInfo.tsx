@@ -22,13 +22,12 @@ import { tip } from "../Tooltip";
 
 // -- Field rows --
 
-/** Lines up with the text of the metadata entries below, past their icons */
+/** In the row's notes, lined up with the field's name */
 const NetworkLine = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0 6px;
-  padding-left: 20px;
   font-size: 14px;
   color: var(--text-dim);
 
