@@ -8,8 +8,8 @@ import type {
   SchemaClass,
   SchemaField,
 } from "../../data/types";
-import { findDeclarationByName, inheritedBases, type InheritedBase } from "../../data/derived";
-import { isSameNetworkType } from "../../data/network";
+import { findDeclarationByName, type InheritedBase } from "../../data/derived";
+import { isSameNetworkType, networkName, type FieldSending } from "../../data/network";
 import { searchLink } from "../../utils/filtering";
 import { formatFieldType } from "../../utils/format";
 import { formatRange } from "../../utils/console-format";
@@ -53,21 +53,36 @@ const Value = styled.span`
 
 const Mark = styled.span`
   display: inline-flex;
-  margin-left: 6px;
-  vertical-align: -2px;
   color: var(--text-dim);
 `;
 
-/** Next to a networked field's name */
-export function NetworkedMark() {
+/** Next to a networked field's offset, crossed out when the class doesn't send it */
+export function NetworkedMark({ sending }: { sending?: FieldSending }) {
+  const off = sending?.sent === false;
+  const text = off
+    ? `Networked, but not sent by this class: ${sendingReason(sending)}`
+    : `Networked, sent from the server to clients. ${sendingReason(sending)}`;
   return (
-    <Mark {...tip("Networked, sent from the server to clients.")} aria-label="networked">
-      <KindIcon kind="meta-broadcast" size="small" />
+    <Mark {...tip(text.trim())} aria-label={off ? "not sent" : "networked"}>
+      <KindIcon kind={off ? "meta-broadcast-off" : "meta-broadcast"} size="small" />
     </Mark>
   );
 }
 
-/** A name to search the network data for, like a user group or a callback */
+/** Which class decides whether it's sent, and how */
+function sendingReason(sending: FieldSending | undefined) {
+  if (!sending) return "";
+  const { by, sent, group, noBase, via } = sending;
+  if (via) return `It's kept for ${via}, which is sent.`;
+  if (noBase) return `${by} sends none of its bases' fields it doesn't include.`;
+  const verb = sent ? "includes" : "excludes";
+  return group ? `${by} ${verb} its user group ${group}.` : `${by} ${verb} it.`;
+}
+
+/**
+ * A name to search the network data for, like a user group or a callback. The search is for the
+ * whole value, not every name containing it, like LocalPlayerExclusive for Player
+ */
 function SearchValue({ value }: { value: string }) {
   const { game } = useContext(DeclarationsContext);
   return (
@@ -290,14 +305,29 @@ function FieldName({
 }) {
   const { game, declarations } = useContext(DeclarationsContext);
   const first = path.split(".")[0];
+  // The lists name fields by their network alias, like m_vecVelocity for m_vecServerVelocity
+  const named = (f: SchemaField) => f.name === first || networkName(f) === first;
   let owner: { module: string; name: string } | undefined;
+  let field: SchemaField | undefined;
   if (className) {
-    owner = findDeclarationByName(declarations, className, "class", declaration.module);
-  } else if (declaration.fields.some((f) => f.name === first)) {
-    owner = declaration;
+    // A||B::field names several classes, the first the game has links
+    for (const name of className.split("||")) {
+      const cls = findDeclarationByName(declarations, name, "class", declaration.module);
+      if (!cls) continue;
+      owner = cls;
+      if (cls.kind === "class") field = cls.fields.find(named);
+      break;
+    }
   } else {
-    owner = bases.findLast((b) => b.fields.some((f) => f.name === first))?.parent;
+    field = declaration.fields.find(named);
+    if (field) owner = declaration;
+    // The nearest base first
+    for (let i = bases.length - 1; !field && i >= 0; i--) {
+      field = bases[i].fields.find(named);
+      if (field) owner = bases[i].parent;
+    }
   }
+  const fieldName = field?.name ?? first;
   // Long ones wrap after the class rather than inside a name
   const text =
     className && showClass ? (
@@ -311,7 +341,10 @@ function FieldName({
     );
   if (!owner) return <Value>{text}</Value>;
   return (
-    <Link to={fieldLink(game, owner.module, owner.name, first)} title={`${owner.name}::${first}`}>
+    <Link
+      to={fieldLink(game, owner.module, owner.name, fieldName)}
+      title={`${owner.name}::${fieldName}`}
+    >
       <Value>{text}</Value>
     </Link>
   );
@@ -372,7 +405,9 @@ export function ClassNetworkDetail({
   bases: InheritedBase[];
 }) {
   if (!declaration.network) return null;
-  const rows = networkRows(declaration, declaration.network, bases);
+  // The class's own fields say on their rows whether it sends them, the lists name them by alias
+  const own = new Set(declaration.fields.flatMap((f) => [f.name, networkName(f)]));
+  const rows = networkRows(declaration, declaration.network, bases, own);
   if (rows.length === 0) return null;
   return (
     <Detail label="Network">
@@ -391,19 +426,20 @@ const MatchBody = styled.div`
  */
 export function ClassNetworkMatch({
   declaration,
+  whole,
+  bases,
 }: {
   /** The search result, its fields left out */
   declaration: SchemaClass;
+  /** The class with every field, which field names link through */
+  whole: SchemaClass;
+  bases: InheritedBase[];
 }) {
-  const { declarations } = useContext(DeclarationsContext);
-  const rows = useMemo(() => {
-    if (!declaration.networkMatch) return [];
-    // Field names link to the class or base that has them, which needs every field
-    const full = declarations.get(declaration.module)?.get(declaration.name);
-    const whole = full?.kind === "class" ? full : declaration;
-    const bases = inheritedBases(declarations, declaration.parents);
-    return networkRows(whole, declaration.networkMatch, bases);
-  }, [declarations, declaration]);
+  const { networkMatch } = declaration;
+  const rows = useMemo(
+    () => (networkMatch ? networkRows(whole, networkMatch, bases) : []),
+    [networkMatch, whole, bases],
+  );
   if (rows.length === 0) return null;
   return (
     <>
@@ -436,6 +472,8 @@ function networkRows(
   declaration: SchemaClass,
   network: ClassNetwork,
   bases: InheritedBase[],
+  /** Field names left out of the lists by name */
+  hidden?: Set<string>,
 ): Row[] {
   const field = (path: string, className?: string, showClass?: boolean) => (
     <FieldName
@@ -450,12 +488,20 @@ function networkRows(
   const rows: Row[] = [];
 
   for (const { key, label, tip, fields } of NAME_LISTS) {
-    const names = network[key];
-    if (!names) continue;
+    let names = network[key];
+    if (fields && hidden) names = names?.filter((name) => !hidden.has(name));
+    if (!names?.length) continue;
     rows.push({
       label,
       tip,
-      items: names.map((name) => (fields ? field(name) : <SearchValue key={name} value={name} />)),
+      items: names.map((name) => {
+        if (!fields) return <SearchValue key={name} value={name} />;
+        // CGameSceneNode::m_hParent is the field in serializers of the class nested anywhere
+        const colons = name.indexOf("::");
+        return colons < 0
+          ? field(name)
+          : field(name.slice(colons + 2), name.slice(0, colons), true);
+      }),
     });
   }
   if (network.overrides) {

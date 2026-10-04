@@ -40,12 +40,21 @@ export function TitledCard({
           <KindIcon kind={icon} size="small" />
           {title}
         </CardTitle>
-        {actions}
+        {actions && <Actions>{actions}</Actions>}
       </CardHeader>
       {children}
     </Card>
   );
 }
+
+/** Right of the title, a line of their own when they don't fit, still on the right */
+const Actions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+`;
 
 /** Stands in for hidden inherited rows, showing them keeps the card where it is on screen */
 export function CollapsedInheritedRow({

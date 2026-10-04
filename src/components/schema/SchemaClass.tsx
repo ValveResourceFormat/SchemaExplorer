@@ -8,6 +8,7 @@ import { CrossGameDetail } from "./CrossGameRefs";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, declarationKey, fieldLink, schemaPath } from "./DeclarationsContext";
 import { inheritedBases, type InheritedBase } from "../../data/derived";
+import { componentOverrides, fieldSending, type FieldSending } from "../../data/network";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset, padHex, plural } from "../../utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
@@ -32,7 +33,7 @@ import {
   TableHead,
 } from "./styles";
 import { Detail, DetailsCard } from "./Detail";
-import { InheritedSwitch } from "./InheritedSwitch";
+import { FilterToggle, InheritedSwitch } from "./InheritedSwitch";
 import { CollapsedInheritedRow, GitHubFileLink, SearchResultCard, TitledCard } from "./Cards";
 import { RowIcon } from "./RowIcon";
 import {
@@ -60,14 +61,26 @@ export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
   isSearchResult?: boolean;
 }> = ({ declaration, isSearchResult }) => {
-  const { game, declarations, entityByClass } = useContext(DeclarationsContext);
+  const context = useContext(DeclarationsContext);
+  const { game, declarations, entityByClass } = context;
   const entities = entityByClass.get(declarationKey(declaration.module, declaration.name));
   const declPath = schemaPath(game, declaration.module, declaration.name);
   const isAbstract = declaration.flags.includes("abstract");
-  // Farthest first, search results only list the class's own matched fields
+  // Farthest first
   const bases = useMemo(
-    () => (isSearchResult ? [] : inheritedBases(declarations, declaration.parents)),
-    [isSearchResult, declarations, declaration.parents],
+    () => inheritedBases(declarations, declaration.parents),
+    [declarations, declaration.parents],
+  );
+  // Search results only have their matched fields, the serializer needs every one
+  const full = declarations.get(declaration.module)?.get(declaration.name);
+  const whole = full?.kind === "class" ? full : declaration;
+  const showsFields = !isSearchResult || declaration.fields.length > 0;
+  const sending = useMemo(
+    () =>
+      showsFields
+        ? fieldSending(declarations, whole, componentOverrides(context, declarations, whole))
+        : NO_SENDING,
+    [context, declarations, whole, showsFields],
   );
 
   if (isSearchResult) {
@@ -82,9 +95,15 @@ export const SchemaClassView: React.FC<{
           </>
         }
       >
-        <ClassNetworkMatch declaration={declaration} />
+        <ClassNetworkMatch declaration={declaration} whole={whole} bases={bases} />
         {declaration.fields.length > 0 && (
-          <FieldTable declaration={declaration} declPath={declPath} bases={bases} />
+          // Only the class's own matched fields
+          <FieldTable
+            declaration={declaration}
+            declPath={declPath}
+            bases={NO_BASES}
+            sending={sending}
+          />
         )}
         {declaration.entityMatches && (
           <EntityMatches
@@ -110,11 +129,20 @@ export const SchemaClassView: React.FC<{
         <GitHubFileLink module={declaration.module} name={declaration.name} button />
       </PageHeader>
       <ClassDetails declaration={declaration} bases={bases} />
-      <FieldTable declaration={declaration} declPath={declPath} bases={bases} inPage />
+      <FieldTable
+        declaration={declaration}
+        declPath={declPath}
+        bases={bases}
+        sending={sending}
+        inPage
+      />
       {entities && <EntitySections entities={entities} anchorBase={declPath} />}
     </>
   );
 };
+
+const NO_BASES: InheritedBase[] = [];
+const NO_SENDING = new Map<api.SchemaField, FieldSending>();
 
 const BaseOffsetText = styled.span`
   color: var(--text-dim);
@@ -195,68 +223,80 @@ function FieldTable({
   declaration,
   declPath,
   bases,
+  sending,
   inPage,
 }: {
   declaration: api.SchemaClass;
   declPath: string;
+  /** The bases whose fields it can show */
   bases: InheritedBase[];
+  /** Whether the class sends its and its bases' networked fields, from fieldSending */
+  sending: Map<api.SchemaField, FieldSending>;
   /** On the class page, with the card and column names */
   inPage?: boolean;
 }) {
   const { game } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
   const [showInherited, setShowInherited] = useState(false);
+  const [networkedOnly, setNetworkedOnly] = useState(false);
 
-  const { own, all, bitfields, hasOffsets, inheritedRange, hexDigits } = useMemo(() => {
-    const bitfields = new Map<api.SchemaField, BitfieldInfo>(
-      computeBitfieldInfo(declaration.fields),
-    );
-    const inherited: FieldEntry[] = [];
-    for (const base of bases) {
-      for (const [field, info] of computeBitfieldInfo(base.fields)) bitfields.set(field, info);
-      for (const field of base.fields) {
-        inherited.push({
-          field,
-          owner: base.parent,
-          offset: field.offset != null ? base.offset + field.offset : undefined,
-          inherited: true,
-          baseOffset: base.offset,
-        });
+  const { own, all, bitfields, hasOffsets, hasNetworked, inheritedRange, hexDigits } =
+    useMemo(() => {
+      const bitfields = new Map<api.SchemaField, BitfieldInfo>(
+        computeBitfieldInfo(declaration.fields),
+      );
+      const inherited: FieldEntry[] = [];
+      for (const base of bases) {
+        for (const [field, info] of computeBitfieldInfo(base.fields)) bitfields.set(field, info);
+        for (const field of base.fields) {
+          inherited.push({
+            field,
+            owner: base.parent,
+            offset: field.offset != null ? base.offset + field.offset : undefined,
+            inherited: true,
+            baseOffset: base.offset,
+          });
+        }
       }
-    }
-    const own: FieldEntry[] = declaration.fields.map((field) => ({
-      field,
-      owner: declaration,
-      offset: field.offset,
-      inherited: false,
-      baseOffset: 0,
-    }));
+      const own: FieldEntry[] = declaration.fields.map((field) => ({
+        field,
+        owner: declaration,
+        offset: field.offset,
+        inherited: false,
+        baseOffset: 0,
+      }));
 
-    const all = [...inherited, ...own];
-    const hasOffsets = all.some((e) => e.offset != null);
-    // Dumps without offsets keep the declaration order, bases first
-    if (all.every((e) => e.offset != null)) all.sort((a, b) => a.offset! - b.offset!);
+      const all = [...inherited, ...own];
+      const hasOffsets = all.some((e) => e.offset != null);
+      const hasNetworked = all.some((e) => e.field.network);
+      // Dumps without offsets keep the declaration order, bases first
+      if (all.every((e) => e.offset != null)) all.sort((a, b) => a.offset! - b.offset!);
 
-    // Every offset in the table as wide as the largest, so the column lines up
-    const largest = Math.max(declaration.size ?? 0, ...all.map((e) => e.offset ?? 0));
-    const hexDigits = formatHexOffset(largest).length - 2;
+      // Every offset in the table as wide as the largest, so the column lines up
+      const largest = Math.max(declaration.size ?? 0, ...all.map((e) => e.offset ?? 0));
+      const hexDigits = formatHexOffset(largest).length - 2;
 
-    // The hidden fields stand in one row, with their range when they all come first
-    const firstOwn = own.find((e) => e.offset != null)?.offset ?? declaration.size;
-    const lastInherited = Math.max(...inherited.map((e) => e.offset ?? Infinity));
-    const inheritedRange =
-      inherited.length > 0 && firstOwn != null && firstOwn > 0 && lastInherited < firstOwn
-        ? `${padHex("0x0", hexDigits)} – ${padHex(formatHexOffset(firstOwn - 1), hexDigits)}`
-        : null;
+      // The hidden fields stand in one row, with their range when they all come first
+      const firstOwn = own.find((e) => e.offset != null)?.offset ?? declaration.size;
+      const lastInherited = Math.max(...inherited.map((e) => e.offset ?? Infinity));
+      const inheritedRange =
+        inherited.length > 0 && firstOwn != null && firstOwn > 0 && lastInherited < firstOwn
+          ? `${padHex("0x0", hexDigits)} – ${padHex(formatHexOffset(firstOwn - 1), hexDigits)}`
+          : null;
 
-    return { own, all, bitfields, hasOffsets, inheritedRange, hexDigits };
-  }, [declaration, bases]);
+      return { own, all, bitfields, hasOffsets, hasNetworked, inheritedRange, hexDigits };
+    }, [declaration, bases]);
 
   if (all.length === 0) return null;
 
   const hasInherited = all.length > own.length;
-  const rows = showInherited ? all : own;
-  const cols = hasOffsets ? OFFSET_COLUMNS : COLUMNS;
+  const shown = showInherited ? all : own;
+  // The filter goes away while none of the shown fields are networked
+  const canFilter = shown.some((e) => e.field.network);
+  const rows = networkedOnly && canFilter ? shown.filter((e) => e.field.network) : shown;
+  // The networked mark goes next to the offset
+  const endColumn = hasOffsets || hasNetworked;
+  const cols = endColumn ? OFFSET_COLUMNS : COLUMNS;
 
   const table = (
     <Table style={{ "--cols": cols } as React.CSSProperties}>
@@ -264,7 +304,7 @@ function FieldTable({
         <TableHead>
           <span>Name</span>
           <span>Type</span>
-          {hasOffsets && <OffsetHead>Offset</OffsetHead>}
+          {endColumn && <OffsetHead>{hasOffsets && "Offset"}</OffsetHead>}
         </TableHead>
       )}
       {!showInherited && hasInherited && (
@@ -287,9 +327,10 @@ function FieldTable({
               entry={entry}
               declPath={declPath}
               game={game}
-              hasOffsets={hasOffsets}
+              endColumn={endColumn}
               hexDigits={hexDigits}
               bitfield={bitfields.get(entry.field)}
+              sending={sending.get(entry.field)}
               anchored={!entry.inherited && fieldParam === entry.field.name}
             />
           </React.Fragment>
@@ -305,12 +346,25 @@ function FieldTable({
       title="Fields"
       icon="field"
       actions={
-        hasInherited && (
-          <InheritedSwitch
-            label="Fields"
-            showInherited={showInherited}
-            onChange={setShowInherited}
-          />
+        (canFilter || hasInherited) && (
+          <>
+            {canFilter && (
+              <FilterToggle
+                pressed={networkedOnly}
+                onChange={setNetworkedOnly}
+                icon="meta-broadcast"
+              >
+                Networked
+              </FilterToggle>
+            )}
+            {hasInherited && (
+              <InheritedSwitch
+                label="Fields"
+                showInherited={showInherited}
+                onChange={setShowInherited}
+              />
+            )}
+          </>
         )
       }
     >
@@ -354,6 +408,13 @@ const OffsetCell = styled.div`
   flex-direction: column;
   align-items: flex-end;
   justify-self: end;
+`;
+
+/** The networked mark left of the offset, so the marks line up */
+const OffsetLine = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const OffsetLink = styled(Link)`
@@ -437,17 +498,20 @@ const FieldRow = memo(function FieldRow({
   entry,
   declPath,
   game,
-  hasOffsets,
+  endColumn,
   hexDigits,
   bitfield,
+  sending,
   anchored,
 }: {
   entry: FieldEntry;
   declPath: string;
   game: string;
-  hasOffsets: boolean;
+  /** The offset and the networked mark */
+  endColumn: boolean;
   hexDigits: number;
   bitfield?: BitfieldInfo;
+  sending?: FieldSending;
   anchored: boolean;
 }) {
   const { field, owner, offset, inherited } = entry;
@@ -479,20 +543,22 @@ const FieldRow = memo(function FieldRow({
               {field.name}
             </AnchorName>
           )}
-          {field.network && <NetworkedMark />}
         </FieldName>
         <FieldType>
           <SchemaTypeView type={field.type} />
           {field.defaultValue != null && <DefaultValue> = {field.defaultValue}</DefaultValue>}
         </FieldType>
-        {hasOffsets && (
+        {endColumn && (
           <OffsetCell data-end>
-            {hex != null && (
-              <OffsetLink to={searchLink(game, `offset:${hex}`)} title="Fields at this offset">
-                <span>{offset}</span>
-                <span>{padHex(hex, hexDigits)}</span>
-              </OffsetLink>
-            )}
+            <OffsetLine>
+              {field.network && <NetworkedMark sending={sending} />}
+              {hex != null && (
+                <OffsetLink to={searchLink(game, `offset:${hex}`)} title="Fields at this offset">
+                  <span>{offset}</span>
+                  <span>{padHex(hex, hexDigits)}</span>
+                </OffsetLink>
+              )}
+            </OffsetLine>
             {bitfield && (
               <BitRange>
                 bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}

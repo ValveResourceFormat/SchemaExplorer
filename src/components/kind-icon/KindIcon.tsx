@@ -7,6 +7,7 @@ export type IconKind =
   | "meta-default"
   | "meta-tag"
   | "meta-broadcast"
+  | "meta-broadcast-off"
   | "meta-note"
   | "meta-variable"
   | "meta-eye-closed"

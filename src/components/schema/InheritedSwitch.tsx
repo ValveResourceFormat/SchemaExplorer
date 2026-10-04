@@ -1,12 +1,14 @@
+import type { ReactNode } from "react";
 import { styled } from "@linaria/react";
 import { keepInPlace } from "../../utils/keep-in-place";
+import { KindIcon, type IconKind } from "../kind-icon/KindIcon";
 
-/** Switch between a declaration's own members and all of them */
+/** Frames the buttons of a card's switch or filter */
 const Segmented = styled.fieldset`
   display: inline-flex;
   gap: 2px;
   min-width: 0;
-  margin: 0 0 0 auto;
+  margin: 0;
   padding: 2px;
   border-radius: 8px;
   border: 1px solid var(--group-border);
@@ -14,6 +16,9 @@ const Segmented = styled.fieldset`
 `;
 
 const SegmentButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 2px 10px;
   border: none;
   border-radius: 6px;
@@ -35,6 +40,31 @@ const SegmentButton = styled.button`
       0 1px 2px #0000001a;
   }
 `;
+
+/** A filter that's on or off, like only the networked fields */
+export function FilterToggle({
+  pressed,
+  onChange,
+  icon,
+  children,
+}: {
+  pressed: boolean;
+  onChange: (pressed: boolean) => void;
+  icon: IconKind;
+  children: ReactNode;
+}) {
+  return (
+    <Segmented>
+      <SegmentButton
+        aria-pressed={pressed}
+        onClick={(e) => keepInPlace(e.currentTarget, () => onChange(!pressed))}
+      >
+        <KindIcon kind={icon} size={14} />
+        {children}
+      </SegmentButton>
+    </Segmented>
+  );
+}
 
 export function InheritedSwitch({
   showInherited,

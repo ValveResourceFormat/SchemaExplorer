@@ -76,7 +76,7 @@ export type GameContext = EntityLookups & {
   consoleItems: ConsoleItem[];
   /** declarationKey(enumModule, enum) → convars using the enum */
   enumConVars: Map<string, ConVar[]>;
-  /** Whether the dump has network data, Deadlock's and older ones don't */
+  /** Whether the dump has network data, older ones like Half-Life: Alyx's don't */
   hasNetwork: boolean;
   error: string | null;
 };
