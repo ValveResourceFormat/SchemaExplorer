@@ -115,7 +115,12 @@ const FIELD_PROPERTIES: {
   { key: "encoder", label: "encoder", tip: "Encoder.", search: true },
   { key: "bitCount", label: "bits", tip: "Bits it's sent in, 32 when not given." },
   { key: "encodeFlags", label: "encode flags", tip: "Encoder flags." },
-  { key: "priority", label: "priority", tip: "Send priority, 64 when not given." },
+  // Not a send rate: fields are sorted by it, so the ones that change often get small indices
+  {
+    key: "priority",
+    label: "priority",
+    tip: "Orders the class's fields, lowest first, 64 when not given.",
+  },
   {
     key: "userGroups",
     label: "user group",
@@ -312,10 +317,17 @@ function FieldName({
   );
 }
 
+/**
+ * The game's NetworkOverrideType_t. A user group override adds a group, and clears the field's
+ * groups without a value
+ */
 const OVERRIDE_KINDS: Record<string, string> = {
   changeCallback: "on change",
+  changeTag: "change tag",
   bitCount: "bits",
   userGroup: "user group",
+  outOfPVSUpdates: "out of PVS updates",
+  removeAll: "reset to defaults",
 };
 
 /** Overrides of the same class, kind and value on one line, like m_cellX, m_cellY and m_cellZ */
@@ -459,8 +471,11 @@ function networkRows(
               {field(f, o.class, i === 0)}
             </React.Fragment>
           ))}{" "}
-          → {OVERRIDE_KINDS[o.kind] ?? o.kind}
-          {/* Unknown kinds can come with an empty value */}
+          →{" "}
+          {o.kind === "userGroup" && !o.value
+            ? "no user groups"
+            : (OVERRIDE_KINDS[o.kind] ?? o.kind)}
+          {/* Kinds without a value, like resetting, have an empty one */}
           {o.value && (
             <>
               {" "}

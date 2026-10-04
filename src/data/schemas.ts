@@ -417,6 +417,13 @@ export function parseEntities(raw: RawEntityClass[]): EntityClass[] {
   });
 }
 
+/** Override kinds that older dumps wrote as kindN, by the name newer ones write */
+const OVERRIDE_KIND_NAMES: Record<string, string> = {
+  kind3: "changeTag",
+  kind7: "outOfPVSUpdates",
+  kind8: "removeAll",
+};
+
 export function parseSchemas(data: SchemasJson) {
   const classes = data.classes as SchemaClass[];
   for (const c of classes) {
@@ -424,6 +431,7 @@ export function parseSchemas(data: SchemasJson) {
     c.flags ??= [];
     c.parents ??= [];
     c.metadata ??= [];
+    for (const o of c.network?.overrides ?? []) o.kind = OVERRIDE_KIND_NAMES[o.kind] ?? o.kind;
     for (const f of (c.fields ??= [])) {
       f.metadata ??= [];
     }

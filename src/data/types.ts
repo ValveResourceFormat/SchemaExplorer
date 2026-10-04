@@ -65,7 +65,10 @@ export interface FieldNetwork {
 /** A class's change to how a field of a base is sent */
 export interface NetworkOverride {
   field: string;
-  /** serializer, encoder, changeCallback, bitCount, userGroup or priority, kindN if unknown */
+  /**
+   * serializer, encoder, changeCallback, changeTag, bitCount, userGroup, priority, outOfPVSUpdates
+   * or removeAll, kindN if unknown
+   */
   kind: string;
   /** Without it, the nearest base that has the field */
   class?: string;
