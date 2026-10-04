@@ -5,7 +5,7 @@ import { schemaPath } from "../components/schema/DeclarationsContext";
 import { allDeclarations, type EntityLookups } from "../data/derived";
 import * as api from "../data/types";
 import { metadataValueText } from "./format";
-import { matchingNetworkParts, networkTerms } from "../data/network";
+import { matchesNetworkWords, matchingNetworkParts } from "../data/network";
 
 type EntitySearchLookups = Pick<
   EntityLookups,
@@ -394,12 +394,12 @@ export function matchesMetadataValues(
   return matchesLoweredValues(lowerMetaVals(metadata), values);
 }
 
-/** Every word is in one of the network data's names or values, nothing without network data */
+/** Every word is in the network data (see matchesNetworkWords), nothing without network data */
 function matchesNetwork(
   network: api.FieldNetwork | api.ClassNetwork | undefined,
   words: string[],
 ): boolean {
-  return network != null && matchesLoweredKeys(networkTerms(network), words);
+  return network != null && matchesNetworkWords(network, words);
 }
 
 export const MAX_SEARCH_RESULTS = 500;
@@ -588,7 +588,14 @@ export function searchDeclarations(
       if (hasNameFilter || moduleWords.length > 0 || declMetaSatisfied || hasEntityFilter) {
         const stripped =
           declaration.kind === "class"
-            ? { ...declaration, fields: emptyFields, entityMatches }
+            ? {
+                ...declaration,
+                // Fields with the network data too, like the fields in a user group the class excludes
+                fields: networkMatched
+                  ? declaration.fields.filter((f) => matchesNetwork(f.network, networkWords))
+                  : emptyFields,
+                entityMatches,
+              }
             : { ...declaration, members: emptyMembers };
         const score = hasNameFilter ? nameFuzzyScore : 3000;
         results.push({ declaration: stripped, score, networkMatched });

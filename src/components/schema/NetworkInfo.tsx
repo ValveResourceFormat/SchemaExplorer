@@ -71,7 +71,7 @@ export function NetworkedMark() {
 function SearchValue({ value }: { value: string }) {
   const { game } = useContext(DeclarationsContext);
   return (
-    <Link to={searchLink(game, `network:${value}`)} title={`Find network data with ${value}`}>
+    <Link to={searchLink(game, `network:=${value}`)} title={`Find network data with ${value}`}>
       <Value>{value}</Value>
     </Link>
   );

@@ -87,8 +87,8 @@ const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "network:",
     icon: "meta-broadcast",
-    description: "Filter by network property or value",
-    example: "e.g. network:changeCallbacks or network:LocalPlayerExclusive",
+    description: "Filter by network property or value, =value for a whole one",
+    example: "e.g. network:changeCallbacks, network:=Player or network:userGroups=Player",
     network: true,
   },
   {

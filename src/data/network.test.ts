@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { getNetworkKeys, isSameNetworkType, matchingNetworkParts, networkTerms } from "./network";
+import {
+  getNetworkKeys,
+  isSameNetworkType,
+  matchesNetworkWords,
+  matchingNetworkParts,
+  networkTerms,
+} from "./network";
 import { parseSchemas } from "./schemas";
 import { parsedSchemas } from "./test-helpers";
 
@@ -73,6 +79,42 @@ describe("matchingNetworkParts", () => {
 
   it("matches values that aren't strings", () => {
     expect(matchingNetworkParts(network, ["4"])).toEqual({ outOfPVSUpdates: 4 });
+  });
+
+  it("keeps whole values with =, and a property's with key=", () => {
+    expect(matchingNetworkParts(network, ["=player"])).toEqual({ includeByUserGroup: ["Player"] });
+    expect(matchingNetworkParts(network, ["value=localplayerexclusive"])).toEqual({
+      overrides: [{ field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" }],
+    });
+    expect(matchingNetworkParts(network, ["vartypeoverrides=cother"])).toEqual({
+      varTypeOverrides: { m_pOther: "COther" },
+    });
+  });
+});
+
+describe("matchesNetworkWords", () => {
+  const network = {
+    type: "int32",
+    userGroups: ["LocalPlayerExclusive"],
+    changeCallbacks: ["OnPlayerChanged"],
+  };
+
+  it("matches text anywhere in a name or value", () => {
+    expect(matchesNetworkWords(network, ["player"])).toBe(true);
+    expect(matchesNetworkWords(network, ["usergroup", "onplayer"])).toBe(true);
+    expect(matchesNetworkWords(network, ["water"])).toBe(false);
+  });
+
+  it("matches a whole name or value with =", () => {
+    expect(matchesNetworkWords(network, ["=player"])).toBe(false);
+    expect(matchesNetworkWords(network, ["=localplayerexclusive"])).toBe(true);
+    expect(matchesNetworkWords(network, ["=usergroups"])).toBe(true);
+  });
+
+  it("matches a property's whole value with key=", () => {
+    expect(matchesNetworkWords(network, ["usergroups=localplayerexclusive"])).toBe(true);
+    expect(matchesNetworkWords(network, ["changecallbacks=localplayerexclusive"])).toBe(false);
+    expect(matchesNetworkWords(network, ["usergroups=localplayer"])).toBe(false);
   });
 });
 

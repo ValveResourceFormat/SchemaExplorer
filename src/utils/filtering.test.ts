@@ -3077,6 +3077,28 @@ describe("network: search", () => {
     });
   });
 
+  it("lists the fields that match too when the class's own network data matched", () => {
+    const field = (name: string, userGroups: string[]) => ({
+      name,
+      type: { category: "builtin" as const, name: "int32" },
+      metadata: [],
+      network: { type: "int32", userGroups },
+    });
+    const entity: SchemaClass = {
+      kind: "class",
+      name: "CEntity",
+      module: "m",
+      flags: [],
+      parents: [],
+      metadata: [],
+      fields: [field("m_iHealth", ["Player"]), field("m_iArmor", ["LocalPlayerExclusive"])],
+      network: { excludeByUserGroup: ["Player", "LocalPlayerExclusive"] },
+    };
+    const [result] = searchDeclarations([entity], parseSearch("network:=player")) as SchemaClass[];
+    expect(result.fields.map((f) => f.name)).toEqual(["m_iHealth"]);
+    expect(result.networkMatch).toEqual({ excludeByUserGroup: ["Player"] });
+  });
+
   it("names no network parts when fields matched", () => {
     const d = search("network:posx").find(
       (r) => r.name === "CNetworkOriginCellCoordQuantizedVector",
