@@ -4,6 +4,7 @@ import {
   allDeclarations,
   buildEntityLookups,
   declarationKey,
+  effectiveEntitySettings,
   entityChain,
   findDeclarationByName,
   findEntityByDesignName,
@@ -379,5 +380,60 @@ describe("findDeclarationByName", () => {
     expect(find("entity2")).toBe("entity2");
     // Not in that module, any module
     expect(find("client")).toBe("entity2");
+  });
+});
+
+describe("entity registration rules", () => {
+  const cls = (name: string, parent?: string) => ({
+    name,
+    module: "server",
+    size: 8,
+    fields: [],
+    ...(parent && { parents: [{ name: parent, module: "server" }] }),
+  });
+  const parsedAliases = parseSchemas({
+    classes: [cls("CBase"), cls("CAnimGraph", "CBase"), cls("CAnimGraphAlias_anim", "CAnimGraph")],
+    enums: [],
+    entities: [
+      {
+        class: "CBase",
+        module: "server",
+        spawnable: false,
+        flags: ["ECF_NOT_NETWORKED", "ECF_HAS_REQUIRED_ENTITY_HANDLE"],
+        spawnOrder: 5,
+      },
+      {
+        class: "CAnimGraph",
+        module: "server",
+        designName: "anim_graph",
+        baseClass: "CBase",
+        spawnable: true,
+      },
+      {
+        class: "CAnimGraphAlias_anim",
+        module: "server",
+        designName: "anim",
+        baseClass: "CAnimGraph",
+        spawnable: true,
+        flags: ["ECF_ALIAS"],
+      },
+    ],
+  });
+  const aliasLookups = buildEntityLookups(parsedAliases.entities, parsedAliases.declarations);
+  const animGraph = aliasLookups.entityByModuleClass.get("server/CAnimGraph")!;
+  const alias = aliasLookups.entityByModuleClass.get("server/CAnimGraphAlias_anim")!;
+
+  it("creates the aliased class for an alias's design name", () => {
+    expect(findEntityByDesignName(aliasLookups, "anim")).toBe(animGraph);
+    expect(aliasLookups.aliasesByEntity.get(animGraph)).toEqual([alias]);
+    const decl = parsedAliases.declarations.get("server")!.get("CAnimGraph")!;
+    expect(aliasLookups.designNamesByDeclaration.get(decl)).toEqual(["anim_graph", "anim"]);
+  });
+
+  it("copies some flags and the spawn order from the bases", () => {
+    expect(effectiveEntitySettings(aliasLookups, animGraph)).toEqual({
+      flags: [{ flag: "ECF_NOT_NETWORKED", from: "CBase" }],
+      spawnOrder: { value: 5, from: "CBase" },
+    });
   });
 });

@@ -11,6 +11,7 @@ import type {
 } from "../../data/types";
 import {
   declarationKey,
+  effectiveEntitySettings,
   entityChain,
   findDeclarationByName,
   findEntityByDesignName,
@@ -69,34 +70,64 @@ function scrollToEntity(event: React.MouseEvent, entity: EntityClass) {
   target.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+/** Design names of aliases that create the entities' class, without repeats */
+function AliasPills({ entities }: { entities: EntityClass[] }) {
+  const { aliasesByEntity } = useContext(DeclarationsContext);
+  const own = new Set(entities.map((e) => e.designName));
+  const names = entities.flatMap((e) => aliasesByEntity.get(e)?.map((a) => a.designName!) ?? []);
+  return [...new Set(names)]
+    .filter((n) => !own.has(n))
+    .map((name) => (
+      <Pill
+        key={`alias/${name}`}
+        data-mono
+        {...tip("Alias design name: the game creates this class for it")}
+      >
+        <KindIcon kind="entity" size={14} />
+        {name}
+        <Dim> alias</Dim>
+      </Pill>
+    ));
+}
+
 /** The class's entities in its page header, each jumping to its section below */
 export function EntityJumpPills({ entities }: { entities: EntityClass[] }) {
   const showModule = entities.length > 1;
-  return entities.map((entity) => (
-    <PillAnchor
-      key={entity.module}
-      href={`#${entityAnchor(entity)}`}
-      data-mono={entity.designName ? true : undefined}
-      {...tip(entity.designName ? "Entity design name" : "Entity without a design name")}
-      onClick={(e) => scrollToEntity(e, entity)}
-    >
-      <KindIcon kind="entity" size={14} />
-      {entity.designName ?? "entity"}
-      {showModule && ` · ${entity.module}`}
-    </PillAnchor>
-  ));
+  return (
+    <>
+      {entities.map((entity) => (
+        <PillAnchor
+          key={entity.module}
+          href={`#${entityAnchor(entity)}`}
+          data-mono={entity.designName ? true : undefined}
+          {...tip(entity.designName ? "Entity design name" : "Entity without a design name")}
+          onClick={(e) => scrollToEntity(e, entity)}
+        >
+          <KindIcon kind="entity" size={14} />
+          {entity.designName ?? "entity"}
+          {showModule && ` · ${entity.module}`}
+        </PillAnchor>
+      ))}
+      <AliasPills entities={entities} />
+    </>
+  );
 }
 
 /** Design names of a class, for its search result */
 export function DesignNamePills({ entities }: { entities: EntityClass[] | undefined }) {
   if (!entities) return null;
   const names = [...new Set(entities.flatMap((e) => (e.designName ? [e.designName] : [])))];
-  return names.map((name) => (
-    <Pill key={name} data-mono {...tip("Entity design name")}>
-      <KindIcon kind="entity" size={14} />
-      {name}
-    </Pill>
-  ));
+  return (
+    <>
+      {names.map((name) => (
+        <Pill key={name} data-mono {...tip("Entity design name")}>
+          <KindIcon kind="entity" size={14} />
+          {name}
+        </Pill>
+      ))}
+      <AliasPills entities={entities} />
+    </>
+  );
 }
 
 // -- Entity heading and details --
@@ -165,20 +196,53 @@ const ComponentEntry = styled.span`
   }
 `;
 
+/** The entity class an alias creates, linked to its page */
+function AliasTarget({ entity }: { entity: EntityClass }) {
+  const context = useContext(DeclarationsContext);
+  // An alias creates its base, see buildEntityLookups
+  const target = entityChain(context, entity)[0];
+  if (!target || !context.aliasesByEntity.get(target)?.includes(entity)) return null;
+  return (
+    <Detail label="Alias">
+      <span {...tip("The game creates this class for the alias's design name, never the alias")}>
+        {entity.designName} creates{" "}
+        <Link to={entityPath(context.game, target)}>{target.class}</Link>
+      </span>
+    </Detail>
+  );
+}
+
 /** Facts about an entity beyond its name, the card hides when there are none */
 function EntityDetails({ entity }: { entity: EntityClass }) {
+  // The dump has what the class declares, registration copies some from its bases
+  const { flags, spawnOrder } = effectiveEntitySettings(useContext(DeclarationsContext), entity);
   return (
     <DetailsCard>
-      {entity.flags.length > 0 && (
+      <AliasTarget entity={entity} />
+      {flags.length > 0 && (
         <Detail label="Flags">
           <InlineList>
-            {entity.flags.map((f) => (
-              <span key={f}>{f}</span>
-            ))}
+            {flags.map(({ flag, from }) =>
+              from ? (
+                <Dim key={flag} {...tip(`Inherited from ${from}`)}>
+                  {flag}
+                </Dim>
+              ) : (
+                <span key={flag}>{flag}</span>
+              ),
+            )}
           </InlineList>
         </Detail>
       )}
-      {entity.spawnOrder !== 0 && <Detail label="Spawn order">{entity.spawnOrder}</Detail>}
+      {spawnOrder.value !== 0 && (
+        <Detail label="Spawn order">
+          {spawnOrder.from ? (
+            <Dim {...tip(`Inherited from ${spawnOrder.from}`)}>{spawnOrder.value}</Dim>
+          ) : (
+            spawnOrder.value
+          )}
+        </Detail>
+      )}
       {entity.components.length > 0 && (
         <Detail label="Components">
           <ComponentList>

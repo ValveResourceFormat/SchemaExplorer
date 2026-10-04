@@ -36,8 +36,16 @@ export type EntityLookups = {
   entities: EntityClass[];
   /** declarationKey(classModule, class) → entities; CEntityInstance is the root of both client and server */
   entityByClass: Map<string, EntityClass[]>;
-  /** module → design name → entity */
+  /**
+   * module → design name → entity. An alias's design name is the class it creates, see
+   * aliasesByEntity
+   */
   entityByDesignName: Map<string, Map<string, EntityClass>>;
+  /**
+   * Alias entity classes (ECF_ALIAS) of the entity they give another design name to. The game
+   * creates the aliased class for the alias's design name, never the alias class itself
+   */
+  aliasesByEntity: Map<EntityClass, EntityClass[]>;
   /** declarationKey(module, class) → entity, for walking baseClass */
   entityByModuleClass: Map<string, EntityClass>;
   /** declarationKey(enumModule, enum) → keys using the enum */
@@ -48,7 +56,10 @@ export type EntityLookups = {
   keyOwners: Map<EntityKey, { module: string; name: string }>;
   /** Entities of each schema class, keyed by the class object for per-keystroke search */
   entitiesByDeclaration: Map<Declaration, EntityClass[]>;
-  /** Deduplicated design names of each schema class (CEntityInstance is "root" twice) */
+  /**
+   * Deduplicated design names of each schema class (CEntityInstance is "root" twice), with the
+   * aliases that create it
+   */
   designNamesByDeclaration: Map<Declaration, string[]>;
   /** Every design name, sorted, for search suggestions */
   designNames: string[];
@@ -331,10 +342,26 @@ export function buildEntityLookups(
     }
   }
 
+  // An alias's design name creates the class it aliases, its base, after every class is known. The
+  // entity it creates gets the base's design name, not the alias's
+  const aliasesByEntity = new Map<EntityClass, EntityClass[]>();
+  for (const alias of entities) {
+    if (!alias.designName || !alias.baseClass || !alias.flags.includes("ECF_ALIAS")) continue;
+    const target = entityByModuleClass.get(declarationKey(alias.module, alias.baseClass));
+    if (!target) continue;
+    pushTo(aliasesByEntity, target, alias);
+    entityByDesignName.get(alias.module)!.set(alias.designName, target);
+    const decl = declarations.get(target.classModule)?.get(target.class);
+    if (decl && !designNamesByDeclaration.get(decl)?.includes(alias.designName)) {
+      pushTo(designNamesByDeclaration, decl, alias.designName);
+    }
+  }
+
   return {
     entities,
     entityByClass,
     entityByDesignName,
+    aliasesByEntity,
     entityByModuleClass,
     enumKeyRefs,
     componentOf,
@@ -343,6 +370,45 @@ export function buildEntityLookups(
     designNamesByDeclaration,
     designNames: [...designNames].sort(),
   };
+}
+
+/**
+ * Flags the entity system copies to a class from its nearest base entity class that has them, when
+ * it registers the class. Others, like ECF_PRECACHE_NETWORKED_ENTITY_ON_CLIENT, aren't copied
+ */
+const INHERITED_ENTITY_FLAGS = new Set([
+  "ECF_NOT_NETWORKED",
+  "ECF_ALWAYS_SPAWN_ON_CLIENT",
+  "ECF_BECOME_SUSPENDED_INSTEAD_OF_DORMANT",
+  "ECF_ANONYMOUS_ENTITY",
+  "ECF_SPAWN_GROUP_HANDLE_INVALID",
+  "ECF_FORCE_WORLDGROUPID",
+]);
+
+/** A setting and the base it came from, when it isn't the entity's own */
+type Inherited<T> = T & { from?: string };
+
+/**
+ * An entity's flags and spawn order as the game has them, with the ones registration copies from
+ * its bases: the dump has what each class declares
+ */
+export function effectiveEntitySettings(
+  lookups: Pick<EntityLookups, "entityByModuleClass">,
+  entity: EntityClass,
+): { flags: Inherited<{ flag: string }>[]; spawnOrder: Inherited<{ value: number }> } {
+  const flags: Inherited<{ flag: string }>[] = entity.flags.map((flag) => ({ flag }));
+  let spawnOrder: Inherited<{ value: number }> = { value: entity.spawnOrder };
+  for (const base of entityChain(lookups, entity)) {
+    for (const flag of base.flags) {
+      if (INHERITED_ENTITY_FLAGS.has(flag) && !flags.some((f) => f.flag === flag)) {
+        flags.push({ flag, from: base.class });
+      }
+    }
+    if (spawnOrder.value === 0 && base.spawnOrder !== 0) {
+      spawnOrder = { value: base.spawnOrder, from: base.class };
+    }
+  }
+  return { flags, spawnOrder };
 }
 
 const chainCache = new WeakMap<EntityClass, EntityClass[]>();
