@@ -287,7 +287,17 @@ function FieldName({
   } else {
     owner = bases.findLast((b) => b.fields.some((f) => f.name === first))?.parent;
   }
-  const text = className && showClass ? `${className}::${path}` : path;
+  // Long ones wrap after the class rather than inside a name
+  const text =
+    className && showClass ? (
+      <>
+        {className}::
+        <wbr />
+        {path}
+      </>
+    ) : (
+      path
+    );
   if (!owner) return <Value>{text}</Value>;
   return (
     <Link to={fieldLink(game, owner.module, owner.name, first)} title={`${owner.name}::${first}`}>

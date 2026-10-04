@@ -39,6 +39,17 @@ const MemberHex = styled(Link)`
   }
 `;
 
+/** The value and hex columns, on phones together at the end of the line */
+const MemberValues = styled.div`
+  display: contents;
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+`;
+
 const FlagBreakdown = styled.div`
   font-size: 14px;
   color: var(--text-dim);
@@ -168,7 +179,8 @@ function EnumMemberRow({
 
   return (
     <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
-      <MemberName>
+      {/* On phones the value and hex go on the line of the name */}
+      <MemberName data-inline>
         <RowIcon kind="enum-member" size="small" />
         <AnchorName
           to={{ pathname: declPath, hash: `field=${encodeURIComponent(member.name)}` }}
@@ -178,10 +190,12 @@ function EnumMemberRow({
           {member.name}
         </AnchorName>
       </MemberName>
-      <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
-      <div>
-        {hex && <MemberHex to={searchLink(game, `enumvalue:${member.value}`)}>{hex}</MemberHex>}
-      </div>
+      <MemberValues data-end>
+        <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
+        <div>
+          {hex && <MemberHex to={searchLink(game, `enumvalue:${member.value}`)}>{hex}</MemberHex>}
+        </div>
+      </MemberValues>
       {(decomposed || member.metadata.length > 0) && (
         <RowNotes>
           {decomposed && <FlagBreakdown>{decomposed.join(" | ")}</FlagBreakdown>}

@@ -82,7 +82,9 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
       return (
         <span>
           {link}
+          {/* Long types wrap after the bracket rather than inside a name */}
           <Dim>&lt;</Dim>
+          <wbr />
           {args.map((arg, i) => (
             <Fragment key={i}>
               {i > 0 && <Dim>, </Dim>}

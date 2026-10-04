@@ -148,11 +148,20 @@ const ComponentList = styled.span`
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: max-content;
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
 
-    > span:nth-child(3n + 2) {
-      display: none;
-    }
+/** A component in the columns of the list, on phones on a line of its own that can wrap */
+const ComponentEntry = styled.span`
+  display: contents;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 8px;
+    overflow-wrap: anywhere;
   }
 `;
 
@@ -177,17 +186,17 @@ function EntityDetails({ entity }: { entity: EntityClass }) {
               "name" in c ? (
                 // Added by the entity itself, nothing replaced. It can also replace the same
                 // component of a base
-                <React.Fragment key={`added/${c.name}`}>
+                <ComponentEntry key={`added/${c.name}`}>
                   <ComponentClass entity={entity} name={c.name} />
                   <span />
                   <span />
-                </React.Fragment>
+                </ComponentEntry>
               ) : (
-                <React.Fragment key={`replaced/${c.base}`}>
+                <ComponentEntry key={`replaced/${c.base}`}>
                   <ComponentClass entity={entity} name={c.base} />
                   <Dim aria-label="replaced by">→</Dim>
                   <ComponentClass entity={entity} name={c.override} />
-                </React.Fragment>
+                </ComponentEntry>
               ),
             )}
           </ComponentList>
@@ -368,7 +377,8 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
         ))}
         <OverriddenPill by={props.overriddenBy} />
       </NameCell>
-      <div>
+      {/* On phones the type and field share a line */}
+      <div data-inline>
         {entityKey.enum && entityKey.enumModule ? (
           <SchemaTypeView
             type={{ category: "declared_enum", name: entityKey.enum, module: entityKey.enumModule }}
@@ -377,7 +387,7 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
           <KeyType type={entityKey.type} />
         )}
       </div>
-      <div>
+      <div data-inline>
         <KeyFieldLink entityKey={entityKey} />
       </div>
     </Row>

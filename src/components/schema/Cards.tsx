@@ -63,7 +63,9 @@ export function CollapsedInheritedRow({
       onClick={(e) => keepInPlace(e.currentTarget.closest("section")!, onShow)}
       aria-expanded={false}
     >
-      <CollapsedText data-before-offset={range ? true : undefined}>{label}</CollapsedText>
+      <CollapsedText data-inline data-before-offset={range ? true : undefined}>
+        {label}
+      </CollapsedText>
       {range}
     </CollapsedRow>
   );
@@ -165,6 +167,25 @@ const CardNotes = styled.div`
   padding: 0 16px 12px;
 `;
 
+/** On phones the source link sits in the corner, rather than wrapping onto a line of its own */
+const ResultHeader = styled(CardHeader)`
+  @media (max-width: 768px) {
+    position: relative;
+
+    &:has(> ${GitHubLink}) {
+      /* Its 16px icon and the gap */
+      padding-right: 44px;
+    }
+
+    > ${GitHubLink} {
+      position: absolute;
+      /* Centered on the title's first line, under the header's 12px padding */
+      top: 16px;
+      right: 16px;
+    }
+  }
+`;
+
 /** A class or enum in search results, its pills after the name and its matches below */
 export function SearchResultCard({
   declaration,
@@ -179,7 +200,7 @@ export function SearchResultCard({
   const { kind, module, name, metadata } = declaration;
   return (
     <Card>
-      <CardHeader>
+      <ResultHeader>
         <CardTitle>
           <KindIcon kind={kind} size="small" />
           <AnchorName to={schemaPath(game, module, name)} title={`${kind} in ${module}`}>
@@ -189,7 +210,7 @@ export function SearchResultCard({
         <ModulePill module={module} />
         {pills}
         <GitHubFileLink module={module} name={name} />
-      </CardHeader>
+      </ResultHeader>
       {metadata.length > 0 && (
         <CardNotes>
           <MetadataTags metadata={metadata} game={game} module={module} />

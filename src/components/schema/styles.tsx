@@ -216,7 +216,10 @@ export const Band = styled.div`
   }
 `;
 
-/** Columns come from --cols, on phones every cell gets its own line */
+/**
+ * Columns come from --cols. On phones every cell gets its own line, except cells marked
+ * data-inline, which share a line with their neighbours, and data-end, which go to its end
+ */
 export const Table = styled.div`
   display: grid;
   grid-template-columns: var(--cols);
@@ -242,6 +245,28 @@ const rowStyles = `
   /* The table draws the line above its first row */
   &:not(:first-child) {
     border-top: 1px solid var(--row-line);
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+
+    > * {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+
+    /* Whole, a cell that doesn't fit moves to the next line */
+    > [data-inline],
+    > [data-end] {
+      flex: 0 0 auto;
+      max-width: 100%;
+    }
+
+    > [data-end] {
+      margin-left: auto;
+    }
   }
 `;
 

@@ -268,7 +268,7 @@ function FieldTable({
       {!showInherited && hasInherited && (
         <CollapsedInheritedRow
           label="Inherited fields"
-          range={inheritedRange && <OffsetText>{inheritedRange}</OffsetText>}
+          range={inheritedRange && <OffsetText data-end>{inheritedRange}</OffsetText>}
           onShow={() => setShowInherited(true)}
         />
       )}
@@ -352,11 +352,6 @@ const OffsetCell = styled.div`
   flex-direction: column;
   align-items: flex-end;
   justify-self: end;
-
-  @media (max-width: 768px) {
-    align-items: flex-start;
-    justify-self: start;
-  }
 `;
 
 const OffsetLink = styled(Link)`
@@ -400,6 +395,18 @@ const FieldName = styled.div`
 const FieldType = styled.div`
   min-width: 0;
   overflow-wrap: anywhere;
+
+  /* After the offset, which is on the line of the name */
+  @media (max-width: 768px) {
+    order: 1;
+  }
+`;
+
+/** After the type, which comes after the offset on phones */
+const FieldNotes = styled(RowNotes)`
+  @media (max-width: 768px) {
+    order: 1;
+  }
 `;
 
 const DefaultValue = styled.span`
@@ -450,7 +457,8 @@ const FieldRow = memo(function FieldRow({
   return (
     <>
       <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
-        <FieldName data-inherited={inherited || undefined}>
+        {/* On phones the offset goes on the line of the name */}
+        <FieldName data-inline data-inherited={inherited || undefined}>
           <RowIcon kind="field" size="small" />
           {inherited ? (
             // Inherited fields belong to their base's page
@@ -476,7 +484,7 @@ const FieldRow = memo(function FieldRow({
           {field.defaultValue != null && <DefaultValue> = {field.defaultValue}</DefaultValue>}
         </FieldType>
         {hasOffsets && (
-          <OffsetCell>
+          <OffsetCell data-end>
             {hex != null && (
               <OffsetLink to={searchLink(game, `offset:${hex}`)} title="Fields at this offset">
                 <span>{offset}</span>
@@ -492,10 +500,10 @@ const FieldRow = memo(function FieldRow({
           </OffsetCell>
         )}
         {(networkAttrs.length > 0 || field.metadata.length > 0) && (
-          <RowNotes>
+          <FieldNotes>
             {networkAttrs.length > 0 && <FieldNetworkLine attrs={networkAttrs} />}
             <MetadataTags metadata={field.metadata} game={game} module={owner.module} />
-          </RowNotes>
+          </FieldNotes>
         )}
       </Row>
       {bitfield && bitfield.totalBits > 0 && (
