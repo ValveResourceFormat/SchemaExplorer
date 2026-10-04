@@ -60,7 +60,23 @@ export function formatDescription(text: string): string {
   return text.replace(/<br\s*\/?>/gi, "\n");
 }
 
-export type Entry = { name: string };
+/** A keyvalue, input or output. Only keys can belong to a component */
+export type Entry = { name: string; component?: string };
+
+/**
+ * Keys of the same component next to each other, after the ones without a component, otherwise
+ * in their order. Inputs and outputs stay as they are
+ */
+export function groupByComponent<T>(items: T[], entryOf: (item: T) => Entry): T[] {
+  const component = (item: T) => entryOf(item).component;
+  if (!items.some(component)) return items;
+  const order = new Map<string | undefined, number>([[undefined, 0]]);
+  for (const item of items) {
+    const c = component(item);
+    if (!order.has(c)) order.set(c, order.size);
+  }
+  return items.toSorted((a, b) => order.get(component(a))! - order.get(component(b))!);
+}
 
 export type InheritedGroup<T extends Entry> = {
   entity: EntityClass;

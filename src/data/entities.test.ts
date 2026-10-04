@@ -14,6 +14,7 @@ import {
   formatKeyName,
   formatKeyPattern,
   formatKeyType,
+  groupByComponent,
   keySchemaType,
 } from "../utils/entity-format";
 
@@ -50,6 +51,13 @@ const data: SchemasJson = {
     },
     { name: "CBodyComponent", module: "server", size: 8, fields: [] },
     { name: "CBodyComponentPoint", module: "server", size: 8, fields: [] },
+    { name: "CScriptComponent", module: "server", size: 8, fields: [] },
+    {
+      name: "CGameSceneNode",
+      module: "server",
+      size: 16,
+      fields: [{ name: "m_vecOrigin", offset: 8, type: { category: "atomic", name: "Vector" } }],
+    },
     {
       name: "hudtextparms_t",
       module: "client",
@@ -78,7 +86,11 @@ const data: SchemasJson = {
       module: "server",
       baseClass: "CEntityInstance",
       spawnable: false,
-      components: [{ base: "CBodyComponent", override: "CBodyComponentPoint" }],
+      // One the class adds itself, one replacing a base class's
+      components: [
+        { name: "CScriptComponent" },
+        { base: "CBodyComponent", override: "CBodyComponentPoint" },
+      ],
       keys: [
         { name: "health", type: "FIELD_INT32", field: "m_iHealth" },
         {
@@ -89,6 +101,16 @@ const data: SchemasJson = {
           enumModule: "client",
         },
         { name: "origin", type: "FIELD_VECTOR", procedural: true },
+        // A component key, declaredIn is the component's datamap class
+        {
+          name: "local.origin",
+          type: "FIELD_VECTOR",
+          field: "m_vecOrigin",
+          path: "m_pSceneNode",
+          component: "CBodyComponent",
+          declaredIn: "CGameSceneNode",
+        },
+        { name: "vscripts", type: "FIELD_STRING", field: "m_iHealth", flags: ["ADDED_KEYFIELD"] },
       ],
     },
     {
@@ -164,6 +186,13 @@ describe("parseEntities", () => {
     expect(root.classModule).toBe("entity2");
   });
 
+  it("keeps a key's component and flags", () => {
+    const base = lookups.entityByModuleClass.get("server/CBaseEntity")!;
+    expect(base.keys[3]).toMatchObject({ component: "CBodyComponent", declaredInModule: "server" });
+    expect(base.keys[4].flags).toEqual(["ADDED_KEYFIELD"]);
+    expect(base.keys[0].flags).toBeUndefined();
+  });
+
   it("tolerates a dump without entities", () => {
     expect(parseSchemas({ classes: [], enums: [] }).entities).toEqual([]);
   });
@@ -214,6 +243,8 @@ describe("entity lookups", () => {
     expect(owner("wait")).toEqual({ module: "server", name: "CBaseToggle" });
     // Embedded structs may only exist in another module, declaredInModule says which
     expect(owner("x")).toEqual({ module: "client", name: "hudtextparms_t" });
+    // A component key's field is in the component's datamap class, not the entity's
+    expect(owner("local.origin")).toEqual({ module: "server", name: "CGameSceneNode" });
   });
 
   it("keeps the resolved owner of every bound key", () => {
@@ -235,6 +266,8 @@ describe("entity lookups", () => {
         ?.map((r) => `${r.entity.class}${r.replaced ? " replaced" : ""}`);
     expect(users("CBodyComponent")).toEqual(["CBaseEntity replaced"]);
     expect(users("CBodyComponentPoint")).toEqual(["CBaseEntity"]);
+    // Added by the entity, nothing replaced
+    expect(users("CScriptComponent")).toEqual(["CBaseEntity"]);
   });
 
   it("indexes enum keyvalue references", () => {
@@ -299,6 +332,27 @@ describe("key formatting", () => {
     // Worldspace and resource types have no single schema type
     expect(keySchemaType("FIELD_POSITION_VECTOR")).toBeUndefined();
     expect(keySchemaType("FIELD_SOUNDNAME")).toBeUndefined();
+  });
+
+  it("groups the keys of a component together, after the others", () => {
+    const keys = [
+      { name: "a", component: "CBodyComponent" },
+      { name: "b" },
+      { name: "c", component: "CLightComponent" },
+      { name: "d", component: "CBodyComponent" },
+      { name: "e" },
+    ];
+    const entries = keys.map((entry) => ({ entry }));
+    expect(groupByComponent(entries, (e) => e.entry).map((e) => e.entry.name)).toEqual([
+      "b",
+      "e",
+      "a",
+      "d",
+      "c",
+    ]);
+    // Without components the list is kept as is
+    const plain = [{ entry: { name: "x" } }, { entry: { name: "y" } }];
+    expect(groupByComponent(plain, (e) => e.entry)).toBe(plain);
   });
 
   it("expands array patterns", () => {

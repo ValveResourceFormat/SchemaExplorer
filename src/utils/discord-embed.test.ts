@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildComponentEmbed, formatFieldType, type EmbedPage } from "./discord-embed";
+import { buildComponentEmbed, type EmbedPage } from "./discord-embed";
+import { formatFieldType } from "./format";
 import { declarations } from "../data/test-helpers";
 import type { SchemaClass } from "../data/types";
 import { canonicalUrl } from "../games-list";

@@ -1,5 +1,6 @@
-import type { Declaration, SchemaFieldType } from "../data/types";
+import type { Declaration } from "../data/types";
 import { INTRINSIC_MODULE } from "../data/intrinsics";
+import { formatFieldType } from "./format";
 
 // Discord component embed, a custom link preview built from Components V2.
 // https://discord.com/developers/docs/link-previews/component-embeds
@@ -23,26 +24,6 @@ export interface EmbedPage {
   gameName: string;
   url: string;
   imageUrl: string;
-}
-
-export function formatFieldType(type: SchemaFieldType): string {
-  switch (type.category) {
-    case "builtin":
-    case "declared_class":
-    case "declared_enum":
-      return type.name;
-    case "ptr":
-      return `${formatFieldType(type.inner)}*`;
-    case "fixed_array":
-      return `${formatFieldType(type.inner)}[${type.count}]`;
-    case "atomic": {
-      const args = [type.inner, type.inner2].filter((t) => t != null).map(formatFieldType);
-      if (type.count != null) args.push(String(type.count));
-      return args.length > 0 ? `${type.name}< ${args.join(", ")} >` : type.name;
-    }
-    case "bitfield":
-      return `bitfield:${type.count}`;
-  }
 }
 
 function declarationHeader(d: Declaration): string {

@@ -7939,6 +7939,384 @@
       "module": "test",
       "name": "TestMapInner2",
       "size": 8
+    },
+    {
+      "fields": [
+        {
+          "name": "m_cellX",
+          "network": {
+            "changeCallbacks": ["OnCellChanged"],
+            "priority": 31,
+            "serializer": "cellx",
+            "type": "uint16"
+          },
+          "offset": 16,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "name": "m_cellY",
+          "network": {
+            "changeCallbacks": ["OnCellChanged"],
+            "priority": 31,
+            "serializer": "celly",
+            "type": "uint16"
+          },
+          "offset": 18,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "name": "m_cellZ",
+          "network": {
+            "changeCallbacks": ["OnCellChanged"],
+            "priority": 31,
+            "serializer": "cellz",
+            "type": "uint16"
+          },
+          "offset": 20,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "name": "m_nOutsideWorld",
+          "network": {
+            "type": "uint16"
+          },
+          "offset": 22,
+          "type": {
+            "category": "builtin",
+            "name": "uint16"
+          }
+        },
+        {
+          "name": "m_vecX",
+          "network": {
+            "bitCount": 15,
+            "changeCallbacks": ["OnCellChanged"],
+            "encodeFlags": 1,
+            "max": 1024,
+            "min": 0,
+            "priority": 31,
+            "sentAs": "float32",
+            "serializer": "posx",
+            "type": "CNetworkedQuantizedFloat"
+          },
+          "offset": 24,
+          "type": {
+            "alignment": 4,
+            "category": "atomic",
+            "name": "CNetworkedQuantizedFloat",
+            "size": 8
+          }
+        },
+        {
+          "name": "m_vecY",
+          "network": {
+            "bitCount": 15,
+            "changeCallbacks": ["OnCellChanged"],
+            "encodeFlags": 1,
+            "max": 1024,
+            "min": 0,
+            "priority": 31,
+            "sentAs": "float32",
+            "serializer": "posy",
+            "type": "CNetworkedQuantizedFloat"
+          },
+          "offset": 32,
+          "type": {
+            "alignment": 4,
+            "category": "atomic",
+            "name": "CNetworkedQuantizedFloat",
+            "size": 8
+          }
+        },
+        {
+          "name": "m_vecZ",
+          "network": {
+            "bitCount": 15,
+            "changeCallbacks": ["OnCellChanged"],
+            "encodeFlags": 1,
+            "max": 1024,
+            "min": 0,
+            "priority": 31,
+            "sentAs": "float32",
+            "serializer": "posz",
+            "type": "CNetworkedQuantizedFloat"
+          },
+          "offset": 40,
+          "type": {
+            "alignment": 4,
+            "category": "atomic",
+            "name": "CNetworkedQuantizedFloat",
+            "size": 8
+          }
+        }
+      ],
+      "flags": ["trivial_destructor"],
+      "module": "client",
+      "name": "CNetworkOriginCellCoordQuantizedVector",
+      "network": {
+        "varsAtomic": true
+      },
+      "size": 48
+    },
+    {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "m_vecMoveDirEntitySpace",
+          "network": {
+            "type": "Vector"
+          },
+          "offset": 4256,
+          "type": {
+            "alignment": 4,
+            "category": "atomic",
+            "name": "Vector",
+            "size": 12
+          }
+        },
+        {
+          "name": "m_flTargetSpeed",
+          "network": {
+            "type": "float32"
+          },
+          "offset": 4268,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_nTransitionStartTick",
+          "network": {
+            "sentAs": "int32",
+            "type": "GameTick_t"
+          },
+          "offset": 4272,
+          "type": {
+            "category": "declared_class",
+            "module": "entity2",
+            "name": "GameTick_t"
+          }
+        },
+        {
+          "name": "m_nTransitionDurationTicks",
+          "network": {
+            "type": "int"
+          },
+          "offset": 4276,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_flTransitionStartSpeed",
+          "network": {
+            "type": "float32"
+          },
+          "offset": 4280,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flFrictionScale",
+          "network": {
+            "type": "float32"
+          },
+          "offset": 4284,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_hConveyorModels",
+          "network": {
+            "sentAs": "ehandle",
+            "type": "EHANDLE"
+          },
+          "offset": 4288,
+          "type": {
+            "alignment": 8,
+            "category": "atomic",
+            "inner": {
+              "alignment": 4,
+              "category": "atomic",
+              "inner": {
+                "category": "declared_class",
+                "module": "client",
+                "name": "C_BaseEntity"
+              },
+              "name": "CHandle",
+              "size": 4
+            },
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
+          }
+        },
+        {
+          "name": "m_flCurrentConveyorOffset",
+          "offset": 4312,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        },
+        {
+          "name": "m_flCurrentConveyorSpeed",
+          "offset": 4316,
+          "type": {
+            "category": "builtin",
+            "name": "float32"
+          }
+        }
+      ],
+      "module": "client",
+      "name": "C_FuncConveyor",
+      "network": {
+        "includeByName": ["m_fFlags"],
+        "overrides": [
+          {
+            "class": "C_BaseEntity",
+            "field": "m_fFlags",
+            "kind": "kind8",
+            "value": ""
+          },
+          {
+            "class": "CNetworkOriginCellCoordQuantizedVector",
+            "field": "m_vecX",
+            "kind": "bitCount",
+            "value": "32"
+          },
+          {
+            "class": "CNetworkOriginCellCoordQuantizedVector",
+            "field": "m_vecY",
+            "kind": "bitCount",
+            "value": "32"
+          },
+          {
+            "class": "CNetworkOriginCellCoordQuantizedVector",
+            "field": "m_vecZ",
+            "kind": "bitCount",
+            "value": "32"
+          },
+          {
+            "class": "CGameSceneNode",
+            "field": "m_angRotation",
+            "kind": "bitCount",
+            "value": "32"
+          }
+        ]
+      },
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_BaseModelEntity"
+        }
+      ],
+      "size": 4320
+    },
+    {
+      "fields": [
+        {
+          "name": "m_nSendUpdate",
+          "network": {
+            "changeCallbacks": ["OnDamageListUpdate"],
+            "type": "int",
+            "userGroups": ["LocalPlayerExclusiveDuringRoundEnd"]
+          },
+          "offset": 64,
+          "type": {
+            "category": "builtin",
+            "name": "int32"
+          }
+        },
+        {
+          "name": "m_DamageList",
+          "network": {
+            "type": "CDamageRecord",
+            "userGroups": ["LocalPlayerExclusiveDuringRoundEnd"]
+          },
+          "offset": 72,
+          "type": {
+            "alignment": 8,
+            "category": "atomic",
+            "inner": {
+              "category": "declared_class",
+              "module": "client",
+              "name": "CDamageRecord"
+            },
+            "name": "C_UtlVectorEmbeddedNetworkVar",
+            "size": 104
+          }
+        }
+      ],
+      "module": "client",
+      "name": "CCSPlayerController_DamageServices",
+      "network": {
+        "replayCompatFields": [
+          {
+            "callback": "OnReplayCompat_DamageList",
+            "field": "m_DamageList.*"
+          }
+        ]
+      },
+      "parents": [
+        {
+          "module": "client",
+          "name": "CPlayerControllerComponent"
+        }
+      ],
+      "size": 176
+    },
+    {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "m_hDetectParentChange",
+          "offset": 5480,
+          "type": {
+            "alignment": 4,
+            "category": "atomic",
+            "name": "CEntityHandle",
+            "size": 4
+          }
+        }
+      ],
+      "module": "client",
+      "name": "C_CSObserverPawn",
+      "network": {
+        "includeByName": [
+          "m_pObserverServices",
+          "m_pMovementServices",
+          "m_pCameraServices",
+          "m_pUseServices"
+        ],
+        "varTypeOverrides": {
+          "m_pCameraServices": "CCSObserver_CameraServices",
+          "m_pMovementServices": "CCSObserver_MovementServices",
+          "m_pObserverServices": "CCSObserver_ObserverServices",
+          "m_pUseServices": "CCSObserver_UseServices"
+        }
+      },
+      "parents": [
+        {
+          "module": "client",
+          "name": "C_CSPlayerPawnBase"
+        }
+      ],
+      "size": 5488
     }
   ],
   "enums": [

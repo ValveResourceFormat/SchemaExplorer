@@ -19,6 +19,7 @@ import { useHashParam } from "../../utils/filtering";
 import {
   buildInheritedGroups,
   entityLabel,
+  groupByComponent,
   formatDescription,
   formatKeyName,
   formatKeyType,
@@ -172,13 +173,23 @@ function EntityDetails({ entity }: { entity: EntityClass }) {
       {entity.components.length > 0 && (
         <Detail label="Components">
           <ComponentList>
-            {entity.components.map((c) => (
-              <React.Fragment key={c.base}>
-                <ComponentClass entity={entity} name={c.base} />
-                <Dim aria-label="replaced by">→</Dim>
-                <ComponentClass entity={entity} name={c.override} />
-              </React.Fragment>
-            ))}
+            {entity.components.map((c) =>
+              "name" in c ? (
+                // Added by the entity itself, nothing replaced. It can also replace the same
+                // component of a base
+                <React.Fragment key={`added/${c.name}`}>
+                  <ComponentClass entity={entity} name={c.name} />
+                  <span />
+                  <span />
+                </React.Fragment>
+              ) : (
+                <React.Fragment key={`replaced/${c.base}`}>
+                  <ComponentClass entity={entity} name={c.base} />
+                  <Dim aria-label="replaced by">→</Dim>
+                  <ComponentClass entity={entity} name={c.override} />
+                </React.Fragment>
+              ),
+            )}
           </ComponentList>
         </Detail>
       )}
@@ -350,6 +361,11 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
           </EntryLink>
         </span>
         {entityKey.removed && <Pill>removed</Pill>}
+        {entityKey.flags?.map((f) => (
+          <Pill key={f} data-mono {...tip(`Datadesc flag ${f}.`)}>
+            {f.toLowerCase().replaceAll("_", " ")}
+          </Pill>
+        ))}
         <OverriddenPill by={props.overriddenBy} />
       </NameCell>
       <div>
@@ -571,7 +587,12 @@ function EntityListCard({
       overriddenBy,
     };
     return kind === "kv" ? (
-      <KeyRow key={entry.name} entityKey={entry as EntityKey} {...props} />
+      <KeyRow
+        // A component can have a key of the same name as the entity's own, like origin
+        key={`${entry.component}/${entry.name}`}
+        entityKey={entry as EntityKey}
+        {...props}
+      />
     ) : (
       <IORow
         key={entry.name}
@@ -581,6 +602,26 @@ function EntityListCard({
         {...props}
       />
     );
+  }
+
+  /** The rows, the keys of each component together under a band naming it, after the others */
+  function renderEntries(
+    entries: { entry: Entry; overriddenBy?: EntityClass }[],
+    declaredBy?: EntityClass,
+  ) {
+    let component: string | undefined;
+    return groupByComponent(entries, (e) => e.entry).map(({ entry, overriddenBy }) => {
+      const row = renderEntry(entry, declaredBy, overriddenBy);
+      const next = entry.component;
+      if (next === component) return row;
+      component = next;
+      return (
+        <React.Fragment key={`component/${next}`}>
+          {next && <ComponentBand entity={entity} name={next} />}
+          {row}
+        </React.Fragment>
+      );
+    });
   }
 
   const hasRows = own.length > 0 || showInherited;
@@ -613,9 +654,7 @@ function EntityListCard({
             {groups.map((g) => (
               <React.Fragment key={g.entity.class}>
                 <InheritedBand entity={g.entity} />
-                {g.entries.map(({ entry, overriddenBy }) =>
-                  renderEntry(entry, g.entity, overriddenBy),
-                )}
+                {renderEntries(g.entries, g.entity)}
               </React.Fragment>
             ))}
             {own.length > 0 && (
@@ -633,9 +672,32 @@ function EntityListCard({
             />
           )
         )}
-        {own.map((entry) => renderEntry(entry))}
+        {renderEntries(own.map((entry) => ({ entry })))}
       </Table>
     </TitledCard>
+  );
+}
+
+const SubBand = styled(Band)`
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background: none;
+  font-size: 13px;
+
+  > a {
+    font-weight: 500;
+    color: var(--syntax-interface);
+  }
+`;
+
+/** Starts the keys of a component, the entity's own come first */
+function ComponentBand({ entity, name }: { entity: EntityClass; name: string }) {
+  return (
+    <SubBand>
+      <KindIcon kind="class" size={14} />
+      <ComponentClass entity={entity} name={name} />
+      <span>component</span>
+    </SubBand>
   );
 }
 
@@ -738,7 +800,8 @@ export function ComponentOf({ name, module }: { name: string; module: string }) 
       items={componentOf.get(declarationKey(module, name))}
       render={({ entity, component, replaced }) => (
         <Link
-          key={`${entity.module}/${entity.class}/${component.base}`}
+          // An entity can add a component and replace one with it
+          key={`${entity.module}/${entity.class}/${"name" in component ? "added" : component.base}/${replaced}`}
           to={entityPath(game, entity)}
           title={`${entity.class} in ${entity.module}`}
         >
@@ -746,7 +809,7 @@ export function ComponentOf({ name, module }: { name: string; module: string }) 
           <span>
             {entity.class}
             {entity.designName && <Dim> {entity.designName}</Dim>}
-            {replaced && <Dim>, replaced by {component.override}</Dim>}
+            {replaced && "override" in component && <Dim>, replaced by {component.override}</Dim>}
           </span>
         </Link>
       )}

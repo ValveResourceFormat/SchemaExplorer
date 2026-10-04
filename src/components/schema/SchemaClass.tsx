@@ -35,6 +35,12 @@ import { Detail, DetailsCard } from "./Detail";
 import { InheritedSwitch } from "./InheritedSwitch";
 import { CollapsedInheritedRow, GitHubFileLink, SearchResultCard, TitledCard } from "./Cards";
 import { RowIcon } from "./RowIcon";
+import {
+  ClassNetworkDetail,
+  FieldNetworkLine,
+  fieldNetworkAttrs,
+  NetworkedMark,
+} from "./NetworkInfo";
 import { tip } from "../Tooltip";
 
 const SizeText = styled.span`
@@ -157,6 +163,7 @@ function ClassDetails({
       <ReferencedBy name={declaration.name} module={declaration.module} />
       <ComponentOf name={declaration.name} module={declaration.module} />
       <MetadataDetail metadata={declaration.metadata} game={game} module={declaration.module} />
+      <ClassNetworkDetail declaration={declaration} bases={bases} />
       <CrossGameDetail declaration={declaration} />
     </DetailsCard>
   );
@@ -438,6 +445,7 @@ const FieldRow = memo(function FieldRow({
   const rowRef = useAnchoredRef(anchored);
   const hex = offset != null ? formatHexOffset(offset) : undefined;
   const paddingBytes = bitfield ? Math.ceil(bitfield.totalBits / 8) : 0;
+  const networkAttrs = fieldNetworkAttrs(field, owner.module);
 
   return (
     <>
@@ -461,6 +469,7 @@ const FieldRow = memo(function FieldRow({
               {field.name}
             </AnchorName>
           )}
+          {field.network && <NetworkedMark />}
         </FieldName>
         <FieldType>
           <SchemaTypeView type={field.type} />
@@ -482,8 +491,9 @@ const FieldRow = memo(function FieldRow({
             )}
           </OffsetCell>
         )}
-        {field.metadata.length > 0 && (
+        {(networkAttrs.length > 0 || field.metadata.length > 0) && (
           <RowNotes>
+            {networkAttrs.length > 0 && <FieldNetworkLine attrs={networkAttrs} />}
             <MetadataTags metadata={field.metadata} game={game} module={owner.module} />
           </RowNotes>
         )}

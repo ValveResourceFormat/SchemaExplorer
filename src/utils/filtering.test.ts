@@ -1282,9 +1282,11 @@ describe("search result ranking", () => {
         "C_INIT_CheckParticleForWater",
         "C_OP_WaterImpulseRenderer",
         "CFuncWater",
+        // A fuzzy match, NetWork…Quantized…Vector
+        "CNetworkOriginCellCoordQuantizedVector",
       ]),
     );
-    expect(result).toHaveLength(6); // CFuncWater appears in client + server
+    expect(result).toHaveLength(7); // CFuncWater appears in client + server
   });
 
   it("module-only filter preserves tier ordering", () => {
@@ -1333,7 +1335,7 @@ describe("search result ranking", () => {
   it("field-only results alphabetical", () => {
     const result = searchDeclarations(declarations, parseSearch("water"));
     // Among field-only matches: C_BaseEntity before C_Fish
-    const fieldOnly = result.filter((d) => !d.name.toLowerCase().includes("water"));
+    const fieldOnly = result.filter((d) => fuzzyScore("water", d.name) === null);
     expect(fieldOnly[0].name).toBe("C_BaseEntity");
     expect(fieldOnly[1].name).toBe("C_Fish");
   });
@@ -1343,13 +1345,17 @@ describe("search result ranking", () => {
     const names = result.map((d) => d.name);
     // All get score 2, sorted alphabetically (ASCII order: uppercase before _)
     expect(names).toEqual([
+      "CCSPlayerController_DamageServices",
       "CEffectData",
       "CEnvSoundscape",
       "CFilterProximity",
       "CFuncWater",
+      "CNetworkOriginCellCoordQuantizedVector",
       "C_BaseEntity",
+      "C_CSObserverPawn",
       "C_CSWeaponBaseGun",
       "C_Fish",
+      "C_FuncConveyor",
       "C_FuncTrackTrain",
       "C_Hostage",
       "C_PathParticleRope",
@@ -3017,5 +3023,61 @@ describe("buildHash", () => {
   it("skips empty params", () => {
     expect(buildHash({ kind: null, search: "", name: undefined })).toBe("");
     expect(buildHash({ kind: null, name: "sv_gravity" })).toBe("name=sv_gravity");
+  });
+});
+
+// ==================== network: ====================
+
+describe("network: search", () => {
+  const search = (q: string) => searchDeclarations(declarations, parseSearch(q));
+  const fieldsOf = (q: string, name: string) => {
+    const d = search(q).find((r) => r.name === name);
+    return d?.kind === "class" ? d.fields.map((f) => f.name) : undefined;
+  };
+
+  it("parses network: words", () => {
+    expect(parseSearch("C_Fish network:posX").networkWords).toEqual(["posx"]);
+    expect(isFilterPrefix("network:")).toBe(true);
+  });
+
+  it("finds fields by a network value", () => {
+    expect(fieldsOf("network:posx", "CNetworkOriginCellCoordQuantizedVector")).toEqual(["m_vecX"]);
+  });
+
+  it("finds fields by a network property name", () => {
+    expect(fieldsOf("network:sentas", "C_FuncConveyor")).toEqual([
+      "m_nTransitionStartTick",
+      "m_hConveyorModels",
+    ]);
+  });
+
+  it("needs every network: word to match the same field", () => {
+    expect(
+      fieldsOf("network:oncellchanged network:sentas", "CNetworkOriginCellCoordQuantizedVector"),
+    ).toEqual(["m_vecX", "m_vecY", "m_vecZ"]);
+    expect(search("network:cellx network:posx")).toEqual([]);
+  });
+
+  it("matches a class's own network data without listing fields", () => {
+    const result = search("network:varsatomic");
+    expect(result.map((d) => d.name)).toEqual(["CNetworkOriginCellCoordQuantizedVector"]);
+    expect((result[0] as SchemaClass).fields).toEqual([]);
+    // varTypeOverrides is keyed by field, and its values are types
+    expect(search("network:CCSObserver_CameraServices").map((d) => d.name)).toEqual([
+      "C_CSObserverPawn",
+    ]);
+  });
+
+  it("leaves MNetwork* metadata to metadata:", () => {
+    // C_Fish only has MNetworkEncoder metadata with "coord"
+    expect(search("network:coord").map((d) => d.name)).not.toContain("C_Fish");
+    expect(search("network:mnetworkenable")).toEqual([]);
+  });
+
+  it("combines with name words", () => {
+    expect(fieldsOf("damage network:localplayer", "CCSPlayerController_DamageServices")).toEqual([
+      "m_nSendUpdate",
+      "m_DamageList",
+    ]);
   });
 });

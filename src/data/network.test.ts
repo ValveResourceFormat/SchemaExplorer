@@ -1,0 +1,100 @@
+import { describe, it, expect } from "vitest";
+import { getNetworkKeys, isSameNetworkType, networkTerms } from "./network";
+import { parseSchemas } from "./schemas";
+import { parsedSchemas } from "./test-helpers";
+
+describe("networkTerms", () => {
+  it("lists property names and values, lowercased", () => {
+    expect(
+      networkTerms({ type: "uint16", changeCallbacks: ["OnCellChanged"], priority: 31 }),
+    ).toEqual(["type", "uint16", "changecallbacks", "oncellchanged", "priority", "31"]);
+  });
+
+  it("names the parts of overrides, and varTypeOverrides by field", () => {
+    expect(
+      networkTerms({
+        overrides: [{ field: "m_vecX", kind: "bitCount", class: "CFoo", value: "32" }],
+        varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices" },
+        varsAtomic: true,
+      }),
+    ).toEqual([
+      "overrides",
+      "field",
+      "m_vecx",
+      "kind",
+      "bitcount",
+      "class",
+      "cfoo",
+      "value",
+      "32",
+      "vartypeoverrides",
+      "m_pcameraservices",
+      "ccsobserver_cameraservices",
+      "varsatomic",
+      "true",
+    ]);
+  });
+
+  it("caches per object", () => {
+    const network = { type: "int" };
+    expect(networkTerms(network)).toBe(networkTerms(network));
+  });
+});
+
+describe("getNetworkKeys", () => {
+  it("collects class and field network properties, sorted", () => {
+    const keys = getNetworkKeys(parsedSchemas.declarations);
+    expect(keys).toContain("varsAtomic");
+    expect(keys).toContain("replayCompatFields");
+    expect(keys).toContain("changeCallbacks");
+    expect(keys).toEqual(keys.toSorted());
+  });
+
+  it("is empty for dumps without network data, like ones with only MNetwork* metadata", () => {
+    const { declarations } = parseSchemas({
+      classes: [
+        {
+          name: "C",
+          module: "m",
+          fields: [
+            {
+              name: "m_x",
+              type: { category: "builtin", name: "int32" },
+              metadata: [{ name: "MNetworkEnable" }],
+            },
+          ],
+        },
+      ],
+      enums: [],
+    });
+    expect(getNetworkKeys(declarations)).toEqual([]);
+  });
+});
+
+describe("isSameNetworkType", () => {
+  it("ignores spellings and spaces", () => {
+    expect(isSameNetworkType("int32", "int")).toBe(true);
+    expect(isSameNetworkType("float32", "float")).toBe(true);
+    expect(isSameNetworkType("CUtlSymbolLarge", "string_t")).toBe(true);
+    expect(isSameNetworkType("CHandle< C_BaseEntity >", "EHANDLE")).toBe(true);
+    expect(isSameNetworkType("CHandle< C_BasePlayerPawn >", "CHandle< CBasePlayerPawn>")).toBe(
+      true,
+    );
+    expect(isSameNetworkType("char[128]", "char")).toBe(true);
+  });
+
+  it("compares network vectors by their elements", () => {
+    expect(isSameNetworkType("C_NetworkUtlVectorBase< CUtlString >", "CUtlString")).toBe(true);
+    expect(
+      isSameNetworkType(
+        "C_UtlVectorEmbeddedNetworkVar< CEconItemAttribute >",
+        "CEconItemAttribute",
+      ),
+    ).toBe(true);
+  });
+
+  it("tells other types apart", () => {
+    expect(isSameNetworkType("uint16", "item_definition_index_t")).toBe(false);
+    expect(isSameNetworkType("CBodyComponent*", "CBodyComponent::Storage_t")).toBe(false);
+  });
+});

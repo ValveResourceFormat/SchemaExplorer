@@ -30,7 +30,8 @@ const games = await Promise.all(
       sizeRaw: mb(json.length),
       revision: raw.revision,
       date: raw.version_date,
-      hasNetwork: json.includes('"MNetworkEnable"'),
+      hasNetworkMetadata: json.includes('"MNetworkEnable"'),
+      hasNetwork: json.includes('"network":'),
       hasEntities: (raw.entities?.length ?? 0) > 0,
     };
   }),
@@ -44,17 +45,14 @@ const gameLines = games
   .join("\n");
 
 const exampleFile = games[0].file;
-const entityGames =
+const gamesWith = (has: "hasEntities" | "hasNetwork" | "hasNetworkMetadata") =>
   games
-    .filter((g) => g.hasEntities)
+    .filter((g) => g[has])
     .map((g) => g.name)
     .join(", ") || "no game";
-
-const netGames =
-  games
-    .filter((g) => g.hasNetwork)
-    .map((g) => g.name)
-    .join(", ") || "no game";
+const entityGames = gamesWith("hasEntities");
+const netMetadataGames = gamesWith("hasNetworkMetadata");
+const netGames = gamesWith("hasNetwork");
 
 // The "JSON structure" section below must be kept in sync with the raw types:
 // RawSchemaClass / RawSchemaEnum / SchemasJson in src/data/schemas.ts
@@ -75,12 +73,27 @@ JSON; parse them, never paste them into context. Offsets and sizes are the Windo
 { generator, revision, version_date, version_time, classes: Class[], enums: Enum[],
   convars?: ConVar[], commands?: Command[], entities?: Entity[] }
 Class  { module, name, size?, alignment?, flags?: string[], parents?: {module,name,offset?}[],
-         fields?: Field[], metadata?: Meta[] }
+         fields?: Field[], metadata?: Meta[], network?: ClassNet }
        // bytes; sizes and offsets omitted for games that aren't kept up to date. flags: abstract,
        // trivial_constructor, trivial_destructor, construct_disallowed. parents: direct bases,
        // offset = start of a later base (multiple inheritance). fields: own only
-Field  { name, offset?, type: Type, metadata?: Meta[] }
+Field  { name, offset?, type: Type, metadata?: Meta[], network?: FieldNet }
        // static members (some games): last, no offset, tagged {name: "static"}
+FieldNet { type, sentAs?, class?, alias?, typeAlias?, serializer?, encoder?, recipientsFilter?,
+          changePointerCallback?, changeCallbacks?: string[], userGroups?: string[], priority?,
+          bitCount?, encodeFlags?, min?, max?, embeddedFieldOffsetDelta?, polymorphic?, resourceType? }
+       // Only in ${netGames}, from the game's network database; a field is networked exactly when
+       // it has one. Defaults omitted: priority 64, bitCount 32, min/max ±FLT_MAX. type: networked
+       // type, like a network vector's element type; sentAs: when different; class: of embedded,
+       // pointer and component fields when type doesn't name it; resourceType: like "vmdl"
+ClassNet { includeByName?, excludeByName?: field[], includeByUserGroup?, excludeByUserGroup?,
+          userGroupProxies?: group[], overrides?: {field, kind, class?, value?}[],
+          varTypeOverrides?: {field: type}, replayCompatFields?: {field, callback}[], varsAtomic?,
+          structNotInNetworkUtlVectorEmbedded?, outOfPVSUpdates? }
+       // Only when the class has one of these. overrides kind: serializer, encoder, changeCallback,
+       // bitCount, userGroup, priority or "kindN"; no class = nearest base with the field.
+       // replayCompatFields field: regex over field paths. Booleans only when true;
+       // outOfPVSUpdates default 2 omitted
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
        // alignment: underlying type, e.g. "uint8_t"
 Meta   { name, value?: string | object }
@@ -88,7 +101,7 @@ Meta   { name, value?: string | object }
        // MGetKV3ClassDefaults: JSON object (keys sorted, NaN as "-nan", per-run values zeroed),
        // "Could not parse KV3 Defaults", or absent. Omits top-level keys equal to the first
        // parent's; full defaults = first parent's full defaults + own keys.
-       // MNetwork* metadata: only in ${netGames}.
+       // MNetwork* metadata: only in ${netMetadataGames}.
 Type   builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner}
        | fixed_array {inner, count} | atomic {name, inner?, inner2?, count?, size?, alignment?}
        | bitfield {count}   (category = the kind)
@@ -103,16 +116,20 @@ ConVar  { name, type, default?, min?, max?, enum?, enumModule?, flags: string[],
        // enum: schema enum of "enum_value" convars, value = enumerator names joined with |
 Command { name, flags: string[], modules: string[], help? }
 Entity  { class, module, classModule?, designName?, baseClass?, spawnable, flags?, spawnOrder?,
-          components?: {base, override}[], keys?: Key[], inputs?: Input[], outputs?: Output[] }
+          components?: ({name} | {base, override})[], keys?: Key[], inputs?: Input[],
+          outputs?: Output[] }
        // Only in ${entityGames}.
        // class: schema class in classModule (default module). baseClass: class of the nearest
        // base entity in the module; keys/inputs/outputs are only those added since it, like FGD.
-       // Root: CEntityInstance (designName "root"), with the inputs/outputs of every entity
-Key     { name, type, field?, declaredIn?, declaredInModule?, path?, enum?, enumModule?,
-          procedural?, removed?, arrayStart?, arrayCount? }
+       // Root: CEntityInstance (designName "root"), with the inputs/outputs of every entity.
+       // components: {name} the class adds, {base, override} replaces a base's with a subclass
+Key     { name, type, field?, declaredIn?, declaredInModule?, component?, path?, enum?, enumModule?,
+          procedural?, removed?, arrayStart?, arrayCount?, flags?: string[] }
        // type: FIELD_*. field: C++ member, under path (dotted) in embedded structs. declaredIn:
        // class whose datadesc adds the key, field may be in its schema parents; defaults to the
-       // entity's class and classModule. With arrayCount, name is a pattern like "Case%02d"
+       // entity's class and classModule. With arrayCount, name is a pattern like "Case%02d".
+       // component: like "CBodyComponent", declaredIn is then its datamap class (CGameSceneNode),
+       // field and path are in it. flags: ADDED_KEYFIELD, ADDITIONAL_FIELDS, EXPLICIT_BASE
 Input   { name, params?: Param[], returns?: Param[], description?, pulseNode? }
 Output  { name, params?: Param[], description? }
 Param   { name, type, enumModule? }

@@ -1,4 +1,25 @@
-import type { SchemaMetadataValue } from "../data/types";
+import type { SchemaFieldType, SchemaMetadataValue } from "../data/types";
+
+/** A type as C++ text, like CUtlVector< CHandle< CBaseEntity > > */
+export function formatFieldType(type: SchemaFieldType): string {
+  switch (type.category) {
+    case "builtin":
+    case "declared_class":
+    case "declared_enum":
+      return type.name;
+    case "ptr":
+      return `${formatFieldType(type.inner)}*`;
+    case "fixed_array":
+      return `${formatFieldType(type.inner)}[${type.count}]`;
+    case "atomic": {
+      const args = [type.inner, type.inner2].filter((t) => t != null).map(formatFieldType);
+      if (type.count != null) args.push(String(type.count));
+      return args.length > 0 ? `${type.name}< ${args.join(", ")} >` : type.name;
+    }
+    case "bitfield":
+      return `bitfield:${type.count}`;
+  }
+}
 
 const metadataTextCache = new WeakMap<object, string>();
 

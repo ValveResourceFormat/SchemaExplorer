@@ -49,6 +49,7 @@ export const DeclarationsContext = createContext<GameContext>({
   crossModuleLookup: new Map(),
   consoleItems: [],
   enumConVars: new Map(),
+  hasNetwork: false,
   ...buildEntityLookups([], new Map()),
   error: null,
 });

@@ -114,8 +114,9 @@ function GameList() {
 
 function SearchFilters({ isRoot }: { isRoot?: boolean }) {
   const Block = isRoot ? HomepageSearchFilters : SearchFiltersBlock;
-  const hasEntities = useContext(DeclarationsContext).entities.length > 0;
-  const tags = getSearchTags("schemas", hasEntities);
+  const { entities, hasNetwork } = useContext(DeclarationsContext);
+  const hasEntities = entities.length > 0;
+  const tags = getSearchTags("schemas", { hasEntities, hasNetwork });
   return (
     <Block>
       <dl>

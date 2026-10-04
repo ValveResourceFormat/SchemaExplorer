@@ -1,4 +1,5 @@
 import type {
+  ClassNetwork,
   ConCommand,
   ConsoleItem,
   ConVar,
@@ -9,6 +10,7 @@ import type {
   EntityKey,
   EntityOutput,
   EntityParam,
+  FieldNetwork,
   SchemaEnum,
   SchemaClass,
   SchemaClassFlag,
@@ -279,8 +281,10 @@ interface RawSchemaClass {
     offset?: number;
     type: SchemaFieldType;
     metadata?: SchemaMetadataEntry[];
+    network?: FieldNetwork;
   }[];
   metadata?: SchemaMetadataEntry[];
+  network?: ClassNetwork;
 }
 
 interface RawSchemaEnum {

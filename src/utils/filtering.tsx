@@ -5,6 +5,7 @@ import { schemaPath } from "../components/schema/DeclarationsContext";
 import { allDeclarations, type EntityLookups } from "../data/derived";
 import * as api from "../data/types";
 import { metadataValueText } from "./format";
+import { networkTerms } from "../data/network";
 
 type EntitySearchLookups = Pick<
   EntityLookups,
@@ -57,6 +58,7 @@ interface ParsedSearch {
   enumValues: Set<number>;
   metadataKeys: string[];
   metadataValues: string[];
+  networkWords: string[];
   entityWords: string[];
   inputWords: string[];
   outputWords: string[];
@@ -69,6 +71,7 @@ export const EMPTY_PARSED: ParsedSearch = {
   enumValues: new Set(),
   metadataKeys: [],
   metadataValues: [],
+  networkWords: [],
   entityWords: [],
   inputWords: [],
   outputWords: [],
@@ -80,6 +83,7 @@ const FILTER_TAGS = [
   "enumvalue:",
   "metadata:",
   "metadatavalue:",
+  "network:",
   "entity:",
   "input:",
   "output:",
@@ -118,6 +122,7 @@ export function parseSearch(search: string): ParsedSearch {
     // metadata: is a prefix of metadatavalue:, so its values can't start with "value:"
     metadataKeys: tagValues("metadata:").filter((x) => !x.startsWith("value:")),
     metadataValues: tagValues("metadatavalue:"),
+    networkWords: tagValues("network:"),
     entityWords: tagValues("entity:"),
     inputWords: tagValues("input:"),
     outputWords: tagValues("output:"),
@@ -389,6 +394,14 @@ export function matchesMetadataValues(
   return matchesLoweredValues(lowerMetaVals(metadata), values);
 }
 
+/** Every word is in one of the network data's names or values, nothing without network data */
+function matchesNetwork(
+  network: api.FieldNetwork | api.ClassNetwork | undefined,
+  words: string[],
+): boolean {
+  return network != null && matchesLoweredKeys(networkTerms(network), words);
+}
+
 export const MAX_SEARCH_RESULTS = 500;
 const emptyFields: api.SchemaField[] = [];
 const emptyMembers: api.SchemaEnumMember[] = [];
@@ -431,6 +444,7 @@ export function searchDeclarations(
     enumValues: enumValueSet,
     metadataKeys,
     metadataValues,
+    networkWords,
     entityWords,
     inputWords,
     outputWords,
@@ -441,7 +455,9 @@ export function searchDeclarations(
   const hasNameFilter = nameWords.length > 0;
   const hasOffsetFilter = offsetSet.size > 0;
   const hasEnumValueFilter = enumValueSet.size > 0;
-  const hasMetadataFilter = metadataKeys.length > 0 || metadataValues.length > 0;
+  // network: works like metadata:, the class's network data or else its fields'
+  const hasMetadataFilter =
+    metadataKeys.length > 0 || metadataValues.length > 0 || networkWords.length > 0;
   const hasIOFilter = inputWords.length > 0 || outputWords.length > 0;
   const hasEntityFilter = entityWords.length > 0 || hasIOFilter;
 
@@ -459,7 +475,7 @@ export function searchDeclarations(
   const results: { declaration: api.Declaration; score: number }[] = [];
 
   function isFieldMatch(
-    item: { name: string; metadata?: api.SchemaMetadataEntry[] },
+    item: { name: string; metadata?: api.SchemaMetadataEntry[]; network?: api.FieldNetwork },
     numericValue: number | undefined,
     remainingWords: string[],
     declMetaSatisfied: boolean,
@@ -492,6 +508,7 @@ export function searchDeclarations(
         !matchesLoweredValues(lowerMetaVals(item.metadata), metadataValues)
       )
         return false;
+      if (networkWords.length > 0 && !matchesNetwork(item.network, networkWords)) return false;
     }
 
     return true;
@@ -552,7 +569,10 @@ export function searchDeclarations(
     const declMetaSatisfied =
       hasMetadataFilter &&
       (metadataKeys.length === 0 || matchesMetadataKeys(declaration.metadata, metadataKeys)) &&
-      (metadataValues.length === 0 || matchesMetadataValues(declaration.metadata, metadataValues));
+      (metadataValues.length === 0 ||
+        matchesMetadataValues(declaration.metadata, metadataValues)) &&
+      (networkWords.length === 0 ||
+        (declaration.kind === "class" && matchesNetwork(declaration.network, networkWords)));
 
     // Field-level filtering needed when there are remaining words, offset, enumvalue, or unsatisfied metadata
     const hasFieldFilter =
@@ -579,6 +599,9 @@ export function searchDeclarations(
 
     // Enum value filter excludes classes entirely
     if (hasEnumValueFilter && declaration.kind !== "enum") continue;
+
+    // Enums have no network data
+    if (networkWords.length > 0 && declaration.kind !== "class") continue;
 
     const score =
       remainingWords.length > 0 ? 5000 + nameFuzzyScore : hasNameFilter ? nameFuzzyScore : 3000;

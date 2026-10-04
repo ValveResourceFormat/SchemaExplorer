@@ -26,7 +26,10 @@ export type ReferenceEntry = {
 
 export type EntityKeyRef = { entity: EntityClass; key: EntityKey };
 
-/** An entity using a class as a component, as the base it replaces or as the replacement */
+/**
+ * An entity using a class as a component: added by the entity, or the base it replaces, or the
+ * replacement
+ */
 export type ComponentRef = { entity: EntityClass; component: EntityComponent; replaced: boolean };
 
 export type EntityLookups = {
@@ -62,6 +65,8 @@ export type GameContext = EntityLookups & {
   consoleItems: ConsoleItem[];
   /** declarationKey(enumModule, enum) → convars using the enum */
   enumConVars: Map<string, ConVar[]>;
+  /** Whether the dump has network data, Deadlock's and older ones don't */
+  hasNetwork: boolean;
   error: string | null;
 };
 
@@ -300,10 +305,14 @@ export function buildEntityLookups(
 
     // Components are in the entity's schema module or the module linking it, like on its page
     for (const component of entity.components) {
-      for (const [name, replaced] of [
-        [component.base, true],
-        [component.override, false],
-      ] as const) {
+      const uses: (readonly [string, boolean])[] =
+        "name" in component
+          ? [[component.name, false]]
+          : [
+              [component.base, true],
+              [component.override, false],
+            ];
+      for (const [name, replaced] of uses) {
         const module = [entity.classModule, entity.module].find((m) =>
           declarations.get(m)?.has(name),
         );
@@ -402,6 +411,13 @@ function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {
   return map;
 }
 
+function hasNetworkData(declarations: Map<string, Map<string, Declaration>>): boolean {
+  for (const d of allDeclarations(declarations)) {
+    if (d.kind === "class" && (d.network || d.fields.some((f) => f.network))) return true;
+  }
+  return false;
+}
+
 // -- Game context store --
 
 const contexts = new Map<GameId, GameContext>();
@@ -479,6 +495,7 @@ export function buildAllGameContexts(
       crossModuleLookup,
       consoleItems,
       enumConVars: buildEnumConVars(consoleItems),
+      hasNetwork: hasNetworkData(declarations),
       ...buildEntityLookups(schema?.entities ?? [], declarations),
       error: errors.get(g.id) ?? null,
     });

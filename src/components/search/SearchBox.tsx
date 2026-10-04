@@ -6,6 +6,7 @@ import { styled } from "@linaria/react";
 import { SearchContext } from "./SearchContext";
 import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
+import { getNetworkKeys } from "../../data/network";
 import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
 import type { SearchMode } from "../../utils/section-search";
 
@@ -48,6 +49,8 @@ export interface SearchTag {
   example: string;
   /** Only shown for games that have entities */
   entities?: boolean;
+  /** Only shown for games that have network data */
+  network?: boolean;
 }
 
 const SEARCH_TAGS: readonly SearchTag[] = [
@@ -80,6 +83,13 @@ const SEARCH_TAGS: readonly SearchTag[] = [
     icon: "meta-variable",
     description: "Filter by metadata value",
     example: "e.g. metadatavalue:true",
+  },
+  {
+    tag: "network:",
+    icon: "meta-broadcast",
+    description: "Filter by network property or value",
+    example: "e.g. network:changeCallbacks or network:LocalPlayerExclusive",
+    network: true,
   },
   {
     tag: "entity:",
@@ -125,9 +135,12 @@ const CONSOLE_SEARCH_TAGS: readonly SearchTag[] = [
   },
 ];
 
-export function getSearchTags(mode: SearchMode, hasEntities: boolean): readonly SearchTag[] {
+export function getSearchTags(
+  mode: SearchMode,
+  { hasEntities, hasNetwork }: { hasEntities: boolean; hasNetwork: boolean },
+): readonly SearchTag[] {
   if (mode === "console") return CONSOLE_SEARCH_TAGS;
-  return hasEntities ? SEARCH_TAGS : SEARCH_TAGS.filter((t) => !t.entities);
+  return SEARCH_TAGS.filter((t) => (!t.entities || hasEntities) && (!t.network || hasNetwork));
 }
 
 function getLastWord(input: string): string {
@@ -429,11 +442,11 @@ export function SearchBox({
   mode?: SearchMode;
 }) {
   const { search } = useContext(SearchContext);
-  const { game, declarations, entities, designNames, consoleItems } =
+  const { game, declarations, entities, designNames, consoleItems, hasNetwork } =
     useContext(DeclarationsContext);
   const baseUrl = sectionPath(game, mode);
   const hasEntities = entities.length > 0;
-  const tags = getSearchTags(mode, hasEntities);
+  const tags = getSearchTags(mode, { hasEntities, hasNetwork });
   const [inputValue, setInputValue] = useState(search);
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -456,6 +469,7 @@ export function SearchBox({
     const list: ValueSuggestions[] = [
       { tag: "module:", header: "Modules", values: [...declarations.keys()] },
       { tag: "metadata:", header: "Metadata Keys", values: getMetadataKeys(declarations) },
+      { tag: "network:", header: "Network Properties", values: getNetworkKeys(declarations) },
     ];
     if (hasEntities) {
       list.push({ tag: "entity:", header: "Entities", values: designNames });

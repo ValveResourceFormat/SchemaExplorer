@@ -18,3 +18,13 @@ export const highlightLink = `
   color: var(--highlight);
   ${subtleUnderline}
 `;
+
+/** A link in the color of the text around it, highlighted on hover */
+export const dimLink = `
+  color: inherit;
+  ${subtleUnderline}
+
+  &:hover {
+    color: var(--highlight);
+  }
+`;

@@ -31,12 +31,75 @@ export interface SchemaMetadataEntry {
   value?: SchemaMetadataValue;
 }
 
+/** How a networked field is sent, from the game's network database. Defaults are left out */
+export interface FieldNetwork {
+  /** Networked type, like the element type of network vectors */
+  type: string;
+  /** The type it's sent as, when different */
+  sentAs?: string;
+  /** Class of embedded, pointer and component fields, when the type doesn't name it */
+  class?: string;
+  alias?: string;
+  typeAlias?: string;
+  serializer?: string;
+  encoder?: string;
+  recipientsFilter?: string;
+  changePointerCallback?: string;
+  changeCallbacks?: string[];
+  userGroups?: string[];
+  /** Default 64 left out */
+  priority?: number;
+  /** Default 32 left out */
+  bitCount?: number;
+  encodeFlags?: number;
+  /** ±FLT_MAX left out */
+  min?: number;
+  max?: number;
+  embeddedFieldOffsetDelta?: number;
+  /** Polymorphic pointers */
+  polymorphic?: boolean;
+  /** Resource extension of resource handle fields, like vnmgraph */
+  resourceType?: string;
+}
+
+/** A class's change to how a field of a base is sent */
+export interface NetworkOverride {
+  field: string;
+  /** serializer, encoder, changeCallback, bitCount, userGroup or priority, kindN if unknown */
+  kind: string;
+  /** Without it, the nearest base that has the field */
+  class?: string;
+  value?: string;
+}
+
+/** Class-wide network settings, from the game's network database */
+export interface ClassNetwork {
+  /** Field names */
+  includeByName?: string[];
+  excludeByName?: string[];
+  /** User groups */
+  includeByUserGroup?: string[];
+  excludeByUserGroup?: string[];
+  overrides?: NetworkOverride[];
+  /** Field → type */
+  varTypeOverrides?: Record<string, string>;
+  userGroupProxies?: string[];
+  /** field is a regex over field paths */
+  replayCompatFields?: { field: string; callback: string }[];
+  varsAtomic?: boolean;
+  structNotInNetworkUtlVectorEmbedded?: boolean;
+  /** Default 2 left out */
+  outOfPVSUpdates?: number;
+}
+
 export interface SchemaField {
   name: string;
   /** Omitted in dumps that are not kept up to date, where offsets would go stale */
   offset?: number;
   type: SchemaFieldType;
   metadata: SchemaMetadataEntry[];
+  /** Only on networked fields */
+  network?: FieldNetwork;
   defaultValue?: string;
 }
 
@@ -65,6 +128,7 @@ export interface SchemaClass {
   parents: SchemaParent[];
   fields: SchemaField[];
   metadata: SchemaMetadataEntry[];
+  network?: ClassNetwork;
   /** Set on search results filtered by input:/output: */
   entityMatches?: { inputs: EntityInput[]; outputs: EntityOutput[] };
 }
@@ -112,18 +176,22 @@ export interface ConCommand {
 
 export type ConsoleItem = ConVar | ConCommand;
 
-// Entity classes (CS2 only for now). Keys, inputs and outputs are only the ones added since baseClass.
+// Entity classes, in the games whose dumps have them. Keys, inputs and outputs are only the ones
+// added since baseClass.
 export interface EntityKey {
   name: string;
   type: string;
   field?: string;
   /**
    * Class whose datadesc adds the key, the field can be inherited from its schema parents (see
-   * resolveKeyField). The dump omits it when it's the entity's class
+   * resolveKeyField). The dump omits it when it's the entity's class. For component keys it's the
+   * component's datamap class, like CGameSceneNode for CBodyComponent
    */
   declaredIn: string;
   /** The dump omits it when it's the entity's classModule */
   declaredInModule: string;
+  /** Component class the key belongs to, like CBodyComponent */
+  component?: string;
   path?: string;
   enum?: string;
   enumModule?: string;
@@ -131,6 +199,8 @@ export interface EntityKey {
   removed?: boolean;
   arrayStart?: number;
   arrayCount?: number;
+  /** Rare datadesc flags: ADDED_KEYFIELD, ADDITIONAL_FIELDS, EXPLICIT_BASE */
+  flags?: string[];
 }
 
 export interface EntityParam {
@@ -154,10 +224,8 @@ export interface EntityOutput {
   description?: string;
 }
 
-export interface EntityComponent {
-  base: string;
-  override: string;
-}
+/** A component the class adds itself, or one replacing a base class's component with a subclass */
+export type EntityComponent = { name: string } | { base: string; override: string };
 
 export interface EntityClass {
   class: string;
