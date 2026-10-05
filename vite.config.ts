@@ -34,6 +34,8 @@ export default defineConfig(({ mode }) => {
         // The hash keeps same-named components in different files apart
         classNameSlug: mode === "development" ? "[title]_[hash]" : "[hash]",
         sourceMap: true,
+        // The site targets current browsers, which need no vendor prefixes
+        prefixer: false,
       }),
       {
         // sirv treats .gz files as pre-compressed and adds Content-Encoding: gzip,
@@ -57,6 +59,8 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       sourcemap: true,
+      // Current browsers only, so neither the JS nor the CSS is rewritten or prefixed for older ones
+      target: "esnext",
       // Lists the licenses of the dependencies bundled into the site
       license: { fileName: "licenses.md" },
       // Emit the pre-hydration script as a standalone, cacheable file instead of
