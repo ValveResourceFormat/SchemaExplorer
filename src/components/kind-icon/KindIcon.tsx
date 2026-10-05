@@ -35,7 +35,7 @@ export type IconKind =
 export type UiIconName = "search" | "close" | "menu" | "check" | "sun" | "moon";
 
 import ICONS_URL from "../../icons.svg?url";
-export { ICONS_URL };
+import type { GameId } from "../../games-list";
 
 /**
  * Codicons are drawn on a 16px grid and are sharpest at that size, so 16 goes next to text of
@@ -43,30 +43,34 @@ export { ICONS_URL };
  */
 type IconSize = 16 | 24;
 
-export const UiIcon = ({
-  className,
-  name,
-  size = 16,
-}: {
+interface IconProps {
   className?: string;
-  name: UiIconName;
   size?: IconSize;
+}
+
+/** A symbol in icons.svg */
+export const SpriteIcon = ({
+  id,
+  className,
+  size,
+}: {
+  id: string;
+  className?: string;
+  size: number;
 }) => (
   <svg className={className} width={size} height={size} aria-hidden="true">
-    <use href={`${ICONS_URL}#${name}`} />
+    <use href={`${ICONS_URL}#${id}`} />
   </svg>
 );
 
-export const KindIcon = ({
-  className,
-  kind,
-  size = 16,
-}: {
-  className?: string;
-  kind: IconKind;
-  size?: IconSize;
-}) => (
-  <svg className={className} width={size} height={size} aria-hidden="true">
-    <use href={`${ICONS_URL}#ki-${kind}`} />
-  </svg>
+export const KindIcon = ({ kind, size = 16, ...props }: IconProps & { kind: IconKind }) => (
+  <SpriteIcon id={`ki-${kind}`} size={size} {...props} />
+);
+
+export const UiIcon = ({ name, size = 16, ...props }: IconProps & { name: UiIconName }) => (
+  <SpriteIcon id={name} size={size} {...props} />
+);
+
+export const GameIcon = ({ game, size = 16, ...props }: IconProps & { game: GameId }) => (
+  <SpriteIcon id={`game-${game}`} size={size} {...props} />
 );

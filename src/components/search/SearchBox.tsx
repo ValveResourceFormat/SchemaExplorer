@@ -210,15 +210,15 @@ function getConsoleSuggestions(items: GameContext["consoleItems"]): ValueSuggest
 const SearchBoxWrapper = styled.div`
   position: relative;
   width: 100%;
-`;
 
-const SearchIcon = styled(UiIcon)`
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  translate: 0 -50%;
-  pointer-events: none;
-  color: var(--searchbox-placeholder);
+  > svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    translate: 0 -50%;
+    pointer-events: none;
+    color: var(--searchbox-placeholder);
+  }
 `;
 
 const MainSearchInput = styled(SearchInput)`
@@ -580,7 +580,7 @@ export function SearchBox({
 
   return (
     <SearchBoxWrapper className={className}>
-      <SearchIcon name="search" />
+      <UiIcon name="search" />
       {!inputValue && !isFocused && (
         <SearchPlaceholder>
           Type <kbd>/</kbd>{" "}

@@ -1,7 +1,7 @@
 import { styled } from "@linaria/react";
 import { BASE_PATH, getGameDef, type GameId } from "../../games-list";
 import type { SchemaMetadata } from "../../data/schemas";
-import { ICONS_URL } from "../kind-icon/KindIcon";
+import { GameIcon } from "../kind-icon/KindIcon";
 import { subtleUnderline } from "../schema/link-styles";
 
 export const ContentWrapper = styled.main`
@@ -71,9 +71,7 @@ export const ResultsHeading = styled.div`
 export function OtherGameHeading({ gameId }: { gameId: GameId }) {
   return (
     <ResultsHeading>
-      <svg width="16" height="16" aria-hidden="true">
-        <use href={`${ICONS_URL}#game-${gameId}`} />
-      </svg>
+      <GameIcon game={gameId} />
       {getGameDef(gameId)?.name}
     </ResultsHeading>
   );

@@ -3,7 +3,7 @@ import { Link } from "../Link";
 import type { Declaration } from "../../data/types";
 import { DeclarationsContext, declarationKey, schemaPath } from "./DeclarationsContext";
 import { getGameDef, GameId } from "../../games-list";
-import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { GameIcon, KindIcon } from "../kind-icon/KindIcon";
 import { InlineList, Pill, PillDot } from "./styles";
 import { Detail } from "./Detail";
 import { tip } from "../Tooltip";
@@ -88,9 +88,7 @@ export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
                 to={schemaPath(gameId, otherModule, declaration.name)}
                 {...(info ? {} : tip("Identical in this game."))}
               >
-                <svg width="16" height="16" aria-hidden="true">
-                  <use href={`${ICONS_URL}#game-${gameId}`} />
-                </svg>
+                <GameIcon game={gameId} />
                 {gameName}
               </Link>
               {info && (

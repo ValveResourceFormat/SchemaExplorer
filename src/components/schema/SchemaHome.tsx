@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { styled } from "@linaria/react";
 import { GAME_LIST } from "../../games-list";
 import { getSearchTags } from "../search/SearchBox";
-import { KindIcon, ICONS_URL } from "../kind-icon/KindIcon";
+import { GameIcon, KindIcon } from "../kind-icon/KindIcon";
 import { CardBlock, InlineList } from "./styles";
 import { highlightLink } from "./link-styles";
 import { Link } from "../Link";
@@ -102,9 +102,7 @@ function GameList() {
     <InlineList>
       {GAME_LIST.map((g) => (
         <Link key={g.id} to={schemaPath(g.id)}>
-          <svg width="16" height="16" aria-hidden="true">
-            <use href={`${ICONS_URL}#game-${g.id}`} />
-          </svg>
+          <GameIcon game={g.id} />
           {g.name}
         </Link>
       ))}

@@ -187,7 +187,7 @@ function FlagFilterItem({
       {...flagTip(flag, game)}
     >
       {/* The flag's own icon takes the place of the color dot */}
-      {flag === EXCLUSIVE_FLAG ? <ExclusiveIcon /> : icon ? <FlagIcon kind={icon} /> : <Dot />}
+      {flag === EXCLUSIVE_FLAG ? <ExclusiveIcon /> : icon ? <KindIcon kind={icon} /> : <Dot />}
       <ItemName>{flag}</ItemName>
       {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
       <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
@@ -202,11 +202,6 @@ const GroupItems = styled.div`
 const Spacer = styled.span`
   width: 16px;
   flex-shrink: 0;
-`;
-
-const FlagIcon = styled(KindIcon)`
-  flex-shrink: 0;
-  color: var(--c);
 `;
 
 const Dot = styled.span`
@@ -230,6 +225,11 @@ const FilterItem = styled.button`
   position: relative;
   --c: var(--group-border);
   ${flagColorVars}
+
+  /* The flag's icon, in the flag's color */
+  > svg {
+    color: var(--c);
+  }
 
   &[data-group="hidden"] > ${Dot} {
     background: transparent;

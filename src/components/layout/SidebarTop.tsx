@@ -6,7 +6,7 @@ import { getGameContext } from "../../data/derived";
 import { buildHash } from "../../utils/filtering";
 import { searchForSection, type SearchMode } from "../../utils/section-search";
 import { AppContext } from "../AppContext";
-import { ICONS_URL, KindIcon, UiIcon } from "../kind-icon/KindIcon";
+import { GameIcon, KindIcon, SpriteIcon, UiIcon } from "../kind-icon/KindIcon";
 import { Link } from "../Link";
 import {
   DeclarationsContext,
@@ -44,9 +44,7 @@ export function SidebarTop({
     <Top>
       <BrandRow>
         <Brand href="https://s2v.app/">
-          <svg width="28" height="28">
-            <use href={`${ICONS_URL}#s2v-logo`} />
-          </svg>
+          <SpriteIcon id="s2v-logo" size={28} />
           <span>Source 2 Viewer</span>
         </Brand>
         <ThemeButton />
@@ -71,8 +69,8 @@ function ThemeButton() {
       title={darkmode ? "Switch to light theme" : "Switch to dark theme"}
       aria-label="Toggle dark theme"
     >
-      <ThemeIcon className="moon" name="moon" />
-      <ThemeIcon className="sun" name="sun" />
+      <UiIcon className="moon" name="moon" />
+      <UiIcon className="sun" name="sun" />
     </ThemeToggle>
   );
 }
@@ -107,9 +105,7 @@ function GameRows({ section, onNavigate }: { section: SearchMode; onNavigate: ()
           data-current={g.id === game || undefined}
           aria-current={g.id === game ? "true" : undefined}
         >
-          <svg width="16" height="16" aria-hidden="true">
-            <use href={`${ICONS_URL}#game-${g.id}`} />
-          </svg>
+          <GameIcon game={g.id} />
           {g.name}
         </NavRow>
       ))}
@@ -198,16 +194,14 @@ const IconButton = styled.button`
   ${iconButton}
 `;
 
-// Pushes itself and the close button after it to the end of the row
+// Pushes itself and the close button after it to the end of the row. The icon follows the theme
+// through CSS, the prerendered page can't know it
 const ThemeToggle = styled.button`
   ${iconButton}
   margin-left: auto;
-`;
 
-// The icon follows the theme through CSS, the prerendered page can't know it
-const ThemeIcon = styled(UiIcon)`
-  [data-theme="dark"] &.sun,
-  :root:not([data-theme="dark"]) &.moon {
+  [data-theme="dark"] & > .sun,
+  :root:not([data-theme="dark"]) & > .moon {
     display: none;
   }
 `;

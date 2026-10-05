@@ -3,18 +3,14 @@ import { styled } from "@linaria/react";
 import { EXCLUSIVE_FLAG, getGameContext } from "../../data/derived";
 import { isGameId } from "../../games-list";
 import { registerTooltip } from "../Tooltip";
-import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { GameIcon, KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { flagAccent, flagDescription, flagIcon } from "./flags";
 
 /** The exclusive flag's icon, the game's own */
-export function ExclusiveIcon({ size = 16 }: { size?: number }) {
+export function ExclusiveIcon() {
   const { game } = useContext(DeclarationsContext);
-  return (
-    <GameIcon width={size} height={size} aria-hidden="true">
-      <use href={`${ICONS_URL}#game-${game}`} />
-    </GameIcon>
-  );
+  return <GameIcon game={game} />;
 }
 
 /**
@@ -38,11 +34,6 @@ export function FlagContent({ flag, compact }: { flag: string; compact?: boolean
     </>
   );
 }
-
-const GameIcon = styled.svg`
-  flex-shrink: 0;
-  border-radius: 2px;
-`;
 
 /** Read by screen readers, not shown */
 export const VisuallyHidden = styled.span`
@@ -110,6 +101,11 @@ const TooltipFlagName = styled.div`
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--accent, var(--text));
+
+  > svg {
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
 `;
 
 const TooltipDescription = styled.div`
