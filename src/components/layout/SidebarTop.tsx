@@ -151,7 +151,7 @@ function SectionRows({
         data-current={current || undefined}
         aria-current={current ? "true" : undefined}
       >
-        <KindIcon kind={SECTIONS[mode].icon} size="small" />
+        <KindIcon kind={SECTIONS[mode].icon} />
         {SECTIONS[mode].label}
         {text && <SidebarCount>{text}</SidebarCount>}
       </NavRow>

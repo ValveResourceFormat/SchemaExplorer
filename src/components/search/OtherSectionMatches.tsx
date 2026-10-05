@@ -47,7 +47,7 @@ export function OtherSectionMatches({
   return (
     <>
       <ResultsHeading>
-        <KindIcon kind={SECTIONS[other].icon} size="small" />
+        <KindIcon kind={SECTIONS[other].icon} />
         {SECTIONS[other].label}
         {total > better.items.length && <AllLink to={to}>All {countText} results</AllLink>}
       </ResultsHeading>
@@ -58,7 +58,7 @@ export function OtherSectionMatches({
       )}
       {own.length > 0 && (
         <ResultsHeading>
-          <KindIcon kind={SECTIONS[section].icon} size="small" />
+          <KindIcon kind={SECTIONS[section].icon} />
           {SECTIONS[section].label}
         </ResultsHeading>
       )}

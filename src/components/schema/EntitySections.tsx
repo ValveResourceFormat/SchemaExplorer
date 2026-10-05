@@ -83,7 +83,7 @@ function AliasPills({ entities }: { entities: EntityClass[] }) {
         data-mono
         {...tip("Alias design name: the game creates this class for it")}
       >
-        <KindIcon kind="entity" size={14} />
+        <KindIcon kind="entity" />
         {name}
         <Dim> alias</Dim>
       </Pill>
@@ -103,7 +103,7 @@ export function EntityJumpPills({ entities }: { entities: EntityClass[] }) {
           {...tip(entity.designName ? "Entity design name" : "Entity without a design name")}
           onClick={(e) => scrollToEntity(e, entity)}
         >
-          <KindIcon kind="entity" size={14} />
+          <KindIcon kind="entity" />
           {entity.designName ?? "entity"}
           {showModule && ` · ${entity.module}`}
         </PillAnchor>
@@ -121,7 +121,7 @@ export function DesignNamePills({ entities }: { entities: EntityClass[] | undefi
     <>
       {names.map((name) => (
         <Pill key={name} data-mono {...tip("Entity design name")}>
-          <KindIcon kind="entity" size={14} />
+          <KindIcon kind="entity" />
           {name}
         </Pill>
       ))}
@@ -427,7 +427,7 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
     >
       <NameCell title={display !== entityKey.name ? entityKey.name : undefined}>
         <span>
-          <RowIcon kind="keyvalue" size="small" />
+          <RowIcon kind="keyvalue" />
           <EntryLink
             kind="kv"
             name={entityKey.name}
@@ -549,7 +549,7 @@ const IORow = memo(function IORow({
     >
       <NameCell>
         <span>
-          <RowIcon kind={kind} size="small" />
+          <RowIcon kind={kind} />
           <EntryLink
             kind={kind}
             name={entry.name}
@@ -737,7 +737,7 @@ function EntityListCard({
             ))}
             {own.length > 0 && (
               <Band>
-                <KindIcon kind="entity" size={14} />
+                <KindIcon kind="entity" />
                 <strong>{entityLabel(entity)}</strong>
               </Band>
             )}
@@ -772,7 +772,7 @@ const SubBand = styled(Band)`
 function ComponentBand({ entity, name }: { entity: EntityClass; name: string }) {
   return (
     <SubBand>
-      <KindIcon kind="class" size={14} />
+      <KindIcon kind="class" />
       <ComponentClass entity={entity} name={name} />
       <span>component</span>
     </SubBand>
@@ -783,7 +783,7 @@ function InheritedBand({ entity }: { entity: EntityClass }) {
   const { game } = useContext(DeclarationsContext);
   return (
     <Band>
-      <KindIcon kind="inherited-class" size={14} />
+      <KindIcon kind="inherited-class" />
       <Link to={entityPath(game, entity)}>{entityLabel(entity)}</Link>
       {entity.designName && <span>{entity.class}</span>}
     </Band>
@@ -807,7 +807,7 @@ export function EntitySections({
     return (
       <section key={`${ctx.game}/${entity.module}`} aria-label={`${entityLabel(entity)} entity`}>
         <EntityHeading id={entityAnchor(entity)}>
-          <KindIcon kind="entity" size="big" />
+          <KindIcon kind="entity" size={24} />
           <EntityName>{entityLabel(entity)}</EntityName>
           {!entity.designName && <Pill>no design name</Pill>}
           <Pill>{entity.spawnable ? "spawnable" : "not spawnable"}</Pill>
@@ -847,7 +847,7 @@ export function EntityMatches({
     return (
       <React.Fragment key={kind}>
         <Band>
-          <KindIcon kind={section.icon} size={14} />
+          <KindIcon kind={section.icon} />
           <strong>{section.title}</strong>
         </Band>
         <Table style={{ "--cols": section.cols } as React.CSSProperties}>
@@ -883,7 +883,7 @@ export function ComponentOf({ name, module }: { name: string; module: string }) 
           to={entityPath(game, entity)}
           title={`${entity.class} in ${entity.module}`}
         >
-          <KindIcon kind="entity" size="small" />
+          <KindIcon kind="entity" />
           <span>
             {entity.class}
             {entity.designName && <Dim> {entity.designName}</Dim>}
@@ -916,7 +916,7 @@ export function UsedByKeyvalues({ name, module }: { name: string; module: string
           to={keyvalueLink(game, entity, key.name)}
           title={`${entity.class} in ${entity.module}`}
         >
-          <KindIcon kind="entity" size="small" />
+          <KindIcon kind="entity" />
           <span>
             {entityLabel(entity)}
             <RefField>{key.name}</RefField>

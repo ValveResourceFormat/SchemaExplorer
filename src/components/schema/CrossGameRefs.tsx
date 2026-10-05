@@ -75,7 +75,7 @@ export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
             to={schemaPath(game, crossModuleMatch.module, crossModuleMatch.name)}
             title={`${crossModuleMatch.name} in ${crossModuleMatch.module}`}
           >
-            <KindIcon kind="module" size="small" />
+            <KindIcon kind="module" />
             {crossModuleMatch.module}
           </Link>
         )}

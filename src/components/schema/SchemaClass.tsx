@@ -120,7 +120,7 @@ export const SchemaClassView: React.FC<{
     <>
       <PageHeader>
         <PageTitle>
-          <KindIcon kind="class" size="big" />
+          <KindIcon kind="class" size={24} />
           {declaration.name}
         </PageTitle>
         {entities && <EntityJumpPills entities={entities} />}
@@ -182,7 +182,7 @@ function ClassDetails({
                 to={schemaPath(game, parent.module, parent.name)}
                 title={`class in ${parent.module}`}
               >
-                <KindIcon kind="inherited-class" size="small" />
+                <KindIcon kind="inherited-class" />
                 {parent.name}
                 {offset !== 0 && <BaseOffsetText>at {formatHexOffset(offset)}</BaseOffsetText>}
               </Link>
@@ -378,7 +378,7 @@ function OwnerBand({ entry }: { entry: FieldEntry }) {
   const { owner, inherited, baseOffset } = entry;
   return (
     <Band>
-      <KindIcon kind={inherited ? "inherited-class" : "class"} size={14} />
+      <KindIcon kind={inherited ? "inherited-class" : "class"} />
       {inherited ? (
         <Link to={schemaPath(game, owner.module, owner.name)}>{owner.name}</Link>
       ) : (
@@ -525,7 +525,7 @@ const FieldRow = memo(function FieldRow({
       <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
         {/* On phones the offset goes on the line of the name */}
         <FieldName data-inline data-inherited={inherited || undefined}>
-          <RowIcon kind="field" size="small" />
+          <RowIcon kind="field" />
           {inherited ? (
             // Inherited fields belong to their base's page
             <AnchorName

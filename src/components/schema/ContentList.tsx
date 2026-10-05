@@ -108,7 +108,7 @@ export function ContentList({ filtered }: { filtered: ReturnType<typeof useFilte
             <Section>
               <PageHeader>
                 <PageTitle>
-                  <KindIcon kind="module" size="big" />
+                  <KindIcon kind="module" size={24} />
                   {module}
                 </PageTitle>
               </PageHeader>

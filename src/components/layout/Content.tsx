@@ -63,8 +63,6 @@ export const ResultsHeading = styled.div`
   color: var(--text-dim);
 
   svg {
-    width: 18px;
-    height: 18px;
     border-radius: 3px;
   }
 `;
@@ -73,7 +71,7 @@ export const ResultsHeading = styled.div`
 export function OtherGameHeading({ gameId }: { gameId: GameId }) {
   return (
     <ResultsHeading>
-      <svg width="24" height="24">
+      <svg width="16" height="16" aria-hidden="true">
         <use href={`${ICONS_URL}#game-${gameId}`} />
       </svg>
       {getGameDef(gameId)?.name}

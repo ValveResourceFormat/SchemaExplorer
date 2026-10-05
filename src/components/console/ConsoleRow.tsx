@@ -15,7 +15,7 @@ import { flagColorVars } from "./flag-styles";
 const flagChipStyles = `
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font: inherit;
   font-size: 12px;
   font-weight: 500;
@@ -28,11 +28,6 @@ const flagChipStyles = `
   white-space: nowrap;
   position: relative;
   --c: var(--text-dim);
-
-  > svg {
-    width: 12px;
-    height: 12px;
-  }
 
   ${flagColorVars}
   &[data-group]:not([data-group="hidden"]) {
@@ -106,7 +101,7 @@ function FilterableFlagBadge({ flag, onClick }: { flag: string; onClick: () => v
 function ModuleBadge({ module, onClick }: { module: string; onClick?: () => void }) {
   const content = (
     <>
-      <KindIcon kind="module" size={12} />
+      <KindIcon kind="module" />
       {module}
     </>
   );

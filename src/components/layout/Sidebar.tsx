@@ -36,7 +36,7 @@ export const DeclarationSidebarElement = ({
       // Long names are cut off, the tooltip has all of it
       title={`${declaration.name}\n${declaration.kind} in ${declaration.module}`}
     >
-      <KindIcon kind={declaration.kind} size="small" />
+      <KindIcon kind={declaration.kind} />
       <span>{declaration.name}</span>
     </SidebarLink>
   );

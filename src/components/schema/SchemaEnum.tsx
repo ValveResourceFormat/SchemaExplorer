@@ -82,7 +82,7 @@ export const SchemaEnumView: React.FC<{
     <>
       <PageHeader>
         <PageTitle>
-          <KindIcon kind="enum" size="big" />
+          <KindIcon kind="enum" size={24} />
           {declaration.name}
         </PageTitle>
         {typePill}
@@ -181,7 +181,7 @@ function EnumMemberRow({
     <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
       {/* On phones the value and hex go on the line of the name */}
       <MemberName data-inline>
-        <RowIcon kind="enum-member" size="small" />
+        <RowIcon kind="enum-member" />
         <AnchorName
           to={{ pathname: declPath, hash: `field=${encodeURIComponent(member.name)}` }}
           replace

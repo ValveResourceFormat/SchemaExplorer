@@ -418,7 +418,7 @@ function MetadataEntries({
           return (
             <MetadataEntry key={group.name}>
               <MetadataIcon>
-                <KindIcon kind={iconKind} size="small" />
+                <KindIcon kind={iconKind} />
               </MetadataIcon>
               <span>
                 <MetadataName to={metaTo}>{group.name}</MetadataName>
@@ -436,7 +436,7 @@ function MetadataEntries({
           <div key={group.name}>
             <MetadataGroupName to={metaTo}>
               <MetadataIcon>
-                <KindIcon kind={iconKind} size="small" />
+                <KindIcon kind={iconKind} />
               </MetadataIcon>
               {group.name}
             </MetadataGroupName>

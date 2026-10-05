@@ -59,7 +59,7 @@ export function FilterToggle({
         aria-pressed={pressed}
         onClick={(e) => keepInPlace(e.currentTarget, () => onChange(!pressed))}
       >
-        <KindIcon kind={icon} size={14} />
+        <KindIcon kind={icon} />
         {children}
       </SegmentButton>
     </Segmented>

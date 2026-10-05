@@ -8,7 +8,7 @@ import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { flagAccent, flagDescription, flagIcon } from "./flags";
 
 /** The exclusive flag's icon, the game's own */
-export function ExclusiveIcon({ size = 12 }: { size?: number }) {
+export function ExclusiveIcon({ size = 16 }: { size?: number }) {
   const { game } = useContext(DeclarationsContext);
   return (
     <GameIcon width={size} height={size} aria-hidden="true">
@@ -33,7 +33,7 @@ export function FlagContent({ flag, compact }: { flag: string; compact?: boolean
   const icon = flagIcon(flag);
   return (
     <>
-      {icon && <KindIcon kind={icon} size={12} />}
+      {icon && <KindIcon kind={icon} />}
       {flag}
     </>
   );
@@ -110,11 +110,6 @@ const TooltipFlagName = styled.div`
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--accent, var(--text));
-
-  > svg {
-    width: 12px;
-    height: 12px;
-  }
 `;
 
 const TooltipDescription = styled.div`

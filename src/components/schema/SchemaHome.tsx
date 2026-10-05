@@ -102,7 +102,7 @@ function GameList() {
     <InlineList>
       {GAME_LIST.map((g) => (
         <Link key={g.id} to={schemaPath(g.id)}>
-          <svg width="20" height="20" aria-hidden="true">
+          <svg width="16" height="16" aria-hidden="true">
             <use href={`${ICONS_URL}#game-${g.id}`} />
           </svg>
           {g.name}
@@ -128,8 +128,7 @@ function SearchFilters({ isRoot }: { isRoot?: boolean }) {
         {tags.map((t) => (
           <React.Fragment key={t.tag}>
             <dt>
-              <KindIcon kind={t.icon} size="small" /> <code>{t.tag}</code> —{" "}
-              {t.description.toLowerCase()}
+              <KindIcon kind={t.icon} /> <code>{t.tag}</code> — {t.description.toLowerCase()}
             </dt>
             <dd>{t.example}</dd>
           </React.Fragment>

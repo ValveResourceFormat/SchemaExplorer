@@ -66,7 +66,7 @@ export function UsedByConVars({ name, module }: { name: string; module: string }
           key={convar.name}
           to={{ pathname: consolePath(game), hash: `name=${encodeURIComponent(convar.name)}` }}
         >
-          <KindIcon kind="convar" size="small" />
+          <KindIcon kind="convar" />
           {convar.name}
         </Link>
       )}
@@ -95,7 +95,7 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
       }
       title={`class in ${ref.declarationModule}`}
     >
-      <KindIcon kind={ref.relation === "class" ? "derived-class" : "field"} size="small" />
+      <KindIcon kind={ref.relation === "class" ? "derived-class" : "field"} />
       <span>
         {ref.declarationName}
         {ref.fieldName && <RefField>{ref.fieldName}</RefField>}

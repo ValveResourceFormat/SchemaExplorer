@@ -422,7 +422,7 @@ function SearchTagPopup({
             onSelect(t.tag);
           }}
         >
-          <KindIcon kind={t.icon} size="small" />
+          <KindIcon kind={t.icon} />
           <TagItemText>
             <TagItemName>{t.tag}</TagItemName>
             <TagItemDesc>{t.description}</TagItemDesc>

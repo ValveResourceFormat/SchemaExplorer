@@ -37,7 +37,7 @@ export function TitledCard({
     <Card>
       <CardHeader>
         <CardTitle as={titleAs}>
-          <KindIcon kind={icon} size="small" />
+          <KindIcon kind={icon} />
           {title}
         </CardTitle>
         {actions && <Actions>{actions}</Actions>}
@@ -84,7 +84,7 @@ export function ModulePill({ module }: { module: string }) {
   const { game } = useContext(DeclarationsContext);
   return (
     <PillLink to={schemaPath(game, module)} title={`${module} module`}>
-      <KindIcon kind="module" size={14} />
+      <KindIcon kind="module" />
       {module}
     </PillLink>
   );
@@ -166,7 +166,7 @@ export function GitHubButton({
       title={title}
       data-button={label ? true : undefined}
     >
-      <KindIcon kind="github" size={16} />
+      <KindIcon kind="github" />
       {label}
     </GitHubLink>
   );
@@ -211,7 +211,7 @@ export function SearchResultCard({
     <Card>
       <ResultHeader>
         <CardTitle>
-          <KindIcon kind={kind} size="small" />
+          <KindIcon kind={kind} />
           <AnchorName to={schemaPath(game, module, name)} title={`${kind} in ${module}`}>
             {name}
           </AnchorName>

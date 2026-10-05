@@ -61,7 +61,7 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
               aria-pressed={kind === k}
               onClick={() => setKind(k)}
             >
-              {icon ? <KindIcon kind={icon} size="small" /> : <Spacer />}
+              {icon ? <KindIcon kind={icon} /> : <Spacer />}
               <ItemName>{label}</ItemName>
               <SidebarCount>{kindCounts[k].toLocaleString("en-US")}</SidebarCount>
             </FilterItem>
@@ -187,13 +187,7 @@ function FlagFilterItem({
       {...flagTip(flag, game)}
     >
       {/* The flag's own icon takes the place of the color dot */}
-      {flag === EXCLUSIVE_FLAG ? (
-        <ExclusiveIcon size={16} />
-      ) : icon ? (
-        <FlagIcon kind={icon} size="small" />
-      ) : (
-        <Dot />
-      )}
+      {flag === EXCLUSIVE_FLAG ? <ExclusiveIcon /> : icon ? <FlagIcon kind={icon} /> : <Dot />}
       <ItemName>{flag}</ItemName>
       {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
       <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>

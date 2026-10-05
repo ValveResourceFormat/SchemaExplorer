@@ -64,7 +64,7 @@ export function NetworkedMark({ sending }: { sending?: FieldSending }) {
     : `Networked, sent from the server to clients. ${sendingReason(sending)}`;
   return (
     <Mark {...tip(text.trim())} aria-label={off ? "not sent" : "networked"}>
-      <KindIcon kind={off ? "meta-broadcast-off" : "meta-broadcast"} size="small" />
+      <KindIcon kind={off ? "meta-broadcast-off" : "meta-broadcast"} />
     </Mark>
   );
 }
@@ -444,7 +444,7 @@ export function ClassNetworkMatch({
   return (
     <>
       <Band>
-        <KindIcon kind="meta-broadcast" size={14} />
+        <KindIcon kind="meta-broadcast" />
         <strong>Network</strong>
       </Band>
       <MatchBody>
