@@ -28,7 +28,7 @@ export const metadataIconMap: Partial<Record<string, IconKind>> = {
   MGetKV3ClassDefaults: "meta-variable",
   MKV3TransferName: "meta-tag",
   MAlternateSemanticName: "meta-tag",
-  MNotSaved: "meta-discard",
+  MNotSaved: "meta-not-saved",
   MPropertySuppressExpr: "meta-eye-closed",
   MPropertySuppressField: "meta-eye-closed",
   MPropertySuppressEnumerator: "meta-eye-closed",

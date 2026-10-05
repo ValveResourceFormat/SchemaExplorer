@@ -27,7 +27,7 @@ import {
   keySchemaType,
   type Entry,
 } from "../../utils/entity-format";
-import { KindIcon, type IconKind } from "../kind-icon/KindIcon";
+import { KindIcon, UiIcon, type IconKind } from "../kind-icon/KindIcon";
 import { ColoredSyntax } from "./ColoredSyntax";
 import {
   DeclarationsContext,
@@ -312,11 +312,15 @@ const FieldLink = styled(Link)`
 `;
 
 const PulseMark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
   color: var(--text-dim);
 
   @media (max-width: 768px) {
     &::after {
-      content: " Pulse node";
+      content: "Pulse node";
       font-size: 13px;
     }
   }
@@ -568,7 +572,7 @@ const IORow = memo(function IORow({
         <div>
           {input.pulseNode && (
             <PulseMark title="Also available as a Pulse node" aria-label="Pulse node">
-              ✓
+              <UiIcon name="check" />
             </PulseMark>
           )}
         </div>

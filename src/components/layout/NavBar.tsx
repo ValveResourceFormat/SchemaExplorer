@@ -1,4 +1,5 @@
 import { styled } from "@linaria/react";
+import { UiIcon } from "../kind-icon/KindIcon";
 import { SearchBox } from "../search/SearchBox";
 import type { SearchMode } from "../../utils/section-search";
 import { iconButton } from "./sidebar-styles";
@@ -14,19 +15,7 @@ export const NavBar = ({
     <NavBarContentCell>
       {onMenuClick && (
         <MenuButton onClick={onMenuClick} aria-label="Open sidebar">
-          <svg
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <UiIcon name="menu" />
         </MenuButton>
       )}
       <NavBarSearchBox mode={section} />

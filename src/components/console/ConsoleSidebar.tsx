@@ -190,7 +190,7 @@ function FlagFilterItem({
       {flag === EXCLUSIVE_FLAG ? (
         <ExclusiveIcon size={16} />
       ) : icon ? (
-        <FlagIcon kind={icon} size={12} />
+        <FlagIcon kind={icon} size="small" />
       ) : (
         <Dot />
       )}
@@ -211,7 +211,6 @@ const Spacer = styled.span`
 `;
 
 const FlagIcon = styled(KindIcon)`
-  margin: 0 2px;
   flex-shrink: 0;
   color: var(--c);
 `;

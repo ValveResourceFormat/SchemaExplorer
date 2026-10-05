@@ -47,7 +47,7 @@ export function flagAccent(flag: string): string | undefined {
 
 // The flags that need to stand out get an icon before their name
 const FLAG_ICONS: Record<string, IconKind> = {
-  workshop_whitelisted: "hammer",
+  workshop_whitelisted: "tools",
   cheat: "lock",
   developmentonly: "code",
   defensive: "shield",

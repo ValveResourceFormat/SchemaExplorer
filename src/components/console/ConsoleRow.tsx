@@ -155,7 +155,8 @@ const Line = styled.div`
   min-width: 0;
 `;
 
-// The kind icon is drawn by CSS, an <svg><use> per row adds up over thousands of prerendered rows
+// The kind icon is drawn by CSS, an <svg><use> per row adds up over thousands of prerendered rows.
+// The masks are the convar and command icons from icons.svg
 const Name = styled.a`
   font-family: var(--font-mono);
   font-weight: 700;
@@ -170,12 +171,14 @@ const Name = styled.a`
     height: 16px;
     margin-right: 8px;
     vertical-align: -2px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%234EC9B0' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M2 4.5h2.25M7.75 4.5H14M2 11.5h7.25M12.75 11.5H14'/%3E%3Ccircle cx='6' cy='4.5' r='1.75'/%3E%3Ccircle cx='11' cy='11.5' r='1.75'/%3E%3C/svg%3E")
-      no-repeat;
+    background: var(--icon-teal);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 9.5c.93 0 1.71.64 1.94 1.5h5.56c.28 0 .5.22.5.5s-.22.5-.5.5H7.94c-.23.86-1.01 1.5-1.94 1.5s-1.71-.64-1.94-1.5H2.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h1.56c.23-.86 1.01-1.5 1.94-1.5zm0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm4-8c.93 0 1.71.64 1.94 1.5h1.56c.28 0 .5.22.5.5s-.22.5-.5.5h-1.56c-.23.86-1.01 1.5-1.94 1.5s-1.71-.64-1.94-1.5H2.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h5.56c.23-.86 1.01-1.5 1.94-1.5zm0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
   }
 
   &[data-command]::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23C586C0' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1.5' y='2.5' width='13' height='11' rx='1.5'/%3E%3Cpath d='M4.5 6l2 2-2 2M8.5 10.5h3'/%3E%3C/svg%3E");
+    background: var(--icon-pink);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.75 1.5H5.25A3.75 3.75 0 0 0 1.5 5.25v13.5a3.75 3.75 0 0 0 3.75 3.75h13.5a3.75 3.75 0 0 0 3.75-3.75V5.25a3.75 3.75 0 0 0-3.75-3.75zM21 18.75A2.25 2.25 0 0 1 18.75 21H5.25A2.25 2.25 0 0 1 3 18.75V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25zm-10.72-5.47-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.97-3.97-3.97-3.97a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06zm9.22 3.97a.75.75 0 0 1-.75.75h-7.5a.75.75 0 0 1 0-1.5h7.5a.75.75 0 0 1 .75.75z'/%3E%3C/svg%3E");
   }
 
   &:hover {

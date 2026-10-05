@@ -35,6 +35,20 @@
   --flag-restricted: #bc4c00;
   --flag-network: #0550ae;
   --flag-saved: #4a8c2a;
+
+  /* Kind icon colors, read by the symbols in icons.svg */
+  --icon-orange: #c25b0a;
+  --icon-yellow: #966d00;
+  --icon-sand: #7e6f14;
+  --icon-blue: #0969da;
+  --icon-cyan: #1b7c9e;
+  --icon-teal: #0e7c6b;
+  --icon-green: #2d8a28;
+  --icon-purple: #7c4dbd;
+  --icon-pink: #a3379c;
+  --icon-red: #cf222e;
+  --icon-salmon: #c4432b;
+  --icon-gray: var(--text-dim);
 }
 
 [data-theme="dark"] {
@@ -72,6 +86,18 @@
   --flag-restricted: #f0883e;
   --flag-network: #79c0ff;
   --flag-saved: #6dbf3a;
+
+  --icon-orange: #e37933;
+  --icon-yellow: #d4aa32;
+  --icon-sand: #dcdcaa;
+  --icon-blue: #75beff;
+  --icon-cyan: #9cdcfe;
+  --icon-teal: #4ec9b0;
+  --icon-green: #89d185;
+  --icon-purple: #b180d7;
+  --icon-pink: #c586c0;
+  --icon-red: #f14c4c;
+  --icon-salmon: #f48771;
 }
 
 :root {

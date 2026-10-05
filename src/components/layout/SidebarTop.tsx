@@ -6,7 +6,7 @@ import { getGameContext } from "../../data/derived";
 import { buildHash } from "../../utils/filtering";
 import { searchForSection, type SearchMode } from "../../utils/section-search";
 import { AppContext } from "../AppContext";
-import { ICONS_URL, KindIcon } from "../kind-icon/KindIcon";
+import { ICONS_URL, KindIcon, UiIcon } from "../kind-icon/KindIcon";
 import { Link } from "../Link";
 import {
   DeclarationsContext,
@@ -52,17 +52,7 @@ export function SidebarTop({
         <ThemeButton />
         {sidebarOpen && (
           <IconButton onClick={onNavigate} aria-label="Close sidebar">
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+            <UiIcon name="close" />
           </IconButton>
         )}
       </BrandRow>
@@ -74,16 +64,6 @@ export function SidebarTop({
 
 function ThemeButton() {
   const { darkmode, setDarkmode } = useContext(AppContext);
-  const icon = {
-    viewBox: "0 0 24 24",
-    width: 18,
-    height: 18,
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  } as const;
 
   return (
     <ThemeToggle
@@ -91,13 +71,8 @@ function ThemeButton() {
       title={darkmode ? "Switch to light theme" : "Switch to dark theme"}
       aria-label="Toggle dark theme"
     >
-      <ThemeIcon className="moon" {...icon}>
-        <path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9" />
-      </ThemeIcon>
-      <ThemeIcon className="sun" {...icon}>
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-      </ThemeIcon>
+      <ThemeIcon className="moon" name="moon" />
+      <ThemeIcon className="sun" name="sun" />
     </ThemeToggle>
   );
 }
@@ -230,7 +205,7 @@ const ThemeToggle = styled.button`
 `;
 
 // The icon follows the theme through CSS, the prerendered page can't know it
-const ThemeIcon = styled.svg`
+const ThemeIcon = styled(UiIcon)`
   [data-theme="dark"] &.sun,
   :root:not([data-theme="dark"]) &.moon {
     display: none;

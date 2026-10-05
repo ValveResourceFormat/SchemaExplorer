@@ -1,9 +1,11 @@
 export type IconKind =
   | "class"
+  | "inherited-class"
+  | "derived-class"
   | "enum"
   | "enum-member"
   | "field"
-  | "inherited-class"
+  | "offset"
   | "meta-default"
   | "meta-tag"
   | "meta-broadcast"
@@ -12,15 +14,16 @@ export type IconKind =
   | "meta-variable"
   | "meta-eye-closed"
   | "meta-folder"
-  | "meta-discard"
+  | "meta-not-saved"
   | "entity"
   | "keyvalue"
   | "input"
   | "output"
   | "convar"
   | "command"
+  | "flag"
   | "module"
-  | "hammer"
+  | "tools"
   | "lock"
   | "code"
   | "shield"
@@ -28,8 +31,25 @@ export type IconKind =
   | "user"
   | "github";
 
+/** Interface icons that take the text color, drawn with UiIcon */
+export type UiIconName = "search" | "close" | "menu" | "check" | "sun" | "moon";
+
 import ICONS_URL from "../../icons.svg?url";
 export { ICONS_URL };
+
+export const UiIcon = ({
+  className,
+  name,
+  size = 16,
+}: {
+  className?: string;
+  name: UiIconName;
+  size?: number;
+}) => (
+  <svg className={className} width={size} height={size} aria-hidden="true">
+    <use href={`${ICONS_URL}#${name}`} />
+  </svg>
+);
 
 export const KindIcon = ({
   className,

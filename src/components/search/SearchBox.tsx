@@ -7,7 +7,7 @@ import { SearchContext } from "./SearchContext";
 import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
 import { getNetworkKeys } from "../../data/network";
-import { KindIcon, IconKind, ICONS_URL } from "../kind-icon/KindIcon";
+import { KindIcon, IconKind, UiIcon } from "../kind-icon/KindIcon";
 import type { SearchMode } from "../../utils/section-search";
 
 export const SearchInput = styled.input`
@@ -56,13 +56,13 @@ export interface SearchTag {
 const SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "module:",
-    icon: "field",
+    icon: "module",
     description: "Filter by module name",
     example: "e.g. module:client",
   },
   {
     tag: "offset:",
-    icon: "meta-default",
+    icon: "offset",
     description: "Filter by byte offset",
     example: "e.g. offset:0x1A0",
   },
@@ -117,13 +117,13 @@ const SEARCH_TAGS: readonly SearchTag[] = [
 const CONSOLE_SEARCH_TAGS: readonly SearchTag[] = [
   {
     tag: "module:",
-    icon: "field",
+    icon: "module",
     description: "Filter by declaring module",
     example: "e.g. module:server",
   },
   {
     tag: "flag:",
-    icon: "meta-tag",
+    icon: "flag",
     description: "Filter by flag, -flag: excludes",
     example: "e.g. flag:cheat -flag:hidden",
   },
@@ -212,7 +212,7 @@ const SearchBoxWrapper = styled.div`
   width: 100%;
 `;
 
-const SearchIcon = styled.svg`
+const SearchIcon = styled(UiIcon)`
   position: absolute;
   left: 12px;
   top: 50%;
@@ -580,9 +580,7 @@ export function SearchBox({
 
   return (
     <SearchBoxWrapper className={className}>
-      <SearchIcon width="16" height="16" aria-hidden="true">
-        <use href={`${ICONS_URL}#search`} />
-      </SearchIcon>
+      <SearchIcon name="search" />
       {!inputValue && !isFocused && (
         <SearchPlaceholder>
           Type <kbd>/</kbd>{" "}

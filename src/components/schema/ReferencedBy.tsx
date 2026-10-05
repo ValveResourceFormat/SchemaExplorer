@@ -95,7 +95,7 @@ export function ReferencedBy({ name, module }: { name: string; module: string })
       }
       title={`class in ${ref.declarationModule}`}
     >
-      <KindIcon kind={ref.relation} size="small" />
+      <KindIcon kind={ref.relation === "class" ? "derived-class" : "field"} size="small" />
       <span>
         {ref.declarationName}
         {ref.fieldName && <RefField>{ref.fieldName}</RefField>}
