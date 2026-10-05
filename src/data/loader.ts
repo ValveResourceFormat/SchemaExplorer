@@ -1,16 +1,22 @@
 import { GameId } from "../games-list";
 import { parseSchemas, type SchemasJson } from "./schemas";
 
-const schemaUrls = import.meta.glob<string>("../../schemas/*.json.gz", {
-  import: "default",
-  query: "?url",
-  eager: true,
-});
+// The build emits every file this matches, so it leaves out the devOnly games in games-list.ts
+const schemaUrls = import.meta.glob<string>(
+  ["../../schemas/*.json.gz", "!**/steamvr.json.gz", "!**/steampal.json.gz"],
+  { import: "default", query: "?url", eager: true },
+);
 
-export async function loadGameSchemas(gameId: GameId) {
+function schemaUrl(gameId: GameId): string {
+  // The dev server serves the schemas folder as it is, including the dev only games
+  if (import.meta.env.DEV) return `${import.meta.env.BASE_URL}schemas/${gameId}.json.gz`;
   const key = Object.keys(schemaUrls).find((k) => k.endsWith(`/${gameId}.json.gz`));
   if (!key) throw new Error(`No schema found for ${gameId}`);
-  const url = schemaUrls[key];
+  return schemaUrls[key];
+}
+
+export async function loadGameSchemas(gameId: GameId) {
+  const url = schemaUrl(gameId);
   let response: Response;
   try {
     response = await fetch(url);

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { GAME_LIST } from "../src/games-list.ts";
+import { ALL_GAMES } from "../src/games-list.ts";
 import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
 import { intrinsicDeclarations } from "../src/data/intrinsics.ts";
 import { allDeclarations, declarationKey } from "../src/data/derived.ts";
@@ -56,7 +56,7 @@ function collectMissing(
 const missingAtomics = new Map<string, MissingTypeInfo>();
 const missingDeclared = new Map<string, MissingTypeInfo>();
 
-for (const game of GAME_LIST) {
+for (const game of ALL_GAMES) {
   const data: SchemasJson = JSON.parse(await readFile(`${schemasDir}/${game.id}.json`, "utf-8"));
   const { declarations } = parseSchemas(data);
 

@@ -3,6 +3,8 @@ const GAMES = [
   { id: "dota2", name: "Dota 2", repo: "SteamTracking/GameTracking-Dota2" },
   { id: "deadlock", name: "Deadlock", repo: "SteamTracking/GameTracking-Deadlock" },
   { id: "hlvr", name: "Half-Life: Alyx" },
+  { id: "steamvr", name: "SteamVR Home", devOnly: true },
+  { id: "steampal", name: "Aperture Desk Job", devOnly: true },
 ] as const;
 
 export type GameId = (typeof GAMES)[number]["id"];
@@ -12,9 +14,17 @@ interface GameDef {
   name: string;
   /** GameTracking repository, games without one are a one-off dump that is never updated */
   repo?: string;
+  /** Only shown by the dev server, the deployed site leaves it out */
+  devOnly?: boolean;
 }
 
-export const GAME_LIST: readonly GameDef[] = GAMES;
+/** Every game with a dump in schemas/, including the dev only ones */
+export const ALL_GAMES: readonly GameDef[] = GAMES;
+
+// Build scripts run in plain Node, where import.meta.env doesn't exist, and only build the deployed site
+export const GAME_LIST: readonly GameDef[] = import.meta.env?.DEV
+  ? ALL_GAMES
+  : ALL_GAMES.filter((g) => !g.devOnly);
 export const DEFAULT_GAME: GameId = GAME_LIST[0].id;
 
 export function getGameDef(id: string): GameDef | undefined {

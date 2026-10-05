@@ -7,7 +7,8 @@ SchemaExplorer shows the `schemas.json` that [DumpSource2](https://github.com/Va
 ## Data
 
 - `schemas/<game>.json` for CS2, Dota 2, and Deadlock are committed by a GitHub Actions bot (`Update <game> schema (revision N)`) after [GameTracking](https://github.com/SteamTracking/GameTracking) runs DumpSource2 on a game update. Don't hand-edit them; a change to the data is a change to DumpSource2.
-- `schemas/hlvr.json` (Half-Life: Alyx) is a one-off dump from an old engine. It has no GameTracking repo, revision, or class and type sizes, but it does list static fields and has Source 1 style convar flags. Show what it has as it is, and don't map old-style data onto the new keys.
+- `schemas/hlvr.json` (Half-Life: Alyx), `schemas/steamvr.json` (SteamVR Home) and `schemas/steampal.json` (Aperture Desk Job) are one-off dumps from old engines. They have no GameTracking repo or class and type sizes, but they do list static fields and have Source 1 style convar flags. Show what they have as it is, and don't map old-style data onto the new keys.
+- Games marked `devOnly` in `src/games-list.ts` (SteamVR Home and Aperture Desk Job) only show up in `npm run dev`. `GAME_LIST` leaves them out everywhere else, and the schema glob in `src/data/loader.ts` names them so the build doesn't emit their `.json.gz`. Add a new dev only game to both.
 - Only the latest dump format is supported. When DumpSource2 changes its output, update the types and parsing, with no fallback for older dumps.
 - New keys from DumpSource2 arrive with a description of what they mean. When adding them:
   - update `src/data/types.ts`;
