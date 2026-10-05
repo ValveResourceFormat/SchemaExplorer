@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "s2v-schema-explorer",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "tsc": "react-router typegen && tsc",

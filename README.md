@@ -2,7 +2,7 @@
 
 A schema explorer for Source 2 engine games (Counter-Strike 2, Dota 2, Deadlock). Browse classes, enums, fields, and their metadata across game schema modules.
 
-Based on [ModDota API explorer](https://github.com/ModDota/moddota.github.io/tree/source/api).
+Loosely based on the [ModDota API explorer](https://github.com/ModDota/moddota.github.io/tree/source/api), but heavily rewritten.
 
 ## Schema Data
 
@@ -27,4 +27,12 @@ npm run dev
 
 ## License
 
-[Apache-2.0](LICENSE)
+The code is licensed under the [MIT License](LICENSE). The license does not cover the third-party material below.
+
+## Third-party notices
+
+- Most of the symbol and metadata icons in `src/icons.svg` are adapted from [Codicons](https://github.com/microsoft/vscode-codicons) by Microsoft, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). They have been minified and recolored.
+- The search icon is from [Octicons](https://github.com/primer/octicons) by GitHub, licensed under the [MIT License](https://github.com/primer/octicons/blob/main/LICENSE).
+- The GitHub logo is a trademark of GitHub, Inc., used under the [GitHub logo guidelines](https://github.com/logos).
+- Counter-Strike 2, Dota 2, Deadlock, Half-Life: Alyx, and their logos are trademarks of Valve Corporation. This project is not affiliated with or endorsed by Valve.
+- The schema data in `schemas/` is dumped from Valve's games and belongs to Valve Corporation.
