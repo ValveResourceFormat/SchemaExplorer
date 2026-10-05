@@ -57,6 +57,8 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       sourcemap: true,
+      // Lists the licenses of the dependencies bundled into the site
+      license: { fileName: "licenses.md" },
       // Emit the pre-hydration script as a standalone, cacheable file instead of
       // inlining it as a data: URI. Inlining guesses the wrong MIME from the
       // source extension and would duplicate the script across every prerendered
