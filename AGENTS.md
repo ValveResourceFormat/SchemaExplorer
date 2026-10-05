@@ -53,6 +53,7 @@ Some views model what the engine does with the data, instead of only listing it:
 - `npm test` runs tsc, oxlint, vitest, and `oxfmt --check`, and CI runs the same. Format with `npm run fmt`.
 - Don't put shell globs in `package.json` scripts. On Windows npm runs scripts through cmd, which doesn't expand them, so `oxfmt *.ts` silently skips `.tsx` files. List files and folders by name instead.
 - `npm run build` prerenders 10 pages per game. Set `PRERENDER_ALL=1` for all of them, which is what CI deploys.
+- `@wyw-in-js/vite` is pinned to 2.4.4. 2.5 fails builds now and then with `UnknownDependencyGraphResetError` or `AbortError: superseded` ([wyw-in-js#422](https://github.com/wyw-in-js/wyw-in-js/issues/422)). Before upgrading, run the build a few dozen times, since it only fails some of the time.
 - After a rebase or fixups, run `npm test` on the newest commit. Test an earlier commit only when a change could plausibly break it.
 
 ## Code and commits
