@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { styled } from "@linaria/react";
 import { useLocation, useParams } from "react-router";
 import { GAME_LIST, type GameId } from "../../games-list";
-import { getGameContext } from "../../data/derived";
+import { getGameContext, sameSchemaPage } from "../../data/derived";
 import { buildHash } from "../../utils/filtering";
 import { searchForSection, type SearchMode } from "../../utils/section-search";
 import { AppContext } from "../AppContext";
@@ -81,11 +81,17 @@ function GameRows({ section, onNavigate }: { section: SearchMode; onNavigate: ()
   const { hash } = useLocation();
   const { module, scope } = useParams();
 
-  // The same page in the other game where it can be. Off the console page for a game without
-  // convars, only the search words schemas understand come along
+  // The same page in the other game where it can be. A schema page missing there goes to its
+  // module or the game's start, since the page itself would send an unknown name to a game that
+  // has it. Off the console page for a game without convars, only the search words schemas
+  // understand come along
   function target(gameId: GameId) {
-    if (section === "schemas") return { pathname: schemaPath(gameId, module, scope), hash };
-    if (getGameContext(gameId).consoleItems.length > 0) {
+    const context = getGameContext(gameId);
+    if (section === "schemas") {
+      const page = sameSchemaPage(context.declarations, module, scope);
+      return { pathname: schemaPath(gameId, page.module, page.scope), hash };
+    }
+    if (context.consoleItems.length > 0) {
       return { pathname: consolePath(gameId), hash };
     }
     return {

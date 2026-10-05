@@ -7,6 +7,7 @@ import {
   effectiveEntitySettings,
   entityChain,
   findDeclarationByName,
+  sameSchemaPage,
   findEntityByDesignName,
   resolveKeyField,
 } from "./derived";
@@ -380,6 +381,24 @@ describe("findDeclarationByName", () => {
     expect(find("entity2")).toBe("entity2");
     // Not in that module, any module
     expect(find("client")).toBe("entity2");
+  });
+});
+
+describe("sameSchemaPage", () => {
+  it("keeps the declaration, in whichever module has it", () => {
+    const page = (module?: string, scope?: string) =>
+      sameSchemaPage(parsed.declarations, module, scope);
+    expect(page("client", "hudtextparms_t")).toEqual({ module: "client", scope: "hudtextparms_t" });
+    expect(page("server", "hudtextparms_t")).toEqual({ module: "client", scope: "hudtextparms_t" });
+  });
+
+  it("falls back to the module, then the game's start", () => {
+    const page = (module?: string, scope?: string) =>
+      sameSchemaPage(parsed.declarations, module, scope);
+    expect(page("client", "Missing")).toEqual({ module: "client" });
+    expect(page("missing", "Missing")).toEqual({ module: undefined });
+    expect(page("client")).toEqual({ module: "client" });
+    expect(page()).toEqual({ module: undefined });
   });
 });
 

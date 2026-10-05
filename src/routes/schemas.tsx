@@ -16,7 +16,7 @@ import { plural } from "../utils/format";
 import {
   declarationKey,
   entityChain,
-  findDeclarationByName,
+  sameSchemaPage,
   designNameEntity,
   getGameContext,
   type EntityLookups,
@@ -192,15 +192,15 @@ export default function SchemasPage() {
       return;
     }
 
-    if (scope) {
-      // Check if the scope exists in another module of the current game
-      const other = findDeclarationByName(declarations, scope);
-      if (other) {
-        navigate(schemaPath(game, other.module, scope), { replace: true });
-        return;
-      }
+    // The scope in another module of this game, like switching games does
+    const page = sameSchemaPage(declarations, module, scope);
+    if (page.scope) {
+      navigate(schemaPath(game, page.module, page.scope), { replace: true });
+      return;
+    }
 
-      // Check if the scope exists in another game
+    // A shared link is for the scope, wherever it is: another game that has it
+    if (scope) {
       for (const [gameId, lookup] of context.otherGamesLookup) {
         const match = lookup.get(scope);
         if (match) {
@@ -210,9 +210,7 @@ export default function SchemasPage() {
       }
     }
 
-    navigate(schemaPath(validGame ? game : DEFAULT_GAME, validModule ? module : undefined), {
-      replace: true,
-    });
+    navigate(schemaPath(game, page.module), { replace: true });
   }, [gameParam, game, declarations, module, scope, navigate, context, location.hash]);
 
   return <DeclarationsPage context={context} />;

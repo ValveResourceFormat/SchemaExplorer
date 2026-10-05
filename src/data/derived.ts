@@ -207,6 +207,20 @@ export function findDeclarationByName(
   return undefined;
 }
 
+/**
+ * The same schema page in another game: the declaration in whichever module has it, else the
+ * module, else the game's start
+ */
+export function sameSchemaPage(
+  declarations: Map<string, Map<string, Declaration>>,
+  module?: string,
+  scope?: string,
+): { module?: string; scope?: string } {
+  const decl = scope ? findDeclarationByName(declarations, scope, undefined, module) : undefined;
+  if (decl) return { module: decl.module, scope: decl.name };
+  return { module: module && declarations.has(module) ? module : undefined };
+}
+
 /** Whether intrinsics.ts lays out an intrinsic, the others only have their size from the dump */
 export function hasIntrinsicLayout(
   declarations: Map<string, Map<string, Declaration>>,
