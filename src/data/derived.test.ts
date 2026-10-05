@@ -239,6 +239,30 @@ describe("context structure", () => {
     expect(exclusive("cs2")).toEqual([]);
   });
 
+  it("finds the declarations no other game has, by name in any module", () => {
+    const dump = (...decls: [string, string][]) =>
+      parseSchemas({
+        classes: [],
+        enums: decls.map(([module, name]) => ({ name, module, alignment: "uint8", members: [] })),
+      });
+    const exclusive = (gameId: GameId) =>
+      [...getGameContext(gameId).exclusive].map((d) => `${d.module}::${d.name}`);
+
+    buildAllGameContexts(
+      new Map<GameId, ParsedSchemas>([
+        ["cs2", dump(["client", "Shared_t"], ["client", "Moved_t"], ["client", "Cs2_t"])],
+        ["dota2", dump(["client", "Shared_t"], ["server", "Moved_t"], ["client", "Dota_t"])],
+      ]),
+      new Map(),
+    );
+    expect(exclusive("cs2")).toEqual(["client::Cs2_t"]);
+    expect(exclusive("dota2")).toEqual(["client::Dota_t"]);
+
+    // Nothing to compare to
+    buildAllGameContexts(new Map([["cs2", dump(["client", "Cs2_t"])]]), new Map());
+    expect(exclusive("cs2")).toEqual([]);
+  });
+
   it("stores the convars of each enum", () => {
     const loaded = new Map<GameId, ParsedSchemas>([
       [

@@ -51,6 +51,12 @@ export const sidebarRow = `
   }
 `;
 
+/** The game and section being shown, and the show filter that's on */
+export const currentRow = `
+  font-weight: 600;
+  background: var(--group);
+`;
+
 /** The row of the page being shown, or a filter that's on */
 export const sidebarRowSelected = `
   font-weight: 600;

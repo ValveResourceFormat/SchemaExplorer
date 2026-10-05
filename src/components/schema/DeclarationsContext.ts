@@ -46,6 +46,7 @@ export const DeclarationsContext = createContext<GameContext>({
   metadata: { revision: 0, versionDate: "", versionTime: "" },
   references: new Map(),
   otherGamesLookup: new Map(),
+  exclusive: new Set(),
   crossModuleLookup: new Map(),
   consoleItems: [],
   enumConVars: new Map(),

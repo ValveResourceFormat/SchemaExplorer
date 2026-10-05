@@ -168,6 +168,13 @@ export function useFieldParam(): string | null {
   return useHashParam("field");
 }
 
+/** Whether the module matches any of the module: words, or there are none */
+export function matchesModule(module: string, moduleWords: string[]): boolean {
+  if (moduleWords.length === 0) return true;
+  const mod = module.toLowerCase();
+  return moduleWords.some((w) => mod.includes(w));
+}
+
 /** @internal Exported for testing */
 export function matchesWords(name: string, words: string[]): boolean {
   const lower = name.toLowerCase();
@@ -515,11 +522,7 @@ export function searchDeclarations(
   }
 
   for (const declaration of declarations) {
-    // Module filter (OR across module words)
-    if (moduleWords.length > 0) {
-      const mod = declaration.module.toLowerCase();
-      if (!moduleWords.some((w) => mod.includes(w))) continue;
-    }
+    if (!matchesModule(declaration.module, moduleWords)) continue;
 
     const ents = lookups?.entitiesByDeclaration.get(declaration);
     const designNames = lookups?.designNamesByDeclaration.get(declaration);

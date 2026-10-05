@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 import { styled } from "@linaria/react";
 import { useLocation, useParams } from "react-router";
 import { GAME_LIST, type GameId } from "../../games-list";
@@ -22,7 +22,7 @@ import {
   sectionTotal,
 } from "../search/useOtherSection";
 import { SidebarCount } from "./Sidebar";
-import { iconButton, sidebarRow } from "./sidebar-styles";
+import { currentRow, iconButton, sidebarRow } from "./sidebar-styles";
 
 /**
  * Brand, then where you are: the game and the section, each a list of rows. The page's own
@@ -33,12 +33,15 @@ export function SidebarTop({
   count,
   onNavigate,
   sidebarOpen,
+  show,
 }: {
   section: SearchMode;
   count?: string;
   /** Closes the mobile drawer */
   onNavigate: () => void;
   sidebarOpen: boolean;
+  /** The page's filters of what its list shows, a ShowGroup */
+  show?: ReactNode;
 }) {
   return (
     <Top>
@@ -56,6 +59,7 @@ export function SidebarTop({
       </BrandRow>
       <GameRows section={section} onNavigate={onNavigate} />
       <SectionRows section={section} count={count} onNavigate={onNavigate} />
+      {show}
     </Top>
   );
 }
@@ -118,6 +122,36 @@ function GameRows({ section, onNavigate }: { section: SearchMode; onNavigate: ()
     </Group>
   );
 }
+
+/** Filters of what the page's list shows, under the sections and alike them */
+export function ShowGroup({ children }: { children: ReactNode }) {
+  return (
+    <ShowRows aria-label="Show">
+      <GroupLabel>Show</GroupLabel>
+      {children}
+    </ShowRows>
+  );
+}
+
+/** A show filter, current like a section when it's on */
+export const ShowRow = styled.button`
+  ${sidebarRow}
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &[aria-pressed="true"] {
+    ${currentRow}
+  }
+`;
+
+/** Takes the place of an icon */
+export const ShowRowSpacer = styled.span`
+  width: 16px;
+  flex-shrink: 0;
+`;
 
 function SectionRows({
   section,
@@ -217,8 +251,19 @@ const Group = styled.nav`
   flex-direction: column;
 `;
 
+// A fieldset groups the filters for assistive tech, without its default frame
+const ShowRows = styled.fieldset`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+`;
+
+// Lines up with the rows' text past their icon, like the list's group headers past their chevron
 const GroupLabel = styled.div`
-  padding: 8px 10px 4px;
+  padding: 8px 10px 4px 32px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-dim);
@@ -228,7 +273,6 @@ const NavRow = styled(Link)`
   ${sidebarRow}
 
   &[data-current] {
-    font-weight: 600;
-    background: var(--group);
+    ${currentRow}
   }
 `;

@@ -71,6 +71,8 @@ export type GameContext = EntityLookups & {
   metadata: ParsedSchemas["metadata"];
   references: Map<string, ReferenceEntry[]>;
   otherGamesLookup: Map<GameId, Map<string, Declaration>>;
+  /** The classes and enums whose name no other game has, in any module */
+  exclusive: Set<Declaration>;
   crossModuleLookup: Map<string, Declaration>;
   /** With EXCLUSIVE_FLAG added to the ones no other game has */
   consoleItems: ConsoleItem[];
@@ -491,11 +493,21 @@ function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {
   return map;
 }
 
+/** A class with network data of its own or networked fields */
+export function isNetworkedClass(d: Declaration): boolean {
+  return d.kind === "class" && (d.network != null || d.fields.some((f) => f.network));
+}
+
 function hasNetworkData(declarations: Map<string, Map<string, Declaration>>): boolean {
   for (const d of allDeclarations(declarations)) {
-    if (d.kind === "class" && (d.network || d.fields.some((f) => f.network))) return true;
+    if (isNetworkedClass(d)) return true;
   }
   return false;
+}
+
+/** Whether none of the other games has the name. Without one to compare to, nothing is told apart */
+function inNoOtherGame(name: string, others: { has(name: string): boolean }[]): boolean {
+  return others.length > 0 && !others.some((names) => names.has(name));
 }
 
 // -- Game context store --
@@ -537,6 +549,12 @@ export function buildAllGameContexts(
       otherGamesLookup.set(other.id, map);
     }
 
+    const otherDeclarations = [...otherGamesLookup.values()];
+    const exclusive = new Set<Declaration>();
+    for (const d of allDeclarations(declarations)) {
+      if (inNoOtherGame(d.name, otherDeclarations)) exclusive.add(d);
+    }
+
     // Build cross-module lookup between client and server
     const clientByName = declarations.get("client") ?? new Map<string, Declaration>();
     const serverByName = declarations.get("server") ?? new Map<string, Declaration>();
@@ -555,14 +573,12 @@ export function buildAllGameContexts(
       }
     }
 
-    // The ones no other game has get a flag of their own, to filter by and show like any other.
-    // Without another game's list to compare to, nothing can be told apart
+    // The ones no other game has get a flag of their own, to filter by and show like any other
     const otherNames = GAME_LIST.filter((o) => o.id !== g.id)
       .map((o) => consoleNames.get(o.id)!)
       .filter((names) => names.size > 0);
     const consoleItems = (schema?.consoleItems ?? []).map((item) => {
-      const name = item.name.toLowerCase();
-      if (otherNames.length === 0 || otherNames.some((names) => names.has(name))) return item;
+      if (!inNoOtherGame(item.name.toLowerCase(), otherNames)) return item;
       return { ...item, flags: [...item.flags, EXCLUSIVE_FLAG] };
     });
 
@@ -572,6 +588,7 @@ export function buildAllGameContexts(
       metadata: schema?.metadata ?? { revision: 0, versionDate: "", versionTime: "" },
       references: buildReferences(declarations),
       otherGamesLookup,
+      exclusive,
       crossModuleLookup,
       consoleItems,
       enumConVars: buildEnumConVars(consoleItems),

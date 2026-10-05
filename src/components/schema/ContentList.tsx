@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { memo, useContext, useMemo } from "react";
 import { useParams } from "react-router";
 import { styled } from "@linaria/react";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
@@ -77,7 +77,12 @@ function ModuleList() {
   );
 }
 
-export function ContentList({ filtered }: { filtered: ReturnType<typeof useFilteredData> }) {
+// Memoized, so the sidebar's show filter, kept above it, doesn't render the page again
+export const ContentList = memo(function ContentList({
+  filtered,
+}: {
+  filtered: ReturnType<typeof useFilteredData>;
+}) {
   const { metadata, error } = useContext(DeclarationsContext);
   const { data, isSearching } = filtered;
   const { game: gameParam, module } = useParams();
@@ -129,4 +134,4 @@ export function ContentList({ filtered }: { filtered: ReturnType<typeof useFilte
       )}
     </ContentWrapper>
   );
-}
+});

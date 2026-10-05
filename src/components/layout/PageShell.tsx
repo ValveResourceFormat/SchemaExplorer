@@ -33,12 +33,15 @@ export function PageProviders({
 export function PageShell({
   section,
   count,
+  show,
   sidebar,
   children,
 }: {
   section: SearchMode;
   /** The page's result count while searching, or everything it filters itself */
   count?: string;
+  /** The page's show filters, under the sections where they stay in view */
+  show?: React.ReactNode;
   /** The page's own list, below the games and sections */
   sidebar: (drawer: { onNavigate: () => void; sidebarOpen: boolean }) => React.ReactNode;
   children: React.ReactNode;
@@ -96,6 +99,7 @@ export function PageShell({
               count={count}
               onNavigate={closeSidebar}
               sidebarOpen={sidebarOpen}
+              show={show}
             />
             {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
           </SidebarWrapper>
