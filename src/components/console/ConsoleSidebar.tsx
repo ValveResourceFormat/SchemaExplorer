@@ -8,6 +8,7 @@ import {
   type TagState,
 } from "../../utils/console-filtering";
 import { SidebarCount, SidebarGroupHeader, SidebarList } from "../layout/Sidebar";
+import { ShowGroup, ShowRow, ShowRowSpacer } from "../layout/SidebarTop";
 import { sidebarRow, sidebarRowSelected } from "../layout/sidebar-styles";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { flagColorVars } from "./flag-styles";
@@ -29,22 +30,28 @@ const MODULE_TITLE: Record<TagState, (value: string) => string> = {
   exclude: (v) => `Stop filtering by ${v}`,
 };
 
+/** Convars, commands, or both, above the list where it stays in view */
+export function ConsoleShow({ filters }: { filters: ConsoleFilters }) {
+  const { kind, kindCounts, setKind } = filters;
+  return (
+    <ShowGroup>
+      {KINDS.map(({ kind: k, label, icon }) => (
+        <ShowRow key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>
+          {icon ? <KindIcon kind={icon} /> : <ShowRowSpacer />}
+          <span>{label}</span>
+          <SidebarCount>{kindCounts[k].toLocaleString("en-US")}</SidebarCount>
+        </ShowRow>
+      ))}
+    </ShowGroup>
+  );
+}
+
 export const ConsoleSidebar = memo(function ConsoleSidebar({
   filters,
 }: {
   filters: ConsoleFilters;
 }) {
-  const {
-    kind,
-    kindCounts,
-    moduleCounts,
-    flagCounts,
-    stats,
-    parsed,
-    setKind,
-    cycleTag,
-    clearFilters,
-  } = filters;
+  const { kind, moduleCounts, flagCounts, stats, parsed, cycleTag, clearFilters } = filters;
   const hasFilters =
     kind !== "all" ||
     parsed.modules.length + parsed.notModules.length + parsed.flags.length > 0 ||
@@ -53,20 +60,6 @@ export const ConsoleSidebar = memo(function ConsoleSidebar({
   return (
     <>
       <SidebarList>
-        <Group title="Show">
-          {KINDS.map(({ kind: k, label, icon }) => (
-            <FilterItem
-              key={k}
-              data-state={kind === k ? "include" : "off"}
-              aria-pressed={kind === k}
-              onClick={() => setKind(k)}
-            >
-              {icon ? <KindIcon kind={icon} /> : <Spacer />}
-              <ItemName>{label}</ItemName>
-              <SidebarCount>{kindCounts[k].toLocaleString("en-US")}</SidebarCount>
-            </FilterItem>
-          ))}
-        </Group>
         <TagGroup
           title="Flags"
           tag="flag:"
@@ -151,7 +144,7 @@ function TagGroup({
             title={MODULE_TITLE[state](v)}
             onClick={() => onToggle(tag, v)}
           >
-            <Spacer />
+            <ShowRowSpacer />
             <ItemName>{v}</ItemName>
             {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
             <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
@@ -197,11 +190,6 @@ function FlagFilterItem({
 
 const GroupItems = styled.div`
   padding-bottom: 8px;
-`;
-
-const Spacer = styled.span`
-  width: 16px;
-  flex-shrink: 0;
 `;
 
 const Dot = styled.span`

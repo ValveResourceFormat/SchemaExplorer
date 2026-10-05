@@ -41,7 +41,7 @@ import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
 import { ConsoleRowsCard } from "./ConsoleRowsCard";
 import { GitHubButton } from "../schema/Cards";
 import { ListCard } from "./styles";
-import { ConsoleSidebar } from "./ConsoleSidebar";
+import { ConsoleShow, ConsoleSidebar } from "./ConsoleSidebar";
 
 // DumpSource2 files with the same entries as the list
 const DUMP_FILES = ["convars.txt", "commands.txt"];
@@ -60,6 +60,7 @@ function ConsoleLayout() {
     <PageShell
       section="console"
       count={formatSectionCount(filters.visible.length)}
+      show={<ConsoleShow filters={filters} />}
       sidebar={() => <ConsoleSidebar filters={filters} />}
     >
       <ConsoleContent filters={filters} />
