@@ -91,7 +91,8 @@ ClassNet { includeByName?, excludeByName?: field[], includeByUserGroup?, exclude
           varTypeOverrides?: {field: type}, replayCompatFields?: {field, callback}[], varsAtomic?,
           structNotInNetworkUtlVectorEmbedded?, outOfPVSUpdates? }
        // Only when the class has one of these. overrides kind: serializer, encoder, changeCallback,
-       // bitCount, userGroup, priority or "kindN"; no class = nearest base with the field.
+       // changeTag, bitCount, userGroup, priority, outOfPVSUpdates, removeAll or "kindN" if unknown;
+       // no class = nearest base with the field.
        // replayCompatFields field: regex over field paths. Booleans only when true;
        // outOfPVSUpdates default 2 omitted
 Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
