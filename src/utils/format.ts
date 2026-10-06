@@ -34,12 +34,6 @@ export function metadataValueText(value: SchemaMetadataValue | undefined): strin
   return text;
 }
 
-/** MNetworkOverride text like "CBaseEntity::m_fFlags" */
-export function parseNetworkOverride(text: string): { className: string; field: string } | null {
-  const m = /^"?(\w+)::(\w+)"?$/.exec(text);
-  return m ? { className: m[1], field: m[2] } : null;
-}
-
 /** "1 field", "2 fields" */
 export function plural(n: number, word: string): string {
   return `${n} ${word}${n !== 1 ? "s" : ""}`;

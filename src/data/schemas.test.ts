@@ -371,24 +371,21 @@ describe("parseSchemas", () => {
   });
 
   it("preserves field metadata", () => {
-    const decl = parsedSchemas.declarations.get("client")?.get("C_RectLight");
-    if (decl?.kind !== "class") throw new Error("Expected class");
-    const field = decl.fields.find((f) => f.name === "m_bShowLight");
-    expect(field).toBeDefined();
-    expect(field!.metadata).toContainEqual({ name: "MNetworkEnable" });
-    expect(field!.metadata).toContainEqual({
-      name: "MNetworkChangeCallback",
-      value: '"RenderingChanged"',
-    });
+    const field = getField(getClass("C_OP_RenderTreeShake"), "m_nRadiusFieldOverride");
+    expect(field.metadata).toEqual([
+      { name: "MPropertyFriendlyName", value: '"strength field override"' },
+      { name: "MPropertyAttributeChoiceName", value: '"particlefield_scalar"' },
+    ]);
+  });
+
+  it("preserves field network data", () => {
+    const field = getField(getClass("C_RectLight"), "m_bShowLight");
+    expect(field.metadata).toEqual([]);
+    expect(field.network).toEqual({ changeCallbacks: ["RenderingChanged"], type: "bool" });
   });
 
   it("preserves class-level metadata", () => {
-    const decl = parsedSchemas.declarations.get("client")?.get("C_RectLight");
-    if (decl?.kind !== "class") throw new Error("Expected class");
-    expect(decl.metadata).toContainEqual({
-      name: "MNetworkVarNames",
-      value: '"bool m_bShowLight"',
-    });
+    expect(getClass("C_Fish").metadata).toEqual([{ name: "MNetworkNoBase" }]);
   });
 
   it("includes intrinsic declarations", () => {

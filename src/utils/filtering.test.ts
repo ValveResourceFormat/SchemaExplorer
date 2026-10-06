@@ -105,8 +105,8 @@ describe("parseSearch", () => {
   });
 
   it("parses metadata key filter", () => {
-    const result = parseSearch("metadata:MNetworkEnable");
-    expect(result.metadataKeys).toEqual(["mnetworkenable"]);
+    const result = parseSearch("metadata:MNotSaved");
+    expect(result.metadataKeys).toEqual(["mnotsaved"]);
   });
 
   it("does not treat metadatavalue: as metadata:", () => {
@@ -116,11 +116,11 @@ describe("parseSearch", () => {
   });
 
   it("parses mixed query", () => {
-    const result = parseSearch("CPlayer module:server offset:0x10 metadata:MNetworkEnable");
+    const result = parseSearch("CPlayer module:server offset:0x10 metadata:MNotSaved");
     expect(result.nameWords).toEqual(["cplayer"]);
     expect(result.moduleWords).toEqual(["server"]);
     expect(result.offsets).toEqual(new Set([16]));
-    expect(result.metadataKeys).toEqual(["mnetworkenable"]);
+    expect(result.metadataKeys).toEqual(["mnotsaved"]);
   });
 
   it("lowercases everything", () => {
@@ -131,10 +131,10 @@ describe("parseSearch", () => {
 
   it("order of words and filters does not matter", () => {
     const a = parseSearch(
-      "C_Fish module:client metadata:MNetworkEnable offset:0x10 enumvalue:4 metadatavalue:coord",
+      "C_Fish module:client metadata:MNotSaved offset:0x10 enumvalue:4 metadatavalue:coord",
     );
     const b = parseSearch(
-      "metadatavalue:coord enumvalue:4 metadata:MNetworkEnable offset:0x10 module:client C_Fish",
+      "metadatavalue:coord enumvalue:4 metadata:MNotSaved offset:0x10 module:client C_Fish",
     );
     expect(a.nameWords).toEqual(b.nameWords);
     expect(a.moduleWords).toEqual(b.moduleWords);
@@ -180,8 +180,8 @@ describe("parseSearch", () => {
   });
 
   it("parses multiple metadata keys", () => {
-    const result = parseSearch("metadata:MNetworkEnable metadata:MNotSaved");
-    expect(result.metadataKeys).toEqual(["mnetworkenable", "mnotsaved"]);
+    const result = parseSearch("metadata:MNotSaved metadata:MPropertyFriendlyName");
+    expect(result.metadataKeys).toEqual(["mnotsaved", "mpropertyfriendlyname"]);
   });
 
   it("ignores empty metadata: value", () => {
@@ -221,10 +221,10 @@ describe("matchesWords", () => {
 
 describe("matchesMetadataKeys", () => {
   it("matches when key present", () => {
-    expect(matchesMetadataKeys([{ name: "MNetworkEnable" }], ["mnetwork"])).toBe(true);
+    expect(matchesMetadataKeys([{ name: "MNotSaved" }], ["mnot"])).toBe(true);
   });
   it("fails when key absent", () => {
-    expect(matchesMetadataKeys([{ name: "MNetworkEnable" }], ["other"])).toBe(false);
+    expect(matchesMetadataKeys([{ name: "MNotSaved" }], ["other"])).toBe(false);
   });
   it("returns false for undefined metadata", () => {
     expect(matchesMetadataKeys(undefined, ["key"])).toBe(false);
@@ -233,10 +233,10 @@ describe("matchesMetadataKeys", () => {
     expect(matchesMetadataKeys([], ["key"])).toBe(false);
   });
   it("returns false for empty keys", () => {
-    expect(matchesMetadataKeys([{ name: "MNetworkEnable" }], [])).toBe(false);
+    expect(matchesMetadataKeys([{ name: "MNotSaved" }], [])).toBe(false);
   });
   it("partial match works (uses includes)", () => {
-    expect(matchesMetadataKeys([{ name: "MNetworkEnable" }], ["network"])).toBe(true);
+    expect(matchesMetadataKeys([{ name: "MNotSaved" }], ["saved"])).toBe(true);
   });
 });
 
@@ -307,11 +307,10 @@ describe("searchDeclarations — declaration matching", () => {
     });
 
     it("finds class by field metadata key as name word", () => {
-      // MNetworkChangeCallback appears as a metadata key on C_Fish.m_x
-      const result = searchDeclarations(declarations, parseSearch("MNetworkChangeCallback"));
+      // MPropertyAttributeChoiceName appears as a metadata key on C_OP_RenderTreeShake fields
+      const result = searchDeclarations(declarations, parseSearch("MPropertyAttributeChoiceName"));
       expect(result.length).toBeGreaterThan(0);
-      // C_Fish has fields with MNetworkChangeCallback
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
+      expect(result.some((d) => d.name === "C_OP_RenderTreeShake")).toBe(true);
     });
 
     it("empty search returns nothing", () => {
@@ -529,35 +528,34 @@ describe("searchDeclarations — declaration matching", () => {
   });
 
   describe("metadata key filter", () => {
-    it("finds classes with MNetworkEnable on fields", () => {
-      const result = searchDeclarations(declarations, parseSearch("metadata:MNetworkEnable"));
+    it("finds classes with MNotSaved on fields", () => {
+      const result = searchDeclarations(declarations, parseSearch("metadata:MNotSaved"));
       expect(result.length).toBeGreaterThan(0);
-      expect(result.some((d) => d.name === "C_CSWeaponBaseGun")).toBe(true);
+      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
     });
 
     it("does not find class without that metadata", () => {
       // CFlashbangProjectile has no metadata on any field
-      const result = searchDeclarations(declarations, parseSearch("metadata:MNetworkEnable"));
+      const result = searchDeclarations(declarations, parseSearch("metadata:MNotSaved"));
       expect(result.every((d) => d.name !== "CFlashbangProjectile")).toBe(true);
     });
 
     it("metadata: filter matches field-level metadata keys", () => {
-      // metadata: filter checks fields, not class-level metadata
-      // C_CSWeaponBaseGun fields have MNetworkEnable, not MNetworkVarNames
-      const result = searchDeclarations(declarations, parseSearch("metadata:MNetworkEnable"));
-      expect(result.some((d) => d.name === "C_CSWeaponBaseGun")).toBe(true);
+      // C_OP_RenderTreeShake has no class metadata, only its fields have MPropertyFriendlyName
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("metadata:MPropertyFriendlyName"),
+      );
+      expect(result.some((d) => d.name === "C_OP_RenderTreeShake")).toBe(true);
     });
 
     it("metadata key filter is case-insensitive partial match", () => {
-      const result = searchDeclarations(declarations, parseSearch("metadata:network"));
-      expect(result.length).toBeGreaterThan(0);
+      const result = searchDeclarations(declarations, parseSearch("metadata:notsav"));
+      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
     });
 
     it("metadata key + name word", () => {
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("C_Fish metadata:MNetworkEnable"),
-      );
+      const result = searchDeclarations(declarations, parseSearch("C_Fish metadata:MNotSaved"));
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe("C_Fish");
     });
@@ -573,7 +571,7 @@ describe("searchDeclarations — declaration matching", () => {
     it("metadata key + module", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadata:MNetworkEnable module:server"),
+        parseSearch("metadata:MNotSaved module:server"),
       );
       expect(result.length).toBeGreaterThan(0);
       expect(result.every((d) => d.module === "server")).toBe(true);
@@ -619,18 +617,17 @@ describe("searchDeclarations — declaration matching", () => {
     });
 
     it("finds class by declaration-level metadata key", () => {
-      // C_CSWeaponBaseGun has MNetworkVarNames on class metadata (not field metadata)
-      const result = searchDeclarations(declarations, parseSearch("metadata:MNetworkVarNames"));
-      expect(result.some((d) => d.name === "C_CSWeaponBaseGun")).toBe(true);
+      // C_Fish has MNetworkNoBase on class metadata (not field metadata)
+      const result = searchDeclarations(declarations, parseSearch("metadata:MNetworkNoBase"));
       expect(result.some((d) => d.name === "C_Fish")).toBe(true);
     });
 
     it("declaration-level metadata match returns empty fields", () => {
-      // MNetworkVarNames is on class metadata, not field metadata
+      // MNetworkNoBase is on class metadata, not field metadata
       // No remaining field words, no offset, no field-level metadata → empty fields
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadata:MNetworkVarNames"),
+        parseSearch("C_Fish metadata:MNetworkNoBase"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
@@ -638,47 +635,45 @@ describe("searchDeclarations — declaration matching", () => {
     });
 
     it("declaration-level metadata match + name word filters fields", () => {
-      // Class metadata matches MNetworkVarNames, "zoom" becomes remaining word → field filter
+      // Class metadata matches MNetworkNoBase, "depth" becomes remaining word → field filter
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadata:MNetworkVarNames zoom"),
+        parseSearch("C_Fish metadata:MNetworkNoBase depth"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
       expect(cls.fields).toHaveLength(1);
-      expect(cls.fields[0].name).toBe("m_zoomLevel");
+      expect(cls.fields[0].name).toBe("m_deathDepth");
     });
 
     it("declaration-level metadata match + offset filters fields", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadata:MNetworkVarNames offset:8000"),
+        parseSearch("C_Fish metadata:MNetworkNoBase offset:4588"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
       expect(cls.fields).toHaveLength(1);
-      expect(cls.fields[0].name).toBe("m_zoomLevel");
+      expect(cls.fields[0].name).toBe("m_x");
     });
 
     it("metadata key on class + metadata key on field must both match at same level", () => {
-      // MNetworkVarNames is only on class metadata, MNetworkEnable only on field metadata
+      // MNetworkNoBase is only on class metadata, MNotSaved only on field metadata
       // No single level has both → no match
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadata:MNetworkVarNames metadata:MNetworkEnable"),
+        parseSearch("C_Fish metadata:MNetworkNoBase metadata:MNotSaved"),
       );
       expect(result).toHaveLength(0);
     });
 
     it("declaration-level metadata key only (no class name) finds classes", () => {
-      // MNetworkIncludeByName only exists on class metadata (C_Hostage, C_Fish, C_BaseEntity)
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("metadata:MNetworkIncludeByName"),
-      );
+      // MGetKV3ClassDefaults only exists on class metadata, and only stays there with defaults
+      // that no field took, like on TestUnknownKeys and TestBrokenDefaults
+      const result = searchDeclarations(declarations, parseSearch("metadata:MGetKV3ClassDefaults"));
       expect(result.length).toBeGreaterThan(0);
-      expect(result.some((d) => d.name === "C_Hostage")).toBe(true);
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
+      expect(result.some((d) => d.name === "TestUnknownKeys")).toBe(true);
+      expect(result.some((d) => d.name === "TestBrokenDefaults")).toBe(true);
       // CFlashbangProjectile has no class metadata → excluded
       expect(result.every((d) => d.name !== "CFlashbangProjectile")).toBe(true);
     });
@@ -686,24 +681,25 @@ describe("searchDeclarations — declaration matching", () => {
 
   describe("metadata value filter", () => {
     it("finds class by metadata value on field", () => {
-      // C_Fish.m_poolOrigin has MNetworkEncoder with value "coord"
-      const result = searchDeclarations(declarations, parseSearch("metadatavalue:coord"));
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
+      // C_OP_RenderTreeShake.m_nRadiusFieldOverride has MPropertyAttributeChoiceName with
+      // value "particlefield_scalar"
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("metadatavalue:particlefield_scalar"),
+      );
+      expect(result.some((d) => d.name === "C_OP_RenderTreeShake")).toBe(true);
     });
 
-    it("finds class by MNetworkSerializer value", () => {
-      // C_Fish.m_x has MNetworkSerializer with value "fish_pos_x"
-      const result = searchDeclarations(declarations, parseSearch("metadatavalue:fish_pos_x"));
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
+    it("finds class by MPropertyFriendlyName value", () => {
+      // C_OP_WaterImpulseRenderer.m_flWobble has MPropertyFriendlyName "impulse wobble radius"
+      const result = searchDeclarations(declarations, parseSearch("metadatavalue:wobble"));
+      expect(result.some((d) => d.name === "C_OP_WaterImpulseRenderer")).toBe(true);
     });
 
     it("finds class by partial metadata value", () => {
-      // "RenderingChanged" is a MNetworkChangeCallback value on C_RectLight.m_bShowLight
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("metadatavalue:renderingchanged"),
-      );
-      expect(result.some((d) => d.name === "C_RectLight")).toBe(true);
+      // "Twist amount (-1..1)" is a MPropertyFriendlyName value on C_OP_RenderTreeShake
+      const result = searchDeclarations(declarations, parseSearch("metadatavalue:twist"));
+      expect(result.some((d) => d.name === "C_OP_RenderTreeShake")).toBe(true);
     });
 
     it("finds enum by member metadata value", () => {
@@ -721,38 +717,41 @@ describe("searchDeclarations — declaration matching", () => {
     });
 
     it("metadata value + name word", () => {
-      const result = searchDeclarations(declarations, parseSearch("C_Fish metadatavalue:fish_pos"));
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("WaterImpulse metadatavalue:impulse"),
+      );
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe("C_Fish");
+      expect(result[0].name).toBe("C_OP_WaterImpulseRenderer");
     });
 
     it("metadata value + module filter", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadatavalue:fish_pos module:client"),
+        parseSearch("metadatavalue:impulse module:particles"),
       );
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
-      expect(result.every((d) => d.module === "client")).toBe(true);
+      expect(result.some((d) => d.name === "C_OP_WaterImpulseRenderer")).toBe(true);
+      expect(result.every((d) => d.module === "particles")).toBe(true);
     });
 
     it("metadata value + wrong module returns nothing for that class", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadatavalue:fish_pos module:server"),
+        parseSearch("metadatavalue:impulse module:client"),
       );
-      expect(result.every((d) => d.name !== "C_Fish")).toBe(true);
+      expect(result.every((d) => d.name !== "C_OP_WaterImpulseRenderer")).toBe(true);
     });
 
     it("finds class by declaration-level metadata value", () => {
-      // C_CSWeaponBaseGun class metadata has MNetworkVarNames="int m_zoomLevel"
-      const result = searchDeclarations(declarations, parseSearch("metadatavalue:m_zoomLevel"));
-      expect(result.some((d) => d.name === "C_CSWeaponBaseGun")).toBe(true);
+      // TestUnknownKeys class metadata keeps the defaults no field took, m_extra and m_unknown
+      const result = searchDeclarations(declarations, parseSearch("metadatavalue:m_unknown"));
+      expect(result.some((d) => d.name === "TestUnknownKeys")).toBe(true);
     });
 
     it("declaration-level metadatavalue match returns empty fields", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadatavalue:m_zoomLevel"),
+        parseSearch("TestUnknownKeys metadatavalue:m_unknown"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
@@ -762,19 +761,18 @@ describe("searchDeclarations — declaration matching", () => {
     it("declaration-level metadatavalue match + name word filters fields", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun metadatavalue:m_zoomLevel silencer"),
+        parseSearch("TestUnknownKeys metadatavalue:m_unknown flx"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
       expect(cls.fields).toHaveLength(1);
-      expect(cls.fields[0].name).toBe("m_iSilencerBodygroup");
+      expect(cls.fields[0].name).toBe("m_flX");
     });
 
     it("declaration-level metadata key + value combined returns empty fields", () => {
-      // C_Hostage has class metadata MNetworkIncludeByName="m_iMaxHealth"
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Hostage metadata:MNetworkIncludeByName metadatavalue:m_iMaxHealth"),
+        parseSearch("TestUnknownKeys metadata:MGetKV3ClassDefaults metadatavalue:m_unknown"),
       );
       expect(result).toHaveLength(1);
       const cls = result[0] as SchemaClass;
@@ -787,9 +785,9 @@ describe("searchDeclarations — declaration matching", () => {
     it("name + module + metadata key", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("WeaponBaseGun module:client metadata:MNetworkEnable"),
+        parseSearch("Fish module:client metadata:MNotSaved"),
       );
-      expect(result.some((d) => d.name === "C_CSWeaponBaseGun")).toBe(true);
+      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
       expect(result.every((d) => d.module === "client")).toBe(true);
     });
 
@@ -806,36 +804,36 @@ describe("searchDeclarations — declaration matching", () => {
       // Both key and value must exist on the same field
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadata:MNetworkChangeCallback metadatavalue:OnPos"),
+        parseSearch("metadata:MPropertyAttributeChoiceName metadatavalue:particlefield_vector"),
       );
-      expect(result.some((d) => d.name === "C_Fish")).toBe(true);
+      expect(result.map((d) => d.name)).toEqual(["C_OP_RemapTransformVisibilityToVector"]);
     });
 
     it("name + metadata key + metadata value", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish metadata:MNetworkSerializer metadatavalue:fish_pos"),
+        parseSearch("RenderTreeShake metadata:MPropertyFriendlyName metadatavalue:twist"),
       );
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe("C_Fish");
+      expect(result[0].name).toBe("C_OP_RenderTreeShake");
     });
 
     it("all filters combined", () => {
       const result = searchDeclarations(
         declarations,
         parseSearch(
-          "C_Fish module:client offset:4588 metadata:MNetworkEnable metadatavalue:fish_pos_x",
+          "C_OP_RenderTreeShake module:particles offset:568 metadata:MPropertyFriendlyName metadatavalue:twist",
         ),
       );
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe("C_Fish");
+      expect(result[0].name).toBe("C_OP_RenderTreeShake");
     });
 
     it("contradictory filters return nothing", () => {
       // CFlashbangProjectile is server, has no metadata
       const result = searchDeclarations(
         declarations,
-        parseSearch("CFlashbangProjectile module:client metadata:MNetworkEnable"),
+        parseSearch("CFlashbangProjectile module:client metadata:MNotSaved"),
       );
       expect(result).toHaveLength(0);
     });
@@ -895,39 +893,35 @@ describe("searchDeclarations — field filtering", () => {
     });
 
     it("filters fields by metadata key", () => {
-      const decl = classesByName.get("C_CSWeaponBaseGun")!;
-      // Only 4 of 7 fields have MNetworkEnable
-      const parsed = parseSearch("metadata:MNetworkEnable");
+      const decl = classesByName.get("C_OP_RenderTreeShake")!;
+      // Only 2 of 10 fields have MPropertyAttributeChoiceName
+      const parsed = parseSearch("metadata:MPropertyAttributeChoiceName");
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
-      expect(result.fields).toHaveLength(4);
-      const names = result.fields.map((f) => f.name);
-      expect(names).toContain("m_zoomLevel");
-      expect(names).toContain("m_iBurstShotsRemaining");
-      expect(names).toContain("m_bNeedsBoltAction");
-      expect(names).toContain("m_nRevolverCylinderIdx");
-      // Fields without MNetworkEnable should be gone
-      expect(names).not.toContain("m_iSilencerBodygroup");
-      expect(names).not.toContain("m_silencedModelIndex");
-      expect(names).not.toContain("m_inPrecache");
+      expect(result.fields.map((f) => f.name)).toEqual([
+        "m_nPeakStrengthFieldOverride",
+        "m_nRadiusFieldOverride",
+      ]);
     });
 
     it("filters fields by metadata value", () => {
-      const decl = classesByName.get("C_Fish")!;
-      // m_x has MNetworkSerializer value "fish_pos_x"
-      const parsed = parseSearch("metadatavalue:fish_pos_x");
+      const decl = classesByName.get("C_OP_RenderTreeShake")!;
+      // m_flTwistAmount has MPropertyFriendlyName "Twist amount (-1..1)"
+      const parsed = parseSearch("metadatavalue:twist");
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
       expect(result.fields).toHaveLength(1);
-      expect(result.fields[0].name).toBe("m_x");
+      expect(result.fields[0].name).toBe("m_flTwistAmount");
     });
 
     it("field name word + metadata key combined", () => {
-      const decl = classesByName.get("C_CSWeaponBaseGun")!;
-      // "weapon" matches class name, "zoom" filters fields, metadata:MNetworkEnable further narrows
-      // m_zoomLevel has MNetworkEnable, so it passes both
-      const parsed = parseSearch("C_CSWeaponBaseGun zoom metadata:MNetworkEnable");
+      const decl = classesByName.get("C_OP_RenderTreeShake")!;
+      // "radius" matches m_flRadius and m_nRadiusFieldOverride, only the second has
+      // MPropertyAttributeChoiceName
+      const parsed = parseSearch(
+        "C_OP_RenderTreeShake radius metadata:MPropertyAttributeChoiceName",
+      );
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
       expect(result.fields).toHaveLength(1);
-      expect(result.fields[0].name).toBe("m_zoomLevel");
+      expect(result.fields[0].name).toBe("m_nRadiusFieldOverride");
     });
 
     it("field name word that matches nothing → declaration excluded", () => {
@@ -940,34 +934,30 @@ describe("searchDeclarations — field filtering", () => {
     it("metadata key that no field has → declaration excluded", () => {
       const decl = classesByName.get("CFlashbangProjectile")!;
       // CFlashbangProjectile has no metadata on any field
-      const parsed = parseSearch("metadata:MNetworkEnable");
+      const parsed = parseSearch("metadata:MNotSaved");
       const result = searchDeclarations([decl], parsed);
       expect(result).toHaveLength(0);
     });
 
     it("preserves field metadata in filtered results", () => {
-      const decl = classesByName.get("C_Fish")!;
-      const parsed = parseSearch("metadatavalue:fish_pos_x");
+      const decl = classesByName.get("C_INIT_CheckParticleForWater")!;
+      const parsed = parseSearch("metadatavalue:particlefield_scalar");
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
       expect(result.fields).toHaveLength(1);
-      // m_x should still have all its metadata entries
-      const meta = result.fields[0].metadata;
-      expect(meta.some((m) => m.name === "MNetworkEnable")).toBe(true);
-      expect(meta.some((m) => m.name === "MNetworkSerializer" && m.value === '"fish_pos_x"')).toBe(
-        true,
-      );
-      expect(
-        meta.some((m) => m.name === "MNetworkChangeCallback" && m.value === '"OnPosChanged"'),
-      ).toBe(true);
+      // m_nFieldOutput should still have all its metadata entries
+      expect(result.fields[0].metadata).toEqual([
+        { name: "MPropertyFriendlyName", value: '"output attribute"' },
+        { name: "MPropertyAttributeChoiceName", value: '"particlefield_scalar"' },
+      ]);
     });
 
     it("preserves class-level metadata in filtered result", () => {
-      const decl = classesByName.get("C_CSWeaponBaseGun")!;
-      const parsed = parseSearch("C_CSWeaponBaseGun zoom");
+      const decl = classesByName.get("C_Fish")!;
+      const parsed = parseSearch("C_Fish wiggle");
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
       // Class metadata should be unchanged
       expect(result.metadata).toBe(decl.metadata);
-      expect(result.metadata.length).toBe(4);
+      expect(result.metadata).toEqual([{ name: "MNetworkNoBase" }]);
     });
 
     it("preserves parents in filtered result", () => {
@@ -988,19 +978,19 @@ describe("searchDeclarations — field filtering", () => {
     });
 
     it("offset + metadata key combined on fields", () => {
-      const decl = classesByName.get("C_CSWeaponBaseGun")!;
-      // offset 8008 is m_iSilencerBodygroup (no metadata), 8000 is m_zoomLevel (has MNetworkEnable)
+      const decl = classesByName.get("C_OP_RenderTreeShake")!;
+      // offset 556 is m_nRadiusFieldOverride, which has MPropertyAttributeChoiceName
       // Combined: field must match BOTH offset AND metadata key
-      const parsed = parseSearch("offset:8000 metadata:MNetworkEnable");
+      const parsed = parseSearch("offset:556 metadata:MPropertyAttributeChoiceName");
       const result = searchDeclarations([decl], parsed)[0] as SchemaClass;
       expect(result.fields).toHaveLength(1);
-      expect(result.fields[0].name).toBe("m_zoomLevel");
+      expect(result.fields[0].name).toBe("m_nRadiusFieldOverride");
     });
 
     it("offset + metadata key with no overlap → declaration excluded", () => {
-      const decl = classesByName.get("C_CSWeaponBaseGun")!;
-      // offset 8008 is m_iSilencerBodygroup which has NO metadata
-      const parsed = parseSearch("offset:8008 metadata:MNetworkEnable");
+      const decl = classesByName.get("C_OP_RenderTreeShake")!;
+      // offset 552 is m_flRadius, which has no MPropertyAttributeChoiceName
+      const parsed = parseSearch("offset:552 metadata:MPropertyAttributeChoiceName");
       const result = searchDeclarations([decl], parsed);
       expect(result).toHaveLength(0);
     });
@@ -1401,14 +1391,14 @@ describe("search result ranking", () => {
   });
 
   it("starts-with score preserved when metadata forces field path", () => {
-    // "C_CSWeapon" starts-with match on C_CSWeaponBaseGun (score 1),
+    // "C_OP_RenderTree" starts-with match on C_OP_RenderTreeShake (score 1),
     // metadata forces field-level filtering
     const result = searchDeclarations(
       declarations,
-      parseSearch("C_CSWeapon metadata:MNetworkEnable"),
+      parseSearch("C_OP_RenderTree metadata:MPropertyAttributeChoiceName"),
     );
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("C_CSWeaponBaseGun");
+    expect(result[0].name).toBe("C_OP_RenderTreeShake");
     expect((result[0] as SchemaClass).fields.length).toBeGreaterThan(0);
   });
 
@@ -1423,10 +1413,10 @@ describe("search result ranking", () => {
   });
 
   it("field-only metadata results ranked below name matches", () => {
-    // "water" + metadata:MNetworkEnable → only field-only matches survive
-    // (CFuncWater has no MNetworkEnable fields, so it's excluded)
-    const result = searchDeclarations(declarations, parseSearch("water metadata:MNetworkEnable"));
-    expect(result.length).toBeGreaterThan(0);
+    // "water" + metadata:MNotSaved → only field-only matches survive, like C_Fish.m_waterLevel
+    // (CFuncWater has no MNotSaved fields, so it's excluded)
+    const result = searchDeclarations(declarations, parseSearch("water metadata:MNotSaved"));
+    expect(result.some((d) => d.name === "C_Fish")).toBe(true);
     // All results are field-only matches (score 3)
     expect(
       result.every(
@@ -1440,19 +1430,19 @@ describe("search result ranking", () => {
 
 describe("field and metadata visibility", () => {
   // C_PathParticleRope has 16 fields:
-  //   NO metadata: m_bStartActive, m_flMaxSimulationTime, m_iszEffectName, m_PathNodes_Name
-  //   MNetworkEnable only: m_flParticleSpacing, m_iEffectIndex, m_PathNodes_Position,
+  //   Not networked: m_bStartActive, m_flMaxSimulationTime, m_iszEffectName, m_PathNodes_Name
+  //   Networked: m_flParticleSpacing, m_iEffectIndex (also MNotSaved), m_PathNodes_Position,
   //     m_PathNodes_TangentIn, m_PathNodes_TangentOut, m_PathNodes_Color, m_PathNodes_RadiusScale
-  //   MNetworkEnable + MNetworkChangeCallback: m_flSlack, m_flRadius, m_ColorTint,
+  //   Networked with change callbacks: m_flSlack, m_flRadius, m_ColorTint,
   //     m_nEffectState, m_PathNodes_PinEnabled
 
-  const noMetaFields = [
+  const notNetworked = [
     "m_bStartActive",
     "m_flMaxSimulationTime",
     "m_iszEffectName",
     "m_PathNodes_Name",
   ];
-  const networkEnableOnly = [
+  const networkedOnly = [
     "m_flParticleSpacing",
     "m_iEffectIndex",
     "m_PathNodes_Position",
@@ -1461,53 +1451,53 @@ describe("field and metadata visibility", () => {
     "m_PathNodes_Color",
     "m_PathNodes_RadiusScale",
   ];
-  const networkEnableWithCallback = [
+  const networkedWithCallback = [
     "m_flSlack",
     "m_flRadius",
     "m_ColorTint",
     "m_nEffectState",
     "m_PathNodes_PinEnabled",
   ];
-  const allRopeFields = [...noMetaFields, ...networkEnableOnly, ...networkEnableWithCallback];
+  const allRopeFields = [...notNetworked, ...networkedOnly, ...networkedWithCallback];
 
-  describe("metadata key + field name word — AND logic", () => {
+  describe("network filter + field name word — AND logic", () => {
     it("returns only m_PathNodes_PinEnabled (AND, not OR)", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadata:MNetworkChangeCallback m_PathNodes_PinEnabled"),
+        parseSearch("network:changecallbacks m_PathNodes_PinEnabled"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       expect(rope).toBeDefined();
 
-      // Only m_PathNodes_PinEnabled has BOTH: name contains "PinEnabled" AND has MNetworkChangeCallback
+      // Only m_PathNodes_PinEnabled has BOTH: name contains "PinEnabled" AND a change callback
       expect(rope.fields).toHaveLength(1);
       expect(rope.fields[0].name).toBe("m_PathNodes_PinEnabled");
     });
 
-    it("fields with only MNetworkChangeCallback but wrong name are hidden", () => {
+    it("fields with only a change callback but wrong name are hidden", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadata:MNetworkChangeCallback m_PathNodes_PinEnabled"),
+        parseSearch("network:changecallbacks m_PathNodes_PinEnabled"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       const names = rope.fields.map((f) => f.name);
 
-      // These have MNetworkChangeCallback but NOT "PinEnabled" in name → hidden
+      // These have a change callback but NOT "PinEnabled" in name → hidden
       expect(names).not.toContain("m_flSlack");
       expect(names).not.toContain("m_flRadius");
       expect(names).not.toContain("m_ColorTint");
       expect(names).not.toContain("m_nEffectState");
     });
 
-    it("fields without MNetworkChangeCallback are hidden", () => {
+    it("fields without a change callback are hidden", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("metadata:MNetworkChangeCallback m_PathNodes_PinEnabled"),
+        parseSearch("network:changecallbacks m_PathNodes_PinEnabled"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       const names = rope.fields.map((f) => f.name);
 
-      for (const f of [...noMetaFields, ...networkEnableOnly]) {
+      for (const f of [...notNetworked, ...networkedOnly]) {
         expect(names).not.toContain(f);
       }
     });
@@ -1529,50 +1519,50 @@ describe("field and metadata visibility", () => {
     });
   });
 
-  describe("class name + metadata filter → only matching-metadata fields visible", () => {
-    it("class name + metadata:MNetworkChangeCallback shows only fields with that metadata", () => {
+  describe("class name + network filter → only matching-network fields visible", () => {
+    it("class name + network:changecallbacks shows only fields with a change callback", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadata:MNetworkChangeCallback"),
+        parseSearch("C_PathParticleRope network:changecallbacks"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       expect(rope).toBeDefined();
 
-      // Only the 5 fields with MNetworkChangeCallback should be visible
+      // Only the 5 fields with a change callback should be visible
       expect(rope.fields).toHaveLength(5);
       const names = rope.fields.map((f) => f.name);
-      for (const f of networkEnableWithCallback) {
+      for (const f of networkedWithCallback) {
         expect(names).toContain(f);
       }
 
-      // Fields with only MNetworkEnable (no callback) should be hidden
-      for (const f of networkEnableOnly) {
+      // Networked fields without a callback should be hidden
+      for (const f of networkedOnly) {
         expect(names).not.toContain(f);
       }
 
-      // Fields with no metadata at all should be hidden
-      for (const f of noMetaFields) {
+      // Fields that aren't networked at all should be hidden
+      for (const f of notNetworked) {
         expect(names).not.toContain(f);
       }
     });
 
-    it("class name + metadata:MNetworkEnable shows all fields with that metadata, hides bare fields", () => {
+    it("class name + network:type shows all networked fields, hides the rest", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadata:MNetworkEnable"),
+        parseSearch("C_PathParticleRope network:type"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
-      // 12 fields have MNetworkEnable
+      // Every networked field has a type, 12 fields are networked
       expect(rope.fields).toHaveLength(12);
       const names = rope.fields.map((f) => f.name);
 
-      for (const f of [...networkEnableOnly, ...networkEnableWithCallback]) {
+      for (const f of [...networkedOnly, ...networkedWithCallback]) {
         expect(names).toContain(f);
       }
 
-      // The 4 fields with no metadata should be hidden
-      for (const f of noMetaFields) {
+      // The 4 fields that aren't networked should be hidden
+      for (const f of notNetworked) {
         expect(names).not.toContain(f);
       }
     });
@@ -1612,15 +1602,15 @@ describe("field and metadata visibility", () => {
     });
   });
 
-  describe("metadata value filter → only matching-value fields visible", () => {
-    it("metadatavalue:parametersChanged shows only fields with that callback value", () => {
+  describe("network value filter → only matching-value fields visible", () => {
+    it("network:parametersChanged shows only fields with that callback", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadatavalue:parametersChanged"),
+        parseSearch("C_PathParticleRope network:parametersChanged"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
-      // m_flSlack, m_flRadius, m_ColorTint have MNetworkChangeCallback = "parametersChanged"
+      // m_flSlack, m_flRadius, m_ColorTint have the "parametersChanged" change callback
       expect(rope.fields).toHaveLength(3);
       const names = rope.fields.map((f) => f.name);
       expect(names).toContain("m_flSlack");
@@ -1631,16 +1621,16 @@ describe("field and metadata visibility", () => {
       expect(names).not.toContain("m_nEffectState"); // effectStateChanged
       expect(names).not.toContain("m_PathNodes_PinEnabled"); // pinStateChanged
 
-      // Fields without metadata values at all are hidden
-      for (const f of [...noMetaFields, ...networkEnableOnly]) {
+      // Fields without a change callback are hidden
+      for (const f of [...notNetworked, ...networkedOnly]) {
         expect(names).not.toContain(f);
       }
     });
 
-    it("metadatavalue:pinStateChanged shows only m_PathNodes_PinEnabled", () => {
+    it("network:pinStateChanged shows only m_PathNodes_PinEnabled", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadatavalue:pinStateChanged"),
+        parseSearch("C_PathParticleRope network:pinStateChanged"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
@@ -1649,44 +1639,30 @@ describe("field and metadata visibility", () => {
     });
   });
 
-  describe("metadata preserved on visible fields, not stripped", () => {
-    it("when filtering by MNetworkChangeCallback, visible fields keep ALL their metadata", () => {
+  describe("metadata and network data preserved on visible fields, not stripped", () => {
+    it("when filtering by network data, visible fields keep their metadata", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadata:MNetworkChangeCallback"),
+        parseSearch("C_PathParticleRope network:vpcf"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
-      // m_flSlack should have both MNetworkEnable AND MNetworkChangeCallback
-      const slack = rope.fields.find((f) => f.name === "m_flSlack")!;
-      expect(slack.metadata).toHaveLength(2);
-      expect(slack.metadata.some((m) => m.name === "MNetworkEnable")).toBe(true);
-      expect(
-        slack.metadata.some(
-          (m) => m.name === "MNetworkChangeCallback" && m.value === '"parametersChanged"',
-        ),
-      ).toBe(true);
-
-      // m_iEffectIndex has MNetworkEnable + MNotSaved — it should NOT be in results
-      expect(rope.fields.every((f) => f.name !== "m_iEffectIndex")).toBe(true);
+      // m_iEffectIndex is sent as a vpcf resource and has MNotSaved
+      expect(rope.fields.map((f) => f.name)).toEqual(["m_iEffectIndex"]);
+      expect(rope.fields[0].metadata).toEqual([{ name: "MNotSaved" }]);
     });
 
-    it("when filtering by metadatavalue, visible field keeps unrelated metadata entries", () => {
+    it("when filtering by a network value, visible field keeps the rest of its network data", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadatavalue:effectStateChanged"),
+        parseSearch("C_PathParticleRope network:effectStateChanged"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       expect(rope.fields).toHaveLength(1);
       const field = rope.fields[0];
       expect(field.name).toBe("m_nEffectState");
-      // Both metadata entries preserved
-      expect(field.metadata.some((m) => m.name === "MNetworkEnable")).toBe(true);
-      expect(
-        field.metadata.some(
-          (m) => m.name === "MNetworkChangeCallback" && m.value === '"effectStateChanged"',
-        ),
-      ).toBe(true);
+      expect(field.network?.changeCallbacks).toEqual(["effectStateChanged"]);
+      expect(field.network?.type).toBeDefined();
     });
   });
 
@@ -1722,16 +1698,16 @@ describe("field and metadata visibility", () => {
     });
 
     it("remaining words can mix field name + metadata key matches on same field", () => {
-      // C_PathParticleRope: m_flSlack has name containing "slack" AND metadata key "MNetworkChangeCallback"
-      // Both "slack" and "callback" should match — "slack" via name, "callback" via metadata key
+      // C_PathParticleRope: "effect" is in m_iszEffectName, m_nEffectState, and m_iEffectIndex,
+      // "notsaved" matches the metadata key MNotSaved only m_iEffectIndex has
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope slack callback"),
+        parseSearch("C_PathParticleRope effect notsaved"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
       expect(rope).toBeDefined();
       expect(rope.fields).toHaveLength(1);
-      expect(rope.fields[0].name).toBe("m_flSlack");
+      expect(rope.fields[0].name).toBe("m_iEffectIndex");
     });
 
     it("words that can't all be found on a single field via name+metadata → excluded", () => {
@@ -1765,16 +1741,16 @@ describe("field and metadata visibility", () => {
 
     it("offset + metadata key shows only field matching BOTH", () => {
       // offset 1552 is m_bStartActive (no metadata) → hidden because fails metadata
-      // offset 1596 is m_flSlack (has MNetworkChangeCallback) → visible
+      // offset 1616 is m_iEffectIndex (has MNotSaved) → visible
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope offset:1552 offset:1596 metadata:MNetworkChangeCallback"),
+        parseSearch("C_PathParticleRope offset:1552 offset:1616 metadata:MNotSaved"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
-      // Only m_flSlack passes both offset AND metadata check
+      // Only m_iEffectIndex passes both offset AND metadata check
       expect(rope.fields).toHaveLength(1);
-      expect(rope.fields[0].name).toBe("m_flSlack");
+      expect(rope.fields[0].name).toBe("m_iEffectIndex");
       // m_bStartActive at offset 1552 has no metadata → excluded
     });
 
@@ -1915,116 +1891,94 @@ describe("field and metadata visibility", () => {
 // -- Complex edge cases --
 
 describe("complex edge cases", () => {
-  // sky3dparams_t has 6 fields:
-  //   scale:             MNetworkEnable
-  //   origin:            MNetworkEnable, MNetworkEncoder("coord")
-  //   bClip3DSkyBoxNearToWorldFar:    MNetworkEnable, MNotSaved
-  //   flClip3DSkyBoxNearToWorldFarOffset: MNetworkEnable, MNotSaved
-  //   fog:               MNetworkEnable, MNotSaved
-  //   m_nWorldGroupID:   MNetworkEnable
+  // sky3dparams_t has 6 fields, all networked:
+  //   scale
+  //   origin:            sent with the "coord" encoder
+  //   bClip3DSkyBoxNearToWorldFar:    MNotSaved
+  //   flClip3DSkyBoxNearToWorldFarOffset: MNotSaved
+  //   fog:               MNotSaved
+  //   m_nWorldGroupID
 
   describe("multiple metadata keys must ALL match on the field", () => {
-    it("metadata:MNetworkEnable metadata:MNotSaved → only fields with BOTH keys", () => {
+    it("metadata:MPropertyFriendlyName metadata:MPropertyAttributeChoiceName → only fields with BOTH keys", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("sky3dparams_t metadata:MNetworkEnable metadata:MNotSaved"),
+        parseSearch(
+          "C_OP_RenderTreeShake metadata:MPropertyFriendlyName metadata:MPropertyAttributeChoiceName",
+        ),
       );
-      const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
-      expect(sky).toBeDefined();
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
+      expect(shake).toBeDefined();
 
-      // 3 fields have both MNetworkEnable AND MNotSaved
-      expect(sky.fields).toHaveLength(3);
-      const names = sky.fields.map((f) => f.name);
-      expect(names).toContain("bClip3DSkyBoxNearToWorldFar");
-      expect(names).toContain("flClip3DSkyBoxNearToWorldFarOffset");
-      expect(names).toContain("fog");
-
-      // Fields with only MNetworkEnable (no MNotSaved) are hidden
-      expect(names).not.toContain("scale");
-      expect(names).not.toContain("origin");
-      expect(names).not.toContain("m_nWorldGroupID");
-    });
-
-    it("metadata:MNetworkEnable metadata:MNetworkEncoder → only origin", () => {
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("sky3dparams_t metadata:MNetworkEnable metadata:MNetworkEncoder"),
-      );
-      const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
-
-      // Only origin has both MNetworkEnable AND MNetworkEncoder
-      expect(sky.fields).toHaveLength(1);
-      expect(sky.fields[0].name).toBe("origin");
-    });
-
-    it("metadata:MNotSaved metadata:MNetworkEncoder → class not found (no single field/class has both)", () => {
-      // matchesMetadataKeys requires ALL keys present in a SINGLE metadata array
-      // No single field on sky3dparams_t has both MNotSaved AND MNetworkEncoder
-      // No single field has both keys → no match
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("sky3dparams_t metadata:MNotSaved metadata:MNetworkEncoder"),
-      );
-      const sky = result.find((d) => d.name === "sky3dparams_t");
-      expect(sky).toBeUndefined();
+      // All 10 fields have MPropertyFriendlyName, 2 also have MPropertyAttributeChoiceName
+      expect(shake.fields.map((f) => f.name)).toEqual([
+        "m_nPeakStrengthFieldOverride",
+        "m_nRadiusFieldOverride",
+      ]);
     });
   });
 
   describe("metadata key + metadata value combined on field level", () => {
-    it("metadata:MNetworkChangeCallback metadatavalue:parametersChanged → AND on fields", () => {
+    it("metadata:MPropertyAttributeChoiceName metadatavalue:peak → AND on fields", () => {
       const result = searchDeclarations(
         declarations,
         parseSearch(
-          "C_PathParticleRope metadata:MNetworkChangeCallback metadatavalue:parametersChanged",
+          "C_OP_RenderTreeShake metadata:MPropertyAttributeChoiceName metadatavalue:peak",
         ),
       );
-      const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      // Only fields with MNetworkChangeCallback AND value containing "parametersChanged"
-      expect(rope.fields).toHaveLength(3);
-      const names = rope.fields.map((f) => f.name);
-      expect(names).toContain("m_flSlack");
-      expect(names).toContain("m_flRadius");
-      expect(names).toContain("m_ColorTint");
+      // Only m_nPeakStrengthFieldOverride has MPropertyAttributeChoiceName AND a value with "peak"
+      const names = shake.fields.map((f) => f.name);
+      expect(names).toEqual(["m_nPeakStrengthFieldOverride"]);
 
-      // m_nEffectState has MNetworkChangeCallback but value is "effectStateChanged" → hidden
-      expect(names).not.toContain("m_nEffectState");
-      // m_PathNodes_PinEnabled has MNetworkChangeCallback but value is "pinStateChanged" → hidden
-      expect(names).not.toContain("m_PathNodes_PinEnabled");
+      // m_flPeakStrength has "peak strength" but no MPropertyAttributeChoiceName → hidden
+      expect(names).not.toContain("m_flPeakStrength");
+      // m_nRadiusFieldOverride has MPropertyAttributeChoiceName but no "peak" → hidden
+      expect(names).not.toContain("m_nRadiusFieldOverride");
     });
   });
 
   describe("free text matches metadata KEY names, not VALUES", () => {
-    it("free text 'coord' does NOT match field via metadata value", () => {
-      // sky3dparams_t.origin has MNetworkEncoder with value "coord"
-      // "coord" as free text checks field NAMES and metadata KEY names, not values
-      // Since "coord" doesn't match class name, any field name, or any metadata KEY name,
-      // No field name or metadata key contains "coord" → no match
+    it("free text 'smooth' does NOT match field via metadata value", () => {
+      // C_OP_RenderTreeShake.m_flTransitionTime has MPropertyFriendlyName
+      // "amount of time taken to smooth between different shake parameters"
+      // "smooth" as free text checks field NAMES and metadata KEY names, not values
+      const result = searchDeclarations(declarations, parseSearch("C_OP_RenderTreeShake smooth"));
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake");
+      expect(shake).toBeUndefined();
+    });
+
+    it("free text 'coord' does NOT match field via network data", () => {
+      // sky3dparams_t.origin is sent with the "coord" encoder, only network: searches that
       const result = searchDeclarations(declarations, parseSearch("sky3dparams_t coord"));
       const sky = result.find((d) => d.name === "sky3dparams_t");
       expect(sky).toBeUndefined();
     });
 
-    it("metadatavalue:coord DOES match field via metadata value", () => {
+    it("metadatavalue:smooth DOES match field via metadata value", () => {
       const result = searchDeclarations(
         declarations,
-        parseSearch("sky3dparams_t metadatavalue:coord"),
+        parseSearch("C_OP_RenderTreeShake metadatavalue:smooth"),
       );
-      const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      // origin has MNetworkEncoder value "coord"
-      expect(sky.fields).toHaveLength(1);
-      expect(sky.fields[0].name).toBe("origin");
+      expect(shake.fields).toHaveLength(1);
+      expect(shake.fields[0].name).toBe("m_flTransitionTime");
     });
 
-    it("free text 'MNetworkEncoder' matches via metadata KEY name", () => {
-      // "MNetworkEncoder" is a metadata key on the origin field
-      const result = searchDeclarations(declarations, parseSearch("sky3dparams_t MNetworkEncoder"));
-      const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
+    it("free text 'AttributeChoiceName' matches via metadata KEY name", () => {
+      // "MPropertyAttributeChoiceName" is a metadata key on two fields
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("C_OP_RenderTreeShake AttributeChoiceName"),
+      );
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      // origin has metadata key "MNetworkEncoder"
-      expect(sky.fields).toHaveLength(1);
-      expect(sky.fields[0].name).toBe("origin");
+      expect(shake.fields.map((f) => f.name)).toEqual([
+        "m_nPeakStrengthFieldOverride",
+        "m_nRadiusFieldOverride",
+      ]);
     });
   });
 
@@ -2078,13 +2032,10 @@ describe("complex edge cases", () => {
 
   describe("class-level metadata does not cause false matches", () => {
     it("word matching only class metadata key → declaration excluded", () => {
-      // C_CSWeaponBaseGun has class metadata "MNetworkVarNames" but NO field has that key
-      // The word "MNetworkVarNames" doesn't match any field → no match → excluded
-      const result = searchDeclarations(
-        declarations,
-        parseSearch("C_CSWeaponBaseGun MNetworkVarNames"),
-      );
-      expect(result.every((d) => d.name !== "C_CSWeaponBaseGun")).toBe(true);
+      // C_Fish has class metadata "MNetworkNoBase" but NO field has that key
+      // The word "MNetworkNoBase" doesn't match any field → no match → excluded
+      const result = searchDeclarations(declarations, parseSearch("C_Fish MNetworkNoBase"));
+      expect(result.every((d) => d.name !== "C_Fish")).toBe(true);
     });
   });
 
@@ -2137,26 +2088,26 @@ describe("complex edge cases", () => {
 
   describe("offset + metadata value combined", () => {
     it("offset + metadatavalue both must match the same field", () => {
-      // C_Fish: m_x at offset 4588, has MNetworkSerializer value "fish_pos_x"
-      //         m_y at offset 4592, has MNetworkSerializer value "fish_pos_y"
+      // C_OP_RenderTreeShake: m_flTwistAmount at offset 568, "Twist amount (-1..1)"
+      //                       m_flRadialAmount at offset 572, "Radial Amount (-1..1)"
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish offset:4588 metadatavalue:fish_pos_x"),
+        parseSearch("C_OP_RenderTreeShake offset:568 metadatavalue:twist"),
       );
-      const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      expect(fish.fields).toHaveLength(1);
-      expect(fish.fields[0].name).toBe("m_x");
-      expect(fish.fields[0].offset).toBe(4588);
+      expect(shake.fields).toHaveLength(1);
+      expect(shake.fields[0].name).toBe("m_flTwistAmount");
+      expect(shake.fields[0].offset).toBe(568);
     });
 
     it("offset for one field + metadatavalue from different field → excluded", () => {
-      // offset 4588 is m_x, but metadatavalue "fish_pos_y" is on m_y → no field matches BOTH
+      // offset 568 is m_flTwistAmount, but "radial" is on m_flRadialAmount → no field matches BOTH
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish offset:4588 metadatavalue:fish_pos_y"),
+        parseSearch("C_OP_RenderTreeShake offset:568 metadatavalue:radial"),
       );
-      expect(result.every((d) => d.name !== "C_Fish")).toBe(true);
+      expect(result.every((d) => d.name !== "C_OP_RenderTreeShake")).toBe(true);
     });
   });
 
@@ -2255,13 +2206,13 @@ describe("complex edge cases", () => {
       expect(names).not.toContain("m_soundscapeName");
     });
 
-    it("metadata:MNetworkEnable on class with NO MNetworkEnable → not found", () => {
-      // CEnvSoundscape has no MNetworkEnable on any field or class
+    it("metadata:MPropertyFriendlyName on class with NO MPropertyFriendlyName → not found", () => {
+      // CEnvSoundscape has no MPropertyFriendlyName on any field or class
       const result = searchDeclarations(
         declarations,
-        parseSearch("CEnvSoundscape metadata:MNetworkEnable"),
+        parseSearch("CEnvSoundscape metadata:MPropertyFriendlyName"),
       );
-      // No field has MNetworkEnable → no match
+      // No field has MPropertyFriendlyName → no match
       expect(result.every((d) => d.name !== "CEnvSoundscape" || d.module !== "client")).toBe(true);
     });
 
@@ -2281,10 +2232,22 @@ describe("complex edge cases", () => {
 
   describe("three-way AND: name word + metadata key + offset", () => {
     it("all three must match the same field", () => {
-      // C_PathParticleRope: m_flSlack at offset 1596, has MNetworkChangeCallback
+      // C_PathParticleRope: m_iEffectIndex at offset 1616, has MNotSaved
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope slack offset:1596 metadata:MNetworkChangeCallback"),
+        parseSearch("C_PathParticleRope effect offset:1616 metadata:MNotSaved"),
+      );
+      const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
+
+      expect(rope.fields).toHaveLength(1);
+      expect(rope.fields[0].name).toBe("m_iEffectIndex");
+    });
+
+    it("name word + offset + network data must match the same field", () => {
+      // C_PathParticleRope: m_flSlack at offset 1596, has a change callback
+      const result = searchDeclarations(
+        declarations,
+        parseSearch("C_PathParticleRope slack offset:1596 network:changecallbacks"),
       );
       const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
 
@@ -2302,7 +2265,7 @@ describe("complex edge cases", () => {
     });
 
     it("offset matches but wrong metadata → excluded", () => {
-      // offset 1592 is m_flParticleSpacing (MNetworkEnable only, no MNotSaved)
+      // offset 1592 is m_flParticleSpacing (networked, no MNotSaved)
       const result = searchDeclarations(
         declarations,
         parseSearch("C_PathParticleRope offset:1592 metadata:MNotSaved"),
@@ -2311,60 +2274,66 @@ describe("complex edge cases", () => {
     });
 
     it("name word + offset + metadatavalue all matching same field", () => {
-      // C_Fish: m_x at offset 4588, has MNetworkSerializer value "fish_pos_x"
+      // C_OP_RenderTreeShake: m_flTwistAmount at offset 568, "Twist amount (-1..1)"
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish m_x offset:4588 metadatavalue:fish_pos_x"),
+        parseSearch("C_OP_RenderTreeShake amount offset:568 metadatavalue:twist"),
       );
-      const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      expect(fish.fields).toHaveLength(1);
-      expect(fish.fields[0].name).toBe("m_x");
+      expect(shake.fields).toHaveLength(1);
+      expect(shake.fields[0].name).toBe("m_flTwistAmount");
     });
 
     it("four-way AND: name + offset + metadata key + metadata value", () => {
-      // C_Fish: m_x at offset 4588, MNetworkSerializer (key) value "fish_pos_x"
+      // C_OP_RenderTreeShake: m_nRadiusFieldOverride at offset 556,
+      // MPropertyAttributeChoiceName (key) value "particlefield_scalar"
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish m_x offset:4588 metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+        parseSearch(
+          "C_OP_RenderTreeShake override offset:556 metadata:MPropertyAttributeChoiceName metadatavalue:particlefield",
+        ),
       );
-      const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
+      const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
 
-      expect(fish.fields).toHaveLength(1);
-      expect(fish.fields[0].name).toBe("m_x");
-      // All 4 metadata entries preserved
-      expect(fish.fields[0].metadata.length).toBeGreaterThanOrEqual(3);
+      expect(shake.fields).toHaveLength(1);
+      expect(shake.fields[0].name).toBe("m_nRadiusFieldOverride");
+      // Both metadata entries preserved
+      expect(shake.fields[0].metadata).toHaveLength(2);
     });
 
     it("four-way AND where one condition fails → excluded", () => {
-      // Everything matches m_x EXCEPT offset 4592 (that's m_y)
+      // Everything matches m_nRadiusFieldOverride EXCEPT offset 552 (that's m_flRadius)
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_Fish m_x offset:4592 metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+        parseSearch(
+          "C_OP_RenderTreeShake override offset:552 metadata:MPropertyAttributeChoiceName metadatavalue:particlefield",
+        ),
       );
-      expect(result.every((d) => d.name !== "C_Fish")).toBe(true);
+      expect(result.every((d) => d.name !== "C_OP_RenderTreeShake")).toBe(true);
     });
   });
 
   describe("no false positives from cross-field or class-level matches", () => {
     it("metadata key on field A + metadata value on field B → excluded", () => {
-      // m_iEffectIndex has MNotSaved, m_flSlack has value "parametersChanged"
+      // The *FieldOverride fields have MPropertyAttributeChoiceName, m_flTwistAmount has "twist"
       // No single field has BOTH → no match → excluded
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_PathParticleRope metadata:MNotSaved metadatavalue:parametersChanged"),
+        parseSearch(
+          "C_OP_RenderTreeShake metadata:MPropertyAttributeChoiceName metadatavalue:twist",
+        ),
       );
-      expect(result.every((d) => d.name !== "C_PathParticleRope")).toBe(true);
+      expect(result.every((d) => d.name !== "C_OP_RenderTreeShake")).toBe(true);
     });
 
-    it("word matching only class metadata key → excluded", () => {
-      // C_CSWeaponBaseGun class has metadata key "MNetworkVarNames"
-      // but no field name or field metadata key contains "mnetworkvarnames"
+    it("metadata key on field A + network data on field B → excluded", () => {
+      // m_iEffectIndex has MNotSaved, m_flSlack has the "parametersChanged" change callback
       const result = searchDeclarations(
         declarations,
-        parseSearch("C_CSWeaponBaseGun MNetworkVarNames"),
+        parseSearch("C_PathParticleRope metadata:MNotSaved network:parametersChanged"),
       );
-      expect(result.every((d) => d.name !== "C_CSWeaponBaseGun")).toBe(true);
+      expect(result.every((d) => d.name !== "C_PathParticleRope")).toBe(true);
     });
 
     it("two field-name words from different fields → excluded", () => {
@@ -2380,13 +2349,26 @@ describe("complex edge cases", () => {
 
 describe("filter permutation coverage", () => {
   it("name + module + metadatavalue", () => {
-    // sky3dparams_t client: origin has MNetworkEncoder="coord"
+    // C_OP_RenderTreeShake: m_flTwistAmount has MPropertyFriendlyName "Twist amount (-1..1)"
     const result = searchDeclarations(
       declarations,
-      parseSearch("sky3dparams_t module:client metadatavalue:coord"),
+      parseSearch("C_OP_RenderTreeShake module:particles metadatavalue:twist"),
     );
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("sky3dparams_t");
+    expect(result[0].name).toBe("C_OP_RenderTreeShake");
+    expect(result[0].module).toBe("particles");
+    const fields = (result[0] as SchemaClass).fields;
+    expect(fields).toHaveLength(1);
+    expect(fields[0].name).toBe("m_flTwistAmount");
+  });
+
+  it("name + module + network", () => {
+    // sky3dparams_t client: origin is sent with the "coord" encoder
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("sky3dparams_t module:client network:coord"),
+    );
+    expect(result).toHaveLength(1);
     expect(result[0].module).toBe("client");
     const fields = (result[0] as SchemaClass).fields;
     expect(fields).toHaveLength(1);
@@ -2394,23 +2376,23 @@ describe("filter permutation coverage", () => {
   });
 
   it("module + offset + metadata", () => {
-    // sky3dparams_t client: origin offset=12 has MNetworkEnable + MNetworkEncoder
+    // C_OP_RenderTreeShake: m_nRadiusFieldOverride offset=556 has MPropertyAttributeChoiceName
     const result = searchDeclarations(
       declarations,
-      parseSearch("module:client offset:12 metadata:MNetworkEncoder"),
+      parseSearch("module:particles offset:556 metadata:MPropertyAttributeChoiceName"),
     );
     expect(result.length).toBeGreaterThan(0);
-    const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
-    expect(sky).toBeDefined();
-    expect(sky.fields).toHaveLength(1);
-    expect(sky.fields[0].name).toBe("origin");
+    const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
+    expect(shake).toBeDefined();
+    expect(shake.fields).toHaveLength(1);
+    expect(shake.fields[0].name).toBe("m_nRadiusFieldOverride");
   });
 
-  it("module + offset + metadatavalue", () => {
-    // sky3dparams_t client: origin offset=12 has MNetworkEncoder value "coord"
+  it("module + offset + network", () => {
+    // sky3dparams_t client: origin offset=12 is sent with the "coord" encoder
     const result = searchDeclarations(
       declarations,
-      parseSearch("module:client offset:12 metadatavalue:coord"),
+      parseSearch("module:client offset:12 network:coord"),
     );
     const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
     expect(sky).toBeDefined();
@@ -2418,11 +2400,11 @@ describe("filter permutation coverage", () => {
     expect(sky.fields[0].name).toBe("origin");
   });
 
-  it("module + metadata + metadatavalue", () => {
-    // C_Fish client: m_x has MNetworkSerializer="fish_pos_x"
+  it("module + network key=value", () => {
+    // C_Fish client: m_x has the serializer "fish_pos_x"
     const result = searchDeclarations(
       declarations,
-      parseSearch("module:client metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+      parseSearch("module:client network:serializer=fish_pos_x"),
     );
     const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
     expect(fish).toBeDefined();
@@ -2431,21 +2413,24 @@ describe("filter permutation coverage", () => {
   });
 
   it("offset + metadata + metadatavalue", () => {
-    // C_Fish: m_x offset=4588 has MNetworkSerializer="fish_pos_x"
+    // C_OP_RenderTreeShake: m_nRadiusFieldOverride offset=556 has
+    // MPropertyAttributeChoiceName="particlefield_scalar"
     const result = searchDeclarations(
       declarations,
-      parseSearch("offset:4588 metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+      parseSearch(
+        "offset:556 metadata:MPropertyAttributeChoiceName metadatavalue:particlefield_scalar",
+      ),
     );
-    const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
-    expect(fish).toBeDefined();
-    expect(fish.fields).toHaveLength(1);
-    expect(fish.fields[0].name).toBe("m_x");
+    const shake = result.find((d) => d.name === "C_OP_RenderTreeShake") as SchemaClass;
+    expect(shake).toBeDefined();
+    expect(shake.fields).toHaveLength(1);
+    expect(shake.fields[0].name).toBe("m_nRadiusFieldOverride");
   });
 
-  it("name + module + offset + metadatavalue", () => {
+  it("name + module + offset + network", () => {
     const result = searchDeclarations(
       declarations,
-      parseSearch("sky3dparams_t module:client offset:12 metadatavalue:coord"),
+      parseSearch("sky3dparams_t module:client offset:12 network:coord"),
     );
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("sky3dparams_t");
@@ -2455,18 +2440,20 @@ describe("filter permutation coverage", () => {
   it("name + module + metadata + metadatavalue", () => {
     const result = searchDeclarations(
       declarations,
-      parseSearch("C_Fish module:client metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+      parseSearch(
+        "C_OP_RenderTreeShake module:particles metadata:MPropertyAttributeChoiceName metadatavalue:peak",
+      ),
     );
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("C_Fish");
+    expect(result[0].name).toBe("C_OP_RenderTreeShake");
     expect((result[0] as SchemaClass).fields).toHaveLength(1);
-    expect((result[0] as SchemaClass).fields[0].name).toBe("m_x");
+    expect((result[0] as SchemaClass).fields[0].name).toBe("m_nPeakStrengthFieldOverride");
   });
 
-  it("module + offset + metadata + metadatavalue", () => {
+  it("module + offset + metadata + network", () => {
     const result = searchDeclarations(
       declarations,
-      parseSearch("module:client offset:4588 metadata:MNetworkSerializer metadatavalue:fish_pos_x"),
+      parseSearch("module:client offset:4588 metadata:MNotSaved network:serializer=fish_pos_x"),
     );
     const fish = result.find((d) => d.name === "C_Fish") as SchemaClass;
     expect(fish).toBeDefined();
@@ -2475,24 +2462,26 @@ describe("filter permutation coverage", () => {
   });
 
   it("multiple metadatavalue: values (AND semantics)", () => {
-    // C_Fish: m_x, m_y, m_z all have MNetworkSerializer="fish_pos_*" and MNetworkChangeCallback="OnPosChanged"
+    // C_OP_RenderTreeShake: the *FieldOverride fields have "strength" in their friendly names
+    // and "particlefield_scalar", m_flPeakStrength has only "peak strength"
     // Both values must match on each field
     const result = searchDeclarations(
       declarations,
-      parseSearch("C_Fish metadatavalue:fish_pos metadatavalue:onpos"),
+      parseSearch("C_OP_RenderTreeShake metadatavalue:strength metadatavalue:scalar"),
     );
     expect(result).toHaveLength(1);
-    const fish = result[0] as SchemaClass;
-    // m_x, m_y, m_z each have both values
-    expect(fish.fields).toHaveLength(3);
-    expect(fish.fields.map((f) => f.name)).toEqual(["m_x", "m_y", "m_z"]);
+    const shake = result[0] as SchemaClass;
+    expect(shake.fields.map((f) => f.name)).toEqual([
+      "m_nPeakStrengthFieldOverride",
+      "m_nRadiusFieldOverride",
+    ]);
   });
 
   it("multiple metadatavalue: where no single field has both → excluded", () => {
-    // "fish_pos_x" is on m_x, "angle_normalize" is on m_angle — no single field has both values
+    // "twist" is on m_flTwistAmount, "radial" is on m_flRadialAmount — no single field has both
     const result = searchDeclarations(
       declarations,
-      parseSearch("C_Fish metadatavalue:fish_pos_x metadatavalue:angle_normalize"),
+      parseSearch("C_OP_RenderTreeShake metadatavalue:twist metadatavalue:radial"),
     );
     expect(result).toHaveLength(0);
   });
@@ -2628,19 +2617,22 @@ describe("filter permutation coverage", () => {
 
 describe("word consumption and visibility", () => {
   it("word consumed by class name still allows metadata to filter fields", () => {
-    // "sky3dparams_t" consumes all name words, but metadata:MNetworkEncoder narrows fields
+    // "sky3dparams_t" consumes all name words, but metadata:MNotSaved narrows fields
     // sky3dparams_t exists in both client and server modules
     const result = searchDeclarations(
       declarations,
-      parseSearch("sky3dparams_t metadata:MNetworkEncoder"),
+      parseSearch("sky3dparams_t metadata:MNotSaved"),
     );
     expect(result).toHaveLength(2);
     for (const d of result) {
       const sky = d as SchemaClass;
       expect(sky.name).toBe("sky3dparams_t");
-      // Only 1 field has MNetworkEncoder: origin
-      expect(sky.fields).toHaveLength(1);
-      expect(sky.fields[0].name).toBe("origin");
+      // Only 3 fields have MNotSaved
+      expect(sky.fields.map((f) => f.name)).toEqual([
+        "bClip3DSkyBoxNearToWorldFar",
+        "flClip3DSkyBoxNearToWorldFarOffset",
+        "fog",
+      ]);
     }
   });
 
@@ -2698,22 +2690,26 @@ describe("word consumption and visibility", () => {
   });
 
   it("two remaining words: one matches field name, one matches metadata key on same field", () => {
-    // C_Fish: "pool" matches m_poolOrigin field name, "encoder" matches its MNetworkEncoder metadata key
+    // C_OP_RenderTreeShake: "radius" matches m_flRadius and m_nRadiusFieldOverride field names,
+    // "choice" matches the MPropertyAttributeChoiceName metadata key only the second has
     // Both must match on the SAME field
-    const result = searchDeclarations(declarations, parseSearch("C_Fish pool encoder"));
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("C_OP_RenderTreeShake radius choice"),
+    );
     expect(result).toHaveLength(1);
-    const fish = result[0] as SchemaClass;
-    expect(fish.fields).toHaveLength(1);
-    expect(fish.fields[0].name).toBe("m_poolOrigin");
+    const shake = result[0] as SchemaClass;
+    expect(shake.fields).toHaveLength(1);
+    expect(shake.fields[0].name).toBe("m_nRadiusFieldOverride");
   });
 
   it("two remaining words: one in field name, one in metadata key of DIFFERENT field → excluded", () => {
-    // C_Fish: "errorhistory" matches m_errorHistory (has MNotSaved)
-    // "MNetworkChangeCallback" only on m_x,m_y,m_z,m_angle,m_poolOrigin (not on error fields)
+    // C_OP_RenderTreeShake: "twist" matches m_flTwistAmount
+    // MPropertyAttributeChoiceName is only on the *FieldOverride fields
     // No single field has both
     const result = searchDeclarations(
       declarations,
-      parseSearch("C_Fish errorhistory MNetworkChangeCallback"),
+      parseSearch("C_OP_RenderTreeShake twist MPropertyAttributeChoiceName"),
     );
     expect(result).toHaveLength(0);
   });
@@ -2745,39 +2741,42 @@ describe("word consumption and visibility", () => {
   });
 
   it("metadata on returned fields is complete — not stripped to matching keys", () => {
-    // Search by metadatavalue:fish_pos_x → returns m_x
-    // m_x has 4 metadata entries, ALL should be preserved
-    const result = searchDeclarations(declarations, parseSearch("C_Fish metadatavalue:fish_pos_x"));
-    const fish = result[0] as SchemaClass;
-    expect(fish.fields).toHaveLength(1);
-    const meta = fish.fields[0].metadata;
-    expect(meta.length).toBeGreaterThanOrEqual(4);
-    expect(meta.some((m) => m.name === "MNetworkEnable")).toBe(true);
-    expect(meta.some((m) => m.name === "MNotSaved")).toBe(true);
-    expect(meta.some((m) => m.name === "MNetworkSerializer")).toBe(true);
-    expect(meta.some((m) => m.name === "MNetworkChangeCallback")).toBe(true);
+    // metadatavalue:strength matches the MPropertyFriendlyName of m_nRadiusFieldOverride,
+    // its MPropertyAttributeChoiceName should be preserved too
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("C_OP_RenderTreeShake metadatavalue:strength"),
+    );
+    const shake = result[0] as SchemaClass;
+    // "peak strength", "peak strength field override", and "strength field override"
+    expect(shake.fields).toHaveLength(3);
+    const override = shake.fields.find((f) => f.name === "m_nRadiusFieldOverride")!;
+    expect(override.metadata).toEqual([
+      { name: "MPropertyFriendlyName", value: '"strength field override"' },
+      { name: "MPropertyAttributeChoiceName", value: '"particlefield_scalar"' },
+    ]);
   });
 
-  it("offset filter does not strip metadata from matched field", () => {
-    // sky3dparams_t: origin at offset 12 has MNetworkEnable + MNetworkEncoder
-    const result = searchDeclarations(declarations, parseSearch("offset:12"));
-    const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
-    expect(sky).toBeDefined();
-    const origin = sky.fields.find((f) => f.name === "origin")!;
-    expect(origin.metadata.some((m) => m.name === "MNetworkEncoder")).toBe(true);
-    expect(origin.metadata.some((m) => m.name === "MNetworkEnable")).toBe(true);
+  it("offset filter does not strip metadata or network data from matched field", () => {
+    // C_PathParticleRope: m_iEffectIndex at offset 1616 has MNotSaved and is networked
+    const result = searchDeclarations(declarations, parseSearch("offset:1616"));
+    const rope = result.find((d) => d.name === "C_PathParticleRope") as SchemaClass;
+    expect(rope).toBeDefined();
+    const index = rope.fields.find((f) => f.name === "m_iEffectIndex")!;
+    expect(index.metadata).toEqual([{ name: "MNotSaved" }]);
+    expect(index.network?.resourceType).toBe("vpcf");
   });
 
   it("quoted metadata values are searchable without quotes", () => {
-    // MNetworkEncoder value is stored as '"coord"' (with quotes in the string)
-    // Searching for just "coord" should match via includes()
+    // MPropertyFriendlyName value is stored as '"radius"' (with quotes in the string)
+    // Searching for just "radius" should match via includes()
     const result = searchDeclarations(
       declarations,
-      parseSearch("sky3dparams_t metadatavalue:coord"),
+      parseSearch("C_INIT_CheckParticleForWater metadatavalue:radius"),
     );
-    const sky = result[0] as SchemaClass;
-    expect(sky.fields).toHaveLength(1);
-    expect(sky.fields[0].name).toBe("origin");
+    const water = result[0] as SchemaClass;
+    expect(water.fields).toHaveLength(1);
+    expect(water.fields[0].name).toBe("m_flRadius");
   });
 });
 
@@ -2786,8 +2785,8 @@ describe("word consumption and visibility", () => {
 describe("boundary and edge cases", () => {
   it("class with no matching fields is excluded entirely (not returned with empty fields)", () => {
     const decl = classesByName.get("CFlashbangProjectile")!;
-    // metadata:MNetworkEnable — CFlashbangProjectile has no metadata on fields
-    const result = searchDeclarations([decl], parseSearch("metadata:MNetworkEnable"));
+    // metadata:MNotSaved — CFlashbangProjectile has no metadata on fields
+    const result = searchDeclarations([decl], parseSearch("metadata:MNotSaved"));
     expect(result).toHaveLength(0);
     // Verify it's not returned with 0 fields
     expect(result.find((d) => d.name === "CFlashbangProjectile")).toBeUndefined();
@@ -2838,13 +2837,16 @@ describe("boundary and edge cases", () => {
   });
 
   it("name word substring in metadata key finds fields with that metadata", () => {
-    // "encoder" is a substring of MNetworkEncoder metadata key
-    // sky3dparams_t: only "origin" field has MNetworkEncoder
-    const result = searchDeclarations(declarations, parseSearch("sky3dparams_t encoder"));
-    const sky = result.find((d) => d.name === "sky3dparams_t") as SchemaClass;
-    expect(sky).toBeDefined();
-    expect(sky.fields).toHaveLength(1);
-    expect(sky.fields[0].name).toBe("origin");
+    // "choice" is a substring of the MPropertyAttributeChoiceName metadata key
+    // C_INIT_CheckParticleForWater: only m_nFieldOutput has MPropertyAttributeChoiceName
+    const result = searchDeclarations(
+      declarations,
+      parseSearch("C_INIT_CheckParticleForWater choice"),
+    );
+    const water = result.find((d) => d.name === "C_INIT_CheckParticleForWater") as SchemaClass;
+    expect(water).toBeDefined();
+    expect(water.fields).toHaveLength(1);
+    expect(water.fields[0].name).toBe("m_nFieldOutput");
   });
 
   it("remaining word matching no field name or metadata key → class excluded", () => {
@@ -3106,10 +3108,9 @@ describe("network: search", () => {
     expect((d as SchemaClass).networkMatch).toBeUndefined();
   });
 
-  it("leaves MNetwork* metadata to metadata:", () => {
-    // C_Fish only has MNetworkEncoder metadata with "coord"
-    expect(search("network:coord").map((d) => d.name)).not.toContain("C_Fish");
-    expect(search("network:mnetworkenable")).toEqual([]);
+  it("leaves metadata to metadata:", () => {
+    expect(search("network:mnotsaved")).toEqual([]);
+    expect(search("network:mnetworknobase")).toEqual([]);
   });
 
   it("combines with name words", () => {

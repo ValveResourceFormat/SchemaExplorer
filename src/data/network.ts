@@ -289,7 +289,7 @@ function childClassName(
 ): string | undefined {
   const network = field.network!;
   let name = network.class ?? network.type.replace(/[*\s]/g, "");
-  // MNetworkVarTypeOverride of the nearest class first, then the game's build filter answers with
+  // The var type override of the nearest class first, then the game's build filter answers with
   // the entity's component class, which wins over it. The filter goes by the class, not the field
   for (const cls of hierarchy) {
     const override = cls.network?.varTypeOverrides?.[field.name];

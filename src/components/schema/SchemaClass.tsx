@@ -192,7 +192,7 @@ function ClassDetails({
       )}
       <ReferencedBy name={declaration.name} module={declaration.module} />
       <ComponentOf name={declaration.name} module={declaration.module} />
-      <MetadataDetail metadata={declaration.metadata} game={game} module={declaration.module} />
+      <MetadataDetail metadata={declaration.metadata} game={game} />
       <ClassNetworkDetail declaration={declaration} bases={bases} />
       <CrossGameDetail declaration={declaration} />
     </DetailsCard>
@@ -570,7 +570,7 @@ const FieldRow = memo(function FieldRow({
         {(networkAttrs.length > 0 || field.metadata.length > 0) && (
           <FieldNotes>
             {networkAttrs.length > 0 && <FieldNetworkLine attrs={networkAttrs} />}
-            <MetadataTags metadata={field.metadata} game={game} module={owner.module} />
+            <MetadataTags metadata={field.metadata} game={game} />
           </FieldNotes>
         )}
       </Row>

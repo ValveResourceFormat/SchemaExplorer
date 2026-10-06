@@ -1,11 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  formatHexOffset,
-  formatEnumHex,
-  metadataValueText,
-  padHex,
-  parseNetworkOverride,
-} from "./format";
+import { formatHexOffset, formatEnumHex, metadataValueText, padHex } from "./format";
 
 describe("padHex", () => {
   it("pads to a number of hex digits", () => {
@@ -115,19 +109,6 @@ describe("formatEnumHex", () => {
     it("still returns hex for non-negative values", () => {
       expect(formatEnumHex(42, "unknown")).toBe("0x2A");
     });
-  });
-});
-
-describe("parseNetworkOverride", () => {
-  it("splits the class and field", () => {
-    expect(parseNetworkOverride('"CBaseEntity::m_fFlags"')).toEqual({
-      className: "CBaseEntity",
-      field: "m_fFlags",
-    });
-  });
-
-  it("returns null for anything else", () => {
-    expect(parseNetworkOverride('"m_lifeState"')).toBeNull();
   });
 });
 

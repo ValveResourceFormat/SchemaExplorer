@@ -6,13 +6,13 @@ import { ColoredSyntax } from "./ColoredSyntax";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { metadataIconMap } from "../kind-icon/metadataIconMap";
 import { searchLink } from "../../utils/filtering";
-import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
+import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
 import { Dim } from "./styles";
 import { Detail, ExpandToggle } from "./Detail";
 import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
-import { metadataValueText, parseNetworkOverride } from "../../utils/format";
-import { findDeclarationByName, hasIntrinsicLayout } from "../../data/derived";
+import { metadataValueText } from "../../utils/format";
+import { hasIntrinsicLayout } from "../../data/derived";
 import { tip } from "../Tooltip";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
@@ -201,37 +201,6 @@ const MetadataValue = styled.span`
   white-space: pre-wrap;
 `;
 
-const MetadataValueLink = styled(Link)`
-  color: var(--text-dim);
-  ${subtleUnderline}
-
-  &:hover {
-    color: var(--highlight);
-  }
-`;
-
-/** Metadata value text, MNetworkOverride links to the overridden field */
-function MetadataValueText({
-  name,
-  text,
-  module,
-}: {
-  name: string;
-  text: string;
-  module?: string;
-}) {
-  const { game, declarations } = useContext(DeclarationsContext);
-  const override = name === "MNetworkOverride" ? parseNetworkOverride(text) : null;
-  if (!override) return text;
-  const target = findDeclarationByName(declarations, override.className, "class", module);
-  if (!target) return text;
-  return (
-    <MetadataValueLink to={fieldLink(game, target.module, target.name, override.field)}>
-      {text}
-    </MetadataValueLink>
-  );
-}
-
 const MAX_COLLAPSED_LINES = 6;
 
 function countLines(groups: { name: string; values: (string | undefined)[] }[]): number {
@@ -362,17 +331,15 @@ function metadataToggle(state: MetadataState) {
 export function MetadataDetail({
   metadata,
   game,
-  module,
 }: {
   metadata: SchemaMetadataEntry[];
   game: string;
-  module?: string;
 }) {
   const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
   return (
     <Detail label="Metadata" toggle={metadataToggle(state)}>
-      <MetadataEntries state={state} game={game} module={module} />
+      <MetadataEntries state={state} game={game} />
     </Detail>
   );
 }
@@ -380,32 +347,21 @@ export function MetadataDetail({
 export function MetadataTags({
   metadata,
   game,
-  module,
 }: {
   metadata: SchemaMetadataEntry[];
   game: string;
-  /** Module of the declaration, preferred when a value names a class */
-  module?: string;
 }) {
   const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
   return (
     <>
-      <MetadataEntries state={state} game={game} module={module} />
+      <MetadataEntries state={state} game={game} />
       {state.hasMore && <ExpandToggle {...metadataToggle(state)!} />}
     </>
   );
 }
 
-function MetadataEntries({
-  state,
-  game,
-  module,
-}: {
-  state: MetadataState;
-  game: string;
-  module?: string;
-}) {
+function MetadataEntries({ state, game }: { state: MetadataState; game: string }) {
   const { grouped, hasMore, expanded } = state;
   const visible = expanded || !hasMore ? grouped : truncateGroups(grouped, MAX_COLLAPSED_LINES);
 
@@ -423,9 +379,7 @@ function MetadataEntries({
               <span>
                 <MetadataName to={metaTo}>{group.name}</MetadataName>
                 {group.values[0] !== undefined && (
-                  <MetadataValue>
-                    : <MetadataValueText name={group.name} text={group.values[0]} module={module} />
-                  </MetadataValue>
+                  <MetadataValue>: {group.values[0]}</MetadataValue>
                 )}
               </span>
             </MetadataEntry>
@@ -442,11 +396,7 @@ function MetadataEntries({
             </MetadataGroupName>
             <MetadataGroupValues>
               {group.values.map((v, i) => (
-                <MetadataValue key={i}>
-                  {v !== undefined && (
-                    <MetadataValueText name={group.name} text={v} module={module} />
-                  )}
-                </MetadataValue>
+                <MetadataValue key={i}>{v}</MetadataValue>
               ))}
             </MetadataGroupValues>
           </div>

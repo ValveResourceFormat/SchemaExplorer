@@ -101,7 +101,8 @@ Meta   { name, value?: string | object }
        // MGetKV3ClassDefaults: JSON object (keys sorted, NaN as "-nan", per-run values zeroed),
        // "Could not parse KV3 Defaults", or absent. Omits top-level keys equal to the first
        // parent's; full defaults = first parent's full defaults + own keys.
-       // MNetwork* metadata: only in ${netMetadataGames}.
+       // MNetworkNoBase on a class: its bases' fields aren't sent, except ones it includes.
+       // Other MNetwork* metadata: only in ${netMetadataGames}, which have no network data.
 Type   builtin {name} | declared_class {module?,name} | declared_enum {module,name} | ptr {inner}
        | fixed_array {inner, count} | atomic {name, inner?, inner2?, count?, size?, alignment?}
        | bitfield {count}   (category = the kind)

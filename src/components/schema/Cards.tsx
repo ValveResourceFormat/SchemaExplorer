@@ -222,7 +222,7 @@ export function SearchResultCard({
       </ResultHeader>
       {metadata.length > 0 && (
         <CardNotes>
-          <MetadataTags metadata={metadata} game={game} module={module} />
+          <MetadataTags metadata={metadata} game={game} />
         </CardNotes>
       )}
       {children}

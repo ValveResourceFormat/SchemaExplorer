@@ -369,7 +369,7 @@ describe("getNetworkKeys", () => {
     expect(keys).toEqual(keys.toSorted());
   });
 
-  it("is empty for dumps without network data, like ones with only MNetwork* metadata", () => {
+  it("is empty for dumps without network data, like the old games' dumps, which only have MNetwork* metadata", () => {
     const { declarations } = parseSchemas({
       classes: [
         {

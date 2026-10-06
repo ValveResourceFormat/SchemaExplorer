@@ -28,27 +28,16 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"RenderingChanged\""
-            }
-          ],
           "name": "m_bShowLight",
+          "network": {
+            "changeCallbacks": ["RenderingChanged"],
+            "type": "bool"
+          },
           "offset": 4504,
           "type": {
             "category": "builtin",
             "name": "bool"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bShowLight\""
         }
       ],
       "module": "client",
@@ -65,12 +54,10 @@
       "alignment": 16,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_zoomLevel",
+          "network": {
+            "type": "int"
+          },
           "offset": 8000,
           "type": {
             "category": "builtin",
@@ -78,12 +65,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_iBurstShotsRemaining",
+          "network": {
+            "type": "int"
+          },
           "offset": 8004,
           "type": {
             "category": "builtin",
@@ -115,12 +100,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_bNeedsBoltAction",
+          "network": {
+            "type": "bool"
+          },
           "offset": 8029,
           "type": {
             "category": "builtin",
@@ -128,35 +111,15 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nRevolverCylinderIdx",
+          "network": {
+            "type": "int32"
+          },
           "offset": 8032,
           "type": {
             "category": "builtin",
             "name": "int32"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_zoomLevel\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_iBurstShotsRemaining\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bNeedsBoltAction\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int32 m_nRevolverCylinderIdx\""
         }
       ],
       "module": "client",
@@ -173,12 +136,10 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "scale",
+          "network": {
+            "type": "int16"
+          },
           "offset": 8,
           "type": {
             "category": "builtin",
@@ -186,16 +147,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord\""
-            }
-          ],
           "name": "origin",
+          "network": {
+            "encoder": "coord",
+            "type": "VectorWS"
+          },
           "offset": 12,
           "type": {
             "alignment": 4,
@@ -207,13 +163,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "bClip3DSkyBoxNearToWorldFar",
+          "network": {
+            "type": "bool"
+          },
           "offset": 24,
           "type": {
             "category": "builtin",
@@ -223,13 +179,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "flClip3DSkyBoxNearToWorldFarOffset",
+          "network": {
+            "type": "float32"
+          },
           "offset": 28,
           "type": {
             "category": "builtin",
@@ -239,13 +195,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "fog",
+          "network": {
+            "type": "fogparams_t"
+          },
           "offset": 32,
           "type": {
             "category": "declared_class",
@@ -254,12 +210,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nWorldGroupID",
+          "network": {
+            "sentAs": "uint32",
+            "type": "WorldGroupId_t"
+          },
           "offset": 136,
           "type": {
             "alignment": 4,
@@ -270,32 +225,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int16 scale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector origin\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool bClip3DSkyBoxNearToWorldFar\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 flClip3DSkyBoxNearToWorldFarOffset\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"fogparams_t fog\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"WorldGroupId_t m_nWorldGroupID\""
-        }
-      ],
       "module": "client",
       "name": "sky3dparams_t",
       "size": 144
@@ -304,12 +233,10 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_entitySpottedState",
+          "network": {
+            "type": "EntitySpottedState_t"
+          },
           "offset": 5080,
           "type": {
             "category": "declared_class",
@@ -318,12 +245,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_leader",
+          "network": {
+            "sentAs": "ehandle",
+            "type": "CHandle< CBaseEntity>"
+          },
           "offset": 5104,
           "type": {
             "alignment": 4,
@@ -338,12 +264,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_reuseTimer",
+          "network": {
+            "type": "CountdownTimer"
+          },
           "offset": 5112,
           "type": {
             "category": "declared_class",
@@ -352,12 +276,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_vel",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 5136,
           "type": {
             "alignment": 4,
@@ -367,16 +289,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"RecvProxy_Rescued\""
-            }
-          ],
           "name": "m_isRescued",
+          "network": {
+            "changeCallbacks": ["RecvProxy_Rescued"],
+            "type": "bool"
+          },
           "offset": 5148,
           "type": {
             "category": "builtin",
@@ -384,16 +301,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"RecvProxy_Jumped\""
-            }
-          ],
           "name": "m_jumpedThisFrame",
+          "network": {
+            "changeCallbacks": ["RecvProxy_Jumped"],
+            "type": "bool"
+          },
           "offset": 5149,
           "type": {
             "category": "builtin",
@@ -401,16 +313,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnHostageStateChanged\""
-            }
-          ],
           "name": "m_nHostageState",
+          "network": {
+            "changeCallbacks": ["OnHostageStateChanged"],
+            "type": "int"
+          },
           "offset": 5152,
           "type": {
             "category": "builtin",
@@ -418,12 +325,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_bHandsHaveBeenCut",
+          "network": {
+            "type": "bool"
+          },
           "offset": 5156,
           "type": {
             "category": "builtin",
@@ -431,16 +336,12 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnGrabberChanged\""
-            }
-          ],
           "name": "m_hHostageGrabber",
+          "network": {
+            "changeCallbacks": ["OnGrabberChanged"],
+            "sentAs": "ehandle",
+            "type": "CHandle< CCSPlayerPawn>"
+          },
           "offset": 5160,
           "type": {
             "alignment": 4,
@@ -474,12 +375,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flRescueStartTime",
+          "network": {
+            "sentAs": "float32",
+            "type": "GameTime_t"
+          },
           "offset": 5180,
           "type": {
             "category": "declared_class",
@@ -488,12 +388,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flGrabSuccessTime",
+          "network": {
+            "sentAs": "float32",
+            "type": "GameTime_t"
+          },
           "offset": 5184,
           "type": {
             "category": "declared_class",
@@ -502,12 +401,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flDropStartTime",
+          "network": {
+            "sentAs": "float32",
+            "type": "GameTime_t"
+          },
           "offset": 5188,
           "type": {
             "category": "declared_class",
@@ -600,82 +498,24 @@
           }
         }
       ],
-      "metadata": [
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_iMaxHealth\""
-        },
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_iHealth\""
-        },
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_lifeState\""
-        },
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_fFlags\""
-        },
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_vecViewOffset\""
-        },
-        {
-          "name": "MNetworkOverride",
-          "value": "\"m_vecViewOffset C_BaseModelEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"EntitySpottedState_t m_entitySpottedState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CHandle< CBaseEntity> m_leader\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CountdownTimer m_reuseTimer\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_vel\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_isRescued\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_jumpedThisFrame\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_nHostageState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bHandsHaveBeenCut\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CHandle< CCSPlayerPawn> m_hHostageGrabber\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTime_t m_flRescueStartTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTime_t m_flGrabSuccessTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTime_t m_flDropStartTime\""
-        }
-      ],
       "module": "client",
       "name": "C_Hostage",
+      "network": {
+        "includeByName": [
+          "m_iMaxHealth",
+          "m_iHealth",
+          "m_lifeState",
+          "m_fFlags",
+          "m_vecViewOffset"
+        ],
+        "overrides": [
+          {
+            "class": "C_BaseModelEntity",
+            "field": "m_vecViewOffset",
+            "kind": "userGroup"
+          }
+        ]
+      },
       "parents": [
         {
           "module": "client",
@@ -992,17 +832,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_poolOrigin",
+          "network": {
+            "encoder": "coord",
+            "type": "VectorWS"
+          },
           "offset": 4568,
           "type": {
             "alignment": 4,
@@ -1014,13 +851,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_waterLevel",
+          "network": {
+            "type": "float32"
+          },
           "offset": 4580,
           "type": {
             "category": "builtin",
@@ -1043,21 +880,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"fish_pos_x\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnPosChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_x",
+          "network": {
+            "changeCallbacks": ["OnPosChanged"],
+            "serializer": "fish_pos_x",
+            "type": "float32"
+          },
           "offset": 4588,
           "type": {
             "category": "builtin",
@@ -1067,21 +898,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"fish_pos_y\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnPosChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_y",
+          "network": {
+            "changeCallbacks": ["OnPosChanged"],
+            "serializer": "fish_pos_y",
+            "type": "float32"
+          },
           "offset": 4592,
           "type": {
             "category": "builtin",
@@ -1091,21 +916,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"fish_pos_z\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnPosChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_z",
+          "network": {
+            "changeCallbacks": ["OnPosChanged"],
+            "serializer": "fish_pos_z",
+            "type": "float32"
+          },
           "offset": 4596,
           "type": {
             "category": "builtin",
@@ -1115,37 +934,19 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"angle_normalize_positive\""
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "7"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "360.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnAngChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_angle",
+          "network": {
+            "bitCount": 7,
+            "changeCallbacks": ["OnAngChanged"],
+            "encodeFlags": 1,
+            "max": 360,
+            "min": 0,
+            "serializer": "angle_normalize_positive",
+            "type": "float32"
+          },
           "offset": 4600,
           "type": {
             "category": "builtin",
@@ -1211,40 +1012,14 @@
       ],
       "metadata": [
         {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_nModelIndex\""
-        },
-        {
-          "name": "MNetworkIncludeByName",
-          "value": "\"m_lifeState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_poolOrigin\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_waterLevel\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_x\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_y\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_z\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_angle\""
+          "name": "MNetworkNoBase"
         }
       ],
       "module": "client",
       "name": "C_Fish",
+      "network": {
+        "includeByName": ["m_nModelIndex", "m_lifeState"]
+      },
       "parents": [
         {
           "module": "client",
@@ -1257,28 +1032,15 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"CBodyComponent\""
-            },
-            {
-              "name": "MNetworkAlias",
-              "value": "\"CBodyComponent\""
-            },
-            {
-              "name": "MNetworkTypeAlias",
-              "value": "\"CBodyComponent\""
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "48"
-            }
-          ],
           "name": "m_CBodyComponent",
+          "network": {
+            "alias": "CBodyComponent",
+            "class": "CBodyComponent",
+            "priority": 48,
+            "type": "CBodyComponent::Storage_t",
+            "typeAlias": "CBodyComponent",
+            "userGroups": ["CBodyComponent"]
+          },
           "offset": 56,
           "type": {
             "category": "ptr",
@@ -1371,17 +1133,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_iMaxHealth",
+          "network": {
+            "changeCallbacks": ["ObservableRecv_m_iMaxHealth"],
+            "type": "int32",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 848,
           "type": {
             "category": "builtin",
@@ -1389,24 +1149,14 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"ClampHealth\""
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Player\""
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            }
-          ],
           "name": "m_iHealth",
+          "network": {
+            "changeCallbacks": ["ObservableRecv_m_iHealth"],
+            "priority": 32,
+            "serializer": "ClampHealth",
+            "type": "int32",
+            "userGroups": ["Player"]
+          },
           "offset": 852,
           "type": {
             "category": "builtin",
@@ -1429,21 +1179,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Player\""
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_lifeState",
+          "network": {
+            "priority": 32,
+            "type": "uint8",
+            "userGroups": ["Player"]
+          },
           "offset": 860,
           "type": {
             "category": "builtin",
@@ -1453,13 +1197,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_bTakesDamage",
+          "network": {
+            "type": "bool"
+          },
           "offset": 861,
           "type": {
             "category": "builtin",
@@ -1469,13 +1213,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_nTakeDamageFlags",
+          "network": {
+            "type": "TakeDamageFlags_t"
+          },
           "offset": 864,
           "type": {
             "category": "declared_enum",
@@ -1484,12 +1228,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nPlatformType",
+          "network": {
+            "type": "EntityPlatformTypes_t"
+          },
           "offset": 872,
           "type": {
             "category": "declared_enum",
@@ -1500,17 +1242,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnInterpolationFrameChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_ubInterpolationFrame",
+          "network": {
+            "changeCallbacks": ["OnInterpolationFrameChanged"],
+            "type": "uint8"
+          },
           "offset": 873,
           "type": {
             "category": "builtin",
@@ -1652,16 +1391,12 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnSubclassIDChanged\""
-            }
-          ],
           "name": "m_nSubclassID",
+          "network": {
+            "changeCallbacks": ["OnSubclassIDChanged"],
+            "sentAs": "uint32",
+            "type": "EntitySubclassID_t"
+          },
           "offset": 904,
           "type": {
             "alignment": 4,
@@ -1727,21 +1462,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "0"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"animTimeSerializer\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flAnimTime",
+          "network": {
+            "priority": 0,
+            "serializer": "animTimeSerializer",
+            "type": "float32"
+          },
           "offset": 956,
           "type": {
             "category": "builtin",
@@ -1751,25 +1480,16 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "1"
-            },
-            {
-              "name": "MNetworkSerializer",
-              "value": "\"simulationTimeSerializer\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnSimulationTimeChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flSimulationTime",
+          "network": {
+            "changeCallbacks": ["OnSimulationTimeChanged"],
+            "priority": 1,
+            "serializer": "simulationTimeSerializer",
+            "type": "float32"
+          },
           "offset": 960,
           "type": {
             "category": "builtin",
@@ -1860,13 +1580,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flCreateTime",
+          "network": {
+            "sentAs": "float32",
+            "type": "GameTime_t"
+          },
           "offset": 1000,
           "type": {
             "category": "declared_class",
@@ -1876,9 +1597,6 @@
         },
         {
           "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
             {
               "name": "MNotSaved"
             }
@@ -1906,13 +1624,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_bClientSideRagdoll",
+          "network": {
+            "type": "bool"
+          },
           "offset": 1010,
           "type": {
             "category": "builtin",
@@ -1922,17 +1640,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnNetVarTeamNumChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_iTeamNum",
+          "network": {
+            "changeCallbacks": ["OnNetVarTeamNumChanged"],
+            "type": "uint8"
+          },
           "offset": 1011,
           "type": {
             "category": "builtin",
@@ -1940,12 +1655,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_spawnflags",
+          "network": {
+            "type": "uint32"
+          },
           "offset": 1012,
           "type": {
             "category": "builtin",
@@ -1955,17 +1668,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_nNextThinkTick",
+          "network": {
+            "sentAs": "int32",
+            "type": "GameTick_t",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 1016,
           "type": {
             "category": "declared_class",
@@ -1974,24 +1685,13 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Player\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnFlagsChanged\""
-            }
-          ],
           "name": "m_fFlags",
+          "network": {
+            "changeCallbacks": ["OnFlagsChanged"],
+            "priority": 32,
+            "type": "uint32",
+            "userGroups": ["Player"]
+          },
           "offset": 1024,
           "type": {
             "category": "builtin",
@@ -2016,29 +1716,17 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkAlias",
-              "value": "\"m_vecVelocity\""
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnServerVelocityChanged\""
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_vecServerVelocity",
+          "network": {
+            "alias": "m_vecVelocity",
+            "changeCallbacks": ["OnServerVelocityChanged"],
+            "priority": 32,
+            "type": "CNetworkVelocityVector",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 1040,
           "type": {
             "category": "declared_class",
@@ -2058,17 +1746,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_vecBaseVelocity",
+          "network": {
+            "type": "Vector",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 1304,
           "type": {
             "alignment": 4,
@@ -2080,13 +1765,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_hEffectEntity",
+          "network": {
+            "sentAs": "ehandle",
+            "type": "CHandle< CBaseEntity>"
+          },
           "offset": 1316,
           "type": {
             "alignment": 4,
@@ -2101,16 +1787,12 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            }
-          ],
           "name": "m_hOwnerEntity",
+          "network": {
+            "priority": 32,
+            "sentAs": "ehandle",
+            "type": "CHandle< CBaseEntity>"
+          },
           "offset": 1320,
           "type": {
             "alignment": 4,
@@ -2127,13 +1809,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_MoveCollide",
+          "network": {
+            "type": "MoveCollide_t"
+          },
           "offset": 1324,
           "type": {
             "category": "declared_enum",
@@ -2142,16 +1824,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnMoveTypeChanged\""
-            }
-          ],
           "name": "m_MoveType",
+          "network": {
+            "changeCallbacks": ["OnMoveTypeChanged"],
+            "type": "MoveType_t"
+          },
           "offset": 1325,
           "type": {
             "category": "declared_enum",
@@ -2171,37 +1848,19 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Water\""
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnWaterLevelChangeNetworked\""
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "8"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "1.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "8"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flWaterLevel",
+          "network": {
+            "bitCount": 8,
+            "changeCallbacks": ["OnWaterLevelChangeNetworked"],
+            "encodeFlags": 8,
+            "max": 1,
+            "min": 0,
+            "type": "float32",
+            "userGroups": ["Water"]
+          },
           "offset": 1328,
           "type": {
             "category": "builtin",
@@ -2211,17 +1870,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnEffectsChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_fEffects",
+          "network": {
+            "changeCallbacks": ["OnEffectsChanged"],
+            "type": "uint32"
+          },
           "offset": 1332,
           "type": {
             "category": "builtin",
@@ -2231,21 +1887,16 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Player\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_hGroundEntity",
+          "network": {
+            "priority": 32,
+            "sentAs": "ehandle",
+            "type": "CHandle< CBaseEntity>",
+            "userGroups": ["Player"]
+          },
           "offset": 1336,
           "type": {
             "alignment": 4,
@@ -2262,21 +1913,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkPriority",
-              "value": "32"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"Player\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_nGroundBodyIndex",
+          "network": {
+            "priority": 32,
+            "type": "int",
+            "userGroups": ["Player"]
+          },
           "offset": 1340,
           "type": {
             "category": "builtin",
@@ -2286,33 +1931,18 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "8"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "4.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flFriction",
+          "network": {
+            "bitCount": 8,
+            "encodeFlags": 1,
+            "max": 4,
+            "min": 0,
+            "type": "float32",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 1344,
           "type": {
             "category": "builtin",
@@ -2322,17 +1952,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flElasticity",
+          "network": {
+            "encoder": "coord",
+            "type": "float32"
+          },
           "offset": 1348,
           "type": {
             "category": "builtin",
@@ -2342,17 +1969,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnGravityUpdated\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flGravityScale",
+          "network": {
+            "changeCallbacks": ["OnGravityUpdated"],
+            "type": "float32"
+          },
           "offset": 1352,
           "type": {
             "category": "builtin",
@@ -2362,17 +1986,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkUserGroup",
-              "value": "\"LocalPlayerExclusive\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flTimeScale",
+          "network": {
+            "type": "float32",
+            "userGroups": ["LocalPlayerAndPredictorsExclusive"]
+          },
           "offset": 1356,
           "type": {
             "category": "builtin",
@@ -2382,17 +2003,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnInterpolationAmountChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_bAnimatedEveryTick",
+          "network": {
+            "changeCallbacks": ["OnInterpolationAmountChanged"],
+            "type": "bool"
+          },
           "offset": 1360,
           "type": {
             "category": "builtin",
@@ -2400,16 +2018,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnGravityUpdated\""
-            }
-          ],
           "name": "m_bGravityDisabled",
+          "network": {
+            "changeCallbacks": ["OnGravityUpdated"],
+            "type": "bool"
+          },
           "offset": 1361,
           "type": {
             "category": "builtin",
@@ -2419,17 +2032,15 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"OnNavIgnoreChanged\""
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_flNavIgnoreUntilTime",
+          "network": {
+            "changeCallbacks": ["OnNavIgnoreChanged"],
+            "sentAs": "float32",
+            "type": "GameTime_t"
+          },
           "offset": 1364,
           "type": {
             "category": "declared_class",
@@ -2659,12 +2270,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nBloodType",
+          "network": {
+            "type": "BloodType"
+          },
           "offset": 1536,
           "type": {
             "category": "declared_enum",
@@ -2673,202 +2282,27 @@
           }
         }
       ],
-      "metadata": [
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_bClientSideRagdoll\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_iMaxHealth\""
-        },
-        {
-          "name": "MNetworkExcludeByUserGroup",
-          "value": "\"Player\""
-        },
-        {
-          "name": "MNetworkExcludeByUserGroup",
-          "value": "\"Water\""
-        },
-        {
-          "name": "MNetworkExcludeByUserGroup",
-          "value": "\"LocalPlayerExclusive\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_spawnflags\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_bTakesDamage\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_nTakeDamageFlags\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_vecAbsVelocity\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_flSpeed\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_flWaterLevel\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_flTimeScale\""
-        },
-        {
-          "name": "MNetworkExcludeByName",
-          "value": "\"m_vecBaseVelocity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CBodyComponent::Storage_t m_CBodyComponent\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int32 m_iMaxHealth\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int32 m_iHealth\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_lifeState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bTakesDamage\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"TakeDamageFlags_t m_nTakeDamageFlags\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"EntityPlatformTypes_t m_nPlatformType\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_ubInterpolationFrame\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"EntitySubclassID_t m_nSubclassID\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flAnimTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flSimulationTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTime_t m_flCreateTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flSpeed\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bClientSideRagdoll\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_iTeamNum\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint32 m_spawnflags\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTick_t m_nNextThinkTick\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint32 m_fFlags\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_vecBaseVelocity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CHandle< CBaseEntity> m_hEffectEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CHandle< CBaseEntity> m_hOwnerEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"MoveCollide_t m_MoveCollide\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"MoveType_t m_MoveType\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flWaterLevel\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint32 m_fEffects\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CHandle< CBaseEntity> m_hGroundEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_nGroundBodyIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flFriction\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flElasticity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flGravityScale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flTimeScale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bAnimatedEveryTick\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_bGravityDisabled\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"GameTime_t m_flNavIgnoreUntilTime\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"BloodType m_nBloodType\""
-        }
-      ],
       "module": "client",
       "name": "C_BaseEntity",
+      "network": {
+        "excludeByName": [
+          "m_bClientSideRagdoll",
+          "m_iMaxHealth",
+          "m_spawnflags",
+          "m_bTakesDamage",
+          "m_nTakeDamageFlags",
+          "m_vecAbsVelocity",
+          "m_flWaterLevel",
+          "m_flTimeScale",
+          "m_vecBaseVelocity"
+        ],
+        "excludeByUserGroup": [
+          "Player",
+          "Water",
+          "LocalPlayerExclusive",
+          "LocalPlayerAndPredictorsExclusive"
+        ]
+      },
       "parents": [
         {
           "module": "entity2",
@@ -2923,12 +2357,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flParticleSpacing",
+          "network": {
+            "type": "float"
+          },
           "offset": 1592,
           "type": {
             "category": "builtin",
@@ -2936,16 +2368,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_flSlack",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "float"
+          },
           "offset": 1596,
           "type": {
             "category": "builtin",
@@ -2953,16 +2380,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "float"
+          },
           "offset": 1600,
           "type": {
             "category": "builtin",
@@ -2970,16 +2392,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_ColorTint",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "Color"
+          },
           "offset": 1604,
           "type": {
             "alignment": 4,
@@ -2989,16 +2406,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"effectStateChanged\""
-            }
-          ],
           "name": "m_nEffectState",
+          "network": {
+            "changeCallbacks": ["effectStateChanged"],
+            "type": "int"
+          },
           "offset": 1608,
           "type": {
             "category": "builtin",
@@ -3008,13 +2420,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_iEffectIndex",
+          "network": {
+            "resourceType": "vpcf",
+            "type": "HParticleSystemDefinitionStrong"
+          },
           "offset": 1616,
           "type": {
             "alignment": 8,
@@ -3029,12 +2442,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_Position",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1624,
           "type": {
             "alignment": 8,
@@ -3050,12 +2461,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_TangentIn",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1648,
           "type": {
             "alignment": 8,
@@ -3071,12 +2480,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_TangentOut",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1672,
           "type": {
             "alignment": 8,
@@ -3092,12 +2499,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_Color",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1696,
           "type": {
             "alignment": 8,
@@ -3113,16 +2518,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"pinStateChanged\""
-            }
-          ],
           "name": "m_PathNodes_PinEnabled",
+          "network": {
+            "changeCallbacks": ["pinStateChanged"],
+            "type": "bool"
+          },
           "offset": 1720,
           "type": {
             "alignment": 8,
@@ -3136,12 +2536,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_RadiusScale",
+          "network": {
+            "type": "float"
+          },
           "offset": 1744,
           "type": {
             "alignment": 8,
@@ -3153,56 +2551,6 @@
             "name": "C_NetworkUtlVectorBase",
             "size": 24
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flParticleSpacing\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flSlack\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Color m_ColorTint\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_nEffectState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"HParticleSystemDefinitionStrong m_iEffectIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_Position\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_TangentIn\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_TangentOut\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_Color\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_PathNodes_PinEnabled\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_PathNodes_RadiusScale\""
         }
       ],
       "module": "client",
@@ -3280,12 +2628,10 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "scale",
+          "network": {
+            "type": "int16"
+          },
           "offset": 8,
           "type": {
             "category": "builtin",
@@ -3293,16 +2639,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord\""
-            }
-          ],
           "name": "origin",
+          "network": {
+            "encoder": "coord",
+            "type": "VectorWS"
+          },
           "offset": 12,
           "type": {
             "alignment": 4,
@@ -3314,13 +2655,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "bClip3DSkyBoxNearToWorldFar",
+          "network": {
+            "type": "bool"
+          },
           "offset": 24,
           "type": {
             "category": "builtin",
@@ -3330,13 +2671,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "flClip3DSkyBoxNearToWorldFarOffset",
+          "network": {
+            "type": "float32"
+          },
           "offset": 28,
           "type": {
             "category": "builtin",
@@ -3346,13 +2687,13 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "fog",
+          "network": {
+            "type": "fogparams_t"
+          },
           "offset": 32,
           "type": {
             "category": "declared_class",
@@ -3361,12 +2702,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nWorldGroupID",
+          "network": {
+            "sentAs": "uint32",
+            "type": "WorldGroupId_t"
+          },
           "offset": 136,
           "type": {
             "alignment": 4,
@@ -3377,32 +2717,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int16 scale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector origin\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool bClip3DSkyBoxNearToWorldFar\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 flClip3DSkyBoxNearToWorldFarOffset\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"fogparams_t fog\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"WorldGroupId_t m_nWorldGroupID\""
-        }
-      ],
       "module": "server",
       "name": "sky3dparams_t",
       "size": 144
@@ -3546,23 +2860,15 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "type": "float"
+          },
           "offset": 1584,
           "type": {
             "category": "builtin",
             "name": "float32"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
         }
       ],
       "module": "client",
@@ -3632,23 +2938,15 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "type": "float"
+          },
           "offset": 1720,
           "type": {
             "category": "builtin",
             "name": "float32"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
         }
       ],
       "module": "client",
@@ -3686,15 +2984,6 @@
     {
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord_integral\""
-            }
-          ],
           "name": "m_vOrigin",
           "offset": 8,
           "type": {
@@ -3705,15 +2994,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord_integral\""
-            }
-          ],
           "name": "m_vStart",
           "offset": 20,
           "type": {
@@ -3724,15 +3004,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"normal\""
-            }
-          ],
           "name": "m_vNormal",
           "offset": 32,
           "type": {
@@ -3743,15 +3014,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"qangle\""
-            }
-          ],
           "name": "m_vAngles",
           "offset": 44,
           "type": {
@@ -3762,11 +3024,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_hEntity",
           "offset": 56,
           "type": {
@@ -3777,11 +3034,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_hOtherEntity",
           "offset": 60,
           "type": {
@@ -3792,11 +3044,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flScale",
           "offset": 64,
           "type": {
@@ -3805,27 +3052,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "12"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "1023.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            }
-          ],
           "name": "m_flMagnitude",
           "offset": 68,
           "type": {
@@ -3834,27 +3060,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "10"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "1023.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            }
-          ],
           "name": "m_flRadius",
           "offset": 72,
           "type": {
@@ -3863,11 +3068,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nSurfaceProp",
           "offset": 76,
           "type": {
@@ -3878,11 +3078,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nEffectIndex",
           "offset": 80,
           "type": {
@@ -3898,11 +3093,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nDamageType",
           "offset": 88,
           "type": {
@@ -3911,11 +3101,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nPenetrate",
           "offset": 92,
           "type": {
@@ -3924,11 +3109,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nMaterial",
           "offset": 94,
           "type": {
@@ -3937,11 +3117,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nHitBox",
           "offset": 96,
           "type": {
@@ -3950,11 +3125,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nColor",
           "offset": 98,
           "type": {
@@ -3963,11 +3133,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_fFlags",
           "offset": 99,
           "type": {
@@ -3976,11 +3141,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nAttachmentIndex",
           "offset": 100,
           "type": {
@@ -3990,11 +3150,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nAttachmentName",
           "offset": 104,
           "type": {
@@ -4005,11 +3160,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_iEffectName",
           "offset": 108,
           "type": {
@@ -4018,11 +3168,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nExplosionType",
           "offset": 110,
           "type": {
@@ -4032,92 +3177,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"VectorWS m_vOrigin\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"VectorWS m_vStart\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_vNormal\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"QAngle m_vAngles\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CEntityHandle m_hEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CEntityHandle m_hOtherEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flScale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flMagnitude\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flRadius\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CUtlStringToken m_nSurfaceProp\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"HParticleSystemDefinition m_nEffectIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint32 m_nDamageType\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nPenetrate\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint16 m_nMaterial\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int16 m_nHitBox\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nColor\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_fFlags\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"AttachmentHandle_t m_nAttachmentIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CUtlStringToken m_nAttachmentName\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint16 m_iEffectName\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nExplosionType\""
-        }
-      ],
       "module": "client",
       "name": "CEffectData",
       "size": 120
@@ -4272,12 +3331,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flParticleSpacing",
+          "network": {
+            "type": "float"
+          },
           "offset": 1240,
           "type": {
             "category": "builtin",
@@ -4285,16 +3342,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_flSlack",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "float"
+          },
           "offset": 1244,
           "type": {
             "category": "builtin",
@@ -4302,16 +3354,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "float"
+          },
           "offset": 1248,
           "type": {
             "category": "builtin",
@@ -4319,16 +3366,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"parametersChanged\""
-            }
-          ],
           "name": "m_ColorTint",
+          "network": {
+            "changeCallbacks": ["parametersChanged"],
+            "type": "Color"
+          },
           "offset": 1252,
           "type": {
             "alignment": 4,
@@ -4338,16 +3380,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"effectStateChanged\""
-            }
-          ],
           "name": "m_nEffectState",
+          "network": {
+            "changeCallbacks": ["effectStateChanged"],
+            "type": "int"
+          },
           "offset": 1256,
           "type": {
             "category": "builtin",
@@ -4357,13 +3394,14 @@
         {
           "metadata": [
             {
-              "name": "MNetworkEnable"
-            },
-            {
               "name": "MNotSaved"
             }
           ],
           "name": "m_iEffectIndex",
+          "network": {
+            "resourceType": "vpcf",
+            "type": "HParticleSystemDefinitionStrong"
+          },
           "offset": 1264,
           "type": {
             "alignment": 8,
@@ -4378,12 +3416,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_Position",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1272,
           "type": {
             "alignment": 8,
@@ -4399,12 +3435,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_TangentIn",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1296,
           "type": {
             "alignment": 8,
@@ -4420,12 +3454,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_TangentOut",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1320,
           "type": {
             "alignment": 8,
@@ -4441,12 +3473,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_Color",
+          "network": {
+            "type": "Vector"
+          },
           "offset": 1344,
           "type": {
             "alignment": 8,
@@ -4462,16 +3492,11 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkChangeCallback",
-              "value": "\"pinStateChanged\""
-            }
-          ],
           "name": "m_PathNodes_PinEnabled",
+          "network": {
+            "changeCallbacks": ["pinStateChanged"],
+            "type": "bool"
+          },
           "offset": 1368,
           "type": {
             "alignment": 8,
@@ -4485,12 +3510,10 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_PathNodes_RadiusScale",
+          "network": {
+            "type": "float"
+          },
           "offset": 1392,
           "type": {
             "alignment": 8,
@@ -4502,56 +3525,6 @@
             "name": "CNetworkUtlVectorBase",
             "size": 24
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flParticleSpacing\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flSlack\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Color m_ColorTint\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int m_nEffectState\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"HParticleSystemDefinitionStrong m_iEffectIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_Position\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_TangentIn\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_TangentOut\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_PathNodes_Color\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"bool m_PathNodes_PinEnabled\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_PathNodes_RadiusScale\""
         }
       ],
       "module": "server",
@@ -4991,23 +3964,15 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "type": "float"
+          },
           "offset": 1368,
           "type": {
             "category": "builtin",
             "name": "float32"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
         }
       ],
       "module": "server",
@@ -5718,23 +4683,15 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flRadius",
+          "network": {
+            "type": "float"
+          },
           "offset": 1224,
           "type": {
             "category": "builtin",
             "name": "float32"
           }
-        }
-      ],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float m_flRadius\""
         }
       ],
       "module": "server",
@@ -5811,15 +4768,6 @@
     {
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord_integral\""
-            }
-          ],
           "name": "m_vOrigin",
           "offset": 8,
           "type": {
@@ -5830,15 +4778,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"coord_integral\""
-            }
-          ],
           "name": "m_vStart",
           "offset": 20,
           "type": {
@@ -5849,15 +4788,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"normal\""
-            }
-          ],
           "name": "m_vNormal",
           "offset": 32,
           "type": {
@@ -5868,15 +4798,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkEncoder",
-              "value": "\"qangle\""
-            }
-          ],
           "name": "m_vAngles",
           "offset": 44,
           "type": {
@@ -5887,11 +4808,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_hEntity",
           "offset": 56,
           "type": {
@@ -5902,11 +4818,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_hOtherEntity",
           "offset": 60,
           "type": {
@@ -5917,11 +4828,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_flScale",
           "offset": 64,
           "type": {
@@ -5930,27 +4836,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "12"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "1023.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            }
-          ],
           "name": "m_flMagnitude",
           "offset": 68,
           "type": {
@@ -5959,27 +4844,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            },
-            {
-              "name": "MNetworkBitCount",
-              "value": "10"
-            },
-            {
-              "name": "MNetworkMinValue",
-              "value": "0.000000"
-            },
-            {
-              "name": "MNetworkMaxValue",
-              "value": "1023.000000"
-            },
-            {
-              "name": "MNetworkEncodeFlags",
-              "value": "1"
-            }
-          ],
           "name": "m_flRadius",
           "offset": 72,
           "type": {
@@ -5988,11 +4852,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nSurfaceProp",
           "offset": 76,
           "type": {
@@ -6003,11 +4862,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nEffectIndex",
           "offset": 80,
           "type": {
@@ -6023,11 +4877,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nDamageType",
           "offset": 88,
           "type": {
@@ -6036,11 +4885,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nPenetrate",
           "offset": 92,
           "type": {
@@ -6049,11 +4893,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nMaterial",
           "offset": 94,
           "type": {
@@ -6062,11 +4901,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nHitBox",
           "offset": 96,
           "type": {
@@ -6075,11 +4909,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nColor",
           "offset": 98,
           "type": {
@@ -6088,11 +4917,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_fFlags",
           "offset": 99,
           "type": {
@@ -6101,11 +4925,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nAttachmentIndex",
           "offset": 100,
           "type": {
@@ -6115,11 +4934,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nAttachmentName",
           "offset": 104,
           "type": {
@@ -6130,11 +4944,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_iEffectName",
           "offset": 108,
           "type": {
@@ -6143,11 +4952,6 @@
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MNetworkEnable"
-            }
-          ],
           "name": "m_nExplosionType",
           "offset": 110,
           "type": {
@@ -6157,92 +4961,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"VectorWS m_vOrigin\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"VectorWS m_vStart\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"Vector m_vNormal\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"QAngle m_vAngles\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CEntityHandle m_hEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CEntityHandle m_hOtherEntity\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flScale\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flMagnitude\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"float32 m_flRadius\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CUtlStringToken m_nSurfaceProp\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"HParticleSystemDefinition m_nEffectIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint32 m_nDamageType\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nPenetrate\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint16 m_nMaterial\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"int16 m_nHitBox\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nColor\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_fFlags\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"AttachmentHandle_t m_nAttachmentIndex\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"CUtlStringToken m_nAttachmentName\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint16 m_iEffectName\""
-        },
-        {
-          "name": "MNetworkVarNames",
-          "value": "\"uint8 m_nExplosionType\""
-        }
-      ],
       "module": "server",
       "name": "CEffectData",
       "size": 112
@@ -6432,7 +5150,6 @@
           }
         }
       ],
-      "metadata": [],
       "module": "particles",
       "name": "C_OP_RenderTreeShake",
       "parents": [
@@ -6491,7 +5208,6 @@
           }
         }
       ],
-      "metadata": [],
       "module": "particles",
       "name": "C_OP_RenderClientPhysicsImpulse",
       "parents": [
@@ -6603,7 +5319,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [],
       "module": "toolscene",
       "name": "CLightRigLight",
       "size": 64
@@ -6691,7 +5406,6 @@
           }
         }
       ],
-      "metadata": [],
       "module": "mapdoclib",
       "name": "CSprayedDataPreset",
       "size": 48
@@ -6729,7 +5443,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [],
       "module": "animgraphlib",
       "name": "CAnimationGraphVisualizerSphere",
       "parents": [
@@ -6779,7 +5492,6 @@
         }
       ],
       "flags": ["trivial_constructor", "trivial_destructor"],
-      "metadata": [],
       "module": "physicslib",
       "name": "RnSoftbodyCapsule_t",
       "size": 32
@@ -6848,7 +5560,6 @@
           }
         }
       ],
-      "metadata": [],
       "module": "particles",
       "name": "CParticleMassCalculationParameters",
       "size": 1136
@@ -6964,7 +5675,6 @@
           }
         }
       ],
-      "metadata": [],
       "module": "particles",
       "name": "C_INIT_CheckParticleForWater",
       "parents": [
@@ -7036,7 +5746,6 @@
         }
       ],
       "flags": ["trivial_constructor", "trivial_destructor"],
-      "metadata": [],
       "module": "physicslib",
       "name": "CastSphereSATParams_t",
       "size": 48
@@ -7364,7 +6073,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [],
       "module": "materialsystem2",
       "name": "PostProcessingVignetteParameters_t",
       "size": 36
@@ -7533,7 +6241,6 @@
         }
       ],
       "flags": ["trivial_destructor"],
-      "metadata": [],
       "module": "physicslib",
       "name": "RnCapsule_t",
       "size": 28
