@@ -122,7 +122,7 @@ describe("resolveLeafType", () => {
   it("prefers inner2 over inner for atomic types (map value type)", () => {
     const key = { category: "builtin" as const, name: "uint64" };
     const value = { category: "declared_class" as const, name: "Bar", module: "m" };
-    const type = { category: "atomic" as const, name: "CUtlHashMap", inner: key, inner2: value };
+    const type = { category: "atomic" as const, name: "CUtlOrderedMap", inner: key, inner2: value };
     expect(resolveLeafType(type)).toBe(value);
   });
 

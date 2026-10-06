@@ -10,9 +10,9 @@ export type SchemaFieldType =
       inner2?: SchemaFieldType;
       /** Integer template argument, rendered last: CBitVec<N>, CUtlVectorFixedGrowable<T, N> */
       count?: number;
-      /** Size in bytes of this instantiation, from the game. Omitted in older dumps */
+      /** Size in bytes of this instantiation, from the game. Not in the old games' dumps */
       size?: number;
-      /** Alignment of this instantiation, from the game. Omitted in older dumps */
+      /** Alignment of this instantiation, from the game. Not in the old games' dumps */
       alignment?: number;
     }
   /** Without module, the class is not in any schema scope */

@@ -198,8 +198,10 @@
           "name": "origin",
           "offset": 12,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -260,8 +262,10 @@
           "name": "m_nWorldGroupID",
           "offset": 136,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "WorldGroupId_t"
+            "name": "WorldGroupId_t",
+            "size": 4
           }
         }
       ],
@@ -322,13 +326,15 @@
           "name": "m_leader",
           "offset": 5104,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -354,8 +360,10 @@
           "name": "m_vel",
           "offset": 5136,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -435,13 +443,15 @@
           "name": "m_hHostageGrabber",
           "offset": 5160,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_CSPlayerPawn"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -457,8 +467,10 @@
           "name": "m_vecGrabbedPos",
           "offset": 5168,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -525,8 +537,10 @@
           "name": "m_lookAt",
           "offset": 5224,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -694,8 +708,10 @@
           "name": "m_soundEventName",
           "offset": 1576,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -739,8 +755,10 @@
             "category": "fixed_array",
             "count": 8,
             "inner": {
+              "alignment": 8,
               "category": "atomic",
-              "name": "CUtlSymbolLarge"
+              "name": "CUtlSymbolLarge",
+              "size": 8
             }
           }
         },
@@ -748,13 +766,15 @@
           "name": "m_hProxySoundscape",
           "offset": 1664,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "CEnvSoundscape"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -769,8 +789,10 @@
           "name": "m_soundscapeName",
           "offset": 1672,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -809,8 +831,10 @@
           "name": "m_pos",
           "offset": 4456,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -822,8 +846,10 @@
           "name": "m_vel",
           "offset": 4468,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -835,8 +861,10 @@
           "name": "m_angles",
           "offset": 4480,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         },
         {
@@ -940,8 +968,10 @@
           "name": "m_actualPos",
           "offset": 4544,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -953,8 +983,10 @@
           "name": "m_actualAngles",
           "offset": 4556,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         },
         {
@@ -973,8 +1005,10 @@
           "name": "m_poolOrigin",
           "offset": 4568,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -1487,13 +1521,15 @@
           "name": "m_hSceneObjectController",
           "offset": 876,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -1609,8 +1645,10 @@
           "name": "m_tokLayerMatchID",
           "offset": 900,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -1626,8 +1664,10 @@
           "name": "m_nSubclassID",
           "offset": 904,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -1665,13 +1705,15 @@
           "name": "m_aThinkFunctions",
           "offset": 928,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "thinkfunc_t"
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
@@ -1965,8 +2007,10 @@
           "name": "m_vecAbsVelocity",
           "offset": 1028,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -2027,8 +2071,10 @@
           "name": "m_vecBaseVelocity",
           "offset": 1304,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -2043,13 +2089,15 @@
           "name": "m_hEffectEntity",
           "offset": 1316,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -2065,13 +2113,15 @@
           "name": "m_hOwnerEntity",
           "offset": 1320,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -2198,13 +2248,15 @@
           "name": "m_hGroundEntity",
           "offset": 1336,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -2483,13 +2535,15 @@
           "name": "m_hOldMoveParent",
           "offset": 1404,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "client",
               "name": "C_BaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -2510,8 +2564,10 @@
           "name": "m_vecAngVelocity",
           "offset": 1456,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         },
         {
@@ -2536,12 +2592,16 @@
           "name": "m_dependencies",
           "offset": 1472,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "CEntityHandle"
+              "name": "CEntityHandle",
+              "size": 4
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
@@ -2592,8 +2652,10 @@
           "name": "m_sUniqueHammerID",
           "offset": 1528,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlString"
+            "name": "CUtlString",
+            "size": 8
           }
         },
         {
@@ -2838,20 +2900,26 @@
           "name": "m_iszEffectName",
           "offset": 1560,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_PathNodes_Name",
           "offset": 1568,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 8,
               "category": "atomic",
-              "name": "CUtlSymbolLarge"
+              "name": "CUtlSymbolLarge",
+              "size": 8
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
@@ -2914,8 +2982,10 @@
           "name": "m_ColorTint",
           "offset": 1604,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Color"
+            "name": "Color",
+            "size": 4
           }
         },
         {
@@ -2947,13 +3017,15 @@
           "name": "m_iEffectIndex",
           "offset": 1616,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "resourcesystem",
               "name": "InfoForResourceTypeIParticleSystemDefinition"
             },
-            "name": "CStrongHandle"
+            "name": "CStrongHandle",
+            "size": 8
           }
         },
         {
@@ -2965,12 +3037,16 @@
           "name": "m_PathNodes_Position",
           "offset": 1624,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -2982,12 +3058,16 @@
           "name": "m_PathNodes_TangentIn",
           "offset": 1648,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -2999,12 +3079,16 @@
           "name": "m_PathNodes_TangentOut",
           "offset": 1672,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -3016,12 +3100,16 @@
           "name": "m_PathNodes_Color",
           "offset": 1696,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -3037,12 +3125,14 @@
           "name": "m_PathNodes_PinEnabled",
           "offset": 1720,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "builtin",
               "name": "bool"
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -3054,12 +3144,14 @@
           "name": "m_PathNodes_RadiusScale",
           "offset": 1744,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "builtin",
               "name": "float32"
             },
-            "name": "C_NetworkUtlVectorBase"
+            "name": "C_NetworkUtlVectorBase",
+            "size": 24
           }
         }
       ],
@@ -3213,8 +3305,10 @@
           "name": "origin",
           "offset": 12,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -3275,8 +3369,10 @@
           "name": "m_nWorldGroupID",
           "offset": 136,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "WorldGroupId_t"
+            "name": "WorldGroupId_t",
+            "size": 4
           }
         }
       ],
@@ -3335,8 +3431,10 @@
           "name": "m_soundEventName",
           "offset": 1224,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -3380,8 +3478,10 @@
             "category": "fixed_array",
             "count": 8,
             "inner": {
+              "alignment": 8,
               "category": "atomic",
-              "name": "CUtlSymbolLarge"
+              "name": "CUtlSymbolLarge",
+              "size": 8
             }
           }
         },
@@ -3389,13 +3489,15 @@
           "name": "m_hProxySoundscape",
           "offset": 1312,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CEnvSoundscape"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -3410,8 +3512,10 @@
           "name": "m_soundscapeName",
           "offset": 1320,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -3594,8 +3698,10 @@
           "name": "m_vOrigin",
           "offset": 8,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "VectorWS"
+            "name": "VectorWS",
+            "size": 12
           }
         },
         {
@@ -3611,8 +3717,10 @@
           "name": "m_vStart",
           "offset": 20,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "VectorWS"
+            "name": "VectorWS",
+            "size": 12
           }
         },
         {
@@ -3628,8 +3736,10 @@
           "name": "m_vNormal",
           "offset": 32,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -3645,8 +3755,10 @@
           "name": "m_vAngles",
           "offset": 44,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         },
         {
@@ -3658,8 +3770,10 @@
           "name": "m_hEntity",
           "offset": 56,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CEntityHandle"
+            "name": "CEntityHandle",
+            "size": 4
           }
         },
         {
@@ -3671,8 +3785,10 @@
           "name": "m_hOtherEntity",
           "offset": 60,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CEntityHandle"
+            "name": "CEntityHandle",
+            "size": 4
           }
         },
         {
@@ -3755,8 +3871,10 @@
           "name": "m_nSurfaceProp",
           "offset": 76,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -3768,13 +3886,15 @@
           "name": "m_nEffectIndex",
           "offset": 80,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "resourcesystem",
               "name": "InfoForResourceTypeIParticleSystemDefinition"
             },
-            "name": "CWeakHandle"
+            "name": "CWeakHandle",
+            "size": 8
           }
         },
         {
@@ -3878,8 +3998,10 @@
           "name": "m_nAttachmentName",
           "offset": 104,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -4040,21 +4162,25 @@
           "name": "m_strTarget",
           "offset": 1208,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_pActivator",
           "offset": 1216,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CBaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         }
       ],
@@ -4083,8 +4209,10 @@
           "name": "m_angViewPunch",
           "offset": 1196,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         }
       ],
@@ -4121,20 +4249,26 @@
           "name": "m_iszEffectName",
           "offset": 1208,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_PathNodes_Name",
           "offset": 1216,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 8,
               "category": "atomic",
-              "name": "CUtlSymbolLarge"
+              "name": "CUtlSymbolLarge",
+              "size": 8
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
@@ -4197,8 +4331,10 @@
           "name": "m_ColorTint",
           "offset": 1252,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Color"
+            "name": "Color",
+            "size": 4
           }
         },
         {
@@ -4230,13 +4366,15 @@
           "name": "m_iEffectIndex",
           "offset": 1264,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "resourcesystem",
               "name": "InfoForResourceTypeIParticleSystemDefinition"
             },
-            "name": "CStrongHandle"
+            "name": "CStrongHandle",
+            "size": 8
           }
         },
         {
@@ -4248,12 +4386,16 @@
           "name": "m_PathNodes_Position",
           "offset": 1272,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -4265,12 +4407,16 @@
           "name": "m_PathNodes_TangentIn",
           "offset": 1296,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -4282,12 +4428,16 @@
           "name": "m_PathNodes_TangentOut",
           "offset": 1320,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -4299,12 +4449,16 @@
           "name": "m_PathNodes_Color",
           "offset": 1344,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -4320,12 +4474,14 @@
           "name": "m_PathNodes_PinEnabled",
           "offset": 1368,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "builtin",
               "name": "bool"
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         },
         {
@@ -4337,12 +4493,14 @@
           "name": "m_PathNodes_RadiusScale",
           "offset": 1392,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "builtin",
               "name": "float32"
             },
-            "name": "CNetworkUtlVectorBase"
+            "name": "CNetworkUtlVectorBase",
+            "size": 24
           }
         }
       ],
@@ -4410,54 +4568,48 @@
       "alignment": 8,
       "fields": [
         {
-          "metadata": [
-            {
-              "name": "MClassPtr"
-            }
-          ],
           "name": "m_pnext",
           "offset": 1192,
           "type": {
-            "category": "ptr",
+            "alignment": 4,
+            "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CPathTrack"
-            }
+            },
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MClassPtr"
-            }
-          ],
           "name": "m_pprevious",
           "offset": 1200,
           "type": {
-            "category": "ptr",
+            "alignment": 4,
+            "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CPathTrack"
-            }
+            },
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
-          "metadata": [
-            {
-              "name": "MClassPtr"
-            }
-          ],
           "name": "m_paltpath",
           "offset": 1208,
           "type": {
-            "category": "ptr",
+            "alignment": 4,
+            "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CPathTrack"
-            }
+            },
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -4480,8 +4632,10 @@
           "name": "m_altName",
           "offset": 1224,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -4533,8 +4687,10 @@
           "name": "m_iszEnemyName",
           "offset": 1248,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -4565,8 +4721,10 @@
           "name": "m_iszPlayerName",
           "offset": 1272,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         }
       ],
@@ -4629,13 +4787,15 @@
           "name": "m_MagnettedEntities",
           "offset": 2656,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "magnetted_objects_t"
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
@@ -4713,16 +4873,20 @@
           "name": "m_strSearchName",
           "offset": 1200,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_strNewHintGroup",
           "offset": 1208,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -4791,21 +4955,25 @@
           "name": "m_iszFilterName",
           "offset": 1216,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_hFilter",
           "offset": 1224,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CBaseFilter"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         }
       ],
@@ -4859,64 +5027,80 @@
           "name": "m_iszEntry",
           "offset": 1192,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszPreIdle",
           "offset": 1200,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszPlay",
           "offset": 1208,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszPostIdle",
           "offset": 1216,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszModifierToAddOnPlay",
           "offset": 1224,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszNextScript",
           "offset": 1232,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszEntity",
           "offset": 1240,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
           "name": "m_iszSyncGroup",
           "offset": 1248,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlSymbolLarge"
+            "name": "CUtlSymbolLarge",
+            "size": 8
           }
         },
         {
@@ -5288,26 +5472,30 @@
           "name": "m_hTargetEnt",
           "offset": 1356,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CBaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
           "name": "m_hNextCine",
           "offset": 1360,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CScriptedSequence"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -5346,13 +5534,15 @@
           "name": "m_hForcedTarget",
           "offset": 1368,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CBaseAnimGraph"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -5476,21 +5666,25 @@
           "name": "m_matOtherToMain",
           "offset": 1728,
           "type": {
+            "alignment": 16,
             "category": "atomic",
-            "name": "CTransform"
+            "name": "CTransform",
+            "size": 32
           }
         },
         {
           "name": "m_hInteractionMainEntity",
           "offset": 1760,
           "type": {
+            "alignment": 4,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "server",
               "name": "CBaseEntity"
             },
-            "name": "CHandle"
+            "name": "CHandle",
+            "size": 4
           }
         },
         {
@@ -5629,8 +5823,10 @@
           "name": "m_vOrigin",
           "offset": 8,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "VectorWS"
+            "name": "VectorWS",
+            "size": 12
           }
         },
         {
@@ -5646,8 +5842,10 @@
           "name": "m_vStart",
           "offset": 20,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "VectorWS"
+            "name": "VectorWS",
+            "size": 12
           }
         },
         {
@@ -5663,8 +5861,10 @@
           "name": "m_vNormal",
           "offset": 32,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -5680,8 +5880,10 @@
           "name": "m_vAngles",
           "offset": 44,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "QAngle"
+            "name": "QAngle",
+            "size": 12
           }
         },
         {
@@ -5693,8 +5895,10 @@
           "name": "m_hEntity",
           "offset": 56,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CEntityHandle"
+            "name": "CEntityHandle",
+            "size": 4
           }
         },
         {
@@ -5706,8 +5910,10 @@
           "name": "m_hOtherEntity",
           "offset": 60,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CEntityHandle"
+            "name": "CEntityHandle",
+            "size": 4
           }
         },
         {
@@ -5790,8 +5996,10 @@
           "name": "m_nSurfaceProp",
           "offset": 76,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -5803,13 +6011,15 @@
           "name": "m_nEffectIndex",
           "offset": 80,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "resourcesystem",
               "name": "InfoForResourceTypeIParticleSystemDefinition"
             },
-            "name": "CWeakHandle"
+            "name": "CWeakHandle",
+            "size": 8
           }
         },
         {
@@ -5913,8 +6123,10 @@
           "name": "m_nAttachmentName",
           "offset": 104,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "CUtlStringToken"
+            "name": "CUtlStringToken",
+            "size": 4
           }
         },
         {
@@ -6041,8 +6253,10 @@
           "name": "m_vCenter",
           "offset": 120,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -6295,32 +6509,40 @@
           "name": "m_vPosition",
           "offset": 0,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_vDirection",
           "offset": 12,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_vLookAt",
           "offset": 24,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_Color",
           "offset": 36,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Color"
+            "name": "Color",
+            "size": 4
           }
         },
         {
@@ -6457,13 +6679,15 @@
           "name": "m_elements",
           "offset": 24,
           "type": {
+            "alignment": 8,
             "category": "atomic",
             "inner": {
               "category": "declared_class",
               "module": "mapdoclib",
               "name": "CSprayedDataPresetElement"
             },
-            "name": "CUtlVector"
+            "name": "CUtlVector",
+            "size": 24
           }
         }
       ],
@@ -6479,8 +6703,10 @@
           "name": "m_vWsPosition",
           "offset": 64,
           "type": {
+            "alignment": 16,
             "category": "atomic",
-            "name": "VectorAligned"
+            "name": "VectorAligned",
+            "size": 16
           }
         },
         {
@@ -6495,8 +6721,10 @@
           "name": "m_Color",
           "offset": 84,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Color"
+            "name": "Color",
+            "size": 4
           }
         }
       ],
@@ -6522,8 +6750,10 @@
             "category": "fixed_array",
             "count": 2,
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             }
           }
         },
@@ -6630,8 +6860,10 @@
           "name": "originParentSpace",
           "offset": 0,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -6750,16 +6982,20 @@
           "name": "m_vRayStart",
           "offset": 0,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_vRayDelta",
           "offset": 12,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -7086,8 +7322,10 @@
           "name": "m_vCenter",
           "offset": 4,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector2D"
+            "name": "Vector2D",
+            "size": 8
           }
         },
         {
@@ -7118,8 +7356,10 @@
           "name": "m_vColorTint",
           "offset": 24,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         }
       ],
@@ -7219,8 +7459,10 @@
           "name": "m_vecOutputMin",
           "offset": 588,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -7233,8 +7475,10 @@
           "name": "m_vecOutputMax",
           "offset": 600,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
@@ -7272,8 +7516,10 @@
             "category": "fixed_array",
             "count": 2,
             "inner": {
+              "alignment": 4,
               "category": "atomic",
-              "name": "Vector"
+              "name": "Vector",
+              "size": 12
             }
           }
         },
@@ -7339,11 +7585,11 @@
         {
           "name": "MGetKV3ClassDefaults",
           "value": {
-            "m_flValue": 1.5,
-            "m_nCount": 42,
             "m_bEnabled": true,
-            "m_szName": "hello",
-            "m_hTarget": null
+            "m_flValue": 1.5,
+            "m_hTarget": null,
+            "m_nCount": 42,
+            "m_szName": "hello"
           }
         }
       ],
@@ -7508,8 +7754,10 @@
           "name": "m_szNan",
           "offset": 16,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlString"
+            "name": "CUtlString",
+            "size": 8
           }
         }
       ],
@@ -7534,48 +7782,58 @@
           "name": "m_items",
           "offset": 0,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlVector",
             "inner": {
               "category": "builtin",
               "name": "int32"
-            }
+            },
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
           "name": "m_empty",
           "offset": 24,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlVector",
             "inner": {
               "category": "builtin",
               "name": "int32"
-            }
+            },
+            "name": "CUtlVector",
+            "size": 24
           }
         },
         {
           "name": "m_vecZero",
           "offset": 48,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_vecNonZero",
           "offset": 60,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Vector"
+            "name": "Vector",
+            "size": 12
           }
         },
         {
           "name": "m_color",
           "offset": 72,
           "type": {
+            "alignment": 4,
             "category": "atomic",
-            "name": "Color"
+            "name": "Color",
+            "size": 4
           }
         }
       ],
@@ -7583,11 +7841,11 @@
         {
           "name": "MGetKV3ClassDefaults",
           "value": {
-            "m_items": [1, 2, 3],
+            "m_color": [255, 128, 0, 255],
             "m_empty": [],
-            "m_vecZero": [0, 0, 0],
+            "m_items": [1, 2, 3],
             "m_vecNonZero": [1, 0, 0],
-            "m_color": [255, 128, 0, 255]
+            "m_vecZero": [0, 0, 0]
           }
         }
       ],
@@ -7655,8 +7913,10 @@
           "name": "m_curve",
           "offset": 0,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CPiecewiseCurve"
+            "name": "CPiecewiseCurve",
+            "size": 64
           }
         }
       ],
@@ -7797,8 +8057,10 @@
           "name": "m_szLabel",
           "offset": 0,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlString"
+            "name": "CUtlString",
+            "size": 8
           }
         },
         {
@@ -7824,9 +8086,9 @@
         {
           "name": "MGetKV3ClassDefaults",
           "value": {
-            "m_szLabel": "",
+            "m_bOff": false,
             "m_nZero": 0,
-            "m_bOff": false
+            "m_szLabel": ""
           }
         }
       ],
@@ -7849,9 +8111,9 @@
         {
           "name": "MGetKV3ClassDefaults",
           "value": {
+            "m_extra": "data",
             "m_flX": 3,
-            "m_unknown": 77,
-            "m_extra": "data"
+            "m_unknown": 77
           }
         }
       ],
@@ -7911,8 +8173,8 @@
           "name": "m_map",
           "offset": 0,
           "type": {
+            "alignment": 8,
             "category": "atomic",
-            "name": "CUtlHashMap",
             "inner": {
               "category": "builtin",
               "name": "uint64"
@@ -7921,7 +8183,9 @@
               "category": "declared_class",
               "module": "test",
               "name": "TestBaseClass"
-            }
+            },
+            "name": "CUtlOrderedMap",
+            "size": 40
           }
         }
       ],
@@ -8190,7 +8454,7 @@
           {
             "class": "C_BaseEntity",
             "field": "m_fFlags",
-            "kind": "kind8",
+            "kind": "removeAll",
             "value": ""
           },
           {
