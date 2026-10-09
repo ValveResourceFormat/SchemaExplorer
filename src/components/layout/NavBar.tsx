@@ -37,7 +37,7 @@ const NavBarContentCell = styled.header`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  height: var(--navbar-height);
   min-width: 0;
   flex-shrink: 0;
   position: sticky;
