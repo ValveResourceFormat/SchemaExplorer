@@ -66,7 +66,10 @@ export const Card = styled.section`
   border: 1px solid var(--group-border);
   border-radius: 10px;
   box-shadow: var(--group-shadow);
-  overflow: hidden;
+  /* Clips to the rounded corners without becoming a scroll container, which would stop the
+     sticky bands inside from sticking to the page */
+  display: flow-root;
+  overflow: clip;
   overflow-wrap: anywhere;
 `;
 
@@ -213,6 +216,27 @@ export const Band = styled.div`
   > strong {
     font-weight: 600;
     color: var(--text);
+  }
+`;
+
+/**
+ * A band and its rows in a table. The band stays under the navbar while its rows scroll past, and
+ * leaves with the last of them
+ */
+export const BandGroup = styled.div`
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+
+  &:not(:first-child) {
+    border-top: 1px solid var(--row-line);
+  }
+
+  > ${Band}:first-child {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 1;
+    box-shadow: 0 1px 0 var(--row-line);
   }
 `;
 

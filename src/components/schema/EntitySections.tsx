@@ -43,6 +43,7 @@ import { CollapsibleLinkDetail, RefField } from "./ReferencedBy";
 import {
   AnchorName,
   Band,
+  BandGroup,
   Dim,
   InlineList,
   Pill,
@@ -703,6 +704,7 @@ function EntityListCard({
   }
 
   const hasRows = own.length > 0 || showInherited;
+  const ownRows = renderEntries(own.map((entry) => ({ entry })));
   return (
     <TitledCard
       title={section.title}
@@ -727,30 +729,30 @@ function EntityListCard({
             ))}
           </TableHead>
         )}
-        {showInherited ? (
-          <>
-            {groups.map((g) => (
-              <React.Fragment key={g.entity.class}>
+        {showInherited
+          ? groups.map((g) => (
+              <BandGroup key={g.entity.class}>
                 <InheritedBand entity={g.entity} />
                 {renderEntries(g.entries, g.entity)}
-              </React.Fragment>
-            ))}
-            {own.length > 0 && (
-              <Band>
-                <KindIcon kind="entity" />
-                <strong>{entityLabel(entity)}</strong>
-              </Band>
+              </BandGroup>
+            ))
+          : groups.length > 0 && (
+              <CollapsedInheritedRow
+                label={`Inherited ${section.title.toLowerCase()}`}
+                onShow={() => setShowInherited(true)}
+              />
             )}
-          </>
+        {showInherited && own.length > 0 ? (
+          <BandGroup>
+            <Band>
+              <KindIcon kind="entity" />
+              <strong>{entityLabel(entity)}</strong>
+            </Band>
+            {ownRows}
+          </BandGroup>
         ) : (
-          groups.length > 0 && (
-            <CollapsedInheritedRow
-              label={`Inherited ${section.title.toLowerCase()}`}
-              onShow={() => setShowInherited(true)}
-            />
-          )
+          ownRows
         )}
-        {renderEntries(own.map((entry) => ({ entry })))}
       </Table>
     </TitledCard>
   );

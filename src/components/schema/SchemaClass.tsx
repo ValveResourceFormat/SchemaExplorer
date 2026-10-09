@@ -23,6 +23,7 @@ import {
 import {
   AnchorName,
   Band,
+  BandGroup,
   InlineList,
   PageHeader,
   PageTitle,
@@ -298,6 +299,20 @@ function FieldTable({
   const endColumn = hasOffsets || hasNetworked;
   const cols = endColumn ? OFFSET_COLUMNS : COLUMNS;
 
+  const renderRow = (entry: FieldEntry) => (
+    <FieldRow
+      key={entryKey(entry)}
+      entry={entry}
+      declPath={declPath}
+      game={game}
+      endColumn={endColumn}
+      hexDigits={hexDigits}
+      bitfield={bitfields.get(entry.field)}
+      sending={sending.get(entry.field)}
+      anchored={!entry.inherited && fieldParam === entry.field.name}
+    />
+  );
+
   const table = (
     <Table style={{ "--cols": cols } as React.CSSProperties}>
       {inPage && rows.length > 0 && (
@@ -314,28 +329,15 @@ function FieldTable({
           onShow={() => setShowInherited(true)}
         />
       )}
-      {rows.map((entry, i) => {
-        const previous = rows[i - 1];
-        const newOwner =
-          showInherited && (!previous || previous.owner !== entry.owner) && entry.owner;
-        return (
-          <React.Fragment
-            key={`${entry.owner.module}/${entry.owner.name}/${entry.field.name}/${entry.offset}`}
-          >
-            {newOwner && <OwnerBand entry={entry} />}
-            <FieldRow
-              entry={entry}
-              declPath={declPath}
-              game={game}
-              endColumn={endColumn}
-              hexDigits={hexDigits}
-              bitfield={bitfields.get(entry.field)}
-              sending={sending.get(entry.field)}
-              anchored={!entry.inherited && fieldParam === entry.field.name}
-            />
-          </React.Fragment>
-        );
-      })}
+      {showInherited
+        ? ownerRuns(rows).map((run, i) => (
+            // By class and position, so filtering out a run's first field keeps its rows
+            <BandGroup key={`${run[0].owner.module}/${run[0].owner.name}/${i}`}>
+              <OwnerBand entry={run[0]} />
+              {run.map(renderRow)}
+            </BandGroup>
+          ))
+        : rows.map(renderRow)}
     </Table>
   );
 
@@ -371,6 +373,24 @@ function FieldTable({
       {table}
     </TitledCard>
   );
+}
+
+function entryKey(entry: FieldEntry) {
+  return `${entry.owner.module}/${entry.owner.name}/${entry.field.name}/${entry.offset}`;
+}
+
+/**
+ * Consecutive fields of the same class, each run goes under its own band. A class whose fields
+ * are split by another's has a run for each part
+ */
+function ownerRuns(rows: FieldEntry[]) {
+  const runs: FieldEntry[][] = [];
+  for (const entry of rows) {
+    const run = runs.at(-1);
+    if (run?.[0].owner === entry.owner) run.push(entry);
+    else runs.push([entry]);
+  }
+  return runs;
 }
 
 function OwnerBand({ entry }: { entry: FieldEntry }) {
