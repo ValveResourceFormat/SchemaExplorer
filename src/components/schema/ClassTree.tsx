@@ -107,12 +107,7 @@ function TreeCard({
 function TreeNodeView({ node, game }: { node: TreeNode; game: string }) {
   return (
     <li>
-      <ClassLink
-        to={schemaPath(game, node.cls.module, node.cls.name)}
-        title={`class in ${node.cls.module}`}
-      >
-        {node.cls.name}
-      </ClassLink>
+      <ClassLink to={schemaPath(game, node.cls.module, node.cls.name)}>{node.cls.name}</ClassLink>
       {node.children.length > 0 && (
         <TreeList>
           {node.children.map((child) => (
@@ -168,9 +163,7 @@ export function ClassTree({ module }: { module?: string }) {
           <RootList>
             {enums.map((e) => (
               <li key={declarationKey(e.module, e.name)}>
-                <ClassLink to={schemaPath(game, e.module, e.name)} title={`enum in ${e.module}`}>
-                  {e.name}
-                </ClassLink>
+                <ClassLink to={schemaPath(game, e.module, e.name)}>{e.name}</ClassLink>
               </li>
             ))}
           </RootList>

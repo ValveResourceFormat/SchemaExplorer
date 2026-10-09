@@ -30,12 +30,7 @@ export const DeclarationSidebarElement = ({
 }) => {
   const { game } = useContext(DeclarationsContext);
   return (
-    <SidebarLink
-      to={schemaPath(game, declaration.module, declaration.name)}
-      onClick={onClick}
-      // Long names are cut off, the tooltip has all of it
-      title={`${declaration.name}\n${declaration.kind} in ${declaration.module}`}
-    >
+    <SidebarLink to={schemaPath(game, declaration.module, declaration.name)} onClick={onClick}>
       <KindIcon kind={declaration.kind} />
       <span>{declaration.name}</span>
     </SidebarLink>

@@ -36,8 +36,10 @@ type SidebarRow =
   | { type: "item"; declaration: Declaration };
 
 const ROW_HEIGHT = 28;
+/** Rows above the active one, which also sets where the hydrated list starts scrolled to */
 const STATIC_BEFORE = 19;
-const STATIC_AFTER = 60;
+/** Every prerendered page carries these rows, enough to fill a tall screen until hydration */
+const STATIC_AFTER = 30;
 
 type SidebarRows = { rows: SidebarRow[]; stickyIndexes: number[] };
 
