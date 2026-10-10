@@ -37,7 +37,7 @@ export function parseConsoleSearch(search: string): ParsedConsoleSearch {
     notFlags: [],
   };
 
-  for (const word of search.toLowerCase().split(" ")) {
+  for (const word of search.toLowerCase().split(/\s+/)) {
     if (!word) continue;
     const negated = word.startsWith("-") && isConsoleFilterWord(word);
     const w = negated ? word.slice(1) : word;
@@ -187,7 +187,7 @@ export function withoutFlag(parsed: ParsedConsoleSearch, flag: string): ParsedCo
 export function setSearchTag(search: string, tag: string, value: string, state: TagState): string {
   const lowerValue = value.toLowerCase();
   const words = search
-    .split(" ")
+    .split(/\s+/)
     .filter((w) => {
       const lower = w.toLowerCase();
       return lower !== `${tag}${lowerValue}` && lower !== `-${tag}${lowerValue}`;
@@ -201,7 +201,7 @@ export function setSearchTag(search: string, tag: string, value: string, state: 
 /** Removes every module:, flag: and type: tag, keeping the name words */
 export function stripConsoleFilters(search: string): string {
   return search
-    .split(" ")
+    .split(/\s+/)
     .filter((w) => w && !isConsoleFilterWord(w.toLowerCase()))
     .join(" ");
 }

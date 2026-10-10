@@ -101,7 +101,7 @@ export function parseIntValue(value: string): number | null {
 }
 
 export function parseSearch(search: string): ParsedSearch {
-  const words = search.toLowerCase().split(" ").filter(Boolean);
+  const words = search.toLowerCase().split(/\s+/).filter(Boolean);
   const nameWords = words.filter((x) => !isFilterPrefix(x));
   const tagValues = (prefix: string) =>
     words

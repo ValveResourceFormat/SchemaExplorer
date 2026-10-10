@@ -13,7 +13,7 @@ export function searchForSection(
   search: string,
   section: SearchMode,
 ): { search: string; complete: boolean } {
-  const words = search.split(" ").filter(Boolean);
+  const words = search.split(/\s+/).filter(Boolean);
   const kept = words.filter((word) => {
     const lower = word.toLowerCase();
     const schemaTag = isFilterPrefix(lower);

@@ -88,4 +88,8 @@ describe("searchForSection", () => {
   it("ignores extra spaces", () => {
     expect(searchForSection("  a   b ", "console")).toEqual({ search: "a b", complete: true });
   });
+
+  it("ignores tabs and newlines", () => {
+    expect(searchForSection("a\t\tb\n", "console")).toEqual({ search: "a b", complete: true });
+  });
 });

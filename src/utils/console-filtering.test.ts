@@ -93,6 +93,10 @@ describe("parseConsoleSearch", () => {
   it("keeps command names starting with + or - as name words", () => {
     expect(parseConsoleSearch("+attack -attack").nameWords).toEqual(["+attack", "-attack"]);
   });
+
+  it("splits words on any whitespace", () => {
+    expect(parseConsoleSearch("sv_cheats\t\tflag:cheat\n").nameWords).toEqual(["sv_cheats"]);
+  });
 });
 
 describe("filterConsoleItems", () => {

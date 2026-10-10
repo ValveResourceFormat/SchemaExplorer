@@ -288,6 +288,10 @@ describe("entity search", () => {
     expect(search("trigger_multiple")).toEqual(["CTriggerMultiple"]);
   });
 
+  it("ignores tabs around words", () => {
+    expect(search("\ttrigger_multiple\t\t")).toEqual(["CTriggerMultiple"]);
+  });
+
   it("filters by entity:", () => {
     expect(search("entity:trigger")).toEqual(["CTriggerMultiple"]);
     expect(search("entity:root")).toEqual(["CEntityInstance"]);
