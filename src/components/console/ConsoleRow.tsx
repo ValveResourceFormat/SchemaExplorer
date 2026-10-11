@@ -236,6 +236,12 @@ const Help = styled.div`
     opacity: 0.7;
   }
 
+  /* The linked row shows all of it, with the help's own line breaks */
+  &[data-full] {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
   @media (max-width: 768px) {
     margin-left: 0;
   }
@@ -370,7 +376,9 @@ export const ConsoleRow = memo(function ConsoleRow({
         </Chips>
       </Line>
       {item.help ? (
-        <Help>{item.help}</Help>
+        <Help data-full={anchored || undefined} {...(anchored ? undefined : tip(item.help))}>
+          {item.help}
+        </Help>
       ) : (
         isReference && <Help data-missing>referenced, never declared</Help>
       )}

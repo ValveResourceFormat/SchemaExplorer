@@ -119,8 +119,13 @@ const pillStyles = `
     align-self: center;
   }
 
+  /* Identifiers, which can be longer than a phone screen is wide. They only wrap when the pill
+     doesn't fit a line of its own */
   &[data-mono] {
     font-family: var(--font-mono);
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 `;
 

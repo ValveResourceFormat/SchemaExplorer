@@ -11,15 +11,30 @@ import { chevronBefore } from "../chevron-styles";
 const SidebarLink = styled(NavLink)`
   ${sidebarRow}
 
-  > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   &.active {
     ${sidebarRowSelected}
   }
 `;
+
+const SidebarName = styled.span`
+  display: flex;
+  min-width: 0;
+`;
+
+const NameHead = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const NameTail = styled.span`
+  flex-shrink: 0;
+`;
+
+/**
+ * Long names are cut in the middle, since many differ only at the end, like
+ * C_DOTA_Ability_Special_Bonus_Unique_Drow_Ranger_1 to _8
+ */
+const NAME_TAIL = 10;
 
 export const DeclarationSidebarElement = ({
   declaration,
@@ -29,10 +44,14 @@ export const DeclarationSidebarElement = ({
   onClick?: () => void;
 }) => {
   const { game } = useContext(DeclarationsContext);
+  const { name } = declaration;
   return (
-    <SidebarLink to={schemaPath(game, declaration.module, declaration.name)} onClick={onClick}>
+    <SidebarLink to={schemaPath(game, declaration.module, name)} onClick={onClick}>
       <KindIcon kind={declaration.kind} />
-      <span>{declaration.name}</span>
+      <SidebarName>
+        <NameHead>{name.slice(0, -NAME_TAIL)}</NameHead>
+        <NameTail>{name.slice(-NAME_TAIL)}</NameTail>
+      </SidebarName>
     </SidebarLink>
   );
 };

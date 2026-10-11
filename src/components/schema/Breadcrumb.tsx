@@ -23,6 +23,8 @@ const BreadcrumbItem = styled.li`
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--text-dim);
 
   &:not(:last-child)::after {
