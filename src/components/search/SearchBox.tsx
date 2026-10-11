@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { buildHash } from "../../utils/filtering";
 import { getConsoleStats } from "../../utils/console-filtering";
 import { styled } from "@linaria/react";
+import { hover } from "../interaction-styles";
 import { SearchContext } from "./SearchContext";
 import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
@@ -22,9 +23,7 @@ export const SearchInput = styled.input`
   outline: none;
   transition: box-shadow 0.15s;
 
-  &:hover {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--highlight) 19%, transparent);
-  }
+  ${hover("box-shadow: 0 0 0 2px color-mix(in srgb, var(--highlight) 19%, transparent);")}
 
   &:focus {
     box-shadow: 0 0 0 2px var(--highlight);

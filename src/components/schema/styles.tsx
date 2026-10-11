@@ -1,6 +1,7 @@
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { subtleUnderline } from "./link-styles";
+import { hover } from "../interaction-styles";
 
 export const CardBlock = styled.div`
   margin: 16px auto 0;
@@ -311,9 +312,7 @@ export const TableHead = styled.div`
 export const Row = styled.div`
   ${rowStyles}
 
-  &:hover {
-    background: var(--row-hover);
-  }
+  ${hover("background: var(--row-hover);")}
 
   &[data-anchored] {
     background: var(--search-highlight);
@@ -337,10 +336,10 @@ export const CollapsedRow = styled.button`
   color: var(--text-dim);
   cursor: pointer;
 
-  &:hover {
+  ${hover(`
     color: var(--text);
     background: var(--row-hover);
-  }
+  `)}
 `;
 
 export const CollapsedText = styled.span`

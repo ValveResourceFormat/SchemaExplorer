@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { styled } from "@linaria/react";
 import { keepInPlace } from "../../utils/keep-in-place";
 import { KindIcon, type IconKind } from "../kind-icon/KindIcon";
+import { hover, pressScale } from "../interaction-styles";
 
 /** Frames the buttons of a card's switch or filter */
 const Segmented = styled.fieldset`
@@ -28,9 +29,8 @@ const SegmentButton = styled.button`
   color: var(--text-dim);
   cursor: pointer;
 
-  &:hover {
-    color: var(--text);
-  }
+  ${hover("color: var(--text);")}
+  ${pressScale(0.97)}
 
   &[aria-pressed="true"] {
     background: var(--group);

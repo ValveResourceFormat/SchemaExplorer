@@ -11,6 +11,7 @@ import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { getConsoleStats, type FilterTag } from "../../utils/console-filtering";
 import { formatDefault, formatRange, parseColor } from "../../utils/console-format";
 import { flagColorVars } from "./flag-styles";
+import { hover } from "../interaction-styles";
 
 const flagChipStyles = `
   display: inline-flex;
@@ -62,9 +63,7 @@ const FlagChipButton = styled.button`
   ${flagChipStyles}
   cursor: pointer;
 
-  &:hover {
-    border-color: var(--c);
-  }
+  ${hover("border-color: var(--c);")}
 `;
 
 function FlagBadge({ flag }: { flag: string }) {
@@ -132,9 +131,7 @@ const Row = styled.li`
     border-bottom: none;
   }
 
-  &:hover {
-    background: var(--row-hover);
-  }
+  ${hover("background: var(--row-hover);")}
 
   &[data-anchored] {
     background: var(--search-highlight);

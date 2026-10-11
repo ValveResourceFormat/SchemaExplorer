@@ -1,6 +1,8 @@
 // Kept apart from components: the build evaluates this module to inline it into other files' CSS,
 // and it can only do that for plain values
 
+import { hover, pressScale } from "../interaction-styles";
+
 /** A square button with only an icon, like the menu and theme buttons */
 export const iconButton = `
   display: grid;
@@ -15,9 +17,16 @@ export const iconButton = `
   color: var(--text-dim);
   cursor: pointer;
 
-  &:hover {
+  ${hover(`
     background: var(--group-members);
     color: var(--text);
+  `)}
+  ${pressScale(0.95)}
+
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      background: var(--group-members);
+    }
   }
 `;
 
@@ -46,9 +55,7 @@ export const sidebarRow = `
     border-radius: 3px;
   }
 
-  &:hover {
-    background: var(--group-members);
-  }
+  ${hover("background: var(--group-members);")}
 `;
 
 /** The game and section being shown, and the show filter that's on */
