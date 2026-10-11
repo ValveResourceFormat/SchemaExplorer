@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useMemo } from "react";
+import { flushSync } from "react-dom";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useParams } from "react-router";
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
@@ -12,7 +13,6 @@ import "./global.css";
 
 const SITE_NAME = "Source 2 Schema Explorer";
 const OG_IMAGE_URL = SITE_ORIGIN + ogImage;
-
 // Custom Discord link preview for declaration pages, must be in the prerendered HTML
 function DiscordComponentEmbed() {
   const { game, module, scope } = useParams();
@@ -108,8 +108,12 @@ export default function Root() {
       darkmode,
       setDarkmode(dark: boolean) {
         window.localStorage.setItem("theme", dark ? "dark" : "light");
-        applyTheme(dark);
-        setDarkmode(dark);
+        const update = () => {
+          applyTheme(dark);
+          flushSync(() => setDarkmode(dark));
+        };
+        if (document.startViewTransition) document.startViewTransition(update);
+        else update();
       },
     }),
     [darkmode],

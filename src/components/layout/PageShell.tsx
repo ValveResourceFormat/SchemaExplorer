@@ -43,7 +43,7 @@ export function PageShell({
   /** The page's show filters, under the sections where they stay in view */
   show?: React.ReactNode;
   /** The page's own list, below the games and sections */
-  sidebar: (drawer: { onNavigate: () => void; sidebarOpen: boolean }) => React.ReactNode;
+  sidebar: (drawer: { onNavigate: () => void }) => React.ReactNode;
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -101,7 +101,7 @@ export function PageShell({
               sidebarOpen={sidebarOpen}
               show={show}
             />
-            {sidebar({ onNavigate: closeSidebar, sidebarOpen })}
+            {sidebar({ onNavigate: closeSidebar })}
           </SidebarWrapper>
         </SidebarPanel>
         <ContentColumn>
@@ -125,16 +125,29 @@ const ContentColumn = styled.div`
   }
 `;
 
+// The overlay and the drawer stay rendered while closed so they can animate both ways. Visibility
+// hides them once the closing transition ends, which also keeps the drawer out of the tab order
 const MobileSidebarOverlay = styled.div`
   display: none;
 
   @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 300;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 200ms ease,
+      visibility 0s 200ms;
+
     &[data-open] {
-      display: block;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 300;
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 300ms ease,
+        visibility 0s;
     }
   }
 `;
@@ -147,7 +160,7 @@ const SidebarPanel = styled.div`
   }
 
   @media (max-width: 768px) {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -155,9 +168,33 @@ const SidebarPanel = styled.div`
     width: 300px;
     z-index: 301;
     background: var(--sidebar);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 200ms var(--ease-out),
+      visibility 0s 200ms;
 
     &[data-open] {
-      display: flex;
+      transform: none;
+      visibility: visible;
+      transition:
+        transform 300ms var(--ease-drawer),
+        visibility 0s;
+    }
+  }
+
+  @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    transform: none;
+    opacity: 0;
+    transition:
+      opacity 150ms ease,
+      visibility 0s 150ms;
+
+    &[data-open] {
+      opacity: 1;
+      transition:
+        opacity 150ms ease,
+        visibility 0s;
     }
   }
 `;

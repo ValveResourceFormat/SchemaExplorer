@@ -10,7 +10,7 @@ export const chevronBefore = `
     height: 16px;
     background: currentColor;
     mask: var(--mask-chevron) center / contain no-repeat;
-    transition: rotate 0.1s;
+    transition: rotate 100ms var(--ease-out);
   }
 
   &[data-collapsed]::before,

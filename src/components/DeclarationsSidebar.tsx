@@ -224,7 +224,6 @@ const VirtualizedList = ({
   activeIndex,
   activeModule,
   scope,
-  sidebarOpen,
   onNavigate,
 }: {
   rows: SidebarRow[];
@@ -234,7 +233,6 @@ const VirtualizedList = ({
   activeIndex: number;
   activeModule: string;
   scope: string;
-  sidebarOpen?: boolean;
   onNavigate?: () => void;
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -305,21 +303,6 @@ const VirtualizedList = ({
     if (wrapper) wrapper.scrollTop = 0;
   }, [activeModule, scope, activeIndex, virtualizer]);
 
-  // When the mobile sidebar opens, the virtualizer's scroll element transitions
-  // from display:none to display:flex. The element had zero dimensions while hidden,
-  // so the virtualizer rendered no items and scrollTop was lost. Re-measure and
-  // scroll to the active item.
-  useEffect(() => {
-    if (!sidebarOpen || !parentRef.current) return;
-    const raf = requestAnimationFrame(() => {
-      virtualizer.measure();
-      if (activeIndex >= 0) {
-        virtualizer.scrollToIndex(activeIndex, { align: "center" });
-      }
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [sidebarOpen]);
-
   const handleSidebarNavigate = useCallback(() => {
     navigatedFromSidebarRef.current = true;
     onNavigate?.();
@@ -371,11 +354,9 @@ const VirtualizedList = ({
 export const DeclarationsSidebar = ({
   show,
   onNavigate,
-  sidebarOpen,
 }: {
   show: ShowFilter;
   onNavigate?: () => void;
-  sidebarOpen?: boolean;
 }) => {
   const context = useContext(DeclarationsContext);
   const { nameWords, moduleWords } = useParsedSearch();
@@ -443,7 +424,6 @@ export const DeclarationsSidebar = ({
           activeIndex={activeIndex}
           activeModule={activeModule}
           scope={scope}
-          sidebarOpen={sidebarOpen}
           onNavigate={onNavigate}
         />
       ) : (

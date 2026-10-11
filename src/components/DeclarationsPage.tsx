@@ -26,9 +26,7 @@ function DeclarationsLayout() {
       section="schemas"
       count={isSearching ? formatSectionCount(data.length, "schemas") : undefined}
       show={<DeclarationsShow show={show} setShow={setShow} />}
-      sidebar={({ onNavigate, sidebarOpen }) => (
-        <DeclarationsSidebar show={show} onNavigate={onNavigate} sidebarOpen={sidebarOpen} />
-      )}
+      sidebar={({ onNavigate }) => <DeclarationsSidebar show={show} onNavigate={onNavigate} />}
     >
       <ContentList filtered={filtered} />
     </PageShell>

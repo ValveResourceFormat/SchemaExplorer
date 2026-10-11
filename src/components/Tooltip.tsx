@@ -40,6 +40,8 @@ function tooltipContent(el: HTMLElement): ReactNode {
 export function TooltipHost() {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
+  // Tooltips opened from the keyboard show and hide without animating
+  const [instant, setInstant] = useState(false);
   const id = useId();
 
   const { refs, floatingStyles, context } = useFloating({
@@ -54,8 +56,9 @@ export function TooltipHost() {
   });
 
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
-    duration: 120,
+    duration: instant ? 0 : 120,
     initial: { opacity: 0, transform: "translateY(2px)" },
+    common: { transitionTimingFunction: "var(--ease-out)" },
   });
 
   useEffect(() => {
@@ -63,13 +66,14 @@ export function TooltipHost() {
     let current: HTMLElement | null = null;
     let shown = false;
 
-    const show = (el: HTMLElement, delay: number) => {
+    const show = (el: HTMLElement, delay: number, fromKeyboard = false) => {
       clearTimeout(timer);
       current = el;
       timer = setTimeout(() => {
         if (!tooltipContent(el)) return;
         refs.setReference(el);
         setTarget(el);
+        setInstant(fromKeyboard);
         setOpen(true);
         shown = true;
       }, delay);
@@ -96,7 +100,8 @@ export function TooltipHost() {
     };
     const onFocusIn = (e: FocusEvent) => {
       const el = find(e.target);
-      if (el && e.target instanceof Element && e.target.matches(":focus-visible")) show(el, 0);
+      if (el && e.target instanceof Element && e.target.matches(":focus-visible"))
+        show(el, 0, true);
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") hide();
