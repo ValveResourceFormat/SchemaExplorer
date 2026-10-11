@@ -136,6 +136,8 @@ const MobileSidebarOverlay = styled.div`
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 300;
+    /* Only closes the drawer on tap, swiping on it doesn't scroll the page behind */
+    touch-action: none;
     opacity: 0;
     visibility: hidden;
     transition:

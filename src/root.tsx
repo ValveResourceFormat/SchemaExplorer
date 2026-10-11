@@ -13,6 +13,9 @@ import "./global.css";
 
 const SITE_NAME = "Source 2 Schema Explorer";
 const OG_IMAGE_URL = SITE_ORIGIN + ogImage;
+/** The browser chrome and phone status bar match the navbar, which is --background in global.css */
+const THEME_COLORS = { light: "#f8f9fb", dark: "#0c131d" };
+
 // Custom Discord link preview for declaration pages, must be in the prerendered HTML
 function DiscordComponentEmbed() {
   const { game, module, scope } = useParams();
@@ -46,7 +49,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:image" content={OG_IMAGE_URL} />
-        <meta name="theme-color" content="#63a1ff" />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content={THEME_COLORS.light}
+        />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_COLORS.dark} />
         <link rel="sitemap" href="/SchemaExplorer/sitemap.xml" />
         <link
           rel="alternate"
@@ -76,6 +84,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function applyTheme(dark: boolean) {
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  // The theme picked on the site can differ from the system one the media queries follow
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.setAttribute("content", dark ? THEME_COLORS.dark : THEME_COLORS.light);
+  }
 }
 
 const AppWrapper = styled.div`

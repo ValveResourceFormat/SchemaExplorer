@@ -123,6 +123,25 @@
 html {
   /* Scrolling to an element leaves it below the navbar */
   scroll-padding-top: var(--navbar-height);
+  /* Phones in landscape don't inflate the text */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Taps fire right away instead of waiting to see if they're a double tap zoom */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Controls give their own press feedback instead of the browser's tap flash, and a long press
+   doesn't select their label. Links keep both, their text is content */
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 html,

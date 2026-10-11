@@ -10,6 +10,15 @@ export const hover = (styles: string) => `
   }
 `;
 
+/** The same styles on hover and while pressed, so taps get them too */
+export const hoverAndPress = (styles: string) => `
+  ${hover(styles)}
+
+  &:active {
+    ${styles}
+  }
+`;
+
 /** Shrinks a little while pressed, unless reduced motion is asked for */
 export const pressScale = (scale: number) => `
   @media (prefers-reduced-motion: no-preference) {

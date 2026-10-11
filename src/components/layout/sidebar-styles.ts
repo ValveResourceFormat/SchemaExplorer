@@ -1,7 +1,7 @@
 // Kept apart from components: the build evaluates this module to inline it into other files' CSS,
 // and it can only do that for plain values
 
-import { hover, pressScale } from "../interaction-styles";
+import { hover, hoverAndPress, pressScale } from "../interaction-styles";
 
 /** A square button with only an icon, like the menu and theme buttons */
 export const iconButton = `
@@ -48,6 +48,8 @@ export const sidebarRow = `
   white-space: nowrap;
   color: var(--text);
   cursor: pointer;
+  /* Links too, the pressed background replaces the browser's tap flash */
+  -webkit-tap-highlight-color: transparent;
 
   > svg {
     flex-shrink: 0;
@@ -55,7 +57,7 @@ export const sidebarRow = `
     border-radius: 3px;
   }
 
-  ${hover("background: var(--group-members);")}
+  ${hoverAndPress("background: var(--group-members);")}
 `;
 
 /** The game and section being shown, and the show filter that's on */

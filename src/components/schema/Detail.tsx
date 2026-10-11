@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@linaria/react";
 import { Card } from "./styles";
 import { chevronBefore } from "../chevron-styles";
-import { hover } from "../interaction-styles";
+import { hoverAndPress } from "../interaction-styles";
 
 // Components with props live apart from styles.tsx, the build evaluates that file for the
 // styled components other files extend and can only read plain definitions there
@@ -111,7 +111,7 @@ const ToggleButton = styled.button`
   color: var(--highlight);
   cursor: pointer;
 
-  ${hover("color: var(--text);")}
+  ${hoverAndPress("color: var(--text);")}
 
   ${chevronBefore}
 
