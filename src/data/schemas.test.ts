@@ -9,6 +9,7 @@ import {
 import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
 import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics";
 import { parseSearch, searchDeclarations } from "../utils/filtering";
+import { metadataValueText } from "../utils/format";
 import { hasIntrinsicLayout, inheritedBases } from "./derived";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
@@ -216,6 +217,17 @@ describe("assignDefaults via parseSchemas", () => {
     expect(getField(cls, "m_szNan").defaultValue).toBe('"nan"');
   });
 
+  it("shows integers past 2^53, which the dump writes as strings, as numbers", () => {
+    const cls = getClass("TestBigIntDefaults");
+    expect(getField(cls, "m_hHandle").defaultValue).toBe("18446744073709551615");
+    expect(getField(cls, "m_handles").defaultValue).toBe("[18446744069414584320,7]");
+    expect(getField(cls, "m_nMask").defaultValue).toBe("9007199254740991");
+    // Fewer digits are a real string
+    expect(getField(cls, "m_szDigits").defaultValue).toBe('"12345"');
+    const meta = cls.metadata.find((m) => m.name === "MGetKV3ClassDefaults");
+    expect(metadataValueText(meta?.value)).toBe('{\n\t"m_unknownHandle": -9223372036854775808\n}');
+  });
+
   it("assigns non-empty arrays, skips empty and all-zero arrays", () => {
     const cls = getClass("TestArrayDefaults");
     expect(getField(cls, "m_items").defaultValue).toBe("[1,2,3]");
@@ -327,6 +339,30 @@ describe("parseSchemas", () => {
       versionDate: "test",
       versionTime: "test",
     });
+  });
+
+  it("parses enum values past 2^53 exactly, from strings and from older dumps' numbers", () => {
+    const decl = findDecl("TestWideEnum_t");
+    if (decl?.kind !== "enum") throw new Error("Expected enum");
+    expect(decl.members.map((m) => m.value)).toEqual([
+      -1,
+      1,
+      9007199254740992n,
+      1152921504606846976n,
+      1152921504606846977n,
+    ]);
+  });
+
+  it("finds enum values past 2^53 by enumvalue:, in decimal and hex", () => {
+    for (const value of ["1152921504606846977", "0x1000000000000001"]) {
+      const result = searchDeclarations(
+        [...parsedSchemas.declarations.get("test")!.values()],
+        parseSearch(`TestWideEnum_t enumvalue:${value}`),
+      );
+      const e = result[0];
+      if (e?.kind !== "enum") throw new Error("Expected enum");
+      expect(e.members.map((m) => m.name)).toEqual(["TEST_WIDE_BIT60_LOW"]);
+    }
   });
 
   it("parses enum declarations with members and metadata", () => {

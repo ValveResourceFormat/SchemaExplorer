@@ -1,6 +1,11 @@
-import type { SchemaEnumMember } from "../data/types";
+import type { EnumValue, SchemaEnumMember } from "../data/types";
 
-const isPowerOf2 = (n: number) => n > 0 && (n & (n - 1)) === 0;
+// BigInt throughout: 64-bit enums have flags past bit 31, which number bitwise operators drop
+
+function isPowerOf2(n: EnumValue): boolean {
+  const big = BigInt(n);
+  return big > 0n && (big & (big - 1n)) === 0n;
+}
 
 /**
  * Heuristically detect whether an enum's members represent bit flags.
@@ -10,8 +15,8 @@ const isPowerOf2 = (n: number) => n > 0 && (n & (n - 1)) === 0;
 export function isFlagEnum(members: SchemaEnumMember[]): boolean {
   if (members.length < 3) return false;
 
-  const baseFlags: number[] = [];
-  const composites: number[] = [];
+  const baseFlags: EnumValue[] = [];
+  const composites: EnumValue[] = [];
 
   for (const m of members) {
     if (isPowerOf2(m.value)) baseFlags.push(m.value);
@@ -23,18 +28,16 @@ export function isFlagEnum(members: SchemaEnumMember[]): boolean {
   // In real flag enums, powers of 2 jump beyond the member count
   // (e.g., 1, 2, 4, 8, 256, 512...). In sequential enums (0,1,2,3,4),
   // the powers of 2 are just small values that happen to be sequential.
-  const maxFlag = Math.max(...baseFlags);
-  if (maxFlag < members.length) return false;
+  if (!baseFlags.some((f) => f >= members.length)) return false;
 
   // Check that at least one composite fully decomposes into base flags
-  // Use manual reduce to avoid 32-bit truncation from bitwise OR
-  let baseMask = 0;
-  for (const f of baseFlags) baseMask = (baseMask | f) >>> 0;
-  return composites.some((v) => ((v >>> 0) & baseMask) >>> 0 === v >>> 0 && v !== 0);
+  let baseMask = 0n;
+  for (const f of baseFlags) baseMask |= BigInt(f);
+  return composites.some((v) => (BigInt(v) & baseMask) === BigInt(v));
 }
 
 /** Precomputed base flags for a flag enum, sorted largest-first. */
-export type BaseFlags = { name: string; value: number }[];
+export type BaseFlags = { name: string; value: EnumValue }[];
 
 /**
  * Extract the power-of-2 members from a flag enum, sorted largest-first.
@@ -45,7 +48,7 @@ export function getBaseFlags(members: SchemaEnumMember[]): BaseFlags {
   for (const m of members) {
     if (isPowerOf2(m.value)) flags.push(m);
   }
-  flags.sort((a, b) => b.value - a.value);
+  flags.sort((a, b) => (a.value < b.value ? 1 : a.value > b.value ? -1 : 0));
   return flags;
 }
 
@@ -54,21 +57,21 @@ export function getBaseFlags(members: SchemaEnumMember[]): BaseFlags {
  * base flag member names. Returns null for base flags / zero / if decomposition
  * doesn't fully cover the value.
  */
-export function decomposeFlags(value: number, baseFlags: BaseFlags): string[] | null {
-  if (value === 0 || isPowerOf2(value)) return null;
+export function decomposeFlags(value: EnumValue, baseFlags: BaseFlags): string[] | null {
+  if (value <= 0 || isPowerOf2(value)) return null;
 
   const flags: string[] = [];
-  let remaining = value >>> 0;
+  let remaining = BigInt(value);
 
   for (const flag of baseFlags) {
-    const fv = flag.value >>> 0;
-    if ((remaining & fv) >>> 0 === fv) {
+    const fv = BigInt(flag.value);
+    if ((remaining & fv) === fv) {
       flags.push(flag.name);
-      remaining = (remaining & ~fv) >>> 0;
+      remaining &= ~fv;
     }
   }
 
-  if (remaining !== 0) return null;
+  if (remaining !== 0n) return null;
 
   flags.reverse();
   return flags;

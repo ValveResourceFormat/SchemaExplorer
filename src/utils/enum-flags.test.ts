@@ -167,4 +167,24 @@ describe("decomposeFlags", () => {
     // All 32 bits set = 0xFFFFFFFF = 4294967295
     expect(decomposeFlags(0xffffffff, allBase)).toHaveLength(32);
   });
+
+  it("decomposes 64-bit flags past bit 31", () => {
+    const wide = [m("LOW", 1), m("BIT32", 2 ** 32), m("BIT40", 2 ** 40), m("BIT60", 2 ** 60)];
+    const wideBase = getBaseFlags(wide);
+    expect(decomposeFlags(2 ** 60 + 2 ** 32, wideBase)).toEqual(["BIT32", "BIT60"]);
+    expect(decomposeFlags(2 ** 40 + 1, wideBase)).toEqual(["LOW", "BIT40"]);
+  });
+
+  it("returns null when a 64-bit flag isn't a member", () => {
+    const wideBase = getBaseFlags([m("LOW", 1), m("BIT32", 2 ** 32)]);
+    expect(decomposeFlags(2 ** 33 + 1, wideBase)).toBeNull();
+  });
+});
+
+describe("isFlagEnum with 64-bit flags", () => {
+  it("treats a composite of 64-bit flags as one, not as a power of 2", () => {
+    const members = [m("A", 2 ** 32), m("B", 2 ** 33), m("C", 2 ** 34), m("AB", 2 ** 32 + 2 ** 33)];
+    expect(isFlagEnum(members)).toBe(true);
+    expect(getBaseFlags(members).map((f) => f.name)).toEqual(["C", "B", "A"]);
+  });
 });

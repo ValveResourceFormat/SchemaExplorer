@@ -6486,6 +6486,63 @@
     {
       "fields": [
         {
+          "name": "m_hHandle",
+          "offset": 0,
+          "type": {
+            "category": "builtin",
+            "name": "uint64"
+          }
+        },
+        {
+          "name": "m_nMask",
+          "offset": 8,
+          "type": {
+            "category": "builtin",
+            "name": "uint64"
+          }
+        },
+        {
+          "name": "m_szDigits",
+          "offset": 16,
+          "type": {
+            "alignment": 8,
+            "category": "atomic",
+            "name": "CUtlString",
+            "size": 8
+          }
+        },
+        {
+          "name": "m_handles",
+          "offset": 24,
+          "type": {
+            "category": "fixed_array",
+            "count": 2,
+            "inner": {
+              "category": "builtin",
+              "name": "uint64"
+            }
+          }
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGetKV3ClassDefaults",
+          "value": {
+            "m_hHandle": "18446744073709551615",
+            "m_handles": ["18446744069414584320", 7],
+            "m_nMask": 9007199254740991,
+            "m_szDigits": "12345",
+            "m_unknownHandle": "-9223372036854775808"
+          }
+        }
+      ],
+      "module": "test",
+      "name": "TestBigIntDefaults",
+      "size": 40
+    },
+    {
+      "fields": [
+        {
           "name": "m_items",
           "offset": 0,
           "type": {
@@ -7438,6 +7495,33 @@
       ],
       "module": "client",
       "name": "DOTA_UNIT_TARGET_TEAM"
+    },
+    {
+      "alignment": "uint64_t",
+      "members": [
+        {
+          "name": "TEST_WIDE_ALL",
+          "value": -1
+        },
+        {
+          "name": "TEST_WIDE_LOW",
+          "value": 1
+        },
+        {
+          "name": "TEST_WIDE_BIT53",
+          "value": 9007199254740992
+        },
+        {
+          "name": "TEST_WIDE_BIT60",
+          "value": "1152921504606846976"
+        },
+        {
+          "name": "TEST_WIDE_BIT60_LOW",
+          "value": "1152921504606846977"
+        }
+      ],
+      "module": "test",
+      "name": "TestWideEnum_t"
     }
   ],
   "revision": 0,

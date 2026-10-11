@@ -1,5 +1,71 @@
 import { describe, it, expect, vi } from "vitest";
-import { formatHexOffset, formatEnumHex, metadataValueText, padHex } from "./format";
+import {
+  formatHexOffset,
+  formatEnumHex,
+  isBigIntString,
+  metadataValueText,
+  padHex,
+  stringifyKV3,
+  toEnumValue,
+} from "./format";
+
+describe("toEnumValue", () => {
+  it("keeps safe integers as numbers", () => {
+    expect(toEnumValue(0)).toBe(0);
+    expect(toEnumValue(-1)).toBe(-1);
+    expect(toEnumValue(Number.MAX_SAFE_INTEGER)).toBe(Number.MAX_SAFE_INTEGER);
+    expect(toEnumValue("4294967295")).toBe(4294967295);
+  });
+
+  it("reads the dump's decimal strings past 2^53 exactly", () => {
+    expect(toEnumValue("1152921504606846977")).toBe(1152921504606846977n);
+    expect(toEnumValue("-9223372036854775808")).toBe(-9223372036854775808n);
+  });
+
+  it("turns numbers past 2^53 into bigints, so they match the same value from a string", () => {
+    expect(toEnumValue(2 ** 60)).toBe(1152921504606846976n);
+    expect(toEnumValue(2 ** 60)).toBe(toEnumValue("1152921504606846976"));
+  });
+
+  it("prints every digit", () => {
+    expect(String(toEnumValue(2 ** 62))).toBe("4611686018427387904");
+  });
+});
+
+describe("isBigIntString", () => {
+  it("matches integers past 2^53", () => {
+    expect(isBigIntString("18446744073709551615")).toBe(true);
+    expect(isBigIntString("-9223372036854775808")).toBe(true);
+    expect(isBigIntString("9007199254740992")).toBe(true);
+  });
+
+  it("leaves other strings alone", () => {
+    expect(isBigIntString("9007199254740991")).toBe(false);
+    expect(isBigIntString("12345")).toBe(false);
+    expect(isBigIntString("18446744073709551615x")).toBe(false);
+    expect(isBigIntString("")).toBe(false);
+  });
+});
+
+describe("stringifyKV3", () => {
+  it("writes big integer strings as numbers, anywhere in the value", () => {
+    expect(stringifyKV3({ a: "18446744073709551615", b: ["-9223372036854775808", 1] })).toBe(
+      '{"a":18446744073709551615,"b":[-9223372036854775808,1]}',
+    );
+  });
+
+  it("keeps other strings and keys quoted", () => {
+    expect(stringifyKV3({ "18446744073709551615": "12345", c: "x" })).toBe(
+      '{"18446744073709551615":"12345","c":"x"}',
+    );
+  });
+
+  it("indents like JSON.stringify", () => {
+    expect(stringifyKV3({ a: "18446744073709551615" }, "\t")).toBe(
+      '{\n\t"a": 18446744073709551615\n}',
+    );
+  });
+});
 
 describe("padHex", () => {
   it("pads to a number of hex digits", () => {
@@ -41,6 +107,10 @@ describe("formatEnumHex", () => {
       expect(formatEnumHex(1, "uint8_t")).toBe("0x01");
       expect(formatEnumHex(255, "uint16_t")).toBe("0xFF");
       expect(formatEnumHex(0xdead, "uint64_t")).toBe("0xDEAD");
+    });
+
+    it("formats bigints past 2^53", () => {
+      expect(formatEnumHex(1152921504606846977n, "uint64_t")).toBe("0x1000000000000001");
     });
   });
 
@@ -85,6 +155,10 @@ describe("formatEnumHex", () => {
 
     it("converts -2 to 0xFFFFFFFFFFFFFFFE", () => {
       expect(formatEnumHex(-2, "uint64_t")).toBe("0xFFFFFFFFFFFFFFFE");
+    });
+
+    it("converts INT64_MIN as a bigint to 0x8000000000000000", () => {
+      expect(formatEnumHex(-9223372036854775808n, "uint64_t")).toBe("0x8000000000000000");
     });
   });
 

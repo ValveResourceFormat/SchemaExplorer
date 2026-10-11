@@ -138,9 +138,15 @@ export interface SchemaClass {
   networkMatch?: ClassNetwork;
 }
 
+/**
+ * Safe integers are numbers and larger ones bigints, so a value always has one form and equal
+ * values compare equal
+ */
+export type EnumValue = number | bigint;
+
 export interface SchemaEnumMember {
   name: string;
-  value: number;
+  value: EnumValue;
   metadata: SchemaMetadataEntry[];
 }
 

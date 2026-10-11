@@ -95,11 +95,14 @@ ClassNet { includeByName?, excludeByName?: field[], includeByUserGroup?, exclude
        // no class = nearest base with the field.
        // replayCompatFields field: regex over field paths. Booleans only when true;
        // outOfPVSUpdates default 2 omitted
-Enum   { module, name, alignment, members?: {name, value, metadata?: Meta[]}[], metadata?: Meta[] }
-       // alignment: underlying type, e.g. "uint8_t"
+Enum   { module, name, alignment, members?: {name, value: number | string, metadata?: Meta[]}[],
+         metadata?: Meta[] }
+       // alignment: underlying type, e.g. "uint8_t". value: the signed 64-bit value, a string of
+       // its decimal digits past ±(2^53-1) (parse with BigInt), so uint64 all-bits is -1
 Meta   { name, value?: string | object }
        // value: raw text, string literals quoted; absent for tags like MNotSaved.
-       // MGetKV3ClassDefaults: JSON object (keys sorted, NaN as "-nan", per-run values zeroed),
+       // MGetKV3ClassDefaults: JSON object (keys sorted, NaN as "-nan", per-run values zeroed,
+       // integers past ±(2^53-1) as strings of their decimal digits at any depth),
        // "Could not parse KV3 Defaults", or absent. Omits top-level keys equal to the first
        // parent's; full defaults = first parent's full defaults + own keys.
        // MNetworkNoBase on a class: its bases' fields aren't sent, except ones it includes.

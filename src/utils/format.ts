@@ -1,4 +1,4 @@
-import type { SchemaFieldType, SchemaMetadataValue } from "../data/types";
+import type { EnumValue, SchemaFieldType, SchemaMetadataValue } from "../data/types";
 
 /** A type as C++ text, like CUtlVector< CHandle< CBaseEntity > > */
 export function formatFieldType(type: SchemaFieldType): string {
@@ -28,7 +28,7 @@ export function metadataValueText(value: SchemaMetadataValue | undefined): strin
   if (value === undefined || typeof value === "string") return value;
   let text = metadataTextCache.get(value);
   if (text === undefined) {
-    text = JSON.stringify(value, null, "\t");
+    text = stringifyKV3(value, "\t");
     metadataTextCache.set(value, text);
   }
   return text;
@@ -39,7 +39,34 @@ export function plural(n: number, word: string): string {
   return `${n} ${word}${n !== 1 ? "s" : ""}`;
 }
 
-export function formatHexOffset(value: number): string {
+const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+
+/**
+ * An enum value in its one form: a number when it's a safe integer, a bigint past ±(2^53 − 1).
+ * The dump writes those as decimal strings, since JSON numbers that large lose digits when parsed
+ */
+export function toEnumValue(value: number | bigint | string): EnumValue {
+  if (typeof value === "number" && Number.isSafeInteger(value)) return value;
+  const big = BigInt(value);
+  return big >= -MAX_SAFE && big <= MAX_SAFE ? Number(big) : big;
+}
+
+/**
+ * KV3 default integers past ±(2^53 − 1), which the dump writes as decimal strings. A string field
+ * holding only such digits would look the same, but no default does
+ */
+export function isBigIntString(value: string): boolean {
+  return /^-?\d+$/.test(value) && !Number.isSafeInteger(Number(value));
+}
+
+/** JSON text of KV3 defaults, the big integers the dump writes as strings back as numbers */
+export function stringifyKV3(value: unknown, space?: string): string {
+  return JSON.stringify(value, null, space).replace(/"(-?\d+)"(?!\s*:)/g, (match, digits) =>
+    isBigIntString(digits) ? digits : match,
+  );
+}
+
+export function formatHexOffset(value: number | bigint): string {
   const hexDigits = value.toString(16).toUpperCase();
   const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
   return `0x${paddedHex}`;
@@ -57,7 +84,8 @@ const alignmentBits: Record<string, number> = {
   uint64_t: 64,
 };
 
-export function formatEnumHex(value: number, alignment: string): string | null {
+/** Negative values as the unsigned bits of the enum's underlying type */
+export function formatEnumHex(value: EnumValue, alignment: string): string | null {
   if (value >= 0) {
     return formatHexOffset(value);
   }
@@ -67,14 +95,5 @@ export function formatEnumHex(value: number, alignment: string): string | null {
     return null;
   }
 
-  if (bits <= 32) {
-    const unsigned = bits === 32 ? value >>> 0 : (value >>> 0) & ((1 << bits) - 1);
-    return formatHexOffset(unsigned);
-  }
-
-  // For 64-bit, use BigInt
-  const unsigned = BigInt(value) & ((1n << BigInt(bits)) - 1n);
-  const hexDigits = unsigned.toString(16).toUpperCase();
-  const paddedHex = hexDigits.length % 2 !== 0 ? `0${hexDigits}` : hexDigits;
-  return `0x${paddedHex}`;
+  return formatHexOffset(BigInt.asUintN(bits, BigInt(value)));
 }

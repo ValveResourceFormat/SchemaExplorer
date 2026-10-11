@@ -22,10 +22,12 @@ import type {
 } from "./types.ts";
 import { compareModuleNames } from "../games-list.ts";
 import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics.ts";
+import { stringifyKV3, toEnumValue } from "../utils/format.ts";
 
 /**
  * MGetKV3ClassDefaults as an object. DumpSource2 writes it parsed (hidden fields omitted,
- * NaN and infinity as strings like "-nan"), or the string "Could not parse KV3 Defaults".
+ * NaN and infinity as strings like "-nan", integers past ±(2^53 − 1) as decimal strings), or the
+ * string "Could not parse KV3 Defaults".
  * @internal Exported for testing
  */
 export function parseKV3Defaults(
@@ -94,7 +96,7 @@ function isNonFiniteFloat(value: string, type: SchemaFieldType): boolean {
 
 function stringifyDefault(value: unknown, type: SchemaFieldType): string {
   if (typeof value !== "string") return String(value);
-  return isNonFiniteFloat(value, type) ? value : JSON.stringify(value);
+  return isNonFiniteFloat(value, type) ? value : stringifyKV3(value);
 }
 
 function assignDefaults(classes: SchemaClass[]) {
@@ -182,7 +184,7 @@ function assignDefaults(classes: SchemaClass[]) {
       } else if (Array.isArray(value)) {
         // Skip empty arrays and all-zero arrays (e.g. Vector [0,0,0])
         if (value.length === 0 || isAllZeroArray(value)) continue;
-        field.defaultValue = JSON.stringify(value);
+        field.defaultValue = stringifyKV3(value);
       } else {
         // For declared_class fields, diff against the target's full defaults to avoid redundancy
         const leaf = resolveLeafType(field.type);
@@ -193,7 +195,7 @@ function assignDefaults(classes: SchemaClass[]) {
         const obj = target
           ? diffObject(value as Record<string, unknown>, getDefaults(target))
           : (value as Record<string, unknown>);
-        if (obj) field.defaultValue = JSON.stringify(obj);
+        if (obj) field.defaultValue = stringifyKV3(obj);
       }
     }
 
@@ -293,7 +295,8 @@ interface RawSchemaEnum {
   alignment: string;
   members?: {
     name: string;
-    value: number;
+    /** Past ±(2^53 − 1) a decimal string, which JSON numbers can't hold exactly */
+    value: number | string;
     metadata?: SchemaMetadataEntry[];
   }[];
   metadata?: SchemaMetadataEntry[];
@@ -428,14 +431,16 @@ export function parseSchemas(data: SchemasJson) {
       f.metadata ??= [];
     }
   }
-  const enums = data.enums as SchemaEnum[];
-  for (const e of enums) {
-    e.kind = "enum";
-    e.metadata ??= [];
-    for (const m of (e.members ??= [])) {
-      m.metadata ??= [];
-    }
-  }
+  const enums: SchemaEnum[] = data.enums.map((e) => ({
+    ...e,
+    kind: "enum",
+    metadata: e.metadata ?? [],
+    members: (e.members ?? []).map((m) => ({
+      ...m,
+      value: toEnumValue(m.value),
+      metadata: m.metadata ?? [],
+    })),
+  }));
 
   assignDefaults(classes);
 

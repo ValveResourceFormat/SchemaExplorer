@@ -4,7 +4,7 @@ import { SearchContext } from "../components/search/SearchContext";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import { allDeclarations, type EntityLookups } from "../data/derived";
 import * as api from "../data/types";
-import { metadataValueText } from "./format";
+import { metadataValueText, toEnumValue } from "./format";
 import { matchesNetworkWords, matchingNetworkParts } from "../data/network";
 
 type EntitySearchLookups = Pick<
@@ -55,7 +55,7 @@ interface ParsedSearch {
   nameWords: string[];
   moduleWords: string[];
   offsets: Set<number>;
-  enumValues: Set<number>;
+  enumValues: Set<api.EnumValue>;
   metadataKeys: string[];
   metadataValues: string[];
   networkWords: string[];
@@ -100,6 +100,14 @@ export function parseIntValue(value: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
+/** Like parseIntValue, but every digit of values past 2^53 kept, in the form members have */
+export function parseEnumValue(value: string): api.EnumValue | null {
+  const match = /^(-?)(0x[0-9a-f]+|(?!0x)\d+)/.exec(value.trim());
+  if (!match) return null;
+  const big = BigInt(match[2]);
+  return toEnumValue(match[1] ? -big : big);
+}
+
 export function parseSearch(search: string): ParsedSearch {
   const words = search.toLowerCase().split(/\s+/).filter(Boolean);
   const nameWords = words.filter((x) => !isFilterPrefix(x));
@@ -108,17 +116,17 @@ export function parseSearch(search: string): ParsedSearch {
       .filter((x) => x.startsWith(prefix))
       .map((x) => x.slice(prefix.length))
       .filter(Boolean);
-  const numbers = (prefix: string) =>
+  const numbers = <T,>(prefix: string, parse: (value: string) => T | null) =>
     new Set(
       tagValues(prefix)
-        .map(parseIntValue)
+        .map(parse)
         .filter((x) => x !== null),
     );
   return {
     nameWords,
     moduleWords: tagValues("module:"),
-    offsets: numbers("offset:"),
-    enumValues: numbers("enumvalue:"),
+    offsets: numbers("offset:", parseIntValue),
+    enumValues: numbers("enumvalue:", parseEnumValue),
     // metadata: is a prefix of metadatavalue:, so its values can't start with "value:"
     metadataKeys: tagValues("metadata:").filter((x) => !x.startsWith("value:")),
     metadataValues: tagValues("metadatavalue:"),
@@ -483,7 +491,7 @@ export function searchDeclarations(
 
   function isFieldMatch(
     item: { name: string; metadata?: api.SchemaMetadataEntry[]; network?: api.FieldNetwork },
-    numericValue: number | undefined,
+    numericValue: api.EnumValue | undefined,
     remainingWords: string[],
     declMetaSatisfied: boolean,
   ): boolean {
@@ -502,7 +510,8 @@ export function searchDeclarations(
       if (!wordMatches) return false;
     }
 
-    if (offsetSet.size > 0 && (numericValue == null || !offsetSet.has(numericValue))) return false;
+    if (offsetSet.size > 0 && (typeof numericValue !== "number" || !offsetSet.has(numericValue)))
+      return false;
     if (enumValueSet.size > 0 && (numericValue == null || !enumValueSet.has(numericValue)))
       return false;
 

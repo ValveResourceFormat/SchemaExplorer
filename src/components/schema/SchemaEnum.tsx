@@ -191,7 +191,7 @@ function EnumMemberRow({
         </AnchorName>
       </MemberName>
       <MemberValues data-end>
-        <ColoredSyntax kind="literal">{member.value}</ColoredSyntax>
+        <ColoredSyntax kind="literal">{String(member.value)}</ColoredSyntax>
         <div>
           {hex && <MemberHex to={searchLink(game, `enumvalue:${member.value}`)}>{hex}</MemberHex>}
         </div>
