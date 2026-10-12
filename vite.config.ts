@@ -36,6 +36,9 @@ export default defineConfig(({ mode }) => {
         sourceMap: true,
         // The site targets current browsers, which need no vendor prefixes
         prefixer: false,
+        // The default "hybrid" strategy also resolves interpolations statically and, in dev, throws
+        // when that differs from evaluating them, even by whitespace or a component stub
+        eval: { strategy: "execute" },
       }),
       {
         // sirv treats .gz files as pre-compressed and adds Content-Encoding: gzip,
