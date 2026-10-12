@@ -14,7 +14,7 @@ interface GameDef {
   name: string;
   /** GameTracking repository, games without one are a one-off dump that is never updated */
   repo?: string;
-  /** Only shown by the dev server, the deployed site leaves it out */
+  /** Only shown by the dev server, the deployed site only has its JSON, linked from llms.txt */
   devOnly?: boolean;
 }
 

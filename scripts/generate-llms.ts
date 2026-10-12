@@ -1,6 +1,6 @@
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { BASE_PATH, GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
+import { ALL_GAMES, BASE_PATH, SITE_ORIGIN } from "../src/games-list.ts";
 import type { SchemasJson } from "../src/data/schemas.ts";
 
 /**
@@ -14,7 +14,7 @@ const assets = await readdir(assetsDir);
 const mb = (n: number) => (n / 1024 / 1024).toFixed(1);
 
 const games = await Promise.all(
-  GAME_LIST.map(async (game) => {
+  ALL_GAMES.map(async (game) => {
     const file = assets.find((f) => f.startsWith(`${game.id}.json-`) && f.endsWith(".gz"));
     if (!file) throw new Error(`No hashed schema asset found for ${game.id}`);
     const [{ size: gzSize }, json] = await Promise.all([
@@ -38,10 +38,12 @@ const games = await Promise.all(
 );
 
 const gameLines = games
-  .map(
-    (g) =>
-      `- ${g.name}: ${g.url}\n  (${g.sizeGz} MB gzipped / ${g.sizeRaw} MB raw${g.revision ? `, revision ${g.revision}, ${g.date}` : ""})`,
-  )
+  .map((g) => {
+    const notes = [`${g.sizeGz} MB gzipped / ${g.sizeRaw} MB raw`];
+    if (g.revision) notes.push(`revision ${g.revision}, ${g.date}`);
+    if (g.devOnly) notes.push("JSON only, not browsable on the site");
+    return `- ${g.name}: ${g.url}\n  (${notes.join(", ")})`;
+  })
   .join("\n");
 
 const exampleFile = games[0].file;
