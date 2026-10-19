@@ -89,7 +89,7 @@ export function declarationKey(module: string, name: string): string {
   return `${module}/${name}`;
 }
 
-function pushTo<K, T>(map: Map<K, T[]>, key: K, value: T) {
+export function pushTo<K, T>(map: Map<K, T[]>, key: K, value: T) {
   let list = map.get(key);
   if (!list) map.set(key, (list = []));
   list.push(value);
@@ -190,6 +190,11 @@ export function crossModuleName(name: string): string | null {
   if (name.startsWith("C_")) return "C" + name.slice(2);
   if (name.startsWith("C") && name[1] !== "_") return "C_" + name.slice(1);
   return null;
+}
+
+/** A name or type as text with the client's C_Foo as CFoo, also inside template arguments */
+export function serverClassName(text: string): string {
+  return text.replace(/\bC_/g, "C");
 }
 
 /** A declaration by name when the module is unknown: in the preferred module, then any */

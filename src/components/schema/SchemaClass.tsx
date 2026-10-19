@@ -13,13 +13,7 @@ import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset, padHex, plural } from "../../utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
 import { useAnchoredRef } from "./useAnchoredRow";
-import {
-  ComponentOf,
-  DesignNamePills,
-  EntityJumpPills,
-  EntityMatches,
-  EntitySections,
-} from "./EntitySections";
+import { ComponentOf, EntityJumpPills, EntitySections } from "./EntitySections";
 import {
   AnchorName,
   Band,
@@ -35,11 +29,10 @@ import {
 } from "./styles";
 import { Detail, DetailsCard } from "./Detail";
 import { FilterToggle, InheritedSwitch } from "./InheritedSwitch";
-import { CollapsedInheritedRow, GitHubFileLink, SearchResultCard, TitledCard } from "./Cards";
+import { CollapsedInheritedRow, GitHubFileLink, TitledCard } from "./Cards";
 import { RowIcon } from "./RowIcon";
 import {
   ClassNetworkDetail,
-  ClassNetworkMatch,
   FieldNetworkLine,
   fieldNetworkAttrs,
   NetworkedMark,
@@ -60,8 +53,7 @@ const AbstractPill = () => (
 
 export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
-  isSearchResult?: boolean;
-}> = ({ declaration, isSearchResult }) => {
+}> = ({ declaration }) => {
   const context = useContext(DeclarationsContext);
   const { game, declarations, entityByClass } = context;
   const entities = entityByClass.get(declarationKey(declaration.module, declaration.name));
@@ -72,50 +64,15 @@ export const SchemaClassView: React.FC<{
     () => inheritedBases(declarations, declaration.parents),
     [declarations, declaration.parents],
   );
-  // Search results only have their matched fields, the serializer needs every one
-  const full = declarations.get(declaration.module)?.get(declaration.name);
-  const whole = full?.kind === "class" ? full : declaration;
-  const showsFields = !isSearchResult || declaration.fields.length > 0;
   const sending = useMemo(
     () =>
-      showsFields
-        ? fieldSending(declarations, whole, componentOverrides(context, declarations, whole))
-        : NO_SENDING,
-    [context, declarations, whole, showsFields],
+      fieldSending(
+        declarations,
+        declaration,
+        componentOverrides(context, declarations, declaration),
+      ),
+    [context, declarations, declaration],
   );
-
-  if (isSearchResult) {
-    return (
-      <SearchResultCard
-        declaration={declaration}
-        pills={
-          <>
-            <DesignNamePills entities={entities} />
-            {isAbstract && <AbstractPill />}
-            {declaration.size != null && <SizeText>{plural(declaration.size, "byte")}</SizeText>}
-          </>
-        }
-      >
-        <ClassNetworkMatch declaration={declaration} whole={whole} bases={bases} />
-        {declaration.fields.length > 0 && (
-          // Only the class's own matched fields
-          <FieldTable
-            declaration={declaration}
-            declPath={declPath}
-            bases={NO_BASES}
-            sending={sending}
-          />
-        )}
-        {declaration.entityMatches && (
-          <EntityMatches
-            matches={declaration.entityMatches}
-            module={declaration.module}
-            anchorBase={declPath}
-          />
-        )}
-      </SearchResultCard>
-    );
-  }
 
   return (
     <>
@@ -130,20 +87,11 @@ export const SchemaClassView: React.FC<{
         <GitHubFileLink module={declaration.module} name={declaration.name} button />
       </PageHeader>
       <ClassDetails declaration={declaration} bases={bases} />
-      <FieldTable
-        declaration={declaration}
-        declPath={declPath}
-        bases={bases}
-        sending={sending}
-        inPage
-      />
+      <FieldTable declaration={declaration} declPath={declPath} bases={bases} sending={sending} />
       {entities && <EntitySections entities={entities} anchorBase={declPath} />}
     </>
   );
 };
-
-const NO_BASES: InheritedBase[] = [];
-const NO_SENDING = new Map<api.SchemaField, FieldSending>();
 
 const BaseOffsetText = styled.span`
   color: var(--text-dim);
@@ -225,7 +173,6 @@ function FieldTable({
   declPath,
   bases,
   sending,
-  inPage,
 }: {
   declaration: api.SchemaClass;
   declPath: string;
@@ -233,8 +180,6 @@ function FieldTable({
   bases: InheritedBase[];
   /** Whether the class sends its and its bases' networked fields, from fieldSending */
   sending: Map<api.SchemaField, FieldSending>;
-  /** On the class page, with the card and column names */
-  inPage?: boolean;
 }) {
   const { game } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
@@ -313,36 +258,6 @@ function FieldTable({
     />
   );
 
-  const table = (
-    <Table style={{ "--cols": cols } as React.CSSProperties}>
-      {inPage && rows.length > 0 && (
-        <TableHead>
-          <span>Name</span>
-          <span>Type</span>
-          {endColumn && <OffsetHead>{hasOffsets && "Offset"}</OffsetHead>}
-        </TableHead>
-      )}
-      {!showInherited && hasInherited && (
-        <CollapsedInheritedRow
-          label="Inherited fields"
-          range={inheritedRange && <OffsetText data-end>{inheritedRange}</OffsetText>}
-          onShow={() => setShowInherited(true)}
-        />
-      )}
-      {showInherited
-        ? ownerRuns(rows).map((run, i) => (
-            // By class and position, so filtering out a run's first field keeps its rows
-            <BandGroup key={`${run[0].owner.module}/${run[0].owner.name}/${i}`}>
-              <OwnerBand entry={run[0]} />
-              {run.map(renderRow)}
-            </BandGroup>
-          ))
-        : rows.map(renderRow)}
-    </Table>
-  );
-
-  if (!inPage) return table;
-
   return (
     <TitledCard
       title="Fields"
@@ -370,7 +285,31 @@ function FieldTable({
         )
       }
     >
-      {table}
+      <Table style={{ "--cols": cols } as React.CSSProperties}>
+        {rows.length > 0 && (
+          <TableHead>
+            <span>Name</span>
+            <span>Type</span>
+            {endColumn && <OffsetHead>{hasOffsets && "Offset"}</OffsetHead>}
+          </TableHead>
+        )}
+        {!showInherited && hasInherited && (
+          <CollapsedInheritedRow
+            label="Inherited fields"
+            range={inheritedRange && <OffsetText data-end>{inheritedRange}</OffsetText>}
+            onShow={() => setShowInherited(true)}
+          />
+        )}
+        {showInherited
+          ? ownerRuns(rows).map((run, i) => (
+              // By class and position, so filtering out a run's first field keeps its rows
+              <BandGroup key={`${run[0].owner.module}/${run[0].owner.name}/${i}`}>
+                <OwnerBand entry={run[0]} />
+                {run.map(renderRow)}
+              </BandGroup>
+            ))
+          : rows.map(renderRow)}
+      </Table>
     </TitledCard>
   );
 }

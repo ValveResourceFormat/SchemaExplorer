@@ -5,24 +5,19 @@ import { declarationKey } from "./DeclarationsContext";
 import { SchemaClassView } from "./SchemaClass";
 import { SchemaEnumView } from "./SchemaEnum";
 
-export function renderDeclaration(declaration: Declaration, isSearchResult?: boolean) {
+export function renderDeclaration(declaration: Declaration) {
   return (
     <ListItem key={declarationKey(declaration.module, declaration.name)}>
-      {!isSearchResult && (
-        <DeclarationBreadcrumb
-          module={declaration.module}
-          name={declaration.name}
-          parent={declaration.kind === "class" ? declaration.parents[0] : undefined}
-        />
-      )}
+      <DeclarationBreadcrumb
+        module={declaration.module}
+        name={declaration.name}
+        parent={declaration.kind === "class" ? declaration.parents[0] : undefined}
+      />
       {declaration.kind === "class" ? (
-        <SchemaClassView declaration={declaration} isSearchResult={isSearchResult} />
+        <SchemaClassView declaration={declaration} />
       ) : (
-        <SchemaEnumView declaration={declaration} isSearchResult={isSearchResult} />
+        <SchemaEnumView declaration={declaration} />
       )}
     </ListItem>
   );
 }
-
-export const renderSearchResult = (declaration: Declaration) =>
-  renderDeclaration(declaration, true);

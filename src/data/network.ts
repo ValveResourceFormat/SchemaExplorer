@@ -88,32 +88,6 @@ export function matchesNetworkWords(network: FieldNetwork | ClassNetwork, words:
   });
 }
 
-/**
- * The parts of a class's network data with any of the lowercased network: words, to show why a
- * class matched. A property whose name has a word is kept whole, otherwise only its entries with one
- */
-export function matchingNetworkParts(network: ClassNetwork, words: string[]): ClassNetwork {
-  const parsed = words.map(parseNetworkWord);
-  const parts: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(network)) {
-    const keys = [key.toLowerCase()];
-    const has = (v: unknown) => parsed.some((w) => partHas(v, keys, w));
-    if (parsed.some((w) => termHas(keys[0], w))) {
-      parts[key] = value;
-    } else if (Array.isArray(value)) {
-      const kept = value.filter(has);
-      if (kept.length > 0) parts[key] = kept;
-    } else if (typeof value === "object" && value !== null) {
-      // Like varTypeOverrides, keyed by field
-      const kept = Object.entries(value).filter(([k, v]) => has({ [k]: v }));
-      if (kept.length > 0) parts[key] = Object.fromEntries(kept);
-    } else if (has(value)) {
-      parts[key] = value;
-    }
-  }
-  return parts as ClassNetwork;
-}
-
 // -- Sending --
 //
 // A model of how the game's networksystem.dll builds the serializer of a class (CFlattenedSerializer)

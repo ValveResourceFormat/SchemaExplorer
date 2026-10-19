@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseEntities, parseSchemas, type SchemasJson } from "./schemas";
 import {
-  allDeclarations,
   buildEntityLookups,
   declarationKey,
   effectiveEntitySettings,
@@ -11,7 +10,8 @@ import {
   findEntityByDesignName,
   resolveKeyField,
 } from "./derived";
-import { parseSearch, searchDeclarations } from "../utils/filtering";
+import { parseSearch } from "../utils/filtering";
+import { searchSchemas } from "../utils/search";
 import {
   formatKeyName,
   formatKeyPattern,
@@ -280,9 +280,14 @@ describe("entity lookups", () => {
 });
 
 describe("entity search", () => {
-  const decls = [...allDeclarations(parsed.declarations)];
-  const search = (q: string) =>
-    searchDeclarations(decls, parseSearch(q), lookups).map((d) => d.name);
+  const context = {
+    declarations: parsed.declarations,
+    entitiesByDeclaration: lookups.entitiesByDeclaration,
+    designNamesByDeclaration: lookups.designNamesByDeclaration,
+    crossModuleLookup: new Map(),
+  };
+  const run = (q: string) => searchSchemas(context, parseSearch(q));
+  const search = (q: string) => run(q).names.map((row) => row.hit.declaration.name);
 
   it("matches design names", () => {
     expect(search("trigger_multiple")).toEqual(["CTriggerMultiple"]);
@@ -307,18 +312,21 @@ describe("entity search", () => {
   it("needs every input: tag to match one of the inputs", () => {
     expect(search("input:kill input:addoutput")).toEqual(["CEntityInstance"]);
     expect(search("input:kill input:missing")).toEqual([]);
-    const [root] = searchDeclarations(decls, parseSearch("input:kill input:addoutput"), lookups);
-    expect(root.kind === "class" && root.entityMatches?.inputs.map((i) => i.name)).toEqual([
-      "AddOutput",
-      "Kill",
-    ]);
+    const [root] = run("input:kill input:addoutput").names;
+    const [tag] = root.hit.tags;
+    expect(tag.kind === "io" && tag.inputs.map((i) => i.name)).toEqual(["AddOutput", "Kill"]);
   });
 
   it("carries the matching inputs and outputs", () => {
-    const [result] = searchDeclarations(decls, parseSearch("output:ontrig"), lookups);
-    expect(result.kind === "class" && result.entityMatches?.outputs.map((o) => o.name)).toEqual([
-      "OnTrigger",
-    ]);
+    const [result] = run("output:ontrig").names;
+    const [tag] = result.hit.tags;
+    expect(tag.kind === "io" && tag.outputs.map((o) => o.name)).toEqual(["OnTrigger"]);
+  });
+
+  it("carries the design names that matched entity:", () => {
+    const [result] = run("entity:trigger").names;
+    const [tag] = result.hit.tags;
+    expect(tag.kind === "entity" && tag.designNames).toEqual(["trigger_multiple"]);
   });
 
   it("ignores a bare entity: tag", () => {

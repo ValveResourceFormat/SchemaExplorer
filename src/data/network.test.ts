@@ -5,7 +5,6 @@ import {
   getNetworkKeys,
   isSameNetworkType,
   matchesNetworkWords,
-  matchingNetworkParts,
   networkTerms,
   type FieldSending,
 } from "./network";
@@ -49,51 +48,6 @@ describe("networkTerms", () => {
   it("caches per object", () => {
     const network = { type: "int" };
     expect(networkTerms(network)).toBe(networkTerms(network));
-  });
-});
-
-describe("matchingNetworkParts", () => {
-  const network = {
-    includeByUserGroup: ["Player", "LocalPlayerExclusive"],
-    excludeByUserGroup: ["FogController"],
-    overrides: [
-      { field: "m_lifeState", kind: "changeCallback", value: "OnLifeStateChanged" },
-      { field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" },
-    ],
-    varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices", m_pOther: "COther" },
-    outOfPVSUpdates: 4,
-    varsAtomic: true,
-  };
-
-  it("keeps only the entries with a word", () => {
-    expect(matchingNetworkParts(network, ["localplayer"])).toEqual({
-      includeByUserGroup: ["LocalPlayerExclusive"],
-      overrides: [{ field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" }],
-    });
-    expect(matchingNetworkParts(network, ["camera"])).toEqual({
-      varTypeOverrides: { m_pCameraServices: "CCSObserver_CameraServices" },
-    });
-  });
-
-  it("keeps a property whole when its name has a word", () => {
-    expect(matchingNetworkParts(network, ["excludebyusergroup", "atomic"])).toEqual({
-      excludeByUserGroup: ["FogController"],
-      varsAtomic: true,
-    });
-  });
-
-  it("matches values that aren't strings", () => {
-    expect(matchingNetworkParts(network, ["4"])).toEqual({ outOfPVSUpdates: 4 });
-  });
-
-  it("keeps whole values with =, and a property's with key=", () => {
-    expect(matchingNetworkParts(network, ["=player"])).toEqual({ includeByUserGroup: ["Player"] });
-    expect(matchingNetworkParts(network, ["value=localplayerexclusive"])).toEqual({
-      overrides: [{ field: "m_nNextThinkTick", kind: "userGroup", value: "LocalPlayerExclusive" }],
-    });
-    expect(matchingNetworkParts(network, ["vartypeoverrides=cother"])).toEqual({
-      varTypeOverrides: { m_pOther: "COther" },
-    });
   });
 });
 

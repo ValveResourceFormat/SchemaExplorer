@@ -1,83 +1,55 @@
-import { useContext, useMemo } from "react";
-import { styled } from "@linaria/react";
-import type { ConsoleItem, Declaration } from "../../data/types";
-import { betterMatches, type SearchMode } from "../../utils/section-search";
-import { Link } from "../Link";
+import { useMemo } from "react";
+import type { ConsoleMatch } from "../../utils/console-filtering";
+import { fieldRowKey, nameRowKey } from "../../utils/result-rows";
+import type { SectionItems } from "../../utils/section-search";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { ResultsHeading } from "../layout/Content";
-import { ConsoleRowsCard } from "../console/ConsoleRowsCard";
-import { DeclarationsContext } from "../schema/DeclarationsContext";
-import { highlightLink } from "../schema/link-styles";
-import { renderSearchResult } from "../schema/renderDeclaration";
-import { OtherSectionContext, SECTIONS, formatSectionCount } from "./useOtherSection";
+import { FieldRowView, NameRowView, OtherSectionHeading, OtherSectionHint } from "./ResultRows";
+import { SECTIONS, useBetterMatches } from "./useOtherSection";
 
 /**
- * Above a section's search results, the other section's results that match the search better,
- * like the sv_cheats convar when searching schemas. Without results of its own, a link to the
- * other section's when it has any
+ * Above the ConVars page's results, the schemas that match the search better, like the
+ * CBaseEntity class when searching for baseentity. Without results of its own, a link to the
+ * schemas when they have any
  */
-export function OtherSectionMatches({
-  section,
-  own,
-}: {
-  section: SearchMode;
-  own: readonly (Declaration | ConsoleItem)[];
-}) {
-  const context = useContext(DeclarationsContext);
-  const { section: other, to, results } = useContext(OtherSectionContext)!;
-  const better = useMemo(
-    () => results && betterMatches(context, own, results),
-    [context, own, results],
-  );
-  if (!results || !better || results.items.length === 0) return null;
+export function OtherSectionMatches({ own }: { own: readonly ConsoleMatch[] }) {
+  const items = useMemo<SectionItems>(() => ({ section: "console", items: own }), [own]);
+  const matches = useBetterMatches(items);
+  if (!matches || matches.better.section !== "schemas") return null;
 
-  const total = results.items.length;
-  const countText = formatSectionCount(total, other);
-  if (better.items.length === 0) {
+  const { names, fields } = matches.better;
+  const shown = names.length + fields.length;
+  if (shown === 0) {
     if (own.length > 0) return null;
-    return (
-      <Hint>
-        <Link to={to}>
-          {countText} result{total !== 1 && "s"} in {SECTIONS[other].label}
-        </Link>
-      </Hint>
-    );
+    return <OtherSectionHint total={matches.count} />;
   }
 
   return (
     <>
-      <ResultsHeading>
-        <KindIcon kind={SECTIONS[other].icon} />
-        {SECTIONS[other].label}
-        {total > better.items.length && <AllLink to={to}>All {countText} results</AllLink>}
-      </ResultsHeading>
-      {better.section === "console" ? (
-        <ConsoleRowsCard gameId={context.game} items={better.items} />
-      ) : (
-        better.items.map(renderSearchResult)
-      )}
+      <OtherSectionHeading total={matches.count} shown={shown} />
+      {names.map((row, i) => (
+        <NameRowView
+          key={nameRowKey(row.hit)}
+          hit={row.hit}
+          paired={row.paired}
+          first={i === 0}
+          last={i === shown - 1}
+        />
+      ))}
+      {fields.map((row, i) => (
+        <FieldRowView
+          key={fieldRowKey(row.hit)}
+          row={row}
+          first={names.length + i === 0}
+          last={names.length + i === shown - 1}
+        />
+      ))}
       {own.length > 0 && (
         <ResultsHeading>
-          <KindIcon kind={SECTIONS[section].icon} />
-          {SECTIONS[section].label}
+          <KindIcon kind={SECTIONS.console.icon} />
+          {SECTIONS.console.label}
         </ResultsHeading>
       )}
     </>
   );
 }
-
-const Hint = styled.p`
-  margin: 12px 0 0;
-  text-align: center;
-  font-size: 16px;
-
-  a {
-    ${highlightLink}
-  }
-`;
-
-const AllLink = styled(Link)`
-  margin-left: auto;
-  font-size: 14px;
-  ${highlightLink}
-`;

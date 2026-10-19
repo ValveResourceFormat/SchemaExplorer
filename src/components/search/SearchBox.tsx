@@ -5,6 +5,7 @@ import { getConsoleStats } from "../../utils/console-filtering";
 import { styled } from "@linaria/react";
 import { hover } from "../interaction-styles";
 import { SearchContext } from "./SearchContext";
+import { MatchHighlight } from "./Highlight";
 import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
 import { getNetworkKeys } from "../../data/network";
@@ -333,11 +334,6 @@ const ValueCount = styled.span`
 const ValuePopupList = styled.div`
   max-height: 200px;
   overflow-y: auto;
-`;
-
-const MatchHighlight = styled.span`
-  background: color-mix(in srgb, var(--highlight) 25%, transparent);
-  border-radius: 2px;
 `;
 
 function HighlightMatch({ text, query }: { text: string; query: string }) {

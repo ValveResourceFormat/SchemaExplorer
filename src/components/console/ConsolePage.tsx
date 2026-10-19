@@ -9,9 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate } from "react-router";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { styled } from "@linaria/react";
-import type { ConsoleItem } from "../../data/types";
 import { getGameContext, type GameContext } from "../../data/derived";
 import { GAME_LIST, dumpFileUrl, getGameDef, type GameId } from "../../games-list";
 import { buildHash, useHashParam, useHydrated } from "../../utils/filtering";
@@ -23,10 +21,13 @@ import {
   moduleFilter,
   nextTagState,
   parseConsoleSearch,
+  searchConsoleItems,
+  searchConsoleResults,
   setSearchTag,
   stripConsoleFilters,
   withoutFlag,
   type ConsoleKind,
+  type ConsoleMatch,
   type FilterTag,
   type ParsedConsoleSearch,
 } from "../../utils/console-filtering";
@@ -34,13 +35,15 @@ import { DeclarationsContext } from "../schema/DeclarationsContext";
 import { PageTitle } from "../schema/styles";
 import { SearchContext } from "../search/SearchContext";
 import { OtherSectionMatches } from "../search/OtherSectionMatches";
-import { formatSectionCount } from "../search/useOtherSection";
+import { ShowAllButton } from "../search/ShowAllButton";
 import { PageProviders, PageShell } from "../layout/PageShell";
 import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
+import { useWindowList } from "../useWindowList";
 import { ConsoleRow, isPlainLeftClick } from "./ConsoleRow";
 import { ConsoleRowsCard } from "./ConsoleRowsCard";
 import { GitHubButton } from "../schema/Cards";
 import { ListCard } from "./styles";
+import { consoleRowKey, SECTION_LABELS, shownSimilar } from "../../utils/result-rows";
 import { ConsoleShow, ConsoleSidebar } from "./ConsoleSidebar";
 
 // DumpSource2 files with the same entries as the list
@@ -48,7 +51,7 @@ const DUMP_FILES = ["convars.txt", "commands.txt"];
 
 export default function ConsolePage({ context }: { context: GameContext }) {
   return (
-    <PageProviders context={context}>
+    <PageProviders context={context} section="console">
       <ConsoleLayout />
     </PageProviders>
   );
@@ -59,7 +62,7 @@ function ConsoleLayout() {
   return (
     <PageShell
       section="console"
-      count={formatSectionCount(filters.visible.length)}
+      count={filters.visible.length.toLocaleString("en-US")}
       show={<ConsoleShow filters={filters} />}
       sidebar={() => <ConsoleSidebar filters={filters} />}
     >
@@ -69,6 +72,20 @@ function ConsoleLayout() {
 }
 
 export type ConsoleFilters = ReturnType<typeof useConsoleFilters>;
+
+function inKind(matches: ConsoleMatch[], kind: ConsoleKind): ConsoleMatch[] {
+  if (kind === "all") return matches;
+  const wantConvars = kind === "convars";
+  return matches.filter(({ item }) => (item.kind === "convar") === wantConvars);
+}
+
+function inModules(
+  matches: ConsoleMatch[],
+  matchesModules: ReturnType<typeof moduleFilter>,
+): ConsoleMatch[] {
+  if (!matchesModules) return matches;
+  return matches.filter(({ item }) => matchesModules(item));
+}
 
 /** Filter state shared by the sidebar and the list, all of it lives in the URL hash */
 function useConsoleFilters() {
@@ -84,21 +101,22 @@ function useConsoleFilters() {
   const deferredSearch = useDeferredValue(search);
   const parsed = useMemo(() => parseConsoleSearch(deferredSearch), [deferredSearch]);
 
-  const { visible, kindCounts, moduleCounts, flagCounts } = useMemo(() => {
+  const { visible, similar, kindCounts, moduleCounts, flagCounts } = useMemo(() => {
     // One scored pass without module filters, which the per-module counts ignore anyway
-    const base = filterConsoleItems(consoleItems, parsed, { ignoreModules: true });
+    const found = searchConsoleItems(consoleItems, parsed, { ignoreModules: true });
     const matchesModules = moduleFilter(parsed, stats);
-    const ofKind = (i: ConsoleItem) =>
-      kind === "all" || (kind === "convars") === (i.kind === "convar");
-    const allKinds = matchesModules ? base.filter(matchesModules) : base;
+    const allKinds = inModules(found.results, matchesModules);
     let convars = 0;
-    for (const item of allKinds) if (item.kind === "convar") convars++;
-    const visible = kind === "all" ? allKinds : allKinds.filter(ofKind);
+    for (const { item } of allKinds) if (item.kind === "convar") convars++;
+    const visible = inKind(allKinds, kind);
+
+    // Names that only match fuzzily are listed apart, and none of the counts include them
+    const similar = inKind(inModules(found.similar, matchesModules), kind);
 
     // Every other active flag already narrowed `visible`, so counting flags there gives each
     // unselected flag's count. A flag that's currently included/excluded needs its own filter
     // lifted first, otherwise it would just show 0 or the full visible count right back.
-    const flagCounts = countBy(visible, (i) => i.flags);
+    const flagCounts = countBy(visible, ({ item }) => item.flags);
     for (const flag of [...parsed.flags, ...parsed.notFlags]) {
       let count = 0;
       const others = withoutFlag(parsed, flag);
@@ -108,10 +126,12 @@ function useConsoleFilters() {
       flagCounts.set(flag, count);
     }
 
+    const moduleMatches = matchesModules ? inKind(found.results, kind) : visible;
     return {
       visible,
+      similar,
       kindCounts: { all: allKinds.length, convars, commands: allKinds.length - convars },
-      moduleCounts: countBy(matchesModules ? base.filter(ofKind) : visible, (i) => i.modules),
+      moduleCounts: countBy(moduleMatches, ({ item }) => item.modules),
       flagCounts,
     };
   }, [consoleItems, parsed, kind, stats]);
@@ -176,6 +196,7 @@ function useConsoleFilters() {
       parsed,
       stats,
       visible,
+      similar,
       kindCounts,
       moduleCounts,
       flagCounts,
@@ -191,6 +212,7 @@ function useConsoleFilters() {
       parsed,
       stats,
       visible,
+      similar,
       kindCounts,
       moduleCounts,
       flagCounts,
@@ -205,7 +227,12 @@ function useConsoleFilters() {
 
 function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
   const { game, metadata } = useContext(DeclarationsContext);
-  const { kind, nameParam, parsed, visible, includeTag, selectName } = filters;
+  const { kind, nameParam, parsed, visible, similar, includeTag, selectName } = filters;
+
+  // The similar names asked for, for this list of them only
+  const [expandedSimilar, setExpandedSimilar] = useState<ConsoleMatch[] | null>(null);
+  const showAllSimilar = expandedSimilar === similar;
+  const onShowAllSimilar = useCallback(() => setExpandedSimilar(similar), [similar]);
 
   // The prerendered page has every row for search engines, hydration has to match it
   // before switching to the virtualized list
@@ -233,6 +260,20 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
 
   const gameName = getGameDef(game)?.name ?? game;
 
+  const list = (
+    <VirtualConsoleList
+      items={visible}
+      similar={similar}
+      showAllSimilar={showAllSimilar}
+      onShowAllSimilar={onShowAllSimilar}
+      nameParam={nameParam}
+      scrollTarget={scrollTarget}
+      onNavigate={onNavigate}
+      onFilter={includeTag}
+      filteredModules={parsed.modules}
+    />
+  );
+
   return (
     <ContentWrapper>
       <Header>
@@ -249,31 +290,25 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
         </HeaderActions>
       </Header>
 
-      {visible.length > 0 && <OtherSectionMatches section="console" own={visible} />}
+      {visible.length > 0 && <OtherSectionMatches own={visible} />}
       {visible.length > 0 ? (
         hydrated ? (
-          <VirtualConsoleList
-            items={visible}
-            nameParam={nameParam}
-            scrollTarget={scrollTarget}
-            onNavigate={onNavigate}
-            onFilter={includeTag}
-            filteredModules={parsed.modules}
-          />
+          list
         ) : (
           <StaticListCard>
-            {visible.map((item, i) =>
+            {visible.map(({ item, nameRanges }, i) =>
               // Only the first screenful needs full rows, the rest is there for search engines
               // and is replaced by the virtual list right after hydration
               i < STATIC_FULL_ROWS ? (
                 <ConsoleRow
-                  key={`${item.kind}/${item.name}`}
+                  key={consoleRowKey(item)}
                   item={item}
+                  nameRanges={nameRanges}
                   anchored={false}
                   onNavigate={onNavigate}
                 />
               ) : (
-                <li key={`${item.kind}/${item.name}`}>
+                <li key={consoleRowKey(item)}>
                   <a href={`#name=${encodeURIComponent(item.name)}`}>{item.name}</a>
                   {item.help && ` ${item.help}`}
                 </li>
@@ -284,8 +319,9 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
       ) : (
         <>
           <TextMessage>No results found</TextMessage>
-          <OtherSectionMatches section="console" own={visible} />
+          <OtherSectionMatches own={visible} />
           <OtherGamesConsoleResults parsed={parsed} kind={kind} />
+          {similar.length > 0 && list}
         </>
       )}
 
@@ -296,57 +332,82 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
 
 const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "mousedown"] as const;
 
+const SIMILAR_HEADING = "similarHeading";
+const SHOW_ALL = "showAll";
+
+/** The results, then the similar names under their heading, then the control for the rest */
+type ListRow = ConsoleMatch | typeof SIMILAR_HEADING | typeof SHOW_ALL;
+
+const GROUP_ROW_HEIGHT = 36;
+
+function buildListRows(
+  items: readonly ConsoleMatch[],
+  similar: readonly ConsoleMatch[],
+  showAllSimilar: boolean,
+): ListRow[] {
+  const rows: ListRow[] = [...items];
+  if (similar.length === 0) return rows;
+
+  rows.push(SIMILAR_HEADING);
+  const shown = shownSimilar(similar, showAllSimilar);
+  rows.push(...shown);
+  if (shown.length < similar.length) rows.push(SHOW_ALL);
+  return rows;
+}
+
+function listRowKey(row: ListRow): string {
+  if (typeof row === "string") return row;
+  return consoleRowKey(row.item);
+}
+
 function VirtualConsoleList({
   items,
+  similar,
+  showAllSimilar,
+  onShowAllSimilar,
   nameParam,
   scrollTarget,
   onNavigate,
   onFilter,
   filteredModules,
 }: {
-  items: ConsoleItem[];
+  items: ConsoleMatch[];
+  /** Items that only match by name fuzzily, listed after the results */
+  similar: ConsoleMatch[];
+  showAllSimilar: boolean;
+  onShowAllSimilar: () => void;
   nameParam: string | null;
   scrollTarget: string | null;
   onNavigate: (name: string, e: React.MouseEvent) => void;
   onFilter: (tag: FilterTag, value: string) => void;
   filteredModules: string[];
 }) {
-  const listRef = useRef<HTMLUListElement>(null);
-  const [offset, setOffset] = useState(0);
+  const rows = useMemo(
+    () => buildListRows(items, similar, showAllSimilar),
+    [items, similar, showAllSimilar],
+  );
 
-  // The header card above changes height as the filter chips change or wrap
-  useLayoutEffect(() => {
-    const measure = () => {
-      const el = listRef.current;
-      if (el) setOffset(el.getBoundingClientRect().top + window.scrollY);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [items]);
-
-  // Stable per item list, the virtualizer recomputes every measurement when these change
-  const estimateSize = useCallback((i: number) => (items[i].help ? 52 : 34), [items]);
-  const getItemKey = useCallback((i: number) => `${items[i].kind}/${items[i].name}`, [items]);
-
-  const virtualizer = useWindowVirtualizer({
-    count: items.length,
-    estimateSize,
-    getItemKey,
-    overscan: 10,
-    scrollMargin: offset,
-  });
+  // Stable per row list, the virtualizer recomputes every measurement when these change
+  const estimateSize = useCallback(
+    (i: number) => {
+      const row = rows[i];
+      if (typeof row === "string") return GROUP_ROW_HEIGHT;
+      return row.item.help ? 52 : 34;
+    },
+    [rows],
+  );
+  const getItemKey = useCallback((i: number) => listRowKey(rows[i]), [rows]);
 
   // Back to the top of the list when the filters change while scrolled down
-  const prevItemsRef = useRef(items);
-  useEffect(() => {
-    if (prevItemsRef.current === items) return;
-    prevItemsRef.current = items;
-    if (window.scrollY > offset) window.scrollTo(0, Math.max(0, offset - 80));
-  }, [items, offset]);
+  const { listRef, virtualizer, itemTop } = useWindowList<HTMLUListElement>({
+    listKey: items,
+    count: rows.length,
+    estimateSize,
+    getItemKey,
+  });
 
   const nameIndex = useMemo(
-    () => (scrollTarget ? items.findIndex((i) => i.name === scrollTarget) : -1),
+    () => (scrollTarget ? items.findIndex((match) => match.item.name === scrollTarget) : -1),
     [items, scrollTarget],
   );
   // Rows above are estimates until measured and scroll restoration runs after mount, so a
@@ -381,16 +442,34 @@ function VirtualConsoleList({
 
   return (
     <ListCard ref={listRef} style={{ height: virtualizer.getTotalSize() }}>
-      {virtualizer.getVirtualItems().map((row) => {
-        const item = items[row.index];
+      {virtualizer.getVirtualItems().map((virtualRow) => {
+        const row = rows[virtualRow.index];
+        const top = itemTop(virtualRow);
+        if (typeof row === "string") {
+          return (
+            <GroupRow
+              key={virtualRow.key}
+              ref={virtualizer.measureElement}
+              data-index={virtualRow.index}
+              style={{ transform: `translateY(${top}px)` }}
+            >
+              {row === SIMILAR_HEADING ? (
+                SECTION_LABELS.similar
+              ) : (
+                <ShowAllButton count={similar.length} onClick={onShowAllSimilar} />
+              )}
+            </GroupRow>
+          );
+        }
         return (
           <ConsoleRow
-            key={row.key}
+            key={virtualRow.key}
             rowRef={virtualizer.measureElement}
-            index={row.index}
-            top={row.start - offset}
-            item={item}
-            anchored={nameParam === item.name}
+            index={virtualRow.index}
+            top={top}
+            item={row.item}
+            nameRanges={row.nameRanges}
+            anchored={nameParam === row.item.name}
             onNavigate={onNavigate}
             onFilter={onFilter}
             filteredModules={filteredModules}
@@ -411,13 +490,14 @@ function OtherGamesConsoleResults({
   const { game } = useContext(DeclarationsContext);
 
   const results = useMemo(() => {
-    const out: { gameId: GameId; found: ConsoleItem[] }[] = [];
+    const out: { gameId: GameId; found: ConsoleMatch[] }[] = [];
     if (parsed.nameWords.length === 0 && parsed.flags.length === 0 && parsed.types.length === 0) {
       return out;
     }
     for (const g of GAME_LIST) {
       if (g.id === game) continue;
-      const found = filterConsoleItems(getGameContext(g.id).consoleItems, parsed, { kind });
+      const { consoleItems } = getGameContext(g.id);
+      const found = searchConsoleResults(consoleItems, parsed, { kind });
       if (found.length > 0) out.push({ gameId: g.id, found: found.slice(0, 100) });
     }
     return out;
@@ -428,7 +508,7 @@ function OtherGamesConsoleResults({
       {results.map(({ gameId, found }) => (
         <React.Fragment key={gameId}>
           <OtherGameHeading gameId={gameId} />
-          <ConsoleRowsCard gameId={gameId} items={found} />
+          <ConsoleRowsCard gameId={gameId} matches={found} />
         </React.Fragment>
       ))}
     </>
@@ -450,6 +530,19 @@ const HeaderActions = styled.div`
   align-items: baseline;
   gap: 8px;
   margin-left: auto;
+`;
+
+/** A heading or control between the virtualized rows */
+const GroupRow = styled.li`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--row-line);
+  font-size: 15px;
+  color: var(--text-dim);
 `;
 
 const STATIC_FULL_ROWS = 40;

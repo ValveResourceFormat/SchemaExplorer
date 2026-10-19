@@ -19,7 +19,10 @@ import {
   SidebarGroupHeader,
   SidebarList,
 } from "./layout/Sidebar";
-import { matchesModule, matchesWords, useParsedSearch } from "../utils/filtering";
+import { allDeclarations } from "../data/derived";
+import { countSearchShowFilters, type SearchResult } from "../utils/search";
+import { ShowFilterContext } from "./schema/ShowFilterContext";
+import { SearchResultContext } from "./search/SearchResultContext";
 import {
   SHOW_FILTERS,
   SHOW_FILTER_NAMES,
@@ -58,50 +61,35 @@ type ModuleMatches = [module: string, declarations: Declaration[]][];
 const unfilteredRowsCache = new WeakMap<Declarations, SidebarRows>();
 const unfilteredMatchesCache = new WeakMap<Declarations, ModuleMatches>();
 const unfilteredCountsCache = new WeakMap<Declarations, Map<ShowFilter, number>>();
-/** The last search's matches, which the list and the show filters' counts both ask for */
-let lastMatches: { declarations: Declarations; key: string; matches: ModuleMatches } | null = null;
-
-function matchesDeclaration(
-  d: Declaration,
-  nameWords: string[],
-  designNamesByDeclaration: GameContext["designNamesByDeclaration"],
-): boolean {
-  if (matchesWords(d.name, nameWords)) return true;
-  const names = designNamesByDeclaration.get(d);
-  return !!names?.some((n) => matchesWords(n, nameWords));
-}
-
-/** Each module the search matches, with its declarations the search matches */
-function searchMatches(
+/**
+ * Each module with its declarations in declaration order: the ones the search result has, or
+ * without a search the ones the show filter keeps. The result is already narrowed to the filter
+ */
+function listedModules(
   context: GameContext,
-  nameWords: string[],
-  moduleWords: string[],
+  shown: SearchResult | null,
+  show: ShowFilter,
 ): ModuleMatches {
-  const { declarations, designNamesByDeclaration } = context;
-  const searching = nameWords.length > 0 || moduleWords.length > 0;
-  const key = `${nameWords.join(" ")}|${moduleWords.join(" ")}`;
-  if (!searching) {
+  const { declarations } = context;
+  const cacheable = !shown && show === "all";
+  if (cacheable) {
     const cached = unfilteredMatchesCache.get(declarations);
     if (cached) return cached;
-  } else if (lastMatches?.declarations === declarations && lastMatches.key === key) {
-    return lastMatches.matches;
   }
 
-  const matches: ModuleMatches = [];
+  const { test } = SHOW_FILTERS[show];
+  const modules: ModuleMatches = [];
   for (const [module, moduleMap] of declarations) {
-    if (!matchesModule(module, moduleWords)) continue;
     const items: Declaration[] = [];
     for (const d of moduleMap.values()) {
-      if (nameWords.length === 0 || matchesDeclaration(d, nameWords, designNamesByDeclaration)) {
-        items.push(d);
-      }
+      const listed = shown ? shown.declarations.has(d) : test(d, context);
+      if (listed) items.push(d);
     }
-    if (items.length > 0) matches.push([module, items]);
+    if (items.length > 0) modules.push([module, items]);
   }
 
-  if (searching) lastMatches = { declarations, key, matches };
-  else unfilteredMatchesCache.set(declarations, matches);
-  return matches;
+  if (cacheable) unfilteredMatchesCache.set(declarations, modules);
+  return modules;
 }
 
 /**
@@ -112,14 +100,12 @@ function searchMatches(
  */
 function buildModuleRows(
   context: GameContext,
-  nameWords: string[],
-  moduleWords: string[],
+  shown: SearchResult | null,
   collapsed: Set<string>,
   show: ShowFilter,
 ): SidebarRows {
   const { declarations } = context;
-  const cacheable =
-    nameWords.length === 0 && moduleWords.length === 0 && collapsed.size === 0 && show === "all";
+  const cacheable = !shown && collapsed.size === 0 && show === "all";
 
   if (cacheable) {
     const cached = unfilteredRowsCache.get(declarations);
@@ -128,10 +114,7 @@ function buildModuleRows(
 
   const rows: SidebarRow[] = [];
   const stickyIndexes: number[] = [];
-  const { test } = SHOW_FILTERS[show];
-  for (const [module, matched] of searchMatches(context, nameWords, moduleWords)) {
-    const items = show === "all" ? matched : matched.filter((d) => test(d, context));
-    if (items.length === 0) continue;
+  for (const [module, items] of listedModules(context, shown, show)) {
     stickyIndexes.push(rows.length);
     rows.push({ type: "header", module, count: items.length });
     if (!collapsed.has(module)) {
@@ -146,24 +129,16 @@ function buildModuleRows(
   return result;
 }
 
-/** Of the declarations the search matches, how many each show filter keeps */
-function showCounts(
-  context: GameContext,
-  nameWords: string[],
-  moduleWords: string[],
-): Map<ShowFilter, number> {
+/** Of the declarations the search has rows for, how many each show filter keeps */
+function showCounts(context: GameContext, result: SearchResult | null): Map<ShowFilter, number> {
+  if (result) return countSearchShowFilters(result, context);
+
   const { declarations } = context;
-  const cacheable = nameWords.length === 0 && moduleWords.length === 0;
-  if (cacheable) {
-    const cached = unfilteredCountsCache.get(declarations);
-    if (cached) return cached;
-  }
-  const matches = searchMatches(context, nameWords, moduleWords);
-  const counts = countShowFilters(
-    matches.flatMap(([, items]) => items),
-    context,
-  );
-  if (cacheable) unfilteredCountsCache.set(declarations, counts);
+  const cached = unfilteredCountsCache.get(declarations);
+  if (cached) return cached;
+
+  const counts = countShowFilters(allDeclarations(declarations), context);
+  unfilteredCountsCache.set(declarations, counts);
   return counts;
 }
 
@@ -171,19 +146,11 @@ function showCounts(
  * Which declarations the sidebar lists. Only the filters that keep something are listed, and
  * the one that's on even when it keeps nothing
  */
-export function DeclarationsShow({
-  show,
-  setShow,
-}: {
-  show: ShowFilter;
-  setShow: (filter: ShowFilter) => void;
-}) {
+export function DeclarationsShow({ setShow }: { setShow: (filter: ShowFilter) => void }) {
   const context = useContext(DeclarationsContext);
-  const { nameWords, moduleWords } = useParsedSearch();
-  const counts = useMemo(
-    () => showCounts(context, nameWords, moduleWords),
-    [context, nameWords, moduleWords],
-  );
+  const { show } = useContext(ShowFilterContext);
+  const { result } = useContext(SearchResultContext);
+  const counts = useMemo(() => showCounts(context, result), [context, result]);
   if (counts.get("all") === 0) return null;
 
   return (
@@ -351,22 +318,16 @@ const VirtualizedList = ({
   );
 };
 
-export const DeclarationsSidebar = ({
-  show,
-  onNavigate,
-}: {
-  show: ShowFilter;
-  onNavigate?: () => void;
-}) => {
+export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
   const context = useContext(DeclarationsContext);
-  const { nameWords, moduleWords } = useParsedSearch();
+  const { show, shown } = useContext(ShowFilterContext);
   const { module: activeModule = "", scope = "" } = useParams();
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
 
   const { rows, stickyIndexes } = useMemo(
-    () => buildModuleRows(context, nameWords, moduleWords, collapsed, show),
-    [context, nameWords, moduleWords, collapsed, show],
+    () => buildModuleRows(context, shown, collapsed, show),
+    [context, shown, collapsed, show],
   );
 
   const activeIndex = useMemo(() => {

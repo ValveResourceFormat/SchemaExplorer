@@ -53,12 +53,15 @@ const PageFooter = styled.footer`
   }
 `;
 
-/** Icon and name above a group of results, like another game's */
+/**
+ * Icon and name above a group of results, like another game's. Its icon lines up with the icons
+ * of the result rows below, which are inset by their card
+ */
 export const ResultsHeading = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 0 4px;
+  gap: 8px;
+  padding: 12px 13px 4px;
   font-size: 15px;
   color: var(--text-dim);
 

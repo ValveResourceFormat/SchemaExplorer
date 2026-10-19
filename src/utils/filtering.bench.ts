@@ -2,26 +2,36 @@ import { test } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseSchemas, type SchemasJson } from "../data/schemas";
-import { allDeclarations } from "../data/derived";
-import { parseSearch, searchDeclarations, fuzzyScore } from "./filtering";
+import { buildAllGameContexts, getGameContext } from "../data/derived";
+import type { GameId } from "../games-list";
+import { parseSearch } from "./filtering";
+import { scoreName } from "./match-score";
+import { searchSchemas } from "./search";
 
 // Vite turns imported bindings into getters; bind them locally so the hot
 // loops measure the function itself rather than the export getter.
 // https://vitest.dev/guide/benchmarking#module-runner-overhead
-const _fuzzyScore = fuzzyScore;
-const _searchDeclarations = searchDeclarations;
+const _scoreName = scoreName;
+const _searchSchemas = searchSchemas;
 
-function loadSchema(name: string) {
+function loadSchema(name: GameId) {
   const path = join(__dirname, "../../schemas", `${name}.json`);
   const data = JSON.parse(readFileSync(path, "utf8")) as SchemasJson;
   return parseSchemas(data);
 }
 
-const cs2All = [...allDeclarations(loadSchema("cs2").declarations)];
-const dota2All = [...allDeclarations(loadSchema("dota2").declarations)];
-const deadlockAll = [...allDeclarations(loadSchema("deadlock").declarations)];
+const loaded = new Map([
+  ["cs2" as const, loadSchema("cs2")],
+  ["dota2" as const, loadSchema("dota2")],
+  ["deadlock" as const, loadSchema("deadlock")],
+]);
+buildAllGameContexts(loaded, new Map());
 
-// Pre-parse queries outside bench callbacks to measure searchDeclarations only
+const cs2 = getGameContext("cs2");
+const dota2 = getGameContext("dota2");
+const deadlock = getGameContext("deadlock");
+
+// Pre-parse queries outside bench callbacks to measure searchSchemas only
 const queries = {
   cbaseentity: parseSearch("CBaseEntity"),
   cbase: parseSearch("CBase"),
@@ -32,105 +42,108 @@ const queries = {
   flRadius: parseSearch("m_flRadius"),
   weaponClient: parseSearch("weapon module:client"),
   initfromsnapshot: parseSearch("initfromsnapshot"),
+  playerHealth: parseSearch("player health"),
 };
 
-test("fuzzyScore", async ({ bench }) => {
+test("scoreName", async ({ bench }) => {
+  const score = (pattern: string, name: string) =>
+    _scoreName(pattern, name, name.toLowerCase(), true);
   await bench.compare(
     bench("exact match", () => {
-      _fuzzyScore("cbaseentity", "CBaseEntity");
+      score("cbaseentity", "CBaseEntity");
     }),
     bench("prefix match", () => {
-      _fuzzyScore("cbase", "CBaseEntity");
+      score("cbase", "CBaseEntity");
     }),
     bench("substring match", () => {
-      _fuzzyScore("entity", "CBaseEntity");
+      score("entity", "CBaseEntity");
     }),
     bench("fuzzy boundary match (CBE)", () => {
-      _fuzzyScore("cbe", "CBaseEntity");
+      score("cbe", "CBaseEntity");
     }),
     bench("fuzzy long pattern (initfromsnapshot)", () => {
-      _fuzzyScore("initfromsnapshot", "C_INIT_InitFromCPSnapshot");
+      score("initfromsnapshot", "C_INIT_InitFromCPSnapshot");
     }),
     bench("no match (null)", () => {
-      _fuzzyScore("xyz", "CBaseEntity");
+      score("xyz", "CBaseEntity");
     }),
     bench("no match long target", () => {
-      _fuzzyScore("xyz", "C_DOTA_Ability_Special_Bonus_Unique_Hoodwink_SharpshooterPierceHeroes");
+      score("xyz", "C_DOTA_Ability_Special_Bonus_Unique_Hoodwink_SharpshooterPierceHeroes");
     }),
   );
 });
 
-test("searchDeclarations — CS2", async ({ bench }) => {
+test("searchSchemas — CS2", async ({ bench }) => {
   await bench.compare(
     bench("exact: CBaseEntity", () => {
-      _searchDeclarations(cs2All, queries.cbaseentity);
+      _searchSchemas(cs2, queries.cbaseentity);
     }),
     bench("prefix: CBase", () => {
-      _searchDeclarations(cs2All, queries.cbase);
+      _searchSchemas(cs2, queries.cbase);
     }),
     bench("substring: weapon", () => {
-      _searchDeclarations(cs2All, queries.weapon);
+      _searchSchemas(cs2, queries.weapon);
     }),
     bench("fuzzy: CBE", () => {
-      _searchDeclarations(cs2All, queries.cbe);
+      _searchSchemas(cs2, queries.cbe);
     }),
     bench("fuzzy: cswb", () => {
-      _searchDeclarations(cs2All, queries.cswb);
+      _searchSchemas(cs2, queries.cswb);
     }),
     bench("multi-word: base entity", () => {
-      _searchDeclarations(cs2All, queries.baseEntity);
+      _searchSchemas(cs2, queries.baseEntity);
+    }),
+    bench("split: player health", () => {
+      _searchSchemas(cs2, queries.playerHealth);
     }),
     bench("field: m_flRadius", () => {
-      _searchDeclarations(cs2All, queries.flRadius);
+      _searchSchemas(cs2, queries.flRadius);
     }),
     bench("combined: weapon module:client", () => {
-      _searchDeclarations(cs2All, queries.weaponClient);
+      _searchSchemas(cs2, queries.weaponClient);
     }),
   );
 });
 
-test("searchDeclarations — Dota2 (largest)", async ({ bench }) => {
+test("searchSchemas — Dota2 (largest)", async ({ bench }) => {
   await bench.compare(
     bench("exact: CBaseEntity", () => {
-      _searchDeclarations(dota2All, queries.cbaseentity);
+      _searchSchemas(dota2, queries.cbaseentity);
     }),
     bench("prefix: CBase", () => {
-      _searchDeclarations(dota2All, queries.cbase);
+      _searchSchemas(dota2, queries.cbase);
     }),
     bench("substring: weapon", () => {
-      _searchDeclarations(dota2All, queries.weapon);
+      _searchSchemas(dota2, queries.weapon);
     }),
     bench("fuzzy: CBE", () => {
-      _searchDeclarations(dota2All, queries.cbe);
+      _searchSchemas(dota2, queries.cbe);
     }),
     bench("fuzzy: initfromsnapshot", () => {
-      _searchDeclarations(dota2All, queries.initfromsnapshot);
+      _searchSchemas(dota2, queries.initfromsnapshot);
     }),
     bench("multi-word: base entity", () => {
-      _searchDeclarations(dota2All, queries.baseEntity);
+      _searchSchemas(dota2, queries.baseEntity);
     }),
     bench("field: m_flRadius", () => {
-      _searchDeclarations(dota2All, queries.flRadius);
-    }),
-    bench("short fuzzy: cbe (worst case)", () => {
-      _searchDeclarations(dota2All, queries.cbe);
+      _searchSchemas(dota2, queries.flRadius);
     }),
   );
 });
 
-test("searchDeclarations — Deadlock", async ({ bench }) => {
+test("searchSchemas — Deadlock", async ({ bench }) => {
   await bench.compare(
     bench("exact: CBaseEntity", () => {
-      _searchDeclarations(deadlockAll, queries.cbaseentity);
+      _searchSchemas(deadlock, queries.cbaseentity);
     }),
     bench("fuzzy: CBE", () => {
-      _searchDeclarations(deadlockAll, queries.cbe);
+      _searchSchemas(deadlock, queries.cbe);
     }),
     bench("fuzzy: initfromsnapshot", () => {
-      _searchDeclarations(deadlockAll, queries.initfromsnapshot);
+      _searchSchemas(deadlock, queries.initfromsnapshot);
     }),
     bench("multi-word: base entity", () => {
-      _searchDeclarations(deadlockAll, queries.baseEntity);
+      _searchSchemas(deadlock, queries.baseEntity);
     }),
   );
 });

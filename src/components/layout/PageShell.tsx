@@ -5,6 +5,7 @@ import { SidebarWrapper } from "./Sidebar";
 import { SidebarTop } from "./SidebarTop";
 import type { SearchMode } from "../../utils/section-search";
 import { SearchContext } from "../search/SearchContext";
+import { SearchResultContext, useSearchResult } from "../search/SearchResultContext";
 import { OtherSectionContext, useOtherSection } from "../search/useOtherSection";
 import { DeclarationsContext, type GameContext } from "../schema/DeclarationsContext";
 import { useHashParam } from "../../utils/filtering";
@@ -12,16 +13,21 @@ import { useHashParam } from "../../utils/filtering";
 /** The game's data and the #search= text, for everything on a page */
 export function PageProviders({
   context,
+  section,
   children,
 }: {
   context: GameContext;
+  section: SearchMode;
   children: React.ReactNode;
 }) {
   const search = useHashParam("search") ?? "";
   const searchCtx = useMemo(() => ({ search }), [search]);
+  const searchResult = useSearchResult(context, search, section);
   return (
     <DeclarationsContext.Provider value={context}>
-      <SearchContext.Provider value={searchCtx}>{children}</SearchContext.Provider>
+      <SearchContext.Provider value={searchCtx}>
+        <SearchResultContext.Provider value={searchResult}>{children}</SearchResultContext.Provider>
+      </SearchContext.Provider>
     </DeclarationsContext.Provider>
   );
 }

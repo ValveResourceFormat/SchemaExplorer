@@ -1,61 +1,23 @@
-import React, { memo, useContext, useMemo } from "react";
+import { memo, useContext } from "react";
 import { useParams } from "react-router";
 import { styled } from "@linaria/react";
-import { ContentWrapper, OtherGameHeading, SiteFooter, TextMessage } from "../layout/Content";
-import { LazyList, ScrollableList } from "../Lists";
-import { useFilteredData, useParsedSearch, searchDeclarations } from "../../utils/filtering";
-import { Declaration } from "../../data/types";
+import { ContentWrapper, SiteFooter, TextMessage } from "../layout/Content";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
-import { getGameContext } from "../../data/derived";
-import { GameId } from "../../games-list";
 import { CardBody, Dim, InlineList, PageHeader, PageTitle } from "./styles";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { Link } from "../Link";
+import { SearchContext } from "../search/SearchContext";
 import { TitledCard } from "./Cards";
 import { ClassTree, EntityTree } from "./ClassTree";
 import { SchemaHome } from "./SchemaHome";
-import { OtherSectionMatches } from "../search/OtherSectionMatches";
-import { renderDeclaration, renderSearchResult } from "./renderDeclaration";
+import { SchemaResults } from "../search/SchemaResults";
+import { renderDeclaration } from "./renderDeclaration";
 
 /** Below the introduction, with the same space above as the cards there */
 const Section = styled.div`
   margin-top: 32px;
 `;
-
-function OtherGamesResults() {
-  const ctx = useContext(DeclarationsContext);
-  const parsed = useParsedSearch();
-
-  const gameResults = useMemo(() => {
-    const result: { gameId: GameId; found: Declaration[] }[] = [];
-    for (const [gameId, lookup] of ctx.otherGamesLookup) {
-      if (gameId === ctx.game) continue;
-      const found = searchDeclarations(lookup.values(), parsed, getGameContext(gameId));
-      if (found.length > 0) {
-        result.push({ gameId, found });
-      }
-    }
-    return result;
-  }, [ctx.game, ctx.otherGamesLookup, parsed]);
-
-  if (gameResults.length === 0) return null;
-
-  return (
-    <>
-      {gameResults.map(({ gameId, found }) => {
-        return (
-          <React.Fragment key={gameId}>
-            <OtherGameHeading gameId={gameId} />
-            <DeclarationsContext.Provider value={getGameContext(gameId)}>
-              <LazyList data={found} render={renderSearchResult} />
-            </DeclarationsContext.Provider>
-          </React.Fragment>
-        );
-      })}
-    </>
-  );
-}
 
 function ModuleList() {
   const { game, declarations } = useContext(DeclarationsContext);
@@ -77,33 +39,20 @@ function ModuleList() {
   );
 }
 
-// Memoized, so the sidebar's show filter, kept above it, doesn't render the page again
-export const ContentList = memo(function ContentList({
-  filtered,
-}: {
-  filtered: ReturnType<typeof useFilteredData>;
-}) {
-  const { metadata, error } = useContext(DeclarationsContext);
-  const { data, isSearching } = filtered;
-  const { game: gameParam, module } = useParams();
+// Memoized, so state kept above it renders the page again only when the page reads it from a
+// context
+export const ContentList = memo(function ContentList() {
+  const { declarations, metadata, error } = useContext(DeclarationsContext);
+  const { search } = useContext(SearchContext);
+  const { game: gameParam, module, scope } = useParams();
+  const declaration = module && scope ? declarations.get(module)?.get(scope) : undefined;
 
   return (
     <ContentWrapper>
-      {data.length > 0 ? (
-        isSearching ? (
-          <>
-            <OtherSectionMatches section="schemas" own={data} />
-            <LazyList data={data} render={renderSearchResult} />
-          </>
-        ) : (
-          <ScrollableList data={data} render={renderDeclaration} />
-        )
-      ) : isSearching ? (
-        <>
-          <TextMessage>No results found</TextMessage>
-          <OtherSectionMatches section="schemas" own={data} />
-          <OtherGamesResults />
-        </>
+      {search ? (
+        <SchemaResults />
+      ) : declaration ? (
+        <div>{renderDeclaration(declaration)}</div>
       ) : error ? (
         <TextMessage>{error}</TextMessage>
       ) : (

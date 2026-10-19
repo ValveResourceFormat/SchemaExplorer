@@ -8,10 +8,21 @@ import {
 } from "./schemas";
 import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
 import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics";
-import { parseSearch, searchDeclarations } from "../utils/filtering";
+import { parseSearch } from "../utils/filtering";
 import { metadataValueText } from "../utils/format";
+import { searchSchemas, type SearchContext } from "../utils/search";
 import { hasIntrinsicLayout, inheritedBases } from "./derived";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
+
+/** Searches the declarations alone, without entities or client and server pairs */
+function searchContext(declarations: SearchContext["declarations"]): SearchContext {
+  return {
+    declarations,
+    entitiesByDeclaration: new Map(),
+    designNamesByDeclaration: new Map(),
+    crossModuleLookup: new Map(),
+  };
+}
 
 // ==================== parseKV3Defaults ====================
 
@@ -355,13 +366,12 @@ describe("parseSchemas", () => {
 
   it("finds enum values past 2^53 by enumvalue:, in decimal and hex", () => {
     for (const value of ["1152921504606846977", "0x1000000000000001"]) {
-      const result = searchDeclarations(
-        [...parsedSchemas.declarations.get("test")!.values()],
+      const result = searchSchemas(
+        searchContext(parsedSchemas.declarations),
         parseSearch(`TestWideEnum_t enumvalue:${value}`),
       );
-      const e = result[0];
-      if (e?.kind !== "enum") throw new Error("Expected enum");
-      expect(e.members.map((m) => m.name)).toEqual(["TEST_WIDE_BIT60_LOW"]);
+      const names = result.fields.map((row) => row.hit.kind === "member" && row.hit.member.name);
+      expect(names).toEqual(["TEST_WIDE_BIT60_LOW"]);
     }
   });
 
@@ -706,10 +716,10 @@ describe("assignDefaults with object defaults", () => {
   });
 
   it("searches object values as their JSON text", () => {
-    const found = searchDeclarations(
-      parsed.declarations.get("m")!.values(),
+    const found = searchSchemas(
+      searchContext(parsed.declarations),
       parseSearch("metadatavalue:m_extra"),
     );
-    expect(found.map((d) => d.name)).toEqual(["ObjChild"]);
+    expect([...found.declarations].map((d) => d.name)).toEqual(["ObjChild"]);
   });
 });

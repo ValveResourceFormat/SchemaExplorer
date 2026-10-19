@@ -5,18 +5,8 @@ import { dumpFileUrl } from "../../games-list";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { hasIntrinsicLayout } from "../../data/derived";
 import { keepInPlace } from "../../utils/keep-in-place";
-import type { Declaration } from "../../data/types";
-import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
-import { MetadataTags } from "./SchemaType";
-import {
-  AnchorName,
-  Card,
-  CardHeader,
-  CardTitle,
-  CollapsedRow,
-  CollapsedText,
-  PillLink,
-} from "./styles";
+import { DeclarationsContext } from "./DeclarationsContext";
+import { Card, CardHeader, CardTitle, CollapsedRow, CollapsedText } from "./styles";
 
 /** A card titled with a kind icon, actions like a switch go on the right of the title */
 export function TitledCard({
@@ -77,16 +67,6 @@ export function CollapsedInheritedRow({
       </CollapsedText>
       {range}
     </CollapsedRow>
-  );
-}
-
-export function ModulePill({ module }: { module: string }) {
-  const { game } = useContext(DeclarationsContext);
-  return (
-    <PillLink to={schemaPath(game, module)} title={`${module} module`}>
-      <KindIcon kind="module" />
-      {module}
-    </PillLink>
   );
 }
 
@@ -169,63 +149,5 @@ export function GitHubButton({
       <KindIcon kind="github" />
       {label}
     </GitHubLink>
-  );
-}
-
-const CardNotes = styled.div`
-  padding: 0 16px 12px;
-`;
-
-/** On phones the source link sits in the corner, rather than wrapping onto a line of its own */
-const ResultHeader = styled(CardHeader)`
-  @media (max-width: 768px) {
-    position: relative;
-
-    &:has(> ${GitHubLink}) {
-      /* Its 16px icon and the gap */
-      padding-right: 44px;
-    }
-
-    > ${GitHubLink} {
-      position: absolute;
-      /* Centered on the title's first line, under the header's 12px padding */
-      top: 16px;
-      right: 16px;
-    }
-  }
-`;
-
-/** A class or enum in search results, its pills after the name and its matches below */
-export function SearchResultCard({
-  declaration,
-  pills,
-  children,
-}: {
-  declaration: Declaration;
-  pills: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  const { game } = useContext(DeclarationsContext);
-  const { kind, module, name, metadata } = declaration;
-  return (
-    <Card>
-      <ResultHeader>
-        <CardTitle>
-          <KindIcon kind={kind} />
-          <AnchorName to={schemaPath(game, module, name)} title={`${kind} in ${module}`}>
-            {name}
-          </AnchorName>
-        </CardTitle>
-        <ModulePill module={module} />
-        {pills}
-        <GitHubFileLink module={module} name={name} />
-      </ResultHeader>
-      {metadata.length > 0 && (
-        <CardNotes>
-          <MetadataTags metadata={metadata} game={game} />
-        </CardNotes>
-      )}
-      {children}
-    </Card>
   );
 }

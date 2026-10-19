@@ -17,6 +17,9 @@ import {
   findEntityByDesignName,
 } from "../../data/derived";
 import { useHashParam } from "../../utils/filtering";
+import type { WordMatch } from "../../utils/search";
+import { matchedRanges } from "../../utils/result-rows";
+import { HighlightRanges } from "../search/Highlight";
 import {
   buildInheritedGroups,
   entityLabel,
@@ -115,19 +118,33 @@ export function EntityJumpPills({ entities }: { entities: EntityClass[] }) {
 }
 
 /** Design names of a class, for its search result */
-export function DesignNamePills({ entities }: { entities: EntityClass[] | undefined }) {
+export function DesignNamePills({
+  entities,
+  matches,
+}: {
+  entities: EntityClass[] | undefined;
+  /** Name words to mark in the design names they matched */
+  matches: readonly WordMatch[];
+}) {
   if (!entities) return null;
   const names = [...new Set(entities.flatMap((e) => (e.designName ? [e.designName] : [])))];
   return (
     <>
       {names.map((name) => (
-        <Pill key={name} data-mono {...tip("Entity design name")}>
-          <KindIcon kind="entity" />
-          {name}
-        </Pill>
+        <DesignNamePill key={name} name={name} matches={matches} />
       ))}
       <AliasPills entities={entities} />
     </>
+  );
+}
+
+/** An entity design name, with the name words it matched marked */
+export function DesignNamePill({ name, matches }: { name: string; matches: readonly WordMatch[] }) {
+  return (
+    <Pill data-mono {...tip("Entity design name")}>
+      <KindIcon kind="entity" />
+      <HighlightRanges text={name} ranges={matchedRanges(matches, "designName", name)} />
+    </Pill>
   );
 }
 
@@ -828,43 +845,6 @@ export function EntitySections({
           />
         ))}
       </section>
-    );
-  });
-}
-
-/** Inputs/outputs that matched an input:/output: search, inside the class's result card */
-export function EntityMatches({
-  matches,
-  module,
-  anchorBase,
-}: {
-  matches: { inputs: EntityInput[]; outputs: EntityOutput[] };
-  module: string;
-  anchorBase: string;
-}) {
-  return (["input", "output"] as const).map((kind) => {
-    const entries = kind === "input" ? matches.inputs : matches.outputs;
-    if (entries.length === 0) return null;
-    const section = SECTIONS[kind];
-    return (
-      <React.Fragment key={kind}>
-        <Band>
-          <KindIcon kind={section.icon} />
-          <strong>{section.title}</strong>
-        </Band>
-        <Table style={{ "--cols": section.cols } as React.CSSProperties}>
-          {entries.map((entry) => (
-            <IORow
-              key={entry.name}
-              kind={kind}
-              entry={entry}
-              module={module}
-              anchorBase={anchorBase}
-              anchored={false}
-            />
-          ))}
-        </Table>
-      </React.Fragment>
     );
   });
 }

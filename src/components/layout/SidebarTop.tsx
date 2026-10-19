@@ -15,12 +15,7 @@ import {
   sectionPath,
 } from "../schema/DeclarationsContext";
 import { SearchContext } from "../search/SearchContext";
-import {
-  OtherSectionContext,
-  SECTIONS,
-  formatSectionCount,
-  sectionTotal,
-} from "../search/useOtherSection";
+import { OtherSectionContext, SECTIONS, sectionTotal } from "../search/useOtherSection";
 import { SidebarCount } from "./Sidebar";
 import { currentRow, iconButton, sidebarRow } from "./sidebar-styles";
 
@@ -170,9 +165,9 @@ function SectionRows({
   // Each section's results for the search, or all it has without one. The other section has
   // none when the search uses filters only this one has
   const countText = (mode: SearchMode) => {
-    if (mode === section) return count ?? formatSectionCount(sectionTotal(context, mode));
-    if (!search) return formatSectionCount(sectionTotal(context, mode));
-    return other.results && formatSectionCount(other.results.items.length, mode);
+    if (mode === section) return count ?? sectionTotal(context, mode).toLocaleString("en-US");
+    if (!search) return sectionTotal(context, mode).toLocaleString("en-US");
+    return other.count !== null && other.count.toLocaleString("en-US");
   };
 
   // The current section goes back to its start, the other one takes the search along

@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { styled } from "@linaria/react";
 import { Link } from "../Link";
 import type {
@@ -16,7 +16,6 @@ import { formatRange } from "../../utils/console-format";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
 import { Detail } from "./Detail";
-import { Band } from "./styles";
 import { dimLink } from "./link-styles";
 import { tip } from "../Tooltip";
 
@@ -413,44 +412,6 @@ export function ClassNetworkDetail({
     <Detail label="Network">
       <RowList rows={rows} />
     </Detail>
-  );
-}
-
-const MatchBody = styled.div`
-  padding: 8px 16px 12px;
-`;
-
-/**
- * The parts of a search result's network data that matched, under a band like other matches,
- * nothing when it matched by its fields
- */
-export function ClassNetworkMatch({
-  declaration,
-  whole,
-  bases,
-}: {
-  /** The search result, its fields left out */
-  declaration: SchemaClass;
-  /** The class with every field, which field names link through */
-  whole: SchemaClass;
-  bases: InheritedBase[];
-}) {
-  const { networkMatch } = declaration;
-  const rows = useMemo(
-    () => (networkMatch ? networkRows(whole, networkMatch, bases) : []),
-    [networkMatch, whole, bases],
-  );
-  if (rows.length === 0) return null;
-  return (
-    <>
-      <Band>
-        <KindIcon kind="meta-broadcast" />
-        <strong>Network</strong>
-      </Band>
-      <MatchBody>
-        <RowList rows={rows} />
-      </MatchBody>
-    </>
   );
 }
 

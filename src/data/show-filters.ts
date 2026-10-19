@@ -1,12 +1,12 @@
 import { declarationKey, isNetworkedClass, type GameContext } from "./derived";
 import type { Declaration } from "./types";
 
-type Lookups = Pick<GameContext, "entitiesByDeclaration" | "componentOf" | "exclusive">;
+export type ShowLookups = Pick<GameContext, "entitiesByDeclaration" | "componentOf" | "exclusive">;
 
 interface ShowFilterDef {
   label: string;
   title: string;
-  test: (d: Declaration, lookups: Lookups) => boolean;
+  test: (d: Declaration, lookups: ShowLookups) => boolean;
 }
 
 /** Which declarations the sidebar can be narrowed to, in the order it lists them */
@@ -45,14 +45,19 @@ export type ShowFilter = keyof typeof SHOW_FILTERS;
 
 export const SHOW_FILTER_NAMES = Object.keys(SHOW_FILTERS) as ShowFilter[];
 
-/** How many of the declarations each filter keeps */
+/**
+ * How many of the declarations each filter keeps. The filters in `skip` aren't tested and count
+ * 0, for a caller that counts them another way
+ */
 export function countShowFilters(
   declarations: Iterable<Declaration>,
-  lookups: Lookups,
+  lookups: ShowLookups,
+  skip: readonly ShowFilter[] = [],
 ): Map<ShowFilter, number> {
   const counts = new Map<ShowFilter, number>(SHOW_FILTER_NAMES.map((f) => [f, 0]));
+  const tested = SHOW_FILTER_NAMES.filter((filter) => !skip.includes(filter));
   for (const d of declarations) {
-    for (const filter of SHOW_FILTER_NAMES) {
+    for (const filter of tested) {
       if (SHOW_FILTERS[filter].test(d, lookups)) counts.set(filter, counts.get(filter)! + 1);
     }
   }

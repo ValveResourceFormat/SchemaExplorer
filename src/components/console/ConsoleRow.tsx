@@ -1,7 +1,8 @@
 import { memo, useContext, useState, type MouseEvent } from "react";
 import { styled } from "@linaria/react";
-import type { ConsoleItem } from "../../data/types";
 import { EXCLUSIVE_FLAG } from "../../data/derived";
+import type { ConsoleItem } from "../../data/types";
+import { HighlightRanges } from "../search/Highlight";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { tip } from "../Tooltip";
 import { SchemaTypeView } from "../schema/SchemaType";
@@ -249,6 +250,8 @@ const Help = styled.div`
 
 export interface ConsoleRowProps {
   item: ConsoleItem;
+  /** The parts of the name a search matched, to highlight */
+  nameRanges?: readonly number[];
   anchored: boolean;
   /** href of the page the row links to, without hash, when it isn't the current page */
   pageHref?: string;
@@ -283,6 +286,7 @@ function orderModules(
 
 export const ConsoleRow = memo(function ConsoleRow({
   item,
+  nameRanges,
   anchored,
   pageHref = "",
   onNavigate,
@@ -333,7 +337,7 @@ export const ConsoleRow = memo(function ConsoleRow({
           onClick={(e) => onNavigate(item.name, e)}
           data-command={item.kind === "command" || undefined}
         >
-          {item.name}
+          {nameRanges ? <HighlightRanges text={item.name} ranges={nameRanges} /> : item.name}
         </Name>
         {convar && (
           <Type>

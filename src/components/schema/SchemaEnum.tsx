@@ -10,7 +10,7 @@ import { formatEnumHex, padHex } from "../../utils/format";
 import { isFlagEnum, getBaseFlags, decomposeFlags, type BaseFlags } from "../../utils/enum-flags";
 import { ReferencedBy, UsedByConVars } from "./ReferencedBy";
 import { CrossGameDetail } from "./CrossGameRefs";
-import { GitHubFileLink, SearchResultCard, TitledCard } from "./Cards";
+import { GitHubFileLink, TitledCard } from "./Cards";
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { useAnchoredRef } from "./useAnchoredRow";
 import { UsedByKeyvalues } from "./EntitySections";
@@ -57,26 +57,9 @@ const FlagBreakdown = styled.div`
 
 export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
-  isSearchResult?: boolean;
-}> = ({ declaration, isSearchResult }) => {
+}> = ({ declaration }) => {
   const { game } = useContext(DeclarationsContext);
   const declPath = schemaPath(game, declaration.module, declaration.name);
-
-  const typePill = (
-    <Pill data-mono {...tip("Underlying type")}>
-      {declaration.alignment}
-    </Pill>
-  );
-
-  if (isSearchResult) {
-    return (
-      <SearchResultCard declaration={declaration} pills={typePill}>
-        {declaration.members.length > 0 && (
-          <MemberTable declaration={declaration} declPath={declPath} />
-        )}
-      </SearchResultCard>
-    );
-  }
 
   return (
     <>
@@ -85,13 +68,15 @@ export const SchemaEnumView: React.FC<{
           <KindIcon kind="enum" size={24} />
           {declaration.name}
         </PageTitle>
-        {typePill}
+        <Pill data-mono {...tip("Underlying type")}>
+          {declaration.alignment}
+        </Pill>
         <GitHubFileLink module={declaration.module} name={declaration.name} button />
       </PageHeader>
       <EnumDetails declaration={declaration} />
       {declaration.members.length > 0 && (
         <TitledCard title="Members" icon="enum-member">
-          <MemberTable declaration={declaration} declPath={declPath} withHead />
+          <MemberTable declaration={declaration} declPath={declPath} />
         </TitledCard>
       )}
     </>
@@ -112,16 +97,7 @@ function EnumDetails({ declaration }: { declaration: api.SchemaEnum }) {
   );
 }
 
-function MemberTable({
-  declaration,
-  declPath,
-  withHead,
-}: {
-  declaration: api.SchemaEnum;
-  declPath: string;
-  /** Column names, on the enum page */
-  withHead?: boolean;
-}) {
+function MemberTable({ declaration, declPath }: { declaration: api.SchemaEnum; declPath: string }) {
   const { game } = useContext(DeclarationsContext);
   const fieldParam = useFieldParam();
   const baseFlags = useMemo(
@@ -137,13 +113,11 @@ function MemberTable({
 
   return (
     <Table style={{ "--cols": COLUMNS } as React.CSSProperties}>
-      {withHead && (
-        <TableHead>
-          <span>Name</span>
-          <span>Value</span>
-          <span>Hex</span>
-        </TableHead>
-      )}
+      <TableHead>
+        <span>Name</span>
+        <span>Value</span>
+        <span>Hex</span>
+      </TableHead>
       {declaration.members.map((member, i) => (
         <EnumMemberRow
           key={`${member.name}-${member.value}`}
