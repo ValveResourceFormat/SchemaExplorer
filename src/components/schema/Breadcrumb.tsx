@@ -2,7 +2,8 @@ import React, { useContext } from "react";
 import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
-import { getGameDef, SITE_ORIGIN } from "../../games-list";
+import { canonicalUrl, getGameDef } from "../../games-list";
+import { moduleLabel } from "../../data/modules";
 
 const BreadcrumbNav = styled.nav`
   margin: 0 0 10px 4px;
@@ -52,7 +53,6 @@ export const DeclarationBreadcrumb: React.FC<{
   const gameData = getGameDef(game);
   if (!gameData) return null;
 
-  const nameUrl = schemaPath(game, module, name);
   let position = 1;
 
   return (
@@ -66,7 +66,7 @@ export const DeclarationBreadcrumb: React.FC<{
         </BreadcrumbItem>
         <BreadcrumbItem itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
           <BreadcrumbLink to={schemaPath(game, module)} itemProp="item">
-            <span itemProp="name">{module}</span>
+            <span itemProp="name">{moduleLabel(module)}</span>
           </BreadcrumbLink>
           <meta itemProp="position" content={String(position++)} />
         </BreadcrumbItem>
@@ -84,7 +84,7 @@ export const DeclarationBreadcrumb: React.FC<{
         )}
         <BreadcrumbItem itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
           <span itemProp="name">{name}</span>
-          <link itemProp="item" href={`${SITE_ORIGIN}${nameUrl}`} />
+          <link itemProp="item" href={canonicalUrl(game, module, name)} />
           <meta itemProp="position" content={String(position)} />
         </BreadcrumbItem>
       </BreadcrumbList>

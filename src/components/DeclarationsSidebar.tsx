@@ -29,7 +29,7 @@ import {
   countShowFilters,
   type ShowFilter,
 } from "../data/show-filters";
-import { KindIcon, type IconKind } from "./kind-icon/KindIcon";
+import { KindIcon, ModuleLabel, type IconKind } from "./kind-icon/KindIcon";
 import { ExclusiveIcon } from "./console/FlagTooltipContent";
 import { tip } from "./Tooltip";
 import { ShowGroup, ShowRow, ShowRowSpacer } from "./layout/SidebarTop";
@@ -301,7 +301,7 @@ const VirtualizedList = ({
                   aria-expanded={!collapsed.has(row.module)}
                   onClick={() => toggleModule(row.module)}
                 >
-                  {row.module}
+                  <ModuleLabel module={row.module} />
                   <SidebarCount>{row.count.toLocaleString("en-US")}</SidebarCount>
                 </SidebarGroupHeader>
               ) : (
@@ -394,7 +394,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
               row.type === "header" ? (
                 <li key={`h-${row.module}`} style={{ height: ROW_HEIGHT }}>
                   <SidebarGroupHeader>
-                    {row.module}
+                    <ModuleLabel module={row.module} />
                     <SidebarCount>{row.count.toLocaleString("en-US")}</SidebarCount>
                   </SidebarGroupHeader>
                 </li>

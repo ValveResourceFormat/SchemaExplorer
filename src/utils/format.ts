@@ -34,6 +34,11 @@ export function metadataValueText(value: SchemaMetadataValue | undefined): strin
   return text;
 }
 
+/** "12,345" */
+export function formatCount(n: number): string {
+  return n.toLocaleString("en-US");
+}
+
 /** "1 field", "2 fields" */
 export function plural(n: number, word: string): string {
   return `${n} ${word}${n !== 1 ? "s" : ""}`;

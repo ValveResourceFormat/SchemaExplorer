@@ -8,6 +8,7 @@ import {
 } from "./schemas";
 import type { Declaration, SchemaClass, SchemaFieldType } from "./types";
 import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics";
+import { moduleLabel } from "./modules";
 import { parseSearch } from "../utils/filtering";
 import { metadataValueText } from "../utils/format";
 import { searchSchemas, type SearchContext } from "../utils/search";
@@ -454,6 +455,17 @@ describe("parseSchemas", () => {
         expect(modules.indexOf("server")).toBeLessThan(idx);
       }
     }
+  });
+
+  it("orders the engine types after every module", () => {
+    const modules = [...parsedSchemas.declarations.keys()];
+    expect(modules.length).toBeGreaterThan(2);
+    expect(modules.at(-1)).toBe(INTRINSIC_MODULE);
+  });
+
+  it("calls the intrinsics engine types and other modules by their name", () => {
+    expect(moduleLabel(INTRINSIC_MODULE)).toBe("Engine types");
+    expect(moduleLabel("client")).toBe("client");
   });
 
   it("handles classes with no parents", () => {

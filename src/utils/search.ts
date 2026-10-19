@@ -25,7 +25,7 @@ import type {
   SchemaField,
   SchemaMetadataEntry,
 } from "../data/types";
-import { compareModuleNames } from "../games-list";
+import { compareModuleNames } from "../data/modules";
 import {
   matchesMetadataKeys,
   matchesMetadataValues,

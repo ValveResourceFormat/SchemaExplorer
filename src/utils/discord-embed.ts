@@ -1,5 +1,5 @@
 import type { Declaration } from "../data/types";
-import { INTRINSIC_MODULE } from "../data/intrinsics";
+import { moduleFile } from "../data/modules";
 import { formatFieldType } from "./format";
 
 // Discord component embed, a custom link preview built from Components V2.
@@ -47,7 +47,7 @@ function* declarationLines(d: Declaration): Generator<string> {
 function buildPayload(d: Declaration, page: EmbedPage, lines: string[]) {
   const total = d.kind === "enum" ? d.members.length : d.fields.length;
   const noun = d.kind === "enum" ? "value" : "field";
-  const location = d.module === INTRINSIC_MODULE ? "intrinsic type" : `${d.module}.dll`;
+  const location = moduleFile(d.module);
 
   const code = [declarationHeader(d), "{", ...lines, "};"].join("\n");
 

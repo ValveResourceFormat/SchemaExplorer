@@ -512,7 +512,11 @@ const FieldRow = memo(function FieldRow({
             <OffsetLine>
               {field.network && <NetworkedMark sending={sending} />}
               {hex != null && (
-                <OffsetLink to={searchLink(game, `offset:${hex}`)} title="Fields at this offset">
+                <OffsetLink
+                  to={searchLink(game, `offset:${hex}`)}
+                  rel="nofollow"
+                  title="Fields at this offset"
+                >
                   <span>{offset}</span>
                   <span>{padHex(hex, hexDigits)}</span>
                 </OffsetLink>

@@ -23,6 +23,7 @@ export type IconKind =
   | "command"
   | "flag"
   | "module"
+  | "intrinsic"
   | "tools"
   | "lock"
   | "code"
@@ -36,6 +37,8 @@ export type UiIconName = "search" | "close" | "menu" | "check" | "sun" | "moon";
 
 import ICONS_URL from "../../icons.svg?url";
 import type { GameId } from "../../games-list";
+import { INTRINSIC_MODULE } from "../../data/intrinsics";
+import { moduleLabel } from "../../data/modules";
 
 /**
  * Codicons are drawn on a 16px grid and are sharpest at that size, so 16 goes next to text of
@@ -65,6 +68,19 @@ export const SpriteIcon = ({
 
 export const KindIcon = ({ kind, size = 16, ...props }: IconProps & { kind: IconKind }) => (
   <SpriteIcon id={`ki-${kind}`} size={size} {...props} />
+);
+
+/** A module's icon, the engine types have their own */
+export const ModuleIcon = ({ module, size = 16, ...props }: IconProps & { module: string }) => (
+  <KindIcon kind={module === INTRINSIC_MODULE ? "intrinsic" : "module"} size={size} {...props} />
+);
+
+/** A module's name in a list of modules, only the engine types get an icon as they aren't a DLL */
+export const ModuleLabel = ({ module }: { module: string }) => (
+  <>
+    {module === INTRINSIC_MODULE && <KindIcon kind="intrinsic" />}
+    {moduleLabel(module)}
+  </>
 );
 
 export const UiIcon = ({ name, size = 16, ...props }: IconProps & { name: UiIconName }) => (

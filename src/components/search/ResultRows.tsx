@@ -25,7 +25,8 @@ import {
 } from "../../utils/result-rows";
 import { hover } from "../interaction-styles";
 import { Link } from "../Link";
-import { KindIcon, UiIcon } from "../kind-icon/KindIcon";
+import { KindIcon, ModuleIcon, UiIcon } from "../kind-icon/KindIcon";
+import { moduleLabel } from "../../data/modules";
 import { ResultsHeading, TextMessage } from "../layout/Content";
 import { ConsoleRow } from "../console/ConsoleRow";
 import { useConsoleRowLinks } from "../console/ConsoleRowsCard";
@@ -351,9 +352,9 @@ function ModulePills({ declarations, item }: { declarations: Declaration[]; item
         const to =
           item === undefined ? schemaPath(game, module, name) : fieldLink(game, module, name, item);
         return (
-          <PillLink key={module} to={to} title={`${name} in ${module}`}>
-            <KindIcon kind="module" />
-            <ModuleName>{module}</ModuleName>
+          <PillLink key={module} to={to} title={`${name} in ${moduleLabel(module)}`}>
+            <ModuleIcon module={module} />
+            <ModuleName>{moduleLabel(module)}</ModuleName>
           </PillLink>
         );
       })}
@@ -383,7 +384,10 @@ export const NameRowView = memo(function NameRowView({
       <Line>
         <KindIcon kind={kind} />
         <NameText>
-          <AnchorName to={schemaPath(game, module, name)} title={`${kind} in ${module}`}>
+          <AnchorName
+            to={schemaPath(game, module, name)}
+            title={`${kind} in ${moduleLabel(module)}`}
+          >
             <HighlightRanges text={name} ranges={matchedRanges(hit.nameWords, "name", name)} />
           </AnchorName>
         </NameText>
@@ -442,7 +446,7 @@ export const FieldRowView = memo(function FieldRowView({
           <KindIcon kind={declaration.kind} />
           <ClassLink
             to={schemaPath(game, declaration.module, declaration.name)}
-            title={`${declaration.name}, ${declaration.kind} in ${declaration.module}`}
+            title={`${declaration.name}, ${declaration.kind} in ${moduleLabel(declaration.module)}`}
           >
             <HighlightRanges
               text={declaration.name}
@@ -506,7 +510,7 @@ export const InheritedRowView = memo(function InheritedRowView({
           <KindIcon kind="class" />
           <ClassLink
             to={schemaPath(game, declaring.module, declaring.name)}
-            title={`${declaring.name}, class in ${declaring.module}`}
+            title={`${declaring.name}, class in ${moduleLabel(declaring.module)}`}
           >
             {declaring.name}
           </ClassLink>

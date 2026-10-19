@@ -1,5 +1,6 @@
 import type { ConsoleItem } from "../data/types";
 import { countBy } from "./collections";
+import { formatCount } from "./format";
 import { mergeRanges } from "./highlight";
 import {
   combineMatches,
@@ -123,6 +124,11 @@ export function getConsoleStats(items: ConsoleItem[]): ConsoleStats {
   };
   statsCache.set(items, stats);
   return stats;
+}
+
+/** "1,234 console commands and 5,678 convars" */
+export function consoleCountsText(stats: ConsoleStats): string {
+  return `${formatCount(stats.commands)} console commands and ${formatCount(stats.convars)} convars`;
 }
 
 type Predicate = (value: string) => boolean;

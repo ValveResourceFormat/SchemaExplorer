@@ -121,6 +121,15 @@ function IntrinsicLink({
     text += ` This one is ${size} bytes${alignment != null ? `, align ${alignment}` : ""}.`;
   }
 
+  // Dumps without sizes only have pages for the intrinsics this site lays out
+  if (!declarations.get(INTRINSIC_MODULE)?.has(name)) {
+    return (
+      <span {...tip(text)}>
+        <ColoredSyntax kind="intrinsic">{name}</ColoredSyntax>
+      </span>
+    );
+  }
+
   return (
     <TypeLink to={to} className="intrinsic" {...tip(text)}>
       {name}

@@ -20,7 +20,7 @@ import type {
   SchemaMetadataEntry,
   SchemaMetadataValue,
 } from "./types.ts";
-import { compareModuleNames } from "../games-list.ts";
+import { compareModuleNames } from "./modules.ts";
 import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics.ts";
 import { stringifyKV3, toEnumValue } from "../utils/format.ts";
 
@@ -359,6 +359,18 @@ export interface SchemaMetadata {
   revision: number;
   versionDate: string;
   versionTime: string;
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** The dump's "Oct 14 2026" build date as 2026-10-14, or null when the dump has none */
+export function isoVersionDate(versionDate: string): string | null {
+  const match = /^([A-Z][a-z]{2}) +(\d{1,2}) +(\d{4})$/.exec(versionDate.trim());
+  if (!match) return null;
+  const month = MONTHS.indexOf(match[1]) + 1;
+  if (month === 0) return null;
+  const day = match[2].padStart(2, "0");
+  return `${match[3]}-${String(month).padStart(2, "0")}-${day}`;
 }
 
 export type ParsedSchemas = ReturnType<typeof parseSchemas>;

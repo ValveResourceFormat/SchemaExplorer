@@ -3,7 +3,7 @@ import { styled } from "@linaria/react";
 import { GAME_LIST } from "../../games-list";
 import { getSearchTags } from "../search/SearchBox";
 import { GameIcon, KindIcon } from "../kind-icon/KindIcon";
-import { CardBlock, InlineList } from "./styles";
+import { CardBlock, InlineList, PageHeader, PageTitle } from "./styles";
 import { highlightLink } from "./link-styles";
 import { Link } from "../Link";
 import { DeclarationsContext, schemaPath } from "./DeclarationsContext";
@@ -68,6 +68,10 @@ const InfoRow = styled.div`
 
 const HomepageSearchFilters = styled(SearchFiltersBlock)`
   margin-top: 32px;
+`;
+
+const HomepageHeader = styled(PageHeader)`
+  margin: 32px 0 0;
 `;
 
 const HomepageCard = styled(CardBlock)`
@@ -173,6 +177,9 @@ export function SchemaHome({ isRoot }: { isRoot: boolean }) {
 function HomepageContent() {
   return (
     <>
+      <HomepageHeader>
+        <PageTitle>Source 2 Schema Explorer</PageTitle>
+      </HomepageHeader>
       <HomepageCard>
         <h2>What is the Source 2 schema system?</h2>
         <p>

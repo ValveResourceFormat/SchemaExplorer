@@ -9,6 +9,7 @@ import { MatchHighlight } from "./Highlight";
 import { DeclarationsContext, sectionPath } from "../schema/DeclarationsContext";
 import { getMetadataKeys, type GameContext } from "../../data/derived";
 import { getNetworkKeys } from "../../data/network";
+import { moduleLabel } from "../../data/modules";
 import { KindIcon, IconKind, UiIcon } from "../kind-icon/KindIcon";
 import type { SearchMode } from "../../utils/section-search";
 
@@ -177,6 +178,8 @@ type ValueSuggestions = {
   header: string;
   values: string[];
   counts?: Map<string, number>;
+  /** What the site calls a value, shown beside it and matched too when it differs */
+  label?: (value: string) => string;
 };
 
 function getSecondLevelContext(
@@ -353,6 +356,7 @@ function ValueSuggestPopup({
   header,
   values,
   counts,
+  label,
   activeIndex,
   onSelect,
   query,
@@ -360,6 +364,7 @@ function ValueSuggestPopup({
   header: string;
   values: string[];
   counts?: Map<string, number>;
+  label?: (value: string) => string;
   activeIndex: number;
   onSelect: (value: string) => void;
   query: string;
@@ -369,24 +374,32 @@ function ValueSuggestPopup({
     <TagPopup role="listbox" id="search-listbox" aria-label={header}>
       <TagPopupHeader>{header}</TagPopupHeader>
       <ValuePopupList>
-        {values.map((v, i) => (
-          // oxlint-disable-next-line jsx-a11y/interactive-supports-focus
-          <TagItem
-            key={v}
-            ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
-            aria-selected={i === activeIndex}
-            data-active={i === activeIndex || undefined}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              onSelect(v);
-            }}
-          >
-            <TagItemName>
-              <HighlightMatch text={v} query={query} />
-            </TagItemName>
-            {counts && <ValueCount>{counts.get(v)}</ValueCount>}
-          </TagItem>
-        ))}
+        {values.map((v, i) => {
+          const name = label?.(v);
+          return (
+            // oxlint-disable-next-line jsx-a11y/interactive-supports-focus
+            <TagItem
+              key={v}
+              ref={i === activeIndex ? (el) => el?.scrollIntoView({ block: "nearest" }) : undefined}
+              aria-selected={i === activeIndex}
+              data-active={i === activeIndex || undefined}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(v);
+              }}
+            >
+              <TagItemName>
+                <HighlightMatch text={v} query={query} />
+              </TagItemName>
+              {name !== undefined && name !== v && (
+                <TagItemDesc>
+                  <HighlightMatch text={name} query={query} />
+                </TagItemDesc>
+              )}
+              {counts && <ValueCount>{counts.get(v)}</ValueCount>}
+            </TagItem>
+          );
+        })}
       </ValuePopupList>
     </TagPopup>
   );
@@ -462,7 +475,7 @@ export function SearchBox({
   const valueSuggestions = useMemo((): ValueSuggestions[] => {
     if (mode === "console") return getConsoleSuggestions(consoleItems);
     const list: ValueSuggestions[] = [
-      { tag: "module:", header: "Modules", values: [...declarations.keys()] },
+      { tag: "module:", header: "Modules", values: [...declarations.keys()], label: moduleLabel },
       { tag: "metadata:", header: "Metadata Keys", values: getMetadataKeys(declarations) },
       { tag: "network:", header: "Network Properties", values: getNetworkKeys(declarations) },
     ];
@@ -480,10 +493,13 @@ export function SearchBox({
   const secondLevel = getSecondLevelContext(lastWord, valueSuggestions, mode);
   const secondLevelValues = useMemo(() => {
     if (!secondLevel) return [];
-    const list = secondLevel.suggestions.values;
+    const { values: list, label } = secondLevel.suggestions;
     if (secondLevel.value === "") return list;
     const lower = secondLevel.value.toLowerCase();
-    return list.filter((v) => v.toLowerCase().includes(lower));
+    return list.filter((v) => {
+      if (v.toLowerCase().includes(lower)) return true;
+      return label !== undefined && label(v).toLowerCase().includes(lower);
+    });
   }, [secondLevel?.suggestions, secondLevel?.value]);
   const isExactMatch =
     secondLevel != null &&
@@ -610,6 +626,7 @@ export function SearchBox({
           header={secondLevel.suggestions.header}
           values={secondLevelValues}
           counts={secondLevel.suggestions.counts}
+          label={secondLevel.suggestions.label}
           activeIndex={activeIndex}
           onSelect={handleValueSelect}
           query={secondLevel.value}

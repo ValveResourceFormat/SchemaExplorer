@@ -5,21 +5,20 @@ import { isGameId, DEFAULT_GAME, getGameDef, canonicalUrl, pageMeta } from "../g
 import { getGameContext } from "../data/derived";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import ConsolePage from "../components/console/ConsolePage";
-import { getConsoleStats } from "../utils/console-filtering";
+import { consoleCountsText, getConsoleStats } from "../utils/console-filtering";
 
 export const meta: MetaFunction = ({ params }) => {
   const game = params.game && isGameId(params.game) ? params.game : null;
-  const gameName = game ? getGameDef(game)!.name : null;
   // Worded like the searches for these lists, "cs2 console commands list", "cs2 cvar list"
-  const title = ["Console Commands & ConVars List", gameName, "Source 2 Schema Explorer"]
-    .filter(Boolean)
-    .join(" - ");
-
+  let title = "Console Commands & ConVars List - Source 2 Schema Explorer";
   let description = "Complete lists of Source 2 console commands and convars (cvars).";
   if (game) {
-    const { convars, commands } = getConsoleStats(getGameContext(game).consoleItems);
-    const fmt = (n: number) => n.toLocaleString("en-US");
-    description = `Complete list of all ${fmt(commands)} console commands and ${fmt(convars)} convars (cvars) in ${gameName}, including hidden and development-only ones, with default values, ranges, flags and help text.`;
+    const gameName = getGameDef(game)!.name;
+    const { metadata, consoleItems } = getGameContext(game);
+    title = `${gameName} Console Commands & ConVars – Full List`;
+    if (metadata.versionDate) title += ` (${metadata.versionDate})`;
+    const counts = consoleCountsText(getConsoleStats(consoleItems));
+    description = `Complete list of all ${counts} (cvars) in ${gameName}, including hidden and development-only ones, with default values, ranges, flags and help text.`;
   }
 
   return pageMeta(title, description, canonicalUrl(params.game, "convars"));

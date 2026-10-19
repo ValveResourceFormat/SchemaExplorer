@@ -25,6 +25,7 @@ SchemaExplorer shows the `schemas.json` that [DumpSource2](https://github.com/Va
   - `network.ts` works out which fields a class sends;
   - `compare.ts` compares across games;
   - `intrinsics.ts` holds the layout of engine types that have no schema. Keep its entries even when no dump uses them.
+  - `modules.ts` orders the modules and names them for display, with the intrinsics shown as "Engine types".
 - `src/utils/filtering.tsx` parses search and filters (`tag:value` terms). The search text lives in the URL hash (`#search=`), not the query string.
 - `src/components/schema/` has the class, enum, entity, and network views. `src/components/console/` has the convars and commands page.
 - `scripts/` run at build time: they compress the schemas, flatten the prerendered pages, and write `llms.txt`, the sitemap, and last-modified dates.

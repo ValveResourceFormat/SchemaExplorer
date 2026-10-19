@@ -1,10 +1,39 @@
 const GAMES = [
-  { id: "cs2", name: "Counter-Strike 2", repo: "SteamTracking/GameTracking-CS2" },
-  { id: "dota2", name: "Dota 2", repo: "SteamTracking/GameTracking-Dota2" },
-  { id: "deadlock", name: "Deadlock", repo: "SteamTracking/GameTracking-Deadlock" },
-  { id: "hlvr", name: "Half-Life: Alyx" },
-  { id: "steamvr", name: "SteamVR Home", devOnly: true },
-  { id: "steampal", name: "Aperture Desk Job", devOnly: true },
+  {
+    id: "cs2",
+    name: "Counter-Strike 2",
+    shortName: "CS2",
+    repo: "SteamTracking/GameTracking-CS2",
+  },
+  {
+    id: "dota2",
+    name: "Dota 2",
+    shortName: "Dota 2",
+    repo: "SteamTracking/GameTracking-Dota2",
+  },
+  {
+    id: "deadlock",
+    name: "Deadlock",
+    shortName: "Deadlock",
+    repo: "SteamTracking/GameTracking-Deadlock",
+  },
+  {
+    id: "hlvr",
+    name: "Half-Life: Alyx",
+    shortName: "HL:Alyx",
+  },
+  {
+    id: "steamvr",
+    name: "SteamVR Home",
+    shortName: "SteamVR Home",
+    devOnly: true,
+  },
+  {
+    id: "steampal",
+    name: "Aperture Desk Job",
+    shortName: "Desk Job",
+    devOnly: true,
+  },
 ] as const;
 
 export type GameId = (typeof GAMES)[number]["id"];
@@ -12,6 +41,8 @@ export type GameId = (typeof GAMES)[number]["id"];
 interface GameDef {
   id: GameId;
   name: string;
+  /** For page titles, where the full name takes too much room */
+  shortName: string;
   /** GameTracking repository, games without one are a one-off dump that is never updated */
   repo?: string;
   /** Only shown by the dev server, the deployed site only has its JSON, linked from llms.txt */
@@ -58,15 +89,4 @@ export function pageMeta(title: string, description: string, url: string) {
     { property: "og:url", content: url },
     { tagName: "link", rel: "canonical", href: url },
   ];
-}
-
-const MODULE_PRIORITY = ["client", "server"];
-
-export function compareModuleNames(a: string, b: string): number {
-  const ai = MODULE_PRIORITY.indexOf(a);
-  const bi = MODULE_PRIORITY.indexOf(b);
-  if (ai !== bi) return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
 }

@@ -14,7 +14,9 @@ import { getGameContext, type GameContext } from "../../data/derived";
 import { GAME_LIST, dumpFileUrl, getGameDef, type GameId } from "../../games-list";
 import { buildHash, useHashParam, useHydrated } from "../../utils/filtering";
 import { countBy } from "../../utils/collections";
+import { formatCount } from "../../utils/format";
 import {
+  consoleCountsText,
   filterConsoleItems,
   getConsoleStats,
   getTagState,
@@ -225,8 +227,86 @@ function useConsoleFilters() {
   );
 }
 
+/** The first row of the static list at the top of the window, and where its top is */
+interface RowPosition {
+  index: number;
+  top: number;
+}
+
+function topVisibleRow(list: HTMLUListElement | null): RowPosition | null {
+  if (!list || list.children.length === 0) return null;
+  const rows = list.children;
+  // The rows are in order down the page, so the first one still in view is found by halving
+  let low = 0;
+  let high = rows.length - 1;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if (rows[mid].getBoundingClientRect().bottom > 0) high = mid;
+    else low = mid + 1;
+  }
+  return { index: low, top: rows[low].getBoundingClientRect().top };
+}
+
+/** What a reader does first, after which the full list makes way for the virtualized one */
+const INTERACTION_EVENTS = ["scroll", "wheel", "keydown"] as const;
+
+/**
+ * Whether the reader has scrolled, pressed a key or clicked since hydration, with where the static
+ * list was then. A click switches after its click event, so a link in the static list still works
+ */
+function useFirstInteraction(hydrated: boolean, listRef: React.RefObject<HTMLUListElement | null>) {
+  const [interaction, setInteraction] = useState<{ position: RowPosition | null } | null>(null);
+  const interacted = interaction != null;
+
+  useEffect(() => {
+    if (!hydrated || interacted) return;
+    let position: RowPosition | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const switchList = () => {
+      position = topVisibleRow(listRef.current) ?? position;
+      setInteraction({ position });
+    };
+    const onPointerUp = () => {
+      timer = setTimeout(switchList, 0);
+    };
+    const onPointerDown = () => {
+      position = topVisibleRow(listRef.current);
+      window.addEventListener("pointerup", onPointerUp, { once: true });
+    };
+    const options = { passive: true, capture: true };
+    for (const type of INTERACTION_EVENTS) window.addEventListener(type, switchList, options);
+    window.addEventListener("pointerdown", onPointerDown, options);
+    return () => {
+      for (const type of INTERACTION_EVENTS) window.removeEventListener(type, switchList, options);
+      window.removeEventListener("pointerdown", onPointerDown, options);
+      window.removeEventListener("pointerup", onPointerUp);
+      clearTimeout(timer);
+    };
+  }, [hydrated, interacted, listRef]);
+
+  return interaction;
+}
+
+function ConsoleIntro() {
+  const { game, metadata, consoleItems } = useContext(DeclarationsContext);
+  const gameName = getGameDef(game)?.name ?? game;
+  const stats = getConsoleStats(consoleItems);
+
+  let text = `${gameName} has ${consoleCountsText(stats)}`;
+  if (metadata.revision > 0) text += ` in build ${metadata.revision} (${metadata.versionDate})`;
+  text += ", run from the developer console.";
+
+  const cheats = stats.flags.get("cheat") ?? 0;
+  const hasSvCheats = consoleItems.some((item) => item.name === "sv_cheats");
+  if (cheats > 0 && hasSvCheats) {
+    text += ` ${formatCount(cheats)} of them are flagged cheat and need sv_cheats 1.`;
+  }
+  return <Intro>{text}</Intro>;
+}
+
 function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
   const { game, metadata } = useContext(DeclarationsContext);
+  const { search } = useContext(SearchContext);
   const { kind, nameParam, parsed, visible, similar, includeTag, selectName } = filters;
 
   // The similar names asked for, for this list of them only
@@ -234,9 +314,14 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
   const showAllSimilar = expandedSimilar === similar;
   const onShowAllSimilar = useCallback(() => setExpandedSimilar(similar), [similar]);
 
-  // The prerendered page has every row for search engines, hydration has to match it
-  // before switching to the virtualized list
+  // The prerendered page has every row for search engines, and keeps them after hydration until
+  // the reader does something, so a crawler that renders the page sees all of them too
+  const unfiltered = search === "" && kind === "all";
   const hydrated = useHydrated();
+  const staticListRef = useRef<HTMLUListElement>(null);
+  const interaction = useFirstInteraction(hydrated, staticListRef);
+  const virtual = hydrated && (interaction != null || !unfiltered || nameParam != null);
+  const restorePosition = unfiltered ? (interaction?.position ?? null) : null;
 
   // Clicking a name only updates the permalink, the row is already in view. Only a #name=
   // link opened from elsewhere (or back/forward to another name) scrolls to its row
@@ -266,6 +351,7 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
       similar={similar}
       showAllSimilar={showAllSimilar}
       onShowAllSimilar={onShowAllSimilar}
+      restorePosition={restorePosition}
       nameParam={nameParam}
       scrollTarget={scrollTarget}
       onNavigate={onNavigate}
@@ -289,32 +375,14 @@ function ConsoleContent({ filters }: { filters: ConsoleFilters }) {
           })}
         </HeaderActions>
       </Header>
+      <ConsoleIntro />
 
       {visible.length > 0 && <OtherSectionMatches own={visible} />}
       {visible.length > 0 ? (
-        hydrated ? (
+        virtual ? (
           list
         ) : (
-          <StaticListCard>
-            {visible.map(({ item, nameRanges }, i) =>
-              // Only the first screenful needs full rows, the rest is there for search engines
-              // and is replaced by the virtual list right after hydration
-              i < STATIC_FULL_ROWS ? (
-                <ConsoleRow
-                  key={consoleRowKey(item)}
-                  item={item}
-                  nameRanges={nameRanges}
-                  anchored={false}
-                  onNavigate={onNavigate}
-                />
-              ) : (
-                <li key={consoleRowKey(item)}>
-                  <a href={`#name=${encodeURIComponent(item.name)}`}>{item.name}</a>
-                  {item.help && ` ${item.help}`}
-                </li>
-              ),
-            )}
-          </StaticListCard>
+          <StaticConsoleList listRef={staticListRef} items={visible} onNavigate={onNavigate} />
         )
       ) : (
         <>
@@ -360,11 +428,47 @@ function listRowKey(row: ListRow): string {
   return consoleRowKey(row.item);
 }
 
+/**
+ * Every row in the page itself, as prerendered. Only the first screenful has full rows, the rest
+ * is there for search engines until the virtualized list takes over
+ */
+function StaticConsoleList({
+  listRef,
+  items,
+  onNavigate,
+}: {
+  listRef: React.RefObject<HTMLUListElement | null>;
+  items: ConsoleMatch[];
+  onNavigate: (name: string, e: React.MouseEvent) => void;
+}) {
+  return (
+    <StaticListCard ref={listRef}>
+      {items.map(({ item, nameRanges }, i) =>
+        i < STATIC_FULL_ROWS ? (
+          <ConsoleRow
+            key={consoleRowKey(item)}
+            item={item}
+            nameRanges={nameRanges}
+            anchored={false}
+            onNavigate={onNavigate}
+          />
+        ) : (
+          <li key={consoleRowKey(item)}>
+            <a href={`#name=${encodeURIComponent(item.name)}`}>{item.name}</a>
+            {item.help && ` ${item.help}`}
+          </li>
+        ),
+      )}
+    </StaticListCard>
+  );
+}
+
 function VirtualConsoleList({
   items,
   similar,
   showAllSimilar,
   onShowAllSimilar,
+  restorePosition,
   nameParam,
   scrollTarget,
   onNavigate,
@@ -376,6 +480,8 @@ function VirtualConsoleList({
   similar: ConsoleMatch[];
   showAllSimilar: boolean;
   onShowAllSimilar: () => void;
+  /** The row of the static list this one replaces that was at the top of the window */
+  restorePosition: RowPosition | null;
   nameParam: string | null;
   scrollTarget: string | null;
   onNavigate: (name: string, e: React.MouseEvent) => void;
@@ -406,10 +512,22 @@ function VirtualConsoleList({
     getItemKey,
   });
 
-  const nameIndex = useMemo(
-    () => (scrollTarget ? items.findIndex((match) => match.item.name === scrollTarget) : -1),
-    [items, scrollTarget],
-  );
+  // Where the static list was, the same rows above it are estimated alike before any is measured
+  const restoredRef = useRef(false);
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!restorePosition || !list || restoredRef.current) return;
+    restoredRef.current = true;
+    let offset = 0;
+    for (let i = 0; i < restorePosition.index; i++) offset += estimateSize(i);
+    const listTop = list.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, listTop + offset - restorePosition.top);
+  }, [restorePosition, estimateSize, listRef]);
+
+  const nameIndex = useMemo(() => {
+    if (!scrollTarget) return -1;
+    return rows.findIndex((row) => typeof row !== "string" && row.item.name === scrollTarget);
+  }, [rows, scrollTarget]);
   // Rows above are estimates until measured and scroll restoration runs after mount, so a
   // single scrollToIndex can land off target; retry briefly until the row stays in place.
   // Rows near either end can't be centered, and any user scroll input stops it
@@ -530,6 +648,12 @@ const HeaderActions = styled.div`
   align-items: baseline;
   gap: 8px;
   margin-left: auto;
+`;
+
+const Intro = styled.p`
+  margin: 8px 0 0 4px;
+  font-size: 15px;
+  color: var(--text-dim);
 `;
 
 /** A heading or control between the virtualized rows */

@@ -122,7 +122,7 @@ export function GitHubFileLink({
   return (
     <GitHubButton
       href={url}
-      title={isIntrinsic ? "View intrinsic type definitions" : `View ${name}.h on GitHub`}
+      title={isIntrinsic ? "View engine type definitions" : `View ${name}.h on GitHub`}
       label={button ? "Source" : undefined}
     />
   );

@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BASE_PATH, GAME_LIST, SITE_ORIGIN } from "../src/games-list.ts";
-import { parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
+import { isoVersionDate, parseSchemas, type SchemasJson } from "../src/data/schemas.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schemasDir = resolve(__dirname, "../schemas");
@@ -15,6 +15,13 @@ function escapeXml(s: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+/** The later of two ISO dates, which compare as strings */
+function latest(a: string | undefined, b: string | undefined): string | undefined {
+  if (!a) return b;
+  if (!b) return a;
+  return a > b ? a : b;
 }
 
 interface SitemapUrl {
@@ -37,14 +44,19 @@ function buildUrlset(urls: SitemapUrl[]): string {
 await mkdir(distDir, { recursive: true });
 
 // Main sitemap: root + game pages + module pages
-const mainUrls: SitemapUrl[] = [{ loc: `${SITE_ORIGIN}${basePath}/` }];
+const rootUrl: SitemapUrl = { loc: `${SITE_ORIGIN}${basePath}/` };
+const mainUrls: SitemapUrl[] = [rootUrl];
 const indexEntries: { file: string; lastmod?: string }[] = [];
 
 for (const game of GAME_LIST) {
   const data: SchemasJson = JSON.parse(
     await readFile(resolve(schemasDir, `${game.id}.json`), "utf-8"),
   );
-  const { declarations, consoleItems } = parseSchemas(data);
+  const { declarations, consoleItems, metadata } = parseSchemas(data);
+
+  // Pages without a date of their own changed with the dump at the latest. One-off dumps have none
+  const versionDate = isoVersionDate(metadata.versionDate) ?? undefined;
+  rootUrl.lastmod = latest(rootUrl.lastmod, versionDate);
 
   // Load per-class lastmod data if available
   let lastmod: Record<string, string> = {};
@@ -62,8 +74,8 @@ for (const game of GAME_LIST) {
     let moduleMaxDate: string | undefined;
     for (const [name] of inner) {
       const fileName = name.replace(/:/g, "_");
-      const date = lastmod[`${mod}/${fileName}`];
-      if (date && (!moduleMaxDate || date > moduleMaxDate)) moduleMaxDate = date;
+      const date = lastmod[`${mod}/${fileName}`] ?? versionDate;
+      moduleMaxDate = latest(moduleMaxDate, date);
       gameUrls.push({
         loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}/${name}`,
         lastmod: date,
@@ -73,12 +85,12 @@ for (const game of GAME_LIST) {
       loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}`,
       lastmod: moduleMaxDate,
     });
-    if (moduleMaxDate && (!gameMaxDate || moduleMaxDate > gameMaxDate)) gameMaxDate = moduleMaxDate;
+    gameMaxDate = latest(gameMaxDate, moduleMaxDate);
   }
 
   mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}`, lastmod: gameMaxDate });
   if (consoleItems.length > 0) {
-    mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}/convars` });
+    mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}/convars`, lastmod: versionDate });
   }
 
   const gameFile = `sitemap-${game.id}.xml`;
@@ -87,10 +99,9 @@ for (const game of GAME_LIST) {
   console.log(`  ${gameFile}: ${gameUrls.length} URLs`);
 }
 
-const mainLastmod = indexEntries.reduce<string | undefined>(
-  (max, e) => (e.lastmod && (!max || e.lastmod > max) ? e.lastmod : max),
-  undefined,
-);
+let mainLastmod: string | undefined;
+for (const entry of indexEntries) mainLastmod = latest(mainLastmod, entry.lastmod);
+rootUrl.lastmod = latest(rootUrl.lastmod, mainLastmod);
 
 const mainFile = "sitemap-main.xml";
 await writeFile(resolve(distDir, mainFile), buildUrlset(mainUrls));
