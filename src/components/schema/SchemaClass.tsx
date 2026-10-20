@@ -158,7 +158,9 @@ interface FieldEntry {
   baseOffset: number;
 }
 
-const OFFSET_COLUMNS = "fit-content(22em) minmax(0, 1fr) max-content";
+/** The offset takes three columns, for the networked mark, the decimal offset, and the hex one */
+const OFFSET_COLUMNS =
+  "fit-content(22em) minmax(0, 1fr) [offset-start] max-content max-content max-content";
 const COLUMNS = "fit-content(22em) minmax(0, 1fr)";
 
 /**
@@ -356,37 +358,41 @@ function OwnerBand({ entry }: { entry: FieldEntry }) {
 }
 
 const OffsetHead = styled.span`
+  grid-column: offset-start / -1;
   justify-self: end;
 `;
 
-const OffsetText = styled.span`
-  justify-self: end;
-  font-family: var(--font-mono);
+const OffsetText = styled(OffsetHead)`
   font-size: 14px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 `;
 
-/** Right-aligned like the old offsets. The bit range of a bitfield goes below */
+/**
+ * Lays the networked mark, the decimal offset, and the hex offset in the table's offset columns,
+ * so each lines up across rows. The hex offset is left-aligned, since its letters aren't as even
+ * as tabular digits. The bit range of a bitfield goes below
+ */
 const OffsetCell = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-self: end;
-`;
-
-/** The networked mark left of the offset, so the marks line up */
-const OffsetLine = styled.div`
-  display: flex;
+  grid-column: offset-start / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0 10px;
+  }
 `;
 
 const OffsetLink = styled(Link)`
-  display: inline-flex;
-  gap: 10px;
-  font-family: var(--font-mono);
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   font-size: 14px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
@@ -394,9 +400,13 @@ const OffsetLink = styled(Link)`
   text-decoration: none;
 
   > span:first-child {
-    min-width: 5ch;
-    text-align: right;
+    justify-self: end;
     opacity: 0.65;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    gap: 10px;
   }
 
   &:hover {
@@ -406,10 +416,16 @@ const OffsetLink = styled(Link)`
 `;
 
 const BitRange = styled.span`
-  font-family: var(--font-mono);
+  grid-column: 1 / -1;
+  justify-self: end;
   font-size: 13px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+
+  @media (max-width: 768px) {
+    flex-basis: 100%;
+    text-align: right;
+  }
 `;
 
 const FieldName = styled.div`
@@ -516,19 +532,17 @@ const FieldRow = memo(function FieldRow({
         </FieldType>
         {endColumn && (
           <OffsetCell data-end>
-            <OffsetLine>
-              {field.network && <NetworkedMark sending={sending} />}
-              {hex != null && (
-                <OffsetLink
-                  to={searchLink(game, `offset:${hex}`)}
-                  rel="nofollow"
-                  title="Fields at this offset"
-                >
-                  <span>{offset}</span>
-                  <span>{padHex(hex, hexDigits)}</span>
-                </OffsetLink>
-              )}
-            </OffsetLine>
+            {field.network && <NetworkedMark sending={sending} />}
+            {hex != null && (
+              <OffsetLink
+                to={searchLink(game, `offset:${hex}`)}
+                rel="nofollow"
+                title="Fields at this offset"
+              >
+                <span>{offset}</span>
+                <span>{padHex(hex, hexDigits)}</span>
+              </OffsetLink>
+            )}
             {bitfield && (
               <BitRange>
                 bit{bitfield.bitCount !== 1 ? "s" : ""} {bitfield.bitOffset}

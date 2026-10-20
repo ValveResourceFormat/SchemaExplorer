@@ -83,7 +83,7 @@ function AliasPills({ entities }: { entities: EntityClass[] }) {
   return aliasNames.map((name) => (
     <Pill
       key={`alias/${name}`}
-      data-mono
+      data-identifier
       {...tip("Alias design name: the game creates this class for it")}
     >
       <KindIcon kind="entity" />
@@ -102,7 +102,7 @@ export function EntityJumpPills({ entities }: { entities: EntityClass[] }) {
         <PillAnchor
           key={entity.module}
           href={`#${entityAnchor(entity)}`}
-          data-mono={entity.designName ? true : undefined}
+          data-identifier={entity.designName ? true : undefined}
           {...tip(entity.designName ? "Entity design name" : "Entity without a design name")}
           onClick={(e) => scrollToEntity(e, entity)}
         >
@@ -142,7 +142,7 @@ export function DesignNamePills({
 /** An entity design name, with the name words it matched marked */
 export function DesignNamePill({ name, matches }: { name: string; matches: readonly WordMatch[] }) {
   return (
-    <Pill data-mono {...tip("Entity design name")}>
+    <Pill data-identifier {...tip("Entity design name")}>
       <KindIcon kind="entity" />
       <HighlightRanges text={name} ranges={matchedRanges(matches, "designName", name)} />
     </Pill>
@@ -165,7 +165,6 @@ const EntityHeading = styled.h2`
 `;
 
 const EntityName = styled.span`
-  font-family: var(--font-mono);
   font-weight: 700;
 `;
 
@@ -290,8 +289,7 @@ function EntityDetails({ entity }: { entity: EntityClass }) {
   );
 }
 
-const MonoName = styled.span`
-  font-family: var(--font-mono);
+const EntryName = styled.span`
   font-weight: 600;
 
   &[data-removed] {
@@ -318,7 +316,6 @@ const Description = styled.div`
 `;
 
 const FieldLink = styled(Link)`
-  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--text-dim);
   ${subtleUnderline}
@@ -457,12 +454,12 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
             declaredBy={props.declaredBy}
             anchorBase={props.anchorBase}
           >
-            <MonoName data-removed={entityKey.removed || undefined}>{display}</MonoName>
+            <EntryName data-removed={entityKey.removed || undefined}>{display}</EntryName>
           </EntryLink>
         </span>
         {entityKey.removed && <Pill>removed</Pill>}
         {entityKey.flags?.map((f) => (
-          <Pill key={f} data-mono {...tip(`Datadesc flag ${f}.`)}>
+          <Pill key={f} data-identifier {...tip(`Datadesc flag ${f}.`)}>
             {f.toLowerCase().replaceAll("_", " ")}
           </Pill>
         ))}
@@ -582,7 +579,7 @@ const IORow = memo(function IORow({
             declaredBy={props.declaredBy}
             anchorBase={props.anchorBase}
           >
-            <MonoName>{entry.name}</MonoName>
+            <EntryName>{entry.name}</EntryName>
           </EntryLink>
           <ParamList params={entry.params} module={module} />
           {input && input.returns.length > 0 && (

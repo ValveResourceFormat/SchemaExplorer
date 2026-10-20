@@ -19,6 +19,7 @@
     "@floating-ui/react": "^0.27.20",
     "@react-router/node": "^8.0.1",
     "@tanstack/react-virtual": "^3.14.9",
+    "inter-ui": "^4.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.0.1"

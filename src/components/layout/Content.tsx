@@ -18,7 +18,6 @@ export const TextMessage = styled.div`
   margin-top: 50px;
   align-self: center;
   font-size: 36px;
-  font-weight: 300;
   color: var(--text-dim);
   text-align: center;
 

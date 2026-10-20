@@ -16,6 +16,7 @@ import { getGameContext } from "./data/derived";
 import { buildComponentEmbed } from "./utils/discord-embed";
 import ogImage from "./source2viewer.png";
 import searchPrehydrate from "./search-prehydrate.js?url";
+import interLatin from "inter-ui/variable-latin/InterVariable-subset.woff2?url";
 import "./global.css";
 
 const OG_IMAGE_URL = SITE_ORIGIN + ogImage;
@@ -62,6 +63,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           content={THEME_COLORS.light}
         />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_COLORS.dark} />
+        <link rel="preload" href={interLatin} as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="sitemap" href="/SchemaExplorer/sitemap.xml" />
         <link
           rel="alternate"

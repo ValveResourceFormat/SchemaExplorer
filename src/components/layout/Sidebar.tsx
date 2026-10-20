@@ -67,7 +67,6 @@ export const SidebarGroupHeader = styled.button`
   padding: 0 8px 0 10px;
   border: none;
   background: var(--sidebar);
-  font: inherit;
   font-size: 14px;
   font-weight: 600;
   text-align: left;

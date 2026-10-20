@@ -98,8 +98,7 @@ const TooltipFlagName = styled.div`
   align-items: center;
   gap: 4px;
   margin-bottom: 4px;
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--accent, var(--text));
 
   > svg {

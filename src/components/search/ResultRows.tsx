@@ -101,8 +101,7 @@ const Line = styled.div`
 `;
 
 const NameText = styled.span`
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 15px;
 `;
 
@@ -143,7 +142,6 @@ const Cell = styled.div`
   flex-wrap: wrap;
   gap: 2px 8px;
   min-width: 0;
-  font-family: var(--font-mono);
   font-size: 14px;
 `;
 

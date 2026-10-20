@@ -117,8 +117,7 @@ const pillStyles = `
 
   /* Identifiers, which can be longer than a phone screen is wide. They only wrap when the pill
      doesn't fit a line of its own */
-  &[data-mono] {
-    font-family: var(--font-mono);
+  &[data-identifier] {
     min-width: 0;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -330,7 +329,6 @@ export const CollapsedRow = styled.button`
   ${rowStyles}
   width: 100%;
   background: none;
-  font: inherit;
   font-size: 14px;
   text-align: left;
   color: var(--text-dim);
@@ -345,8 +343,9 @@ export const CollapsedRow = styled.button`
 export const CollapsedText = styled.span`
   grid-column: 1 / -1;
 
+  /* offset-start names the grid line where a table with offsets starts its offset columns */
   &[data-before-offset] {
-    grid-column: 1 / -2;
+    grid-column: 1 / offset-start;
   }
 
   &::after {

@@ -27,7 +27,6 @@ const MemberName = styled.div`
 `;
 
 const MemberHex = styled(Link)`
-  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
@@ -74,7 +73,7 @@ export const SchemaEnumView: React.FC<{
           <KindIcon kind="enum" size={24} />
           {declaration.name}
         </PageTitle>
-        <Pill data-mono {...tip("Underlying type")}>
+        <Pill data-identifier {...tip("Underlying type")}>
           {declaration.alignment}
         </Pill>
         {declaration.flags.map((flag) => (

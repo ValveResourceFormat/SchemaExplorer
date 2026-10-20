@@ -149,8 +149,7 @@ const Line = styled.div`
 // CSS draws the kind icon. An <svg><use> per row adds up over thousands of prerendered rows.
 // The masks are the convar and command icons from icons.svg
 const Name = styled.a`
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 15px;
   color: var(--text);
   text-decoration: none;
@@ -180,13 +179,11 @@ const Name = styled.a`
 
 /** Blue like builtin types on the schema pages */
 const Type = styled.span`
-  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--syntax-literal);
 `;
 
 const Value = styled.span`
-  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--text);
   display: inline-flex;
@@ -195,7 +192,6 @@ const Value = styled.span`
 `;
 
 const Range = styled.span`
-  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--text-dim);
 `;

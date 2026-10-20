@@ -45,7 +45,6 @@ const Attr = styled.span`
 
 /** A little brighter than the labels, not as bright as the field names */
 const Value = styled.span`
-  font-family: var(--font-mono);
   font-size: 13px;
   color: color-mix(in srgb, var(--text) 55%, var(--text-dim));
 `;

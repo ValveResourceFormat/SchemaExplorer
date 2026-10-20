@@ -23,8 +23,7 @@ const StaticListCard = styled(ListCard)`
     text-overflow: ellipsis;
 
     > a {
-      font-family: var(--font-mono);
-      font-weight: 700;
+      font-weight: 600;
       font-size: 15px;
       color: var(--text);
       text-decoration: none;

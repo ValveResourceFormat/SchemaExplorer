@@ -24,7 +24,6 @@ const SegmentButton = styled.button`
   border: none;
   border-radius: 6px;
   background: none;
-  font: inherit;
   font-size: 13px;
   color: var(--text-dim);
   cursor: pointer;

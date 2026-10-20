@@ -164,12 +164,8 @@ const TooltipPanel = styled.div`
   background: color-mix(in srgb, var(--accent, var(--group-border)) 8%, var(--group));
   box-shadow: var(--group-shadow);
   color: var(--text);
-  font:
-    13px/1.45 -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
   white-space: pre-line;
   pointer-events: none;
 `;

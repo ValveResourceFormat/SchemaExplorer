@@ -8,7 +8,6 @@ const Button = styled.button`
   border: none;
   background: none;
   color: var(--text-dim);
-  font: inherit;
   font-size: 14px;
   cursor: pointer;
 

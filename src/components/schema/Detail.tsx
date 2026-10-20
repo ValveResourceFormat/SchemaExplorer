@@ -106,7 +106,6 @@ const ToggleButton = styled.button`
   padding: 0;
   border: none;
   background: none;
-  font: inherit;
   font-size: 14px;
   color: var(--highlight);
   cursor: pointer;

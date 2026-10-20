@@ -257,7 +257,6 @@ const ClearButton = styled.button`
   border-radius: 6px;
   border: 1px solid var(--group-border);
   background: var(--group);
-  font: inherit;
   font-size: 14px;
   color: var(--text);
   cursor: pointer;

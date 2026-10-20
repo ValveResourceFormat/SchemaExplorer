@@ -1,3 +1,19 @@
+@font-face {
+  font-family: InterVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("inter-ui/variable-latin/InterVariable-subset.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: InterVariable;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("inter-ui/variable-latin/InterVariable-Italic-subset.woff2") format("woff2");
+}
+
 :root {
   color-scheme: light;
   --background: #f8f9fb;
@@ -101,9 +117,6 @@
 }
 
 :root {
-  --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-
   /* Codicons chevron-down for chevronBefore, here so its users share one copy */
   --mask-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.15 5.85l4.5 4.5c.19.2.51.2.7 0l4.5-4.5c.2-.19.2-.51 0-.7-.19-.2-.51-.2-.7 0L8 9.29 3.85 5.15c-.19-.2-.51-.2-.7 0-.2.19-.2.51 0 .7z'/%3E%3C/svg%3E");
 
@@ -151,12 +164,35 @@ body {
   background-color: var(--background);
   scrollbar-gutter: stable;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
+    InterVariable,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
   font-size: 16px;
+  font-variant-ligatures: no-contextual;
+  /* Distinct I, l, and 1, and 0 and O, which identifiers like m_lFoo and m_IFoo depend on */
+  font-feature-settings: "ss04";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+button,
+input,
+textarea,
+select,
+code,
+kbd,
+pre,
+samp {
+  font: inherit;
 }
 
 *,

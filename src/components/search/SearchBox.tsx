@@ -20,7 +20,6 @@ export const SearchInput = styled.input`
   border-radius: 8px;
   background: var(--searchbox-background);
   color: var(--text);
-  font-family: inherit;
   font-size: 16px;
   outline: none;
   transition: box-shadow 0.15s;
@@ -240,7 +239,6 @@ const SearchPlaceholder = styled.div`
   pointer-events: none;
   color: var(--searchbox-placeholder);
   font-size: 14px;
-  font-family: inherit;
   white-space: nowrap;
   overflow: hidden;
 
@@ -250,7 +248,6 @@ const SearchPlaceholder = styled.div`
   }
 
   kbd {
-    font-family: inherit;
     font-size: 12px;
     font-weight: 600;
     padding: 1px 6px;
@@ -291,7 +288,6 @@ const TagItem = styled.button`
   padding: 7px 12px;
   border: none;
   background: transparent;
-  font: inherit;
   color: var(--text);
   font-size: 14px;
   cursor: pointer;
@@ -313,7 +309,6 @@ const TagItemText = styled.div`
 const TagItemName = styled.span`
   font-weight: 600;
   font-size: 13px;
-  font-family: var(--font-mono);
 `;
 
 const TagItemDesc = styled.span`
@@ -325,7 +320,6 @@ const TagItemExample = styled.span`
   font-size: 11px;
   color: var(--text-dim);
   opacity: 0.6;
-  font-family: var(--font-mono);
   flex-shrink: 0;
 `;
 
