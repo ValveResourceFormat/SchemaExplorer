@@ -58,7 +58,6 @@ for (const game of GAME_LIST) {
   const versionDate = isoVersionDate(metadata.versionDate) ?? undefined;
   rootUrl.lastmod = latest(rootUrl.lastmod, versionDate);
 
-  // Load per-class lastmod data if available
   let lastmod: Record<string, string> = {};
   try {
     lastmod = JSON.parse(await readFile(resolve(schemasDir, `${game.id}-lastmod.json`), "utf-8"));
@@ -72,6 +71,7 @@ for (const game of GAME_LIST) {
 
   for (const [mod, inner] of declarations) {
     let moduleMaxDate: string | undefined;
+
     for (const [name] of inner) {
       const fileName = name.replace(/:/g, "_");
       const date = lastmod[`${mod}/${fileName}`] ?? versionDate;
@@ -81,6 +81,7 @@ for (const game of GAME_LIST) {
         lastmod: date,
       });
     }
+
     mainUrls.push({
       loc: `${SITE_ORIGIN}${basePath}/${game.id}/${mod}`,
       lastmod: moduleMaxDate,
@@ -89,6 +90,7 @@ for (const game of GAME_LIST) {
   }
 
   mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}`, lastmod: gameMaxDate });
+
   if (consoleItems.length > 0) {
     mainUrls.push({ loc: `${SITE_ORIGIN}${basePath}/${game.id}/convars`, lastmod: versionDate });
   }
@@ -101,6 +103,7 @@ for (const game of GAME_LIST) {
 
 let mainLastmod: string | undefined;
 for (const entry of indexEntries) mainLastmod = latest(mainLastmod, entry.lastmod);
+
 rootUrl.lastmod = latest(rootUrl.lastmod, mainLastmod);
 
 const mainFile = "sitemap-main.xml";
@@ -108,7 +111,6 @@ await writeFile(resolve(distDir, mainFile), buildUrlset(mainUrls));
 indexEntries.unshift({ file: mainFile, lastmod: mainLastmod });
 console.log(`  ${mainFile}: ${mainUrls.length} URLs`);
 
-// Sitemap index
 let indexXml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 indexXml += `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 for (const { file, lastmod } of indexEntries) {

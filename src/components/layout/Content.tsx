@@ -31,7 +31,7 @@ export const TextMessage = styled.div`
 export const ListItem = styled.div`
   padding: 5px 0;
 
-  /* Cards space themselves, the list already does between items */
+  /* Cards space themselves. The list already spaces between items */
   > :last-child {
     margin-bottom: 0;
   }
@@ -75,7 +75,7 @@ export function OtherGameHeading({ gameId }: { gameId: GameId }) {
   return (
     <ResultsHeading>
       <GameIcon game={gameId} />
-      {getGameDef(gameId)?.name}
+      {getGameDef(gameId).name}
     </ResultsHeading>
   );
 }
@@ -85,7 +85,7 @@ export function SiteFooter({
   metadata,
   note,
 }: {
-  /** Without it, the revision line is left out */
+  /** Without it, the footer leaves out the revision line */
   metadata?: SchemaMetadata;
   note?: string;
 }) {

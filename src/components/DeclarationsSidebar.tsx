@@ -20,7 +20,8 @@ import {
   SidebarList,
 } from "./layout/Sidebar";
 import { allDeclarations } from "../data/derived";
-import { countSearchShowFilters, type SearchResult } from "../utils/search";
+import { countSearchShowFilters } from "../utils/search-show-filters";
+import type { SearchResult } from "../utils/search-types";
 import { ShowFilterContext } from "./schema/ShowFilterContext";
 import { SearchResultContext } from "./search/SearchResultContext";
 import {
@@ -61,6 +62,7 @@ type ModuleMatches = [module: string, declarations: Declaration[]][];
 const unfilteredRowsCache = new WeakMap<Declarations, SidebarRows>();
 const unfilteredMatchesCache = new WeakMap<Declarations, ModuleMatches>();
 const unfilteredCountsCache = new WeakMap<Declarations, Map<ShowFilter, number>>();
+
 /**
  * Each module with its declarations in declaration order: the ones the search result has, or
  * without a search the ones the show filter keeps. The result is already narrowed to the filter
@@ -79,12 +81,15 @@ function listedModules(
 
   const { test } = SHOW_FILTERS[show];
   const modules: ModuleMatches = [];
+
   for (const [module, moduleMap] of declarations) {
     const items: Declaration[] = [];
+
     for (const d of moduleMap.values()) {
       const listed = shown ? shown.declarations.has(d) : test(d, context);
       if (listed) items.push(d);
     }
+
     if (items.length > 0) modules.push([module, items]);
   }
 
@@ -94,7 +99,7 @@ function listedModules(
 
 /**
  * The modules and their declarations. With no search, nothing collapsed, and everything shown,
- * the rows are the same for every page of a game, so they're cached instead of rebuilt per
+ * every page of a game has the same rows. The code caches them instead of rebuilding them per
  * render. Prerendering only ever hits this case, and a game can have tens of thousands of
  * declarations.
  */
@@ -114,9 +119,11 @@ function buildModuleRows(
 
   const rows: SidebarRow[] = [];
   const stickyIndexes: number[] = [];
+
   for (const [module, items] of listedModules(context, shown, show)) {
     stickyIndexes.push(rows.length);
     rows.push({ type: "header", module, count: items.length });
+
     if (!collapsed.has(module)) {
       for (const d of items) {
         rows.push({ type: "item", declaration: d });
@@ -143,8 +150,8 @@ function showCounts(context: GameContext, result: SearchResult | null): Map<Show
 }
 
 /**
- * Which declarations the sidebar lists. Only the filters that keep something are listed, and
- * the one that's on even when it keeps nothing
+ * Which declarations the sidebar lists. It lists only the filters that keep something, and the
+ * filter that is on even when it keeps nothing
  */
 export function DeclarationsShow({ setShow }: { setShow: (filter: ShowFilter) => void }) {
   const context = useContext(DeclarationsContext);
@@ -160,6 +167,14 @@ export function DeclarationsShow({ setShow }: { setShow: (filter: ShowFilter) =>
         if (count === 0 && filter !== show) return null;
         const { label, title } = SHOW_FILTERS[filter];
         const icon = SHOW_ICONS[filter];
+
+        let rowIcon = <ShowRowSpacer />;
+        if (filter === "exclusive") {
+          rowIcon = <ExclusiveIcon />;
+        } else if (icon) {
+          rowIcon = <KindIcon kind={icon} />;
+        }
+
         return (
           <ShowRow
             key={filter}
@@ -167,13 +182,7 @@ export function DeclarationsShow({ setShow }: { setShow: (filter: ShowFilter) =>
             {...tip(title)}
             onClick={() => setShow(filter)}
           >
-            {filter === "exclusive" ? (
-              <ExclusiveIcon />
-            ) : icon ? (
-              <KindIcon kind={icon} />
-            ) : (
-              <ShowRowSpacer />
-            )}
+            {rowIcon}
             <span>{label}</span>
             <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>
           </ShowRow>
@@ -234,9 +243,8 @@ const VirtualizedList = ({
       activeStickyIndexRef.current = active;
 
       const result = defaultRangeExtractor(range);
-      if (result[0] > active) {
-        result.unshift(active);
-      }
+      if (result[0] > active) result.unshift(active);
+
       return result;
     },
     [stickyIndexes],
@@ -258,13 +266,16 @@ const VirtualizedList = ({
       return;
     }
     if (!scope || !activeModule) return;
+
     if (navigatedFromSidebarRef.current) {
       navigatedFromSidebarRef.current = false;
       return;
     }
+
     if (activeIndex >= 0) {
       virtualizer.scrollToIndex(activeIndex, { align: "center" });
     }
+
     // Reset wrapper scroll in case the browser scrolled it
     const wrapper = parentRef.current?.parentElement;
     if (wrapper) wrapper.scrollTop = 0;
@@ -357,6 +368,7 @@ export const DeclarationsSidebar = ({ onNavigate }: { onNavigate?: () => void })
       } else {
         next.add(module);
       }
+
       return next;
     });
   }, []);

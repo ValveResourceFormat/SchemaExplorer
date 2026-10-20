@@ -31,12 +31,12 @@ export default defineConfig(({ mode }) => {
       reactRouter(),
       wyw({
         include: "src/**/*.tsx",
-        // The hash keeps same-named components in different files apart
+        // The hash separates same-named components in different files
         classNameSlug: mode === "development" ? "[title]_[hash]" : "[hash]",
         sourceMap: true,
         // The site targets current browsers, which need no vendor prefixes
         prefixer: false,
-        // The default "hybrid" strategy also resolves interpolations statically and, in dev, throws
+        // The default "hybrid" strategy also resolves interpolations statically. In dev, it throws
         // when that differs from evaluating them, even by whitespace or a component stub
         eval: { strategy: "execute" },
       }),
@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       sourcemap: true,
-      // Current browsers only, so neither the JS nor the CSS is rewritten or prefixed for older ones
+      // Current browsers only. The build does not rewrite or prefix the JS or the CSS for older ones
       target: "esnext",
       // Lists the licenses of the dependencies bundled into the site
       license: { fileName: "licenses.md" },

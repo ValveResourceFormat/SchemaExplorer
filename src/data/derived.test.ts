@@ -14,8 +14,6 @@ import { parsedSchemas, buildTestContext } from "./test-helpers";
 
 const ctx = buildTestContext();
 
-// ==================== crossModuleName ====================
-
 describe("crossModuleName", () => {
   it("maps C_ prefix to C (client → server)", () => {
     expect(crossModuleName("C_AK47")).toBe("CAK47");
@@ -50,16 +48,12 @@ describe("crossModuleName", () => {
   });
 });
 
-// ==================== declarationKey ====================
-
 describe("declarationKey", () => {
   it("joins module and name with slash", () => {
     expect(declarationKey("client", "C_BaseEntity")).toBe("client/C_BaseEntity");
     expect(declarationKey("server", "CBaseEntity")).toBe("server/CBaseEntity");
   });
 });
-
-// ==================== allDeclarations ====================
 
 describe("allDeclarations", () => {
   it("yields all declarations across modules", () => {
@@ -76,8 +70,6 @@ describe("allDeclarations", () => {
     expect([...allDeclarations(empty)]).toEqual([]);
   });
 });
-
-// ==================== buildAllGameContexts with test-schemas.json ====================
 
 describe("references", () => {
   it("records parent class references", () => {

@@ -4,29 +4,36 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration, useParams } from "reac
 import { styled } from "@linaria/react";
 import { AppContext } from "./components/AppContext";
 import { TooltipHost } from "./components/Tooltip";
-import { BASE_PATH, SITE_ORIGIN, canonicalUrl, getGameDef, isGameId } from "./games-list";
+import {
+  BASE_PATH,
+  SITE_NAME,
+  SITE_ORIGIN,
+  canonicalUrl,
+  gameIdFrom,
+  getGameDef,
+} from "./games-list";
 import { getGameContext } from "./data/derived";
 import { buildComponentEmbed } from "./utils/discord-embed";
 import ogImage from "./source2viewer.png";
 import searchPrehydrate from "./search-prehydrate.js?url";
 import "./global.css";
 
-const SITE_NAME = "Source 2 Schema Explorer";
 const OG_IMAGE_URL = SITE_ORIGIN + ogImage;
 /** The browser chrome and phone status bar match the navbar, which is --background in global.css */
 const THEME_COLORS = { light: "#f8f9fb", dark: "#0c131d" };
 
-// Custom Discord link preview for declaration pages, must be in the prerendered HTML
+// Custom Discord link preview for declaration pages. It must be in the prerendered HTML
 function DiscordComponentEmbed() {
-  const { game, module, scope } = useParams();
-  if (!game || !module || !scope || !isGameId(game)) return null;
+  const { game: gameParam, module, scope } = useParams();
+  const game = gameIdFrom(gameParam);
+  if (!game || !module || !scope) return null;
 
   const decl = getGameContext(game).declarations.get(module)?.get(scope);
   if (!decl) return null;
 
   const json = buildComponentEmbed(decl, {
     siteName: SITE_NAME,
-    gameName: getGameDef(game)!.name,
+    gameName: getGameDef(game).name,
     url: canonicalUrl(game, module, scope),
     imageUrl: OG_IMAGE_URL,
   });

@@ -4,7 +4,8 @@ import { INTRINSIC_MODULE } from "./intrinsics";
 import type { SchemaClass, SchemaFieldType, Declaration } from "./types";
 import type { GameId } from "../games-list";
 import { parseSearch } from "../utils/filtering";
-import { searchSchemas, type SearchContext, type SearchResult } from "../utils/search";
+import { searchSchemas } from "../utils/search";
+import type { SearchContext, SearchResult } from "../utils/search-types";
 import testData from "../utils/test-schemas.json";
 
 export const parsedSchemas = parseSchemas(testData as SchemasJson);

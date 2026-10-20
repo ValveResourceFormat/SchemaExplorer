@@ -11,7 +11,7 @@ import {
   rowDeclarations,
   SIMILAR_SHOWN,
 } from "./result-rows";
-import type { NameHit, SearchResult } from "./search";
+import type { NameHit, SearchResult } from "./search-types";
 
 function types(result: SearchResult, showAll = false): string[] {
   return buildResultRows(result, showAll).map((row) => row.type);

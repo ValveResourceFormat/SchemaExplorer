@@ -2,9 +2,9 @@ const FUZZY_MIN_PATTERN_LEN = 3;
 /** Letters of a fuzzy match may span this many times the pattern length, plus the slack */
 const FUZZY_SPAN_FACTOR = 2;
 const FUZZY_SPAN_SLACK = 2;
-/** Only words of this length are looked for as typos */
+/** The search checks only words of this length or longer for typos */
 export const TYPO_MIN_PATTERN_LEN = 4;
-/** Typos are only looked for when a search has fewer results than this */
+/** The search checks for typos only when it has fewer results than this */
 export const TYPO_MAX_RESULTS = 10;
 const UNDERSCORE = 95;
 
@@ -119,9 +119,9 @@ const greedyIndexes: number[] = [];
 const boundaryIndexes: number[] = [];
 
 /**
- * The letters of the pattern in order from a word start, within `limit`. Two scans compete: one
- * takes the first letter it finds, the other only letters that start a word, and the better one
- * gives the match
+ * The letters of the pattern in order from a word start, within `limit`. Two scans compete. One
+ * takes the first letter it finds. The other takes only letters that start a word. The better
+ * scan gives the match
  */
 function fuzzyFrom(
   pattern: string,
@@ -133,17 +133,18 @@ function fuzzyFrom(
   const m = pattern.length;
   const n = name.length;
 
-  let gPi = 0,
-    gPrevPos = -1,
-    gBoundaryHits = 0,
-    gConsecutive = 0,
-    gGap = 0,
-    gCase = 0;
-  let bPi = 0,
-    bPrevPos = -1,
-    bConsecutive = 0,
-    bGap = 0,
-    bCase = 0;
+  let gPi = 0;
+  let gPrevPos = -1;
+  let gBoundaryHits = 0;
+  let gConsecutive = 0;
+  let gGap = 0;
+  let gCase = 0;
+
+  let bPi = 0;
+  let bPrevPos = -1;
+  let bConsecutive = 0;
+  let bGap = 0;
+  let bCase = 0;
 
   for (let ti = start; ti < limit; ti++) {
     const low = lower.charCodeAt(ti);
@@ -192,9 +193,9 @@ function fuzzyFrom(
 }
 
 /**
- * The letters of the pattern in order. The first letter has to start a word and the letters
- * have to fit in a few times the pattern's length, so a name with the letters scattered along it
- * isn't a match. The best start gives the match
+ * The letters of the pattern in order. The first letter has to start a word. The letters have to
+ * fit in a few times the pattern's length, so a name with the letters scattered along it isn't a
+ * match. The best start gives the match
  */
 function fuzzyMatch(pattern: string, name: string, lower: string): NameMatch | null {
   const m = pattern.length;
@@ -254,8 +255,8 @@ function collapsePattern(pattern: string): string {
 
 /**
  * A pattern with an underscore inside it against a name without its underscores: mana_regen is
- * m_flManaRegen. Only matches that start a word count, the ranges are the parts between the
- * name's underscores
+ * m_flManaRegen. Only matches that start a word count. The ranges are the parts between the
+ * underscores of the name
  */
 function scoreCollapsed(pattern: string, name: string, lower: string): NameMatch | null {
   const collapsed = collapsePattern(pattern);
@@ -299,8 +300,8 @@ function hasInnerUnderscore(pattern: string): boolean {
 
 /**
  * How a name matches a lowercased pattern, or null. `lower` is the lowercased name. An occurrence
- * that starts a word wins over an earlier one inside a word, and one that ends a word over one
- * that cuts into the next. Patterns shorter than FUZZY_MIN_PATTERN_LEN, and any when `fuzzy` is
+ * that starts a word wins over an earlier one inside a word. An occurrence that ends a word wins
+ * over one that cuts into the next. Patterns shorter than FUZZY_MIN_PATTERN_LEN, and any when `fuzzy` is
  * false, only match as a substring. Patterns of two letters or fewer, and ones ending in an
  * underscore, don't match inside a word. A pattern with an underscore inside it also matches the
  * name without its underscores.
@@ -401,8 +402,8 @@ function sameLetters(
 }
 
 /**
- * Whether the pattern is the text at `start` with `length` letters, give or take one edit: a
- * letter added, left out or changed, or two next letters swapped
+ * Whether the pattern equals the text at `start` with `length` letters, within one edit. An edit
+ * is a letter added, removed, or changed, or two adjacent letters swapped
  */
 function withinOneEdit(pattern: string, text: string, start: number, length: number): boolean {
   const m = pattern.length;
@@ -464,7 +465,7 @@ export function longestWordLength(name: string): number {
 
 /**
  * The length a word of a name needs to be a typo target of one of the words: one less than the
- * shortest word that is looked for as a typo. 0 when no word is long enough for that
+ * shortest word that the search checks for typos. 0 when no word is long enough for that
  */
 export function shortestTypoTarget(words: readonly string[]): number {
   let shortest = 0;
@@ -478,7 +479,7 @@ export function shortestTypoTarget(words: readonly string[]): number {
 
 /**
  * A word of the name that the pattern is a typo of, or null: one edit from the word, or from the
- * start of a longer one. Words are split where the scorer starts them. Patterns shorter than
+ * start of a longer one. Words start where the scorer starts them. Patterns shorter than
  * TYPO_MIN_PATTERN_LEN never match. The ranges are the word's matched part
  */
 export function typoMatch(pattern: string, name: string, lower: string): NameMatch | null {
@@ -508,8 +509,8 @@ export function typoMatch(pattern: string, name: string, lower: string): NameMat
 
 /**
  * One match per word, from `scoreWord` or else, as a typo, from `typoWord`. Both are given the
- * target the words are matched against. Null when a word has neither, and when no word needed
- * a typo: such a name is found or not found by its words already
+ * target that the words are matched against. Null when a word has neither, and when no word needed
+ * a typo. The words already find or miss such a name
  */
 export function matchTypoWords<T>(
   words: readonly string[],
@@ -563,7 +564,7 @@ export function nameMatchTier(
 
   let tier = TIER_EXACT;
   for (const w of words) tier = Math.max(tier, bestTier(w));
-  // A space often stands for an underscore or nothing, "cl color" is an exact cl_color
+  // A space often stands for an underscore or nothing. "cl color" is an exact cl_color
   if (words.length > 1 && tier > TIER_EXACT) {
     for (const form of joinedWordForms(words)) tier = Math.min(tier, bestTier(form));
   }

@@ -8,8 +8,6 @@ import {
   matchesMetadataValues,
 } from "./filtering";
 
-// -- parseIntValue --
-
 describe("parseIntValue", () => {
   it("parses decimal", () => {
     expect(parseIntValue("128")).toBe(128);
@@ -27,8 +25,6 @@ describe("parseIntValue", () => {
     expect(parseIntValue(" 42 ")).toBe(42);
   });
 });
-
-// -- isFilterPrefix --
 
 describe("isFilterPrefix", () => {
   it("recognizes module:", () => {
@@ -54,8 +50,6 @@ describe("isFilterPrefix", () => {
     expect(isFilterPrefix("moduleName")).toBe(false);
   });
 });
-
-// -- Tags written alone and punctuation --
 
 describe("parseSearch with a tag written alone", () => {
   it("takes the next word as the value", () => {
@@ -113,8 +107,6 @@ describe("parseSearch with punctuation around words", () => {
     expect(parseSearch("health: module:client").nameWords).toEqual(["health"]);
   });
 });
-
-// -- parseSearch --
 
 describe("parseSearch", () => {
   it("returns empty for empty string", () => {
@@ -261,8 +253,6 @@ describe("parseSearch", () => {
   });
 });
 
-// -- matchesMetadataKeys --
-
 describe("matchesMetadataKeys", () => {
   it("matches when key present", () => {
     expect(matchesMetadataKeys([{ name: "MNotSaved" }], ["mnot"])).toBe(true);
@@ -283,8 +273,6 @@ describe("matchesMetadataKeys", () => {
     expect(matchesMetadataKeys([{ name: "MNotSaved" }], ["saved"])).toBe(true);
   });
 });
-
-// -- matchesMetadataValues --
 
 describe("matchesMetadataValues", () => {
   it("matches when value present", () => {

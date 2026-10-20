@@ -1,5 +1,5 @@
-// Kept apart from components: the build evaluates this module to inline it into other files' CSS,
-// and it can only do that for plain values
+// Kept apart from components: the build evaluates this module to inline it into other files' CSS.
+// It can do that only for plain values
 
 /** A chevron before the text, pointing down while expanded and right while collapsed */
 export const chevronBefore = `

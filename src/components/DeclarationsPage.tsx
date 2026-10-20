@@ -6,7 +6,7 @@ import { ShowFilterContext } from "./schema/ShowFilterContext";
 import { PageProviders, PageShell } from "./layout/PageShell";
 import { SearchResultContext } from "./search/SearchResultContext";
 import type { ShowFilter } from "../data/show-filters";
-import { filterSearchResult } from "../utils/search";
+import { filterSearchResult } from "../utils/search-show-filters";
 
 export default function DeclarationsPage({ context }: { context: GameContext }) {
   return (
@@ -19,7 +19,7 @@ export default function DeclarationsPage({ context }: { context: GameContext }) 
 function DeclarationsLayout() {
   const context = useContext(DeclarationsContext);
   const { result } = useContext(SearchResultContext);
-  // Stays on while browsing, and when switching to another game
+  // The filter stays on while browsing and when switching to another game
   const [show, setShow] = useState<ShowFilter>("all");
 
   // Narrowed once for the sidebar's list and the results list

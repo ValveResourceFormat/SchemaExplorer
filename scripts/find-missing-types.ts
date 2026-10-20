@@ -24,10 +24,16 @@ function collectMissing(
   switch (type.category) {
     case "atomic":
       if (!intrinsicNames.has(type.name)) {
-        if (!atomics.has(type.name)) atomics.set(type.name, { sources: new Set(), count: 0 });
-        atomics.get(type.name)!.sources.add(source);
-        atomics.get(type.name)!.count++;
+        let info = atomics.get(type.name);
+        if (!info) {
+          info = { sources: new Set(), count: 0 };
+          atomics.set(type.name, info);
+        }
+
+        info.sources.add(source);
+        info.count++;
       }
+
       if (type.inner) collectMissing(type.inner, atomics, declared, knownKeys, source);
       if (type.inner2) collectMissing(type.inner2, atomics, declared, knownKeys, source);
       break;
@@ -37,9 +43,14 @@ function collectMissing(
       if (!type.module) break;
       const key = declarationKey(type.module, type.name);
       if (!knownKeys.has(key)) {
-        if (!declared.has(key)) declared.set(key, { sources: new Set(), count: 0 });
-        declared.get(key)!.sources.add(source);
-        declared.get(key)!.count++;
+        let info = declared.get(key);
+        if (!info) {
+          info = { sources: new Set(), count: 0 };
+          declared.set(key, info);
+        }
+
+        info.sources.add(source);
+        info.count++;
       }
       break;
     }
@@ -67,6 +78,7 @@ for (const game of ALL_GAMES) {
 
   for (const decl of allDeclarations(declarations)) {
     if (decl.kind !== "class") continue;
+
     for (const field of decl.fields) {
       collectMissing(field.type, missingAtomics, missingDeclared, knownKeys, game.id);
     }

@@ -23,7 +23,7 @@ const KINDS = [
   { kind: "commands", label: "Commands", icon: "command" },
 ] as const;
 
-// Flags explain themselves via their tooltip instead, modules don't have one
+// Flags explain themselves in their tooltip instead. Modules don't have one
 const MODULE_TITLE: Record<TagState, (value: string) => string> = {
   off: (v) => `Only show ${v}`,
   include: (v) => `Stop filtering by ${v}`,
@@ -170,6 +170,13 @@ function FlagFilterItem({
   const { game } = useContext(DeclarationsContext);
   const icon = flagIcon(flag);
 
+  let marker: React.ReactNode = <Dot />;
+  if (flag === EXCLUSIVE_FLAG) {
+    marker = <ExclusiveIcon />;
+  } else if (icon) {
+    marker = <KindIcon kind={icon} />;
+  }
+
   return (
     <FilterItem
       data-group={flagGroup(flag)}
@@ -180,7 +187,7 @@ function FlagFilterItem({
       {...flagTip(flag, game)}
     >
       {/* The flag's own icon takes the place of the color dot */}
-      {flag === EXCLUSIVE_FLAG ? <ExclusiveIcon /> : icon ? <KindIcon kind={icon} /> : <Dot />}
+      {marker}
       <ItemName>{flag}</ItemName>
       {state === "exclude" && <VisuallyHidden>(hidden)</VisuallyHidden>}
       <SidebarCount>{count.toLocaleString("en-US")}</SidebarCount>

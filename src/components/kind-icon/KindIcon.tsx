@@ -70,12 +70,12 @@ export const KindIcon = ({ kind, size = 16, ...props }: IconProps & { kind: Icon
   <SpriteIcon id={`ki-${kind}`} size={size} {...props} />
 );
 
-/** A module's icon, the engine types have their own */
+/** A module's icon. The engine types have their own */
 export const ModuleIcon = ({ module, size = 16, ...props }: IconProps & { module: string }) => (
   <KindIcon kind={module === INTRINSIC_MODULE ? "intrinsic" : "module"} size={size} {...props} />
 );
 
-/** A module's name in a list of modules, only the engine types get an icon as they aren't a DLL */
+/** A module's name in a list of modules. Only the engine types get an icon, because they aren't a DLL */
 export const ModuleLabel = ({ module }: { module: string }) => (
   <>
     {module === INTRINSIC_MODULE && <KindIcon kind="intrinsic" />}

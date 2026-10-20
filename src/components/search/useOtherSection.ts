@@ -19,8 +19,8 @@ export const SECTIONS = {
 } as const satisfies Record<SearchMode, { label: string; icon: string }>;
 
 /**
- * The other section's results for the page's search. The schemas' are the page's own search
- * result, which is for the same search when nothing was dropped from it
+ * The other section's results for the page's search. For the schemas, these are the page's own
+ * search result. That result is for the same search when nothing was dropped from it
  */
 function searchOtherSection(
   context: GameContext,
@@ -50,9 +50,9 @@ export function sectionTotal(context: GameContext, section: SearchMode): number 
 export type OtherSection = ReturnType<typeof useOtherSection>;
 
 /**
- * The other section with the current search carried over, and its results there. They are
- * null without a search, or when the search uses filters only this section has. `count` is
- * how many results the other section lists
+ * The other section with the current search carried over, and its results there. The results
+ * are null without a search. They are also null when the search uses filters that only this
+ * section has. `count` is the number of results the other section lists
  */
 export function useOtherSection(section: SearchMode) {
   const context = useContext(DeclarationsContext);
@@ -83,8 +83,8 @@ export function useOtherSection(section: SearchMode) {
 export const OtherSectionContext = createContext<OtherSection | null>(null);
 
 /**
- * The other section's results that match better than this section's `own`, and how many results
- * it has in all. Null without any results there
+ * The other section's results that match better than this section's `own`, and the total number
+ * of results there. Null without any results there
  */
 export function useBetterMatches(own: SectionItems | null) {
   const { designNamesByDeclaration } = useContext(DeclarationsContext);

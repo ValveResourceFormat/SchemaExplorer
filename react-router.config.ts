@@ -31,6 +31,7 @@ export default {
 
             for (const [mod, moduleMap] of declarations) {
               paths.push(`/${game.id}/${mod}`);
+
               if (!limit || count < limit) {
                 for (const name of moduleMap.keys()) {
                   if (process.platform === "win32" && name.includes("::")) continue;
@@ -40,9 +41,10 @@ export default {
               }
             }
 
-            // Design name links like /cs2/logic_relay redirect in the browser, a page of their own
+            // The browser redirects design name links like /cs2/logic_relay. A page of their own
             // gives link previews the entity's title and description
             const designNames = new Set<string>();
+
             for (const entity of entities) {
               const { designName } = entity;
               if (!designName || declarations.has(designName)) continue;
@@ -50,6 +52,7 @@ export default {
               if (process.platform === "win32" && /[<>:"|?*]/.test(designName)) continue;
               designNames.add(designName);
             }
+
             for (const designName of [...designNames].slice(0, limit || undefined)) {
               paths.push(`/${game.id}/${designName}`);
             }

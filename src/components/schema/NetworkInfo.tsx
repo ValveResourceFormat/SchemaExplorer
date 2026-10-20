@@ -19,8 +19,6 @@ import { Detail } from "./Detail";
 import { dimLink } from "./link-styles";
 import { tip } from "../Tooltip";
 
-// -- Field rows --
-
 /** In the row's notes, lined up with the field's name */
 const NetworkLine = styled.div`
   display: flex;
@@ -61,6 +59,7 @@ export function NetworkedMark({ sending }: { sending?: FieldSending }) {
   const text = off
     ? `Networked, but not sent by this class: ${sendingReason(sending)}`
     : `Networked, sent from the server to clients. ${sendingReason(sending)}`;
+
   return (
     <Mark {...tip(text.trim())} aria-label={off ? "not sent" : "networked"}>
       <KindIcon kind={off ? "meta-broadcast-off" : "meta-broadcast"} />
@@ -74,13 +73,14 @@ function sendingReason(sending: FieldSending | undefined) {
   const { by, sent, group, noBase, via } = sending;
   if (via) return `It's kept for ${via}, which is sent.`;
   if (noBase) return `${by} sends none of its bases' fields it doesn't include.`;
+
   const verb = sent ? "includes" : "excludes";
   return group ? `${by} ${verb} its user group ${group}.` : `${by} ${verb} it.`;
 }
 
 /**
- * A name to search the network data for, like a user group or a callback. The search is for the
- * whole value, not every name containing it, like LocalPlayerExclusive for Player
+ * A name to search the network data for, like a user group or a callback. The search matches the
+ * whole value, not every name that contains it, like LocalPlayerExclusive for Player
  */
 function SearchValue({ value }: { value: string }) {
   const { game } = useContext(DeclarationsContext);
@@ -105,6 +105,7 @@ function ClassName({ name, module }: { name: string; module: string }) {
   const { game, declarations } = useContext(DeclarationsContext);
   const target = findDeclarationByName(declarations, name, "class", module);
   if (!target) return <Value>{name}</Value>;
+
   return (
     <Link to={schemaPath(game, target.module, target.name)} title={`class in ${target.module}`}>
       <Value>{name}</Value>
@@ -113,8 +114,8 @@ function ClassName({ name, module }: { name: string; module: string }) {
 }
 
 /**
- * The properties shown as they are, in this order. Names others search for link to a network:
- * search, numbers and types are plain
+ * The properties, shown as they are, in this order. Names that others search for link to a
+ * search with the network: tag, and numbers and types are plain
  */
 const FIELD_PROPERTIES: {
   key: keyof FieldNetwork;
@@ -129,7 +130,7 @@ const FIELD_PROPERTIES: {
   { key: "encoder", label: "encoder", tip: "Encoder.", search: true },
   { key: "bitCount", label: "bits", tip: "Bits it's sent in, 32 when not given." },
   { key: "encodeFlags", label: "encode flags", tip: "Encoder flags." },
-  // Not a send rate: fields are sorted by it, so the ones that change often get small indices
+  // Not a send rate. Fields sort by it, so the ones that change often get small indices
   {
     key: "priority",
     label: "priority",
@@ -164,12 +165,13 @@ const FIELD_PROPERTIES: {
 export type FieldAttr = { key: string; label: string; tip: string; value?: React.ReactNode };
 
 /**
- * What to show of how a field is sent, nothing for a field sent as its own type with the
- * defaults. The module of the declaring class is preferred when a property names a class
+ * What to show of how a field is sent. A field sent as its own type with the defaults has nothing
+ * to show. A property that names a class prefers the module of the declaring class
  */
 export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr[] {
   const network = field.network;
   if (!network) return [];
+
   const attrs: FieldAttr[] = [];
   const typeText = formatFieldType(field.type);
 
@@ -181,6 +183,7 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
       value: <Value>{network.type}</Value>,
     });
   }
+
   // Most name a class the field's type names already
   if (network.class && !typeText.split(/\W+/).includes(network.class)) {
     attrs.push({
@@ -190,9 +193,11 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
       value: <ClassName name={network.class} module={module} />,
     });
   }
+
   if (network.polymorphic) {
     attrs.push({ key: "polymorphic", label: "polymorphic", tip: "A polymorphic pointer." });
   }
+
   if (network.typeAlias && network.typeAlias !== network.alias) {
     attrs.push({
       key: "typeAlias",
@@ -201,9 +206,11 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
       value: <Value>{network.typeAlias}</Value>,
     });
   }
+
   for (const { key, label, tip, search } of FIELD_PROPERTIES) {
     const value = network[key];
     if (value == null || value === false) continue;
+
     const values = Array.isArray(value) ? value : [String(value)];
     attrs.push({
       key,
@@ -212,7 +219,9 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
       value: search ? <SearchValues values={values} /> : <Value>{values.join(", ")}</Value>,
     });
   }
+
   const range = formatRange(network.min?.toString(), network.max?.toString());
+
   if (range) {
     attrs.push({
       key: "range",
@@ -221,6 +230,7 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
       value: <Value>{range}</Value>,
     });
   }
+
   return attrs;
 }
 
@@ -237,8 +247,6 @@ export function FieldNetworkLine({ attrs }: { attrs: FieldAttr[] }) {
     </NetworkLine>
   );
 }
-
-// -- Class details --
 
 const NetworkList = styled.div`
   display: grid;
@@ -308,11 +316,13 @@ function FieldName({
   const named = (f: SchemaField) => f.name === first || networkName(f) === first;
   let owner: { module: string; name: string } | undefined;
   let field: SchemaField | undefined;
+
   if (className) {
-    // A||B::field names several classes, the first the game has links
+    // A||B::field names several classes. It links the first class that the game has
     for (const name of className.split("||")) {
       const cls = findDeclarationByName(declarations, name, "class", declaration.module);
       if (!cls) continue;
+
       owner = cls;
       if (cls.kind === "class") field = cls.fields.find(named);
       break;
@@ -320,13 +330,16 @@ function FieldName({
   } else {
     field = declaration.fields.find(named);
     if (field) owner = declaration;
+
     // The nearest base first
     for (let i = bases.length - 1; !field && i >= 0; i--) {
       field = bases[i].fields.find(named);
       if (field) owner = bases[i].parent;
     }
   }
+
   const fieldName = field?.name ?? first;
+
   // Long ones wrap after the class rather than inside a name
   const text =
     className && showClass ? (
@@ -338,7 +351,9 @@ function FieldName({
     ) : (
       path
     );
+
   if (!owner) return <Value>{text}</Value>;
+
   return (
     <Link
       to={fieldLink(game, owner.module, owner.name, fieldName)}
@@ -365,12 +380,18 @@ const OVERRIDE_KINDS: Record<string, string> = {
 /** Overrides of the same class, kind and value on one line, like m_cellX, m_cellY and m_cellZ */
 function groupOverrides(overrides: NetworkOverride[]) {
   const groups = new Map<string, { key: string; override: NetworkOverride; fields: string[] }>();
+
   for (const o of overrides) {
     const key = `${o.class}/${o.kind}/${o.value}`;
     const group = groups.get(key);
-    if (group) group.fields.push(o.field);
-    else groups.set(key, { key, override: o, fields: [o.field] });
+
+    if (group) {
+      group.fields.push(o.field);
+    } else {
+      groups.set(key, { key, override: o, fields: [o.field] });
+    }
   }
+
   return [...groups.values()];
 }
 
@@ -404,10 +425,12 @@ export function ClassNetworkDetail({
   bases: InheritedBase[];
 }) {
   if (!declaration.network) return null;
-  // The class's own fields say on their rows whether it sends them, the lists name them by alias
+
+  // The class's own fields say on their rows whether it sends them. The lists name them by alias
   const own = new Set(declaration.fields.flatMap((f) => [f.name, networkName(f)]));
   const rows = networkRows(declaration, declaration.network, bases, own);
   if (rows.length === 0) return null;
+
   return (
     <Detail label="Network">
       <RowList rows={rows} />
@@ -452,11 +475,13 @@ function networkRows(
     let names = network[key];
     if (fields && hidden) names = names?.filter((name) => !hidden.has(name));
     if (!names?.length) continue;
+
     rows.push({
       label,
       tip,
       items: names.map((name) => {
         if (!fields) return <SearchValue key={name} value={name} />;
+
         // CGameSceneNode::m_hParent is the field in serializers of the class nested anywhere
         const colons = name.indexOf("::");
         return colons < 0
@@ -465,34 +490,38 @@ function networkRows(
       }),
     });
   }
+
   if (network.overrides) {
     rows.push({
       label: "Overrides",
       tip: "Changes to how fields of this class or its bases are sent.",
       lines: true,
-      items: groupOverrides(network.overrides).map(({ key, override: o, fields }) => (
-        <span key={key}>
-          {fields.map((f, i) => (
-            <React.Fragment key={f}>
-              {i > 0 && ", "}
-              {field(f, o.class, i === 0)}
-            </React.Fragment>
-          ))}{" "}
-          →{" "}
-          {o.kind === "userGroup" && !o.value
-            ? "no user groups"
-            : (OVERRIDE_KINDS[o.kind] ?? o.kind)}
-          {/* Kinds without a value, like resetting, have an empty one */}
-          {o.value && (
-            <>
-              {" "}
-              <Value>{o.value}</Value>
-            </>
-          )}
-        </span>
-      )),
+      items: groupOverrides(network.overrides).map(({ key, override: o, fields }) => {
+        const noUserGroups = o.kind === "userGroup" && !o.value;
+        const kindLabel = noUserGroups ? "no user groups" : (OVERRIDE_KINDS[o.kind] ?? o.kind);
+
+        return (
+          <span key={key}>
+            {fields.map((f, i) => (
+              <React.Fragment key={f}>
+                {i > 0 && ", "}
+                {field(f, o.class, i === 0)}
+              </React.Fragment>
+            ))}{" "}
+            → {kindLabel}
+            {/* Kinds without a value, like resetting, have an empty one */}
+            {o.value && (
+              <>
+                {" "}
+                <Value>{o.value}</Value>
+              </>
+            )}
+          </span>
+        );
+      }),
     });
   }
+
   if (network.varTypeOverrides) {
     rows.push({
       label: "Type overrides",
@@ -505,6 +534,7 @@ function networkRows(
       )),
     });
   }
+
   if (network.replayCompatFields) {
     rows.push({
       label: "Replay compat",
@@ -517,6 +547,7 @@ function networkRows(
       )),
     });
   }
+
   if (network.outOfPVSUpdates != null) {
     rows.push({
       label: "Out of PVS updates",
@@ -524,10 +555,12 @@ function networkRows(
       items: <Value>{network.outOfPVSUpdates}</Value>,
     });
   }
+
   const flags = [
     network.varsAtomic && "vars atomic",
     network.structNotInNetworkUtlVectorEmbedded && "not in embedded network vectors",
   ].filter(Boolean);
+
   if (flags.length > 0) {
     rows.push({
       label: "Flags",

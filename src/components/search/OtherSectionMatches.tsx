@@ -8,9 +8,9 @@ import { FieldRowView, NameRowView, OtherSectionHeading, OtherSectionHint } from
 import { SECTIONS, useBetterMatches } from "./useOtherSection";
 
 /**
- * Above the ConVars page's results, the schemas that match the search better, like the
- * CBaseEntity class when searching for baseentity. Without results of its own, a link to the
- * schemas when they have any
+ * Shows the schemas that match the search better above the ConVars page's results, like the
+ * CBaseEntity class when searching for baseentity. Without results of its own, the page shows a
+ * link to the schemas when they have any
  */
 export function OtherSectionMatches({ own }: { own: readonly ConsoleMatch[] }) {
   const items = useMemo<SectionItems>(() => ({ section: "console", items: own }), [own]);

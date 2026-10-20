@@ -304,7 +304,7 @@ describe("fieldSending of nested serializers", () => {
   });
 
   it("leaves out fields with nothing nested under them sent", () => {
-    // Its own field excluded, CScaleNode has nothing to send, but it isn't left out for that
+    // Its own field is excluded, so CScaleNode has nothing to send. It isn't left out for that
     const entity = declarations.get("m")!.get("CEntity") as SchemaClass;
     expect(byName(fieldSending(declarations, entity))).toEqual({});
   });

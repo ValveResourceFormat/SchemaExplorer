@@ -1,5 +1,5 @@
-// Kept apart from components: the build evaluates this module to inline it into other files' CSS,
-// and it can only do that for plain values
+// Kept apart from components. The build evaluates this module to inline it into other files' CSS.
+// It can only do that for plain values
 
 /** Sets --c to the color of the element's data-group flag group */
 export const flagColorVars = `

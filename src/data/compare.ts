@@ -47,17 +47,21 @@ function metadataEqual(a: SchemaMetadataEntry[], b: SchemaMetadataEntry[]): bool
 /** Network data is only compared when both games have it, Deadlock's dump doesn't */
 function compareClasses(a: SchemaClass, b: SchemaClass, compareNetwork: boolean): DiffStatus {
   if (a.parents.length !== b.parents.length) return "differs";
-  // Size, alignment and base offsets are layout, like field offsets. Dumps that are not kept up
-  // to date have no layout, there is nothing to compare then
+
+  // Size, alignment, and base offsets are layout, like field offsets. Dumps that are not kept up
+  // to date have no layout. There is nothing to compare then
   const hasLayout = a.size != null && b.size != null;
   let offsetsDiffer = hasLayout && (a.size !== b.size || a.alignment !== b.alignment);
+
   for (let i = 0; i < a.parents.length; i++) {
     if (a.parents[i].name !== b.parents[i].name || a.parents[i].module !== b.parents[i].module)
       return "differs";
     if (hasLayout && a.parents[i].offset !== b.parents[i].offset) offsetsDiffer = true;
   }
+
   if (a.flags.join() !== b.flags.join()) return "differs";
   if (a.fields.length !== b.fields.length) return "differs";
+
   for (let i = 0; i < a.fields.length; i++) {
     if (a.fields[i].name !== b.fields[i].name) return "differs";
     if (!typesEqual(a.fields[i].type, b.fields[i].type)) return "differs";
@@ -66,8 +70,10 @@ function compareClasses(a: SchemaClass, b: SchemaClass, compareNetwork: boolean)
     if (a.fields[i].defaultValue !== b.fields[i].defaultValue) return "differs";
     if (hasLayout && a.fields[i].offset !== b.fields[i].offset) offsetsDiffer = true;
   }
+
   if (!metadataEqual(a.metadata, b.metadata)) return "differs";
   if (compareNetwork && !deepEqual(a.network, b.network)) return "differs";
+
   return offsetsDiffer ? "offsets_only" : "identical";
 }
 

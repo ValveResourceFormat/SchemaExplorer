@@ -1,4 +1,4 @@
-// Structured C++ type from the JSON dump. If this changes, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
+// Structured C++ type from the JSON dump. If this changes, update the pseudo-schema in scripts/generate-llms.ts (llms.txt)
 export type SchemaFieldType =
   | { category: "builtin"; name: string }
   | { category: "ptr"; inner: SchemaFieldType }
@@ -22,7 +22,7 @@ export type SchemaFieldType =
 
 /**
  * Raw metadata text, or a parsed object for MGetKV3ClassDefaults. Unparseable defaults stay
- * the string "Could not parse KV3 Defaults".
+ * the string "Could not parse KV3 Defaults"
  */
 export type SchemaMetadataValue = string | Record<string, unknown>;
 
@@ -157,7 +157,7 @@ export interface SchemaEnum {
 
 export type Declaration = SchemaClass | SchemaEnum;
 
-// Console variables and commands. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
+// Console variables and commands. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt)
 export interface ConVar {
   kind: "convar";
   name: string;
@@ -184,13 +184,13 @@ export interface ConCommand {
 export type ConsoleItem = ConVar | ConCommand;
 
 // Entity classes, in the games whose dumps have them. Keys, inputs and outputs are only the ones
-// added since baseClass.
+// added since baseClass
 export interface EntityKey {
   name: string;
   type: string;
   field?: string;
   /**
-   * Class whose datadesc adds the key, the field can be inherited from its schema parents (see
+   * Class whose datadesc adds the key. The field can be inherited from its schema parents (see
    * resolveKeyField). The dump omits it when it's the entity's class. For component keys it's the
    * component's datamap class, like CGameSceneNode for CBodyComponent
    */

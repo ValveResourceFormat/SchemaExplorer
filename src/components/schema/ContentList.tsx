@@ -54,14 +54,14 @@ function ModuleList() {
   );
 }
 
-// Memoized, so state kept above it renders the page again only when the page reads it from a
+// Memoized. State kept above it renders the page again only when the page reads that state from a
 // context
 export const ContentList = memo(function ContentList() {
   const { game, declarations, metadata, error } = useContext(DeclarationsContext);
   const { search } = useContext(SearchContext);
   const { game: gameParam, module, scope } = useParams();
   const declaration = module && scope ? declarations.get(module)?.get(scope) : undefined;
-  const gameName = getGameDef(game)?.name ?? game;
+  const gameName = getGameDef(game).name;
   const isIntrinsic = module === INTRINSIC_MODULE;
   const moduleTitle = isIntrinsic
     ? moduleLabel(INTRINSIC_MODULE)

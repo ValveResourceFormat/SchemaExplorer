@@ -75,11 +75,14 @@ export function parseConsoleSearch(search: string): ParsedConsoleSearch {
     const value = w.slice(colon + 1);
 
     if (tag === "module:") {
-      if (value) (negated ? parsed.notModules : parsed.modules).push(value);
+      const list = negated ? parsed.notModules : parsed.modules;
+      if (value) list.push(value);
     } else if (tag === "flag:") {
-      if (value) (negated ? parsed.notFlags : parsed.flags).push(value);
+      const list = negated ? parsed.notFlags : parsed.flags;
+      if (value) list.push(value);
     } else if (tag === "type:") {
-      if (value) (negated ? parsed.notTypes : parsed.types).push(value);
+      const list = negated ? parsed.notTypes : parsed.types;
+      if (value) list.push(value);
     } else {
       const nameWord = trimConsoleNameWord(word);
       if (nameWord) parsed.nameWords.push(nameWord);
@@ -106,10 +109,11 @@ export interface ConsoleStats {
 
 const statsCache = new WeakMap<ConsoleItem[], ConsoleStats>();
 
-/** Cached per game, the item list is built once when the schemas are loaded */
+/** Cached per game. The app builds the item list once when it loads the schemas */
 export function getConsoleStats(items: ConsoleItem[]): ConsoleStats {
   let stats = statsCache.get(items);
   if (stats) return stats;
+
   const convars = items.filter((i) => i.kind === "convar").length;
   const modules = countBy(items, (i) => i.modules);
   const flags = countBy(items, (i) => i.flags);
@@ -123,6 +127,7 @@ export function getConsoleStats(items: ConsoleItem[]): ConsoleStats {
     commands: items.length - convars,
   };
   statsCache.set(items, stats);
+
   return stats;
 }
 
@@ -134,8 +139,8 @@ export function consoleCountsText(stats: ConsoleStats): string {
 type Predicate = (value: string) => boolean;
 
 /**
- * A tag value matches exactly when it is a known name, so module:client does not also
- * match panoramauiclient, otherwise as a substring while it's still being typed.
+ * A tag value that is a known name matches exactly, so module:client does not match
+ * panoramauiclient. Any other value matches as a substring while it is still being typed
  */
 function valuePredicates(values: string[], known: Map<string, number>): Predicate[] {
   return values.map((v): Predicate => (known.has(v) ? (x) => x === v : (x) => x.includes(v)));
@@ -170,8 +175,8 @@ function combinedMatch(matches: readonly NameMatch[]): NameMatch {
 }
 
 /**
- * The best of `best` and the words joined the ways a space can stand for. A space often stands
- * for an underscore or nothing, so "cl color" is also an exact cl_color
+ * The better of `best` and the words joined in the ways a space can stand for. A space often
+ * stands for an underscore or nothing, so "cl color" also matches cl_color exactly
  */
 function betterJoined(
   words: readonly string[],
@@ -207,8 +212,8 @@ function matchWords(words: readonly string[], name: string): NameMatch | null {
 }
 
 /**
- * The match of a name when some word doesn't match as it is: only the words joined can still
- * make it a result, and only when every word at least matches fuzzily
+ * The match of a name when some word doesn't match as it is. Only the joined words can still
+ * make the name a result, and only when every word at least matches fuzzily
  */
 function matchJoinedWords(words: readonly string[], name: string, lower: string): NameMatch | null {
   const joined = betterJoined(words, name, lower, null, false);
@@ -221,8 +226,8 @@ function matchJoinedWords(words: readonly string[], name: string, lower: string)
 }
 
 /**
- * The match of a name that is a result, or null. The same as matchWords unless that is a fuzzy
- * match, without looking for fuzzy matches of the words that match as they are
+ * The match of a name that is a result, or null. It equals the match of matchWords unless that
+ * match is fuzzy. It does not look for fuzzy matches of words that match as they are
  */
 function matchResultWords(words: readonly string[], name: string): NameMatch | null {
   const lower = name.toLowerCase();
@@ -256,8 +261,8 @@ function typoTargetWord(word: string, target: NameTarget): NameMatch | null {
 }
 
 /**
- * Whether every word is in the name, at least one of them as a typo of a word of the name. Null
- * without a typo, such a name is found or not found by its words already
+ * The match when every word is in the name and at least one word is a typo of a word of the
+ * name. Null without a typo, because the words already find or miss such a name
  */
 function matchTypoName(words: readonly string[], name: string): NameMatch | null {
   const target = { name, lower: name.toLowerCase() };
@@ -309,7 +314,7 @@ function filterByTags(
 
 /**
  * The items a search lists as results, in item order. Items that only match by name fuzzily are
- * not results. Nothing is ranked or highlighted, for counting
+ * not results. Nothing is ranked or highlighted. This function is for counting
  */
 export function filterConsoleItems(
   items: ConsoleItem[],
@@ -346,8 +351,8 @@ function rankMatches(scored: ScoredItem[]): ConsoleMatch[] {
 }
 
 /**
- * The results of a search, best name first: the same as the results of searchConsoleItems, without
- * looking for similar names
+ * The results of a search, best name first. They equal the results of searchConsoleItems, but this
+ * function does not look for similar names
  */
 export function searchConsoleResults(
   items: ConsoleItem[],
@@ -405,6 +410,7 @@ export function searchConsoleItems(
     }
     if (typos.length > 0) fuzzy = [...typos, ...fuzzy.filter((x) => !typoItems.has(x.item))];
   }
+
   return { results: rankMatches(found), similar: rankMatches(fuzzy) };
 }
 
@@ -427,8 +433,13 @@ export function setSearchTag(search: string, tag: string, value: string, state: 
       return lower !== `${tag}${lowerValue}` && lower !== `-${tag}${lowerValue}`;
     })
     .filter(Boolean);
-  if (state === "include") words.push(`${tag}${value}`);
-  else if (state === "exclude") words.push(`-${tag}${value}`);
+
+  if (state === "include") {
+    words.push(`${tag}${value}`);
+  } else if (state === "exclude") {
+    words.push(`-${tag}${value}`);
+  }
+
   return words.join(" ");
 }
 

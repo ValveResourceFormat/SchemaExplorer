@@ -11,7 +11,8 @@ import { INTRINSIC_MODULE, intrinsicDeclarations } from "./intrinsics";
 import { moduleLabel } from "./modules";
 import { parseSearch } from "../utils/filtering";
 import { metadataValueText } from "../utils/format";
-import { searchSchemas, type SearchContext } from "../utils/search";
+import { searchSchemas } from "../utils/search";
+import type { SearchContext } from "../utils/search-types";
 import { hasIntrinsicLayout, inheritedBases } from "./derived";
 import { parsedSchemas, findDecl, getClass, getField } from "./test-helpers";
 
@@ -24,8 +25,6 @@ function searchContext(declarations: SearchContext["declarations"]): SearchConte
     crossModuleLookup: new Map(),
   };
 }
-
-// ==================== parseKV3Defaults ====================
 
 describe("parseKV3Defaults", () => {
   it("uses object defaults as-is", () => {
@@ -45,8 +44,6 @@ describe("parseKV3Defaults", () => {
     expect(parseKV3Defaults([1, 2] as unknown as Record<string, unknown>)).toBeNull();
   });
 });
-
-// ==================== diffObject ====================
 
 describe("diffObject", () => {
   it("returns null when objects are identical", () => {
@@ -88,8 +85,6 @@ describe("diffObject", () => {
     expect(diffObject(embedded, own)).toBeNull();
   });
 });
-
-// ==================== resolveLeafType ====================
 
 describe("resolveLeafType", () => {
   it("returns builtin types as-is", () => {
@@ -150,8 +145,6 @@ describe("resolveLeafType", () => {
   });
 });
 
-// ==================== parseSchemas + assignDefaults (integration) ====================
-
 describe("assignDefaults via parseSchemas", () => {
   it("assigns scalar defaults to fields", () => {
     const cls = getClass("TestSimpleDefaults");
@@ -163,7 +156,7 @@ describe("assignDefaults via parseSchemas", () => {
 
   it("skips builtin zero-value defaults (0, empty string, false, null)", () => {
     const cls = getClass("TestSimpleDefaults");
-    // m_hTarget is builtin CHandle with value null — should be skipped
+    // m_hTarget is builtin CHandle with value null, so it is skipped
     expect(getField(cls, "m_hTarget").defaultValue).toBeUndefined();
   });
 
@@ -244,11 +237,11 @@ describe("assignDefaults via parseSchemas", () => {
     const cls = getClass("TestArrayDefaults");
     expect(getField(cls, "m_items").defaultValue).toBe("[1,2,3]");
     expect(getField(cls, "m_empty").defaultValue).toBeUndefined();
-    // Vector [0,0,0] is all-zero — skip
+    // Vector [0,0,0] is all-zero, so it is skipped
     expect(getField(cls, "m_vecZero").defaultValue).toBeUndefined();
-    // Vector [1,0,0] has a non-zero element — show
+    // Vector [1,0,0] has a non-zero element, so it is shown
     expect(getField(cls, "m_vecNonZero").defaultValue).toBe("[1,0,0]");
-    // Color [255,128,0,255] — show
+    // Color [255,128,0,255] is shown
     expect(getField(cls, "m_color").defaultValue).toBe("[255,128,0,255]");
   });
 
@@ -319,8 +312,6 @@ describe("assignDefaults via parseSchemas", () => {
     expect(getField(cls, "m_map").defaultValue).toBe('{"m_flB":77}');
   });
 });
-
-// ==================== parseSchemas basics ====================
 
 describe("parseSchemas", () => {
   it("sorts declarations alphabetically by name within each module", () => {
@@ -485,8 +476,6 @@ describe("parseSchemas", () => {
   });
 });
 
-// ==================== class layout ====================
-
 describe("class layout and bases", () => {
   const int = { category: "builtin", name: "int32" } as const;
   const { declarations } = parseSchemas({
@@ -611,8 +600,6 @@ describe("atomic sizes", () => {
     expect(declarations.has("CPiecewiseCurve")).toBe(false);
   });
 });
-
-// ==================== object defaults ====================
 
 describe("assignDefaults with object defaults", () => {
   const float = { category: "builtin", name: "float32" } as const;

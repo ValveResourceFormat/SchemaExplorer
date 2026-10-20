@@ -88,12 +88,10 @@ describe("computeBitfieldInfo", () => {
 
     expect(result.size).toBe(4);
 
-    // First group
     expect(result.get(a)!.bitOffset).toBe(0);
     expect(result.get(b)!.bitOffset).toBe(3);
     expect(result.get(b)!.totalBits).toBe(8);
 
-    // Second group
     expect(result.get(c)!.bitOffset).toBe(0);
     expect(result.get(d)!.bitOffset).toBe(1);
     expect(result.get(d)!.totalBits).toBe(3);

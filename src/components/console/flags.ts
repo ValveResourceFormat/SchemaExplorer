@@ -3,7 +3,7 @@ import { EXCLUSIVE_FLAG } from "../../data/derived";
 
 type FlagGroup = "workshop" | "cheat" | "devonly" | "restricted" | "network" | "saved" | "hidden";
 
-// Flags that get a color, everything else is a neutral badge
+// Flags that get a color. Every other flag is a neutral badge
 const FLAG_GROUPS: Record<string, FlagGroup> = {
   workshop_whitelisted: "workshop",
   cheat: "cheat",
@@ -29,7 +29,7 @@ export function flagGroup(flag: string): FlagGroup | undefined {
   return FLAG_GROUPS[flag];
 }
 
-// Matches the --flag-* custom properties in global.css, "hidden" has no color of its own
+// Matches the --flag-* custom properties in global.css. The "hidden" group has no color of its own
 const GROUP_ACCENTS: Partial<Record<FlagGroup, string>> = {
   workshop: "var(--flag-workshop)",
   cheat: "var(--flag-cheat)",

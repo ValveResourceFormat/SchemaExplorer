@@ -6,8 +6,8 @@ export const MatchHighlight = styled.span`
 `;
 
 /**
- * The text with the parts given as sorted [start, end, ...] ranges marked. It is one element, so
- * the parts don't become separate items in a flex container like a pill
+ * Marks the parts of the text given as sorted [start, end, ...] ranges. The result is one
+ * element, so the parts do not become separate items in a flex container like a pill
  */
 export function HighlightRanges({ text, ranges }: { text: string; ranges: readonly number[] }) {
   if (ranges.length === 0) return <span>{text}</span>;

@@ -17,7 +17,7 @@ import {
   findEntityByDesignName,
 } from "../../data/derived";
 import { useHashParam } from "../../utils/filtering";
-import type { WordMatch } from "../../utils/search";
+import type { WordMatch } from "../../utils/search-types";
 import { matchedRanges } from "../../utils/result-rows";
 import { HighlightRanges } from "../search/Highlight";
 import {
@@ -41,7 +41,7 @@ import {
 } from "./DeclarationsContext";
 import { countBy } from "../../utils/collections";
 import { SchemaTypeView } from "./SchemaType";
-import { useAnchoredRef } from "./useAnchoredRow";
+import { useAnchoredRef } from "./useAnchoredRef";
 import { CollapsibleLinkDetail, RefField } from "./ReferencedBy";
 import {
   AnchorName,
@@ -62,14 +62,13 @@ import { RowIcon } from "./RowIcon";
 import { subtleUnderline } from "./link-styles";
 import { tip } from "../Tooltip";
 
-// -- Links to the entity sections of a class page --
-
 const entityAnchor = (entity: EntityClass) => `entity-${entity.module}`;
 
 /** Scrolls to an entity section without touching the hash, which holds the page's params */
 function scrollToEntity(event: React.MouseEvent, entity: EntityClass) {
   const target = document.getElementById(entityAnchor(entity));
   if (!target) return;
+
   event.preventDefault();
   target.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -79,19 +78,19 @@ function AliasPills({ entities }: { entities: EntityClass[] }) {
   const { aliasesByEntity } = useContext(DeclarationsContext);
   const own = new Set(entities.map((e) => e.designName));
   const names = entities.flatMap((e) => aliasesByEntity.get(e)?.map((a) => a.designName!) ?? []);
-  return [...new Set(names)]
-    .filter((n) => !own.has(n))
-    .map((name) => (
-      <Pill
-        key={`alias/${name}`}
-        data-mono
-        {...tip("Alias design name: the game creates this class for it")}
-      >
-        <KindIcon kind="entity" />
-        {name}
-        <Dim> alias</Dim>
-      </Pill>
-    ));
+  const aliasNames = [...new Set(names)].filter((n) => !own.has(n));
+
+  return aliasNames.map((name) => (
+    <Pill
+      key={`alias/${name}`}
+      data-mono
+      {...tip("Alias design name: the game creates this class for it")}
+    >
+      <KindIcon kind="entity" />
+      {name}
+      <Dim> alias</Dim>
+    </Pill>
+  ));
 }
 
 /** The class's entities in its page header, each jumping to its section below */
@@ -127,7 +126,9 @@ export function DesignNamePills({
   matches: readonly WordMatch[];
 }) {
   if (!entities) return null;
+
   const names = [...new Set(entities.flatMap((e) => (e.designName ? [e.designName] : [])))];
+
   return (
     <>
       {names.map((name) => (
@@ -147,8 +148,6 @@ export function DesignNamePill({ name, matches }: { name: string; matches: reado
     </Pill>
   );
 }
-
-// -- Entity heading and details --
 
 const EntityHeading = styled.h2`
   display: flex;
@@ -177,7 +176,9 @@ function ComponentClass({ entity, name }: { entity: EntityClass; name: string })
   const target = module
     ? { module, name }
     : crossModuleLookup.get(declarationKey(entity.classModule, name));
+
   if (!target) return <span>{name}</span>;
+
   return <Link to={schemaPath(game, target.module, target.name)}>{name}</Link>;
 }
 
@@ -201,7 +202,7 @@ const ComponentList = styled.span`
   }
 `;
 
-/** A component in the columns of the list, on phones on a line of its own that can wrap */
+/** A component in the columns of the list. On phones it gets a line of its own that can wrap */
 const ComponentEntry = styled.span`
   display: contents;
 
@@ -217,9 +218,10 @@ const ComponentEntry = styled.span`
 /** The entity class an alias creates, linked to its page */
 function AliasTarget({ entity }: { entity: EntityClass }) {
   const context = useContext(DeclarationsContext);
-  // An alias creates its base, see buildEntityLookups
+  // An alias creates its base. See buildEntityLookups
   const target = entityChain(context, entity)[0];
   if (!target || !context.aliasesByEntity.get(target)?.includes(entity)) return null;
+
   return (
     <Detail label="Alias">
       <span {...tip("The game creates this class for the alias's design name, never the alias")}>
@@ -230,9 +232,9 @@ function AliasTarget({ entity }: { entity: EntityClass }) {
   );
 }
 
-/** Facts about an entity beyond its name, the card hides when there are none */
+/** Facts about an entity beyond its name. The card hides when there are none */
 function EntityDetails({ entity }: { entity: EntityClass }) {
-  // The dump has what the class declares, registration copies some from its bases
+  // The dump has what the class declares. Registration copies some from its bases
   const { flags, spawnOrder } = effectiveEntitySettings(useContext(DeclarationsContext), entity);
   return (
     <DetailsCard>
@@ -287,8 +289,6 @@ function EntityDetails({ entity }: { entity: EntityClass }) {
     </DetailsCard>
   );
 }
-
-// -- Rows --
 
 const MonoName = styled.span`
   font-family: var(--font-mono);
@@ -361,6 +361,7 @@ function EntryLink({
   const { game } = useContext(DeclarationsContext);
   // An own row only changes the hash of this page
   const own = !declaredBy;
+
   return (
     <AnchorName
       to={{
@@ -377,19 +378,21 @@ function EntryLink({
 }
 
 /**
- * An entity field type, shown like the schema type it stands for when there is one, otherwise by
- * its own name like soundname. The raw FIELD_ name is in the tooltip.
+ * An entity field type. It shows like the schema type it stands for when there is one, and
+ * otherwise by its own name like soundname. The tooltip has the raw FIELD_ name
  */
 function KeyType({ type }: { type: string }) {
   const { declarations } = useContext(DeclarationsContext);
   const mapped = keySchemaType(type);
   let schemaType: SchemaFieldType | undefined;
+
   if (mapped?.category === "declared_class") {
     const decl = findDeclarationByName(declarations, mapped.name, "class");
     if (decl) schemaType = { category: "declared_class", name: decl.name, module: decl.module };
   } else if (mapped) {
     schemaType = mapped;
   }
+
   return (
     <span {...tip(`Keyvalue type ${type}`)}>
       {schemaType ? (
@@ -404,8 +407,10 @@ function KeyType({ type }: { type: string }) {
 function KeyFieldLink({ entityKey }: { entityKey: EntityKey }) {
   const { game, keyOwners } = useContext(DeclarationsContext);
   const owner = keyOwners.get(entityKey);
-  if (!entityKey.field)
+
+  if (!entityKey.field) {
     return <Pill {...tip("Read by code, not bound to a field.")}>procedural</Pill>;
+  }
 
   const text = entityKey.path ? `${entityKey.path}.${entityKey.field}` : entityKey.field;
   if (!owner) return <Dim>{text}</Dim>;
@@ -432,14 +437,14 @@ function OverriddenPill({ by }: { by?: EntityClass }) {
   return by ? <Pill>overridden by {entityLabel(by)}</Pill> : null;
 }
 
-// Memoized like the field rows, an anchor click re-renders only the rows it changes
+// Memoized like the field rows. An anchor click re-renders only the rows it changes
 const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entityKey: EntityKey }) {
   const rowRef = useAnchoredRef(props.anchored);
   const display = formatKeyName(entityKey);
 
   return (
     <Row
-      ref={rowRef as React.Ref<HTMLDivElement>}
+      ref={rowRef}
       data-anchored={props.anchored || undefined}
       data-overridden={props.overriddenBy ? true : undefined}
     >
@@ -481,8 +486,8 @@ const KeyRow = memo(function KeyRow({ entityKey, ...props }: RowProps & { entity
 });
 
 /**
- * A Pulse type, entity handles link to the entity in the same module (client or server),
- * schema enums to the param's enumModule
+ * A Pulse type. Entity handles link to the entity in the same module (client or server), and
+ * schema enums link to the param's enumModule
  */
 function PvalType({
   type,
@@ -496,15 +501,18 @@ function PvalType({
   const context = useContext(DeclarationsContext);
   const { game, declarations } = context;
   const colon = type.indexOf(":");
-  const base = (colon < 0 ? type : type.slice(0, colon)).replace(/^PVAL_/, "").toLowerCase();
+  const baseType = colon < 0 ? type : type.slice(0, colon);
+  const base = baseType.replace(/^PVAL_/, "").toLowerCase();
   if (colon < 0) return <ColoredSyntax kind="literal">{base}</ColoredSyntax>;
 
   const sub = type.slice(colon + 1);
   let inner: React.ReactNode = sub;
+
   if (sub.startsWith("PVAL_")) {
     inner = <PvalType type={sub} module={module} enumModule={enumModule} />;
   } else if (base === "ehandle") {
     const target = findEntityByDesignName(context, sub, module);
+
     if (target) {
       inner = (
         <FieldLink to={entityPath(game, target)} title={target.class}>
@@ -561,7 +569,7 @@ const IORow = memo(function IORow({
 
   return (
     <Row
-      ref={rowRef as React.Ref<HTMLDivElement>}
+      ref={rowRef}
       data-anchored={props.anchored || undefined}
       data-overridden={props.overriddenBy ? true : undefined}
     >
@@ -601,8 +609,6 @@ const IORow = memo(function IORow({
     </Row>
   );
 });
-
-// -- Keyvalue, input and output cards --
 
 type SectionKind = "kv" | "input" | "output";
 
@@ -663,9 +669,10 @@ function EntityListCard({
 
   // Links from older pages can still point at an inherited row here
   const anchoredInherited =
-    anchor != null && !own.some(isAnchor)
-      ? groups.some((g) => g.entries.some((e) => !e.overriddenBy && isAnchor(e.entry)))
-      : false;
+    anchor != null &&
+    !own.some(isAnchor) &&
+    groups.some((g) => g.entries.some((e) => !e.overriddenBy && isAnchor(e.entry)));
+
   // Each entity is keyed by game and module, so this starts on own entries for every entity
   const [showInherited, setShowInherited] = useState(false);
   useEffect(() => {
@@ -675,7 +682,7 @@ function EntityListCard({
   if (own.length === 0 && groups.length === 0) return null;
 
   function renderEntry(entry: Entry, declaredBy?: EntityClass, overriddenBy?: EntityClass) {
-    // Own entries are never overridden, inherited ones lose to a nearer redeclaration
+    // Own entries are never overridden. A nearer redeclaration overrides inherited ones
     const props = {
       anchorBase,
       anchored: !overriddenBy && isAnchor(entry),
@@ -700,17 +707,20 @@ function EntityListCard({
     );
   }
 
-  /** The rows, the keys of each component together under a band naming it, after the others */
+  /** The rows. The keys of each component go together under a band that names it, after the others */
   function renderEntries(
     entries: { entry: Entry; overriddenBy?: EntityClass }[],
     declaredBy?: EntityClass,
   ) {
     let component: string | undefined;
+
     return groupByComponent(entries, (e) => e.entry).map(({ entry, overriddenBy }) => {
       const row = renderEntry(entry, declaredBy, overriddenBy);
       const next = entry.component;
       if (next === component) return row;
+
       component = next;
+
       return (
         <React.Fragment key={`component/${next}`}>
           {next && <ComponentBand entity={entity} name={next} />}
@@ -722,6 +732,7 @@ function EntityListCard({
 
   const hasRows = own.length > 0 || showInherited;
   const ownRows = renderEntries(own.map((entry) => ({ entry })));
+
   return (
     <TitledCard
       title={section.title}
@@ -787,7 +798,7 @@ const SubBand = styled(Band)`
   }
 `;
 
-/** Starts the keys of a component, the entity's own come first */
+/** Starts the keys of a component. The entity's own keys come first */
 function ComponentBand({ entity, name }: { entity: EntityClass; name: string }) {
   return (
     <SubBand>
@@ -849,8 +860,6 @@ export function EntitySections({
   });
 }
 
-// -- Component classes --
-
 /** Entities using a class as a component, the reverse of an entity's components */
 export function ComponentOf({ name, module }: { name: string; module: string }) {
   const { game, componentOf } = useContext(DeclarationsContext);
@@ -877,11 +886,10 @@ export function ComponentOf({ name, module }: { name: string; module: string }) 
   );
 }
 
-// -- Enum pages --
-
 export function UsedByKeyvalues({ name, module }: { name: string; module: string }) {
   const { game, enumKeyRefs } = useContext(DeclarationsContext);
   const refs = enumKeyRefs.get(declarationKey(module, name));
+
   // Client and server entities often share a design name
   const ambiguous = useMemo(() => {
     const counts = countBy(refs ?? [], ({ entity, key }) => [`${entityLabel(entity)}.${key.name}`]);

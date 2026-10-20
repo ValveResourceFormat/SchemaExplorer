@@ -9,7 +9,8 @@ import {
   type OtherGameResult,
   type ResultRow,
 } from "../../utils/result-rows";
-import { hasSchemaHits, isFuzzyRow, searchSchemas } from "../../utils/search";
+import { hasSchemaHits, searchSchemas } from "../../utils/search";
+import { isFuzzyRow } from "../../utils/search-types";
 import type { SectionItems } from "../../utils/section-search";
 import { OtherGameHeading } from "../layout/Content";
 import { DeclarationsContext } from "../schema/DeclarationsContext";
@@ -127,9 +128,9 @@ function useOtherGameResults(parsed: ParsedSearch, enabled: boolean): OtherGameR
 }
 
 /**
- * The results of the schema search in one virtualized list, narrowed to the sidebar's show
- * filter, with the ConVars that match the search better and, without results in this game, the
- * results of the other games
+ * Lists the results of the schema search in one virtualized list, narrowed to the sidebar's show
+ * filter. The list also has the ConVars that match the search better. Without results in this
+ * game, it has the results of the other games
  */
 export function SchemaResults() {
   const { query, parsed, result: unfiltered } = useContext(SearchResultContext);
@@ -168,11 +169,12 @@ function ResultsList({
   query: string;
   onShowAll: () => void;
 }) {
-  // Stable per row list, the virtualizer recomputes every measurement when these change
+  // These stay the same for one row list. The virtualizer recomputes every measurement when they
+  // change
   const estimateSize = useCallback((i: number) => estimateRowSize(rows[i]), [rows]);
   const getItemKey = useCallback((i: number) => rows[i].key, [rows]);
 
-  // Back to the top of the list for another query, not when only the rows change
+  // Scrolls back to the top for another query, but not when only the rows change
   const { listRef, virtualizer, itemTop } = useWindowList<HTMLDivElement>({
     listKey: query,
     count: rows.length,

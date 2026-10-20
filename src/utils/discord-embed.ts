@@ -5,7 +5,7 @@ import { formatFieldType } from "./format";
 // Discord component embed, a custom link preview built from Components V2.
 // https://discord.com/developers/docs/link-previews/component-embeds
 
-// Discord rejects payloads over 3000 bytes, leave some headroom.
+// Discord rejects payloads over 3000 bytes. This limit leaves some headroom
 const MAX_PAYLOAD_BYTES = 2800;
 // Keep the preview from taking over the chat
 const MAX_MEMBERS = 15;
@@ -28,10 +28,13 @@ export interface EmbedPage {
 
 function declarationHeader(d: Declaration): string {
   if (d.kind === "enum") {
-    return `enum ${d.name}${d.alignment ? ` : ${d.alignment}` : ""}`;
+    const underlying = d.alignment ? ` : ${d.alignment}` : "";
+    return `enum ${d.name}${underlying}`;
   }
+
   const parents = d.parents.map((p) => `public ${p.name}`).join(", ");
-  return `class ${d.name}${parents ? ` : ${parents}` : ""}`;
+  const bases = parents ? ` : ${parents}` : "";
+  return `class ${d.name}${bases}`;
 }
 
 function* declarationLines(d: Declaration): Generator<string> {
@@ -56,7 +59,8 @@ function buildPayload(d: Declaration, page: EmbedPage, lines: string[]) {
 
   if (lines.length < total) {
     const remaining = total - lines.length;
-    content += `\n-# …and ${remaining} more ${noun}${remaining !== 1 ? "s" : ""}`;
+    const suffix = remaining !== 1 ? "s" : "";
+    content += `\n-# …and ${remaining} more ${noun}${suffix}`;
   }
 
   return {

@@ -189,6 +189,7 @@ function getSecondLevelContext(
 ): { prefix: string; value: string; suggestions: ValueSuggestions } | null {
   const lower = lastWord.toLowerCase();
   const negated = negationPrefix(lower, mode);
+
   for (const sug of suggestions) {
     if (lower.startsWith(negated + sug.tag)) {
       return {
@@ -198,6 +199,7 @@ function getSecondLevelContext(
       };
     }
   }
+
   return null;
 }
 
@@ -461,7 +463,7 @@ export function SearchBox({
   const navigate = useNavigate();
   const location = useLocation();
   const [, startTransition] = useTransition();
-  // The search this box last wrote to the URL, the input already shows it
+  // The search this box last wrote to the URL. The input already shows it
   const ownSearchRef = useRef(search);
 
   // Sync input value from URL (back/forward navigation, clicking links)
@@ -514,15 +516,18 @@ export function SearchBox({
   const applyNewValue = (newValue: string) => {
     setInputValue(newValue);
     const replace = inputValue !== "" || newValue === "";
+
     // Other hash params, like the convars page kind filter, stay when searching on the same page.
     // A directly loaded prerendered page can have a trailing slash
     const samePage = location.pathname.replace(/\/$/, "") === baseUrl;
     const params = Object.fromEntries(new URLSearchParams(samePage ? location.hash.slice(1) : ""));
     const hash = buildHash({ ...params, name: null, search: newValue });
     ownSearchRef.current = newValue;
+
     startTransition(() => {
       navigate({ pathname: baseUrl, hash }, { replace });
     });
+
     setActiveIndex(0);
     ref.current?.focus();
   };
@@ -559,19 +564,21 @@ export function SearchBox({
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter" || e.key === "Tab") {
-      // Tab only completes a word being typed, otherwise it moves focus on
+      // Tab completes only a word being typed. Otherwise it moves focus to the next element
       if (e.key === "Tab" && lastWord === "") return;
       e.preventDefault();
-      if (showFirstLevel && filteredTags[activeIndex])
+
+      if (showFirstLevel && filteredTags[activeIndex]) {
         handleTagSelect(filteredTags[activeIndex].tag);
-      else if (showSecondLevel && secondLevelValues[activeIndex])
+      } else if (showSecondLevel && secondLevelValues[activeIndex]) {
         handleValueSelect(secondLevelValues[activeIndex]);
+      }
     }
   };
 
   const ref = useRef<HTMLInputElement>(null);
 
-  // React owns the input now, stop the pre-hydration script from rewriting the history entry
+  // React owns the input now, so this stops the pre-hydration script from rewriting the history entry
   useEffect(() => {
     window.stopSearchPrehydrate?.();
   }, []);

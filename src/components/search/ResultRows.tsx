@@ -12,7 +12,7 @@ import {
   type MemberHit,
   type NameHit,
   type SearchRow,
-} from "../../utils/search";
+} from "../../utils/search-types";
 import {
   formatRowOffsets,
   hitDesignNames,
@@ -45,8 +45,6 @@ interface RowState {
   first?: boolean;
   last?: boolean;
 }
-
-// -- Styles --
 
 /** The edges of a row in the card its section makes up */
 const cardRowStyles = `
@@ -151,7 +149,7 @@ const Cell = styled.div`
 
 /**
  * The same width in every row, so their columns line up. It fits the pills of a client and a
- * server class and most single modules, a longer module name is cut short
+ * server class and most single modules. A longer module name is cut short
  */
 const moduleColumnWidth = "10.5rem";
 
@@ -170,7 +168,7 @@ const FieldGrid = styled.div`
   }
 `;
 
-/** The class takes one line, a long name is cut short */
+/** The class takes one line. A long name is cut short */
 const ClassCell = styled(Cell)`
   flex-wrap: nowrap;
   grid-column: 1;
@@ -263,8 +261,6 @@ const OffsetText = styled.span`
   font-variant-numeric: tabular-nums;
 `;
 
-// -- Section --
-
 /** A section heading, which has more room above than the heading of another game's results */
 const Heading = styled(ResultsHeading)`
   padding-top: 16px;
@@ -338,8 +334,6 @@ export const SectionHeader = memo(function SectionHeader({ section }: { section:
   }
 });
 
-// -- Name rows --
-
 /**
  * A pill for the module of each side of a row, which goes to that side's class, or to the item in
  * it when the row is a field or an enum member
@@ -403,8 +397,6 @@ export const NameRowView = memo(function NameRowView({
     </ItemRow>
   );
 });
-
-// -- Field rows --
 
 /** The value of an enum member in decimal, and in hex when the enum has the width for it */
 function MemberValue({ member, alignment }: { member: SchemaEnumMember; alignment: string }) {
@@ -481,8 +473,6 @@ export const FieldRowView = memo(function FieldRowView({
   );
 });
 
-// -- Inherited field rows --
-
 /** A field that classes have from a base, in the columns of the fields table */
 export const InheritedRowView = memo(function InheritedRowView({
   row,
@@ -529,8 +519,6 @@ export const InheritedRowView = memo(function InheritedRowView({
   );
 });
 
-// -- Other rows --
-
 export const ShowAllRowView = memo(function ShowAllRowView({
   count,
   onShowAll,
@@ -545,8 +533,6 @@ export const ShowAllRowView = memo(function ShowAllRowView({
     </ItemRow>
   );
 });
-
-// -- ConVars rows --
 
 const AllLink = styled(Link)`
   margin-left: auto;

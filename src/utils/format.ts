@@ -41,7 +41,8 @@ export function formatCount(n: number): string {
 
 /** "1 field", "2 fields" */
 export function plural(n: number, word: string): string {
-  return `${n} ${word}${n !== 1 ? "s" : ""}`;
+  const suffix = n !== 1 ? "s" : "";
+  return `${n} ${word}${suffix}`;
 }
 
 const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);

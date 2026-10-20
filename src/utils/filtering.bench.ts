@@ -8,7 +8,7 @@ import { parseSearch } from "./filtering";
 import { scoreName } from "./match-score";
 import { searchSchemas } from "./search";
 
-// Vite turns imported bindings into getters; bind them locally so the hot
+// Vite turns imported bindings into getters. Binding them locally makes the hot
 // loops measure the function itself rather than the export getter.
 // https://vitest.dev/guide/benchmarking#module-runner-overhead
 const _scoreName = scoreName;

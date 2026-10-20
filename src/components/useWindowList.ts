@@ -1,17 +1,17 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useWindowVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
 
-/** How far above the top of the list it scrolls back to, so the content above shows a little */
+/** How far above the top of the list the page scrolls back to, so a little of the content above shows */
 const SCROLL_BACK_MARGIN = 80;
 
-/** How many rows are rendered beyond the ones in view */
+/** How many rows render beyond the ones in view */
 const OVERSCAN = 10;
 
 /**
  * A virtualized list inside the window's scroll. Its scroll margin is where the list starts on the
- * page, measured again when the window or the content above the list changes size, and when
- * `listKey` changes. The list scrolls back to its top once `listKey` changes while the page is
- * scrolled further down. `itemTop` is where a virtual item goes inside the list
+ * page. The hook measures the margin again when the window or the content above the list changes
+ * size, and when `listKey` changes. When `listKey` changes while the page is scrolled further
+ * down, the list scrolls back to its top. `itemTop` is where a virtual item goes inside the list
  */
 export function useWindowList<T extends HTMLElement>({
   listKey,
@@ -58,8 +58,8 @@ export function useWindowList<T extends HTMLElement>({
     getItemKey,
     overscan: OVERSCAN,
     scrollMargin,
-    // The window still has the previous page's scroll when the list mounts, which the virtualizer
-    // would scroll back to after scroll restoration has moved the new page to the top
+    // When the list mounts, the window still has the previous page's scroll. The virtualizer
+    // would scroll back to it after scroll restoration moves the new page to the top
     initialOffset: 0,
   });
 

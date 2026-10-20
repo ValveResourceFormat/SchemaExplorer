@@ -51,8 +51,6 @@ export const DeclarationBreadcrumb: React.FC<{
 }> = ({ module, name, parent }) => {
   const { game } = useContext(DeclarationsContext);
   const gameData = getGameDef(game);
-  if (!gameData) return null;
-
   let position = 1;
 
   return (

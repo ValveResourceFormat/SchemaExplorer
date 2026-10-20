@@ -15,7 +15,7 @@ const Button = styled.button`
   ${hover("color: var(--highlight);")}
 `;
 
-/** Asks for the rest of a list that was cut short, `count` being all of it */
+/** Asks for the rest of a list that was cut short. `count` is the size of the whole list. */
 export function ShowAllButton({ count, onClick }: { count: number; onClick: () => void }) {
   return (
     <Button type="button" onClick={onClick}>

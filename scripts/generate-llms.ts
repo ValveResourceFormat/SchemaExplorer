@@ -56,7 +56,7 @@ const entityGames = gamesWith("hasEntities");
 const netMetadataGames = gamesWith("hasNetworkMetadata");
 const netGames = gamesWith("hasNetwork");
 
-// The "JSON structure" section below must be kept in sync with the raw types:
+// Keep the "JSON structure" section below in sync with the raw types:
 // RawSchemaClass / RawSchemaEnum / SchemasJson in src/data/schemas.ts
 // and SchemaFieldType / SchemaMetadataEntry in src/data/types.ts.
 const text = `# Source 2 Schema Explorer

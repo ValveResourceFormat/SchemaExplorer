@@ -4,15 +4,9 @@ import { buildContext, buildTestContext, builtin, cls, field, search } from "../
 import type { Declaration, SchemaFieldType } from "../data/types";
 import { parseSearch } from "./filtering";
 import { TIER_EXACT, TIER_FUZZY, TIER_WORD_START } from "./match-score";
-import {
-  countSearchShowFilters,
-  filterSearchResult,
-  itemName,
-  rowSides,
-  searchSchemas,
-  type PairableHit,
-  type SearchResult,
-} from "./search";
+import { searchSchemas } from "./search";
+import { countSearchShowFilters, filterSearchResult } from "./search-show-filters";
+import { itemName, rowSides, type PairableHit, type SearchResult } from "./search-types";
 
 function handleTo(name: string, module: string): SchemaFieldType {
   return {
@@ -342,8 +336,6 @@ describe("positions", () => {
   });
 });
 
-// -- Pairing --
-
 const pairingContext = buildContext({
   classes: [
     cls("client", "C_Foo", [
@@ -491,8 +483,6 @@ describe("client and server pairs", () => {
     ]);
   });
 });
-
-// -- Tags --
 
 const tagContext = buildContext({
   classes: [
@@ -653,8 +643,6 @@ describe("tags only", () => {
   });
 });
 
-// -- Test fixtures --
-
 describe("fixture schemas", () => {
   const context = buildTestContext();
 
@@ -682,8 +670,6 @@ describe("fixture schemas", () => {
     expect(result.declarations).toEqual(declarations);
   });
 });
-
-// -- Tag filters on the fixture schemas --
 
 describe("fixture tag filters", () => {
   const context = buildTestContext();
@@ -1019,8 +1005,6 @@ describe("fixture tag filters", () => {
   });
 });
 
-// -- Inherited fields --
-
 const base = (name: string, module = "server") => ({ name, module });
 
 const inheritedContext = buildContext({
@@ -1241,8 +1225,6 @@ describe("inherited fields and the show filters", () => {
     }
   });
 });
-
-// -- Show filters --
 
 const showContext = buildContext({
   classes: [

@@ -88,21 +88,23 @@ export function matchesNetworkWords(network: FieldNetwork | ClassNetwork, words:
   });
 }
 
-// -- Sending --
-//
 // A model of how the game's networksystem.dll builds the serializer of a class (CFlattenedSerializer)
 // and picks the fields it sends, so field rows can say whether their class sends them:
 //
 // 1. The serializer has the networked fields of the class and its bases. A field whose type is a
-//    networked class, like an embedded struct, a pointer or a component, gets a serializer of that
-//    class nested under it, unless it has its own serializer
-// 2. Every field starts included. Then each serializer, the nested ones first, goes over its class
-//    and bases from the farthest base, each class marking fields with its lists in this order: the
-//    nearest class with MNetworkNoBase excludes the fields of its bases, then user groups are
-//    excluded and included, then fields by name. A mark overwrites the one before it. Marking a
-//    field marks everything nested under it, and lists reach nested fields at any depth
-// 3. A field with an included field nested under it is included again, then excluded fields are
-//    left out of the serializer, the nested ones before their parent's lists ever run
+//    networked class gets a serializer of that class nested under it. Embedded structs, pointers,
+//    and components are examples. A field with its own serializer gets no nested one
+// 2. Every field starts included. Then each serializer goes over its class and bases from the
+//    farthest base. The nested serializers go first. Each class marks fields with its lists in
+//    this order:
+//    a. The nearest class with MNetworkNoBase excludes the fields of its bases
+//    b. User groups are excluded and included
+//    c. Fields by name are marked
+//    A mark overwrites the one before it. Marking a field marks everything nested under it. Lists
+//    reach nested fields at any depth
+// 3. A field with an included field nested under it is included again. Then excluded fields are
+//    left out of the serializer. The nested serializers finish this before the lists of their
+//    parent run
 // 4. Overrides, like a field's user group, apply after this, so they don't change what's sent
 
 /** Why a class sends a networked field or leaves it out, when anything besides the default decides */
@@ -186,20 +188,22 @@ export function fieldSending(
       const parent = declarations.get(p.module)?.get(p.name);
       if (parent?.kind === "class") list.push(...hierarchyOf(parent));
     }
+
     return list;
   };
 
   const build = (cls: SchemaClass, path: SchemaClass[]): SendNode => {
     const hierarchy = hierarchyOf(cls);
     const node: SendNode = { hierarchy, fields: [] };
+
     // The farthest base's fields first
     for (let depth = hierarchy.length - 1; depth >= 0; depth--) {
       for (const field of hierarchy[depth].fields) {
         const network = field.network;
         if (!network) continue;
         const entry: SendField = { field, depth, included: true, removed: false };
-        // A field with its own serializer is sent as one value, and a class missing from the
-        // database gets nothing nested either, which findClass returning nothing covers
+        // A field with its own serializer is sent as one value. A class missing from the
+        // database gets nothing nested either, and findClass returns nothing for it
         if (!network.serializer && path.length < MAX_NESTING) {
           const childName = childClassName(hierarchy, field, componentOverrides);
           const child = childName ? findClass(childName) : undefined;
@@ -208,6 +212,7 @@ export function fieldSending(
         node.fields.push(entry);
       }
     }
+
     return node;
   };
 
@@ -218,6 +223,7 @@ export function fieldSending(
   for (const f of root.fields) {
     if (f.reason) sending.set(f.field, f.reason);
   }
+
   return sending;
 }
 
@@ -234,17 +240,21 @@ export function componentOverrides(
   const overrides = new Map<string, string>();
   const queue: Declaration[] = [declaration];
   let entity: EntityClass | undefined;
+
   while (!entity && queue.length > 0) {
     const cls = queue.shift()!;
     const entities = lookups.entitiesByDeclaration.get(cls);
     entity = entities?.find((e) => e.module === cls.module) ?? entities?.[0];
     if (cls.kind !== "class") continue;
+
     for (const p of cls.parents) {
       const parent = declarations.get(p.module)?.get(p.name);
       if (parent) queue.push(parent);
     }
   }
+
   if (!entity) return overrides;
+
   // The nearest entity's replacement wins, and replacements don't chain: a base's override of the
   // override isn't applied
   for (const e of [entity, ...entityChain(lookups, entity)]) {
@@ -252,6 +262,7 @@ export function componentOverrides(
       if ("base" in c && !overrides.has(c.base)) overrides.set(c.base, c.override);
     }
   }
+
   return overrides;
 }
 
@@ -272,6 +283,7 @@ function childClassName(
       break;
     }
   }
+
   return componentOverrides?.get(name) ?? name;
 }
 
@@ -361,7 +373,7 @@ function run(node: SendNode) {
 }
 
 /**
- * Includes fields with an included field nested under them, returns the first included path. The
+ * Includes fields with an included field nested under them, and returns the first included path. The
  * game logs this as "including X to ensure entire chain to field". It never excludes: a field whose
  * nested fields are all excluded stays included
  */
@@ -391,14 +403,18 @@ const keysCache = new WeakMap<Map<string, Map<string, Declaration>>, string[]>()
 export function getNetworkKeys(declarations: Map<string, Map<string, Declaration>>): string[] {
   let keys = keysCache.get(declarations);
   if (keys) return keys;
+
   const set = new Set<string>();
   for (const d of allDeclarations(declarations)) {
     if (d.kind !== "class") continue;
+
     for (const key of Object.keys(d.network ?? {})) set.add(key);
     for (const f of d.fields) if (f.network) for (const key of Object.keys(f.network)) set.add(key);
   }
+
   keys = [...set].sort();
   keysCache.set(declarations, keys);
+
   return keys;
 }
 
@@ -418,6 +434,7 @@ const NETWORK_VECTOR = /^(?:C_?NetworkUtlVectorBase|C_?UtlVectorEmbeddedNetworkV
 function normalizeType(text: string): string {
   let s = text.replace(/\s/g, "");
   s = NETWORK_VECTOR.exec(s)?.[1] ?? s;
+
   // A char[128] is networked as a char
   s = s.replace(/\[\d+\]$/, "");
   // Handles are networked as EHANDLE or with the other module's class name

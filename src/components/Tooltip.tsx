@@ -11,10 +11,10 @@ import {
 } from "@floating-ui/react";
 
 /**
- * Tooltips are data attributes, one host shows them for the whole page. An element with
- * `data-tip` shows that text, one with `data-tip-kind` gets its content from the renderer
- * registered for the kind. `data-tip-accent` tints the panel with a CSS color, so it reads
- * as belonging to a colored badge
+ * Tooltips are data attributes, and one host shows them for the whole page. An element with
+ * `data-tip` shows that text. An element with `data-tip-kind` gets its content from the renderer
+ * registered for the kind. `data-tip-accent` tints the panel with a CSS color, so the panel
+ * reads as belonging to a colored badge
  */
 export function tip(text: string, accent?: string) {
   return { "data-tip": text, "data-tip-accent": accent };
@@ -48,8 +48,8 @@ export function TooltipHost() {
     open,
     onOpenChange: setOpen,
     placement: "top",
-    // top/left instead of the default translate transform, which would otherwise
-    // collide with (and get overwritten by) the transition's own transform below
+    // top/left instead of the default translate transform. That transform would otherwise
+    // collide with the transition's own transform below, and the transition would overwrite it
     transform: false,
     middleware: [offset(8), flip({ padding: 8 }), shift({ padding: 8 })],
     whileElementsMounted: autoUpdate,

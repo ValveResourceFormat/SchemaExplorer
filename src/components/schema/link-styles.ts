@@ -1,7 +1,7 @@
-// Kept apart from styles.tsx: the build evaluates this module to inline it into other files' CSS,
-// and it can only do that for plain values
+// The build evaluates this module to inline it into other files' CSS. It can only do that for
+// plain values, so this module stays apart from styles.tsx
 
-/** A faint underline on links among other text, so they aren't told apart by color alone */
+/** A faint underline on links among other text, so color alone doesn't set them apart */
 export const subtleUnderline = `
   text-decoration: underline;
   text-decoration-thickness: 1px;

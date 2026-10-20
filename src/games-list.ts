@@ -43,9 +43,9 @@ interface GameDef {
   name: string;
   /** For page titles, where the full name takes too much room */
   shortName: string;
-  /** GameTracking repository, games without one are a one-off dump that is never updated */
+  /** GameTracking repository. A game without one is a one-off dump that is never updated */
   repo?: string;
-  /** Only shown by the dev server, the deployed site only has its JSON, linked from llms.txt */
+  /** Only the dev server shows it. The deployed site has only its JSON, linked from llms.txt */
   devOnly?: boolean;
 }
 
@@ -58,20 +58,34 @@ export const GAME_LIST: readonly GameDef[] = import.meta.env?.DEV
   : ALL_GAMES.filter((g) => !g.devOnly);
 export const DEFAULT_GAME: GameId = GAME_LIST[0].id;
 
-export function getGameDef(id: string): GameDef | undefined {
-  return GAME_LIST.find((g) => g.id === id);
+const gamesById = new Map<GameId, GameDef>();
+for (const game of ALL_GAMES) {
+  gamesById.set(game.id, game);
 }
 
-/** A file DumpSource2 wrote into the game's GameTracking repository */
-export function dumpFileUrl(id: string, path: string): string | null {
-  const repo = getGameDef(id)?.repo;
-  return repo ? `https://github.com/${repo}/blob/master/DumpSource2/${path}` : null;
+export function getGameDef(id: GameId): GameDef {
+  return gamesById.get(id)!;
 }
 
 export function isGameId(id: string): id is GameId {
   return GAME_LIST.some((g) => g.id === id);
 }
 
+/** A file DumpSource2 wrote into the game's GameTracking repository */
+export function dumpFileUrl(id: string, path: string): string | null {
+  if (!isGameId(id)) return null;
+
+  const repo = getGameDef(id).repo;
+  return repo ? `https://github.com/${repo}/blob/master/DumpSource2/${path}` : null;
+}
+
+/** The game id in a URL parameter, or null when it is missing or unknown */
+export function gameIdFrom(value: string | undefined): GameId | null {
+  if (value && isGameId(value)) return value;
+  return null;
+}
+
+export const SITE_NAME = "Source 2 Schema Explorer";
 export const SITE_ORIGIN = "https://s2v.app";
 export const BASE_PATH = "/SchemaExplorer";
 

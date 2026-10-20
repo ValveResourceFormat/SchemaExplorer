@@ -8,7 +8,7 @@ import { keepInPlace } from "../../utils/keep-in-place";
 import { DeclarationsContext } from "./DeclarationsContext";
 import { Card, CardHeader, CardTitle, CollapsedRow, CollapsedText } from "./styles";
 
-/** A card titled with a kind icon, actions like a switch go on the right of the title */
+/** A card titled with a kind icon. Actions like a switch go on the right of the title */
 export function TitledCard({
   title,
   icon,
@@ -37,7 +37,7 @@ export function TitledCard({
   );
 }
 
-/** Right of the title, a line of their own when they don't fit, still on the right */
+/** Sit on the right of the title. When they don't fit, they get a line of their own, still on the right */
 const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -46,7 +46,7 @@ const Actions = styled.div`
   margin-left: auto;
 `;
 
-/** Stands in for hidden inherited rows, showing them keeps the card where it is on screen */
+/** Stands in for hidden inherited rows. Showing them keeps the card where it is on screen */
 export function CollapsedInheritedRow({
   label,
   range,
@@ -101,7 +101,7 @@ const GitHubLink = styled.a`
 const INTRINSIC_SOURCE_URL =
   "https://github.com/ValveResourceFormat/SchemaExplorer/blob/master/src/data/intrinsics.ts";
 
-/** The declaration's dumped header on GitHub, a labelled button on its own page */
+/** The declaration's dumped header on GitHub. On its own page it is a labelled button */
 export function GitHubFileLink({
   module,
   name,
@@ -113,12 +113,15 @@ export function GitHubFileLink({
 }) {
   const { game, declarations } = useContext(DeclarationsContext);
   const isIntrinsic = module === INTRINSIC_MODULE;
-  // Intrinsics without a layout only come from the dump, there's no source to show
+
+  // Intrinsics without a layout only come from the dump, so there's no source to show
   if (isIntrinsic && !hasIntrinsicLayout(declarations, name)) return null;
+
   const url = isIntrinsic
     ? INTRINSIC_SOURCE_URL
     : dumpFileUrl(game, `schemas/${module}/${name.replace(/:/g, "_")}.h`);
   if (!url) return null;
+
   return (
     <GitHubButton
       href={url}
@@ -128,7 +131,7 @@ export function GitHubFileLink({
   );
 }
 
-/** A file on GitHub, a button when it has a label and only the icon without */
+/** A file on GitHub. It is a button with a label, and only the icon without one */
 export function GitHubButton({
   href,
   title,

@@ -80,7 +80,7 @@ export function parseIntValue(value: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-/** Like parseIntValue, but every digit of values past 2^53 kept, in the form members have */
+/** Like parseIntValue, but it keeps every digit of values past 2^53, in the form members have */
 export function parseEnumValue(value: string): api.EnumValue | null {
   const match = /^(-?)(0x[0-9a-f]+|(?!0x)\d+)/.exec(value.trim());
   if (!match) return null;
@@ -100,17 +100,20 @@ export function parseSearch(search: string): ParsedSearch {
     .filter((x) => !isFilterPrefix(x))
     .map(trimNameWord)
     .filter(Boolean);
+
   const tagValues = (prefix: string) =>
     words
       .filter((x) => x.startsWith(prefix))
       .map((x) => x.slice(prefix.length))
       .filter(Boolean);
+
   const numbers = <T,>(prefix: string, parse: (value: string) => T | null) =>
     new Set(
       tagValues(prefix)
         .map(parse)
         .filter((x) => x !== null),
     );
+
   return {
     nameWords,
     moduleWords: tagValues("module:"),

@@ -15,8 +15,6 @@ import type { GameId } from "../games-list.ts";
 import { GAME_LIST } from "../games-list.ts";
 import { INTRINSIC_MODULE } from "./intrinsics.ts";
 
-// -- Types --
-
 export type ReferenceEntry = {
   declarationName: string;
   declarationModule: string;
@@ -83,15 +81,17 @@ export type GameContext = EntityLookups & {
   error: string | null;
 };
 
-// -- Utilities --
-
 export function declarationKey(module: string, name: string): string {
   return `${module}/${name}`;
 }
 
 export function pushTo<K, T>(map: Map<K, T[]>, key: K, value: T) {
   let list = map.get(key);
-  if (!list) map.set(key, (list = []));
+  if (!list) {
+    list = [];
+    map.set(key, list);
+  }
+
   list.push(value);
 }
 
@@ -105,9 +105,9 @@ const metadataKeysCache = new WeakMap<Map<string, Map<string, Declaration>>, str
 
 /**
  * Every metadata key used anywhere in a game, sorted, for search autocomplete.
- * Walking every declaration is expensive and the result only changes per game, so
- * it is cached on the declarations map rather than recomputed per render. During
- * prerendering that is the difference between once per game and once per page.
+ * Walking every declaration is expensive, and the result only changes per game.
+ * The result is cached on the declarations map, not recomputed per render. During
+ * prerendering this means one walk per game, not one per page
  */
 export function getMetadataKeys(declarations: Map<string, Map<string, Declaration>>): string[] {
   let keys = metadataKeysCache.get(declarations);
@@ -116,6 +116,7 @@ export function getMetadataKeys(declarations: Map<string, Map<string, Declaratio
   const set = new Set<string>();
   for (const d of allDeclarations(declarations)) {
     for (const m of d.metadata) set.add(m.name);
+
     if (d.kind === "class") {
       for (const f of d.fields) for (const m of f.metadata) set.add(m.name);
     } else {
@@ -123,12 +124,11 @@ export function getMetadataKeys(declarations: Map<string, Map<string, Declaratio
     }
   }
 
-  keys = [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  keys = [...set].sort();
   metadataKeysCache.set(declarations, keys);
+
   return keys;
 }
-
-// -- Private helpers --
 
 function collectTypeKeys(type: SchemaFieldType, out: Set<string>) {
   switch (type.category) {
@@ -165,6 +165,7 @@ function buildReferences(
           relation: "class",
         });
       }
+
       for (const field of decl.fields) {
         typeKeys.clear();
         collectTypeKeys(field.type, typeKeys);
@@ -207,10 +208,12 @@ export function findDeclarationByName(
   const matches = (d: Declaration | undefined) => d != null && (!kind || d.kind === kind);
   const preferred = preferModule && declarations.get(preferModule)?.get(name);
   if (preferred && matches(preferred)) return preferred;
+
   for (const moduleMap of declarations.values()) {
     const d = moduleMap.get(name);
     if (matches(d)) return d;
   }
+
   return undefined;
 }
 
@@ -246,7 +249,7 @@ export interface InheritedBase {
 
 /**
  * Every base of a class, the farthest first. A later base in multiple inheritance sits at an
- * offset, and its fields and own bases move with it.
+ * offset, and its fields and own bases move with it
  */
 export function inheritedBases(
   declarations: Map<string, Map<string, Declaration>>,
@@ -254,26 +257,29 @@ export function inheritedBases(
 ): InheritedBase[] {
   const bases: InheritedBase[] = [];
   const visited = new Set<string>();
+
   function collect(parents: SchemaParent[], baseOffset: number) {
     for (const parent of parents) {
       const key = declarationKey(parent.module, parent.name);
       if (visited.has(key)) continue;
       visited.add(key);
+
       const offset = baseOffset + (parent.offset ?? 0);
       const decl = declarations.get(parent.module)?.get(parent.name);
       if (decl?.kind === "class") collect(decl.parents, offset);
+
       bases.push({ parent, offset, fields: decl?.kind === "class" ? decl.fields : [] });
     }
   }
+
   collect(parents, 0);
+
   return bases;
 }
 
-// -- Entities --
-
 /**
  * Finds the schema class that owns a key's field: the declaredIn class, then its schema
- * parents when declaredIn only inherits the field.
+ * parents when declaredIn only inherits the field
  */
 export function resolveKeyField(
   declarations: Map<string, Map<string, Declaration>>,
@@ -291,13 +297,14 @@ export function resolveKeyField(
     if (visited.has(cls)) continue;
     visited.add(cls);
     if (cls.fields.some((f) => f.name === key.field)) return { module: cls.module, name: cls.name };
+
     for (const p of cls.parents) {
       const parent = declarations.get(p.module)?.get(p.name);
       if (parent?.kind === "class") stack.push(parent);
     }
   }
 
-  // The field is not in the schema, link to the declaring class anyway
+  // The field is not in the schema. Link to the declaring class anyway
   return { module: start.module, name: start.name };
 }
 
@@ -330,7 +337,11 @@ export function buildEntityLookups(
 
     if (designName) {
       let byName = entityByDesignName.get(entity.module);
-      if (!byName) entityByDesignName.set(entity.module, (byName = new Map()));
+      if (!byName) {
+        byName = new Map();
+        entityByDesignName.set(entity.module, byName);
+      }
+
       byName.set(designName, entity);
       designNames.add(designName);
     }
@@ -348,8 +359,9 @@ export function buildEntityLookups(
         const module = [entity.classModule, entity.module].find((m) =>
           declarations.get(m)?.has(name),
         );
-        if (module)
+        if (module) {
           pushTo(componentOf, declarationKey(module, name), { entity, component, replaced });
+        }
       }
     }
 
@@ -357,6 +369,7 @@ export function buildEntityLookups(
       const ref = { entity, key };
       const owner = resolveKeyField(declarations, key);
       if (owner) keyOwners.set(key, owner);
+
       if (key.enum && key.enumModule) {
         pushTo(enumKeyRefs, declarationKey(key.enumModule, key.enum), ref);
       }
@@ -372,6 +385,7 @@ export function buildEntityLookups(
     if (!target) continue;
     pushTo(aliasesByEntity, target, alias);
     entityByDesignName.get(alias.module)!.set(alias.designName, target);
+
     const decl = declarations.get(target.classModule)?.get(target.class);
     if (decl && !designNamesByDeclaration.get(decl)?.includes(alias.designName)) {
       pushTo(designNamesByDeclaration, decl, alias.designName);
@@ -419,16 +433,19 @@ export function effectiveEntitySettings(
 ): { flags: Inherited<{ flag: string }>[]; spawnOrder: Inherited<{ value: number }> } {
   const flags: Inherited<{ flag: string }>[] = entity.flags.map((flag) => ({ flag }));
   let spawnOrder: Inherited<{ value: number }> = { value: entity.spawnOrder };
+
   for (const base of entityChain(lookups, entity)) {
     for (const flag of base.flags) {
       if (INHERITED_ENTITY_FLAGS.has(flag) && !flags.some((f) => f.flag === flag)) {
         flags.push({ flag, from: base.class });
       }
     }
+
     if (spawnOrder.value === 0 && base.spawnOrder !== 0) {
       spawnOrder = { value: base.spawnOrder, from: base.class };
     }
   }
+
   return { flags, spawnOrder };
 }
 
@@ -441,11 +458,13 @@ export function entityChain(
 ): EntityClass[] {
   const cached = chainCache.get(entity);
   if (cached) return cached;
+
   const chain: EntityClass[] = [];
   const seen = new Set<EntityClass>([entity]);
   let base = entity.baseClass
     ? lookups.entityByModuleClass.get(declarationKey(entity.module, entity.baseClass))
     : undefined;
+
   while (base && !seen.has(base)) {
     seen.add(base);
     chain.push(base);
@@ -453,7 +472,9 @@ export function entityChain(
       ? lookups.entityByModuleClass.get(declarationKey(base.module, base.baseClass))
       : undefined;
   }
+
   chainCache.set(entity, chain);
+
   return chain;
 }
 
@@ -466,10 +487,12 @@ export function findEntityByDesignName(
   const inModule = (module: string) => lookups.entityByDesignName.get(module)?.get(designName);
   const preferred = (preferModule && inModule(preferModule)) || inModule("server");
   if (preferred) return preferred;
+
   for (const byName of lookups.entityByDesignName.values()) {
     const found = byName.get(designName);
     if (found) return found;
   }
+
   return undefined;
 }
 
@@ -490,11 +513,13 @@ export function designNameEntity(
 
 function buildEnumConVars(items: ConsoleItem[]): Map<string, ConVar[]> {
   const map = new Map<string, ConVar[]>();
+
   for (const item of items) {
     if (item.kind === "convar" && item.enum && item.enumModule) {
       pushTo(map, declarationKey(item.enumModule, item.enum), item);
     }
   }
+
   return map;
 }
 
@@ -514,8 +539,6 @@ function hasNetworkData(declarations: Map<string, Map<string, Declaration>>): bo
 function inNoOtherGame(name: string, others: { has(name: string): boolean }[]): boolean {
   return others.length > 0 && !others.some((names) => names.has(name));
 }
-
-// -- Game context store --
 
 const contexts = new Map<GameId, GameContext>();
 
@@ -560,7 +583,6 @@ export function buildAllGameContexts(
       if (inNoOtherGame(d.name, otherDeclarations)) exclusive.add(d);
     }
 
-    // Build cross-module lookup between client and server
     const clientByName = declarations.get("client") ?? new Map<string, Declaration>();
     const serverByName = declarations.get("server") ?? new Map<string, Declaration>();
 

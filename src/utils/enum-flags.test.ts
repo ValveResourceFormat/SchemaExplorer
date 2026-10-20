@@ -8,8 +8,6 @@ const m = (name: string, value: number): SchemaEnumMember => ({
   metadata: [],
 });
 
-// -- isFlagEnum --
-
 describe("isFlagEnum", () => {
   it("detects a simple flags enum", () => {
     expect(isFlagEnum([m("A", 1), m("B", 2), m("C", 4), m("AB", 3)])).toBe(true);
@@ -69,8 +67,6 @@ describe("isFlagEnum", () => {
     expect(isFlagEnum(members)).toBe(true);
   });
 });
-
-// -- decomposeFlags --
 
 describe("decomposeFlags", () => {
   const members = [

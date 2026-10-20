@@ -12,7 +12,7 @@ import { componentOverrides, fieldSending, type FieldSending } from "../../data/
 import { searchLink, useFieldParam } from "../../utils/filtering";
 import { formatHexOffset, padHex, plural } from "../../utils/format";
 import { computeBitfieldInfo, type BitfieldInfo } from "../../utils/bitfields";
-import { useAnchoredRef } from "./useAnchoredRow";
+import { useAnchoredRef } from "./useAnchoredRef";
 import { ComponentOf, EntityJumpPills, EntitySections } from "./EntitySections";
 import {
   AnchorName,
@@ -48,8 +48,6 @@ const SizeText = styled.span`
 const AbstractPill = () => (
   <Pill {...tip("Abstract class, only derived classes are instantiated.")}>abstract</Pill>
 );
-
-// -- Class --
 
 export const SchemaClassView: React.FC<{
   declaration: api.SchemaClass;
@@ -102,6 +100,7 @@ const BaseOffsetText = styled.span`
 function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
   const { size, alignment } = declaration;
   if (size == null) return null;
+
   return (
     <SizeText>
       {plural(size, "byte")} ({formatHexOffset(size)}){alignment != null && `, align ${alignment}`}
@@ -109,7 +108,7 @@ function ClassLayout({ declaration }: { declaration: api.SchemaClass }) {
   );
 }
 
-/** Bases, references, metadata and other games, the card hides when there is none */
+/** Bases, references, metadata and other games. The card hides when there is none */
 function ClassDetails({
   declaration,
   bases,
@@ -148,8 +147,6 @@ function ClassDetails({
   );
 }
 
-// -- Fields --
-
 interface FieldEntry {
   field: api.SchemaField;
   /** The class declaring the field */
@@ -165,8 +162,8 @@ const OFFSET_COLUMNS = "fit-content(22em) minmax(0, 1fr) max-content";
 const COLUMNS = "fit-content(22em) minmax(0, 1fr)";
 
 /**
- * The fields of a class, and with inherited ones every field sorted by offset, so a base
- * placed after the class's own fields shows up where it is
+ * The fields of a class. With inherited fields shown, the table sorts every field by offset, so a
+ * base placed after the class's own fields shows up where it is
  */
 function FieldTable({
   declaration,
@@ -192,8 +189,10 @@ function FieldTable({
         computeBitfieldInfo(declaration.fields),
       );
       const inherited: FieldEntry[] = [];
+
       for (const base of bases) {
         for (const [field, info] of computeBitfieldInfo(base.fields)) bitfields.set(field, info);
+
         for (const field of base.fields) {
           inherited.push({
             field,
@@ -204,6 +203,7 @@ function FieldTable({
           });
         }
       }
+
       const own: FieldEntry[] = declaration.fields.map((field) => ({
         field,
         owner: declaration,
@@ -319,22 +319,29 @@ function entryKey(entry: FieldEntry) {
 }
 
 /**
- * Consecutive fields of the same class, each run goes under its own band. A class whose fields
- * are split by another's has a run for each part
+ * Splits the rows into runs of consecutive fields of the same class. Each run goes under its own
+ * band. A class whose fields another class splits has a run for each part
  */
 function ownerRuns(rows: FieldEntry[]) {
   const runs: FieldEntry[][] = [];
+
   for (const entry of rows) {
     const run = runs.at(-1);
-    if (run?.[0].owner === entry.owner) run.push(entry);
-    else runs.push([entry]);
+
+    if (run?.[0].owner === entry.owner) {
+      run.push(entry);
+    } else {
+      runs.push([entry]);
+    }
   }
+
   return runs;
 }
 
 function OwnerBand({ entry }: { entry: FieldEntry }) {
   const { game } = useContext(DeclarationsContext);
   const { owner, inherited, baseOffset } = entry;
+
   return (
     <Band>
       <KindIcon kind={inherited ? "inherited-class" : "class"} />
@@ -361,7 +368,7 @@ const OffsetText = styled.span`
   white-space: nowrap;
 `;
 
-/** Right-aligned like the old offsets, the bit range of a bitfield below */
+/** Right-aligned like the old offsets. The bit range of a bitfield goes below */
 const OffsetCell = styled.div`
   display: flex;
   flex-direction: column;
@@ -452,7 +459,7 @@ const PaddingNote = styled(Row)`
   }
 `;
 
-/** Memoized, an anchor click re-renders only the rows it changes, not a whole pawn's fields */
+/** Memoized. An anchor click re-renders only the rows it changes, not a whole pawn's fields */
 const FieldRow = memo(function FieldRow({
   entry,
   declPath,
@@ -481,7 +488,7 @@ const FieldRow = memo(function FieldRow({
 
   return (
     <>
-      <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
+      <Row ref={rowRef} data-anchored={anchored || undefined}>
         {/* On phones the offset goes on the line of the name */}
         <FieldName data-inline data-inherited={inherited || undefined}>
           <RowIcon kind="field" />

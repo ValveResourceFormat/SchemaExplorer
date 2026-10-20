@@ -57,6 +57,7 @@ export function CollapsibleLinkDetail<T>({
 /** Convars whose value is an enumerator of this enum */
 export function UsedByConVars({ name, module }: { name: string; module: string }) {
   const { game, enumConVars } = useContext(DeclarationsContext);
+
   return (
     <CollapsibleLinkDetail
       title="Used by convars"

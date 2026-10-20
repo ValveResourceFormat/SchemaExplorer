@@ -4,8 +4,8 @@ import type { ConsoleMatch } from "./console-filtering";
 import { formatHexOffset, metadataValueText } from "./format";
 import { mergeRanges } from "./highlight";
 import { declarationKey } from "../data/derived";
+import { hasSchemaHits } from "./search";
 import {
-  hasSchemaHits,
   itemName,
   type FieldHit,
   type InheritedSide,
@@ -19,7 +19,7 @@ import {
   type SimilarRow,
   type TagMatch,
   type WordMatch,
-} from "./search";
+} from "./search-types";
 
 /** How many similar names are listed before the rest is asked for */
 export const SIMILAR_SHOWN = 50;
@@ -157,7 +157,7 @@ function similarRowKey(hit: SimilarHit): string {
   return `${key}/${itemName(hit)}`;
 }
 
-/** Keyed by kind too, a convar and a command can share a name */
+/** The key includes the kind, because a convar and a command can share a name */
 export function consoleRowKey(item: ConsoleItem): string {
   return `${item.kind}/${item.name}`;
 }
@@ -177,7 +177,8 @@ export interface ResultExtras {
 
 /**
  * The class, enum, field, member and inherited field rows of a result. The rows of another game
- * have its game, which keys them, and no section headers, its heading stands for them
+ * have that game, which keys them. They have no section headers, because the game heading stands
+ * for them
  */
 function pushHitRows(rows: ResultRow[], result: SearchResult, game?: GameId) {
   const keyPrefix = game === undefined ? "" : `${game}:`;
@@ -201,8 +202,8 @@ function pushHitRows(rows: ResultRow[], result: SearchResult, game?: GameId) {
 
 /**
  * The rows of the results list in the order they are shown: classes and enums, fields and
- * members, the other section's better matches, other games' results and similar names. Sections
- * without rows are left out, and similar names are cut off after SIMILAR_SHOWN unless
+ * members, the other section's better matches, other games' results and similar names. The list
+ * omits sections without rows. It lists at most SIMILAR_SHOWN similar names unless
  * `showAllSimilar` is set
  */
 export function buildResultRows(
@@ -244,6 +245,7 @@ export function buildResultRows(
       rows.push({ type: "showAll", key: "showAll:similar", count: similar.length });
     }
   }
+
   return rows;
 }
 
@@ -293,20 +295,16 @@ function tagWhy(tag: TagMatch): string[] {
   switch (tag.kind) {
     case "io": {
       const labels: string[] = [];
-      if (tag.inputs.length > 0)
-        labels.push(
-          listNames(
-            "input",
-            tag.inputs.map((i) => i.name),
-          ),
-        );
-      if (tag.outputs.length > 0)
-        labels.push(
-          listNames(
-            "output",
-            tag.outputs.map((o) => o.name),
-          ),
-        );
+      if (tag.inputs.length > 0) {
+        const inputNames = tag.inputs.map((i) => i.name);
+        labels.push(listNames("input", inputNames));
+      }
+
+      if (tag.outputs.length > 0) {
+        const outputNames = tag.outputs.map((o) => o.name);
+        labels.push(listNames("output", outputNames));
+      }
+
       return labels;
     }
     case "metadata": {
@@ -316,9 +314,8 @@ function tagWhy(tag: TagMatch): string[] {
       });
       return entries.length > 0 ? [listNames("metadata", entries)] : [];
     }
-    case "network": {
+    case "network":
       return [`network: ${tag.words.join(" ")}`];
-    }
     case "entity":
     case "offset":
     case "enumValue":
@@ -328,7 +325,7 @@ function tagWhy(tag: TagMatch): string[] {
 
 /**
  * Short labels for what made a hit besides its name: metadata, network words, inputs, and
- * outputs. Entity names are pills, offsets and enum values are shown by the row itself
+ * outputs. Entity names are pills. The row itself shows offsets and enum values
  */
 export function hitWhy(hit: PairableHit | SimilarHit): string[] {
   const labels: string[] = [];

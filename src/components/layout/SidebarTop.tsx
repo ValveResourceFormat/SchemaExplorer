@@ -81,9 +81,9 @@ function GameRows({ section, onNavigate }: { section: SearchMode; onNavigate: ()
   const { module, scope } = useParams();
 
   // The same page in the other game where it can be. A schema page missing there goes to its
-  // module or the game's start, since the page itself would send an unknown name to a game that
-  // has it. Off the console page for a game without convars, only the search words schemas
-  // understand come along
+  // module or the game's start. The page itself would send an unknown name to a game that
+  // has it. Off the console page for a game without convars, only the search words that schemas
+  // understand carry over
   function target(gameId: GameId) {
     const context = getGameContext(gameId);
     if (section === "schemas") {
@@ -118,7 +118,7 @@ function GameRows({ section, onNavigate }: { section: SearchMode; onNavigate: ()
   );
 }
 
-/** Filters of what the page's list shows, under the sections and alike them */
+/** Filters of what the page's list shows. They sit under the sections and look like them */
 export function ShowGroup({ children }: { children: ReactNode }) {
   return (
     <ShowRows aria-label="Show">
@@ -170,7 +170,7 @@ function SectionRows({
     return other.count !== null && other.count.toLocaleString("en-US");
   };
 
-  // The current section goes back to its start, the other one takes the search along
+  // The current section goes back to its start. The other section takes the search with it
   const row = (mode: SearchMode) => {
     const current = mode === section;
     const text = countText(mode);
@@ -230,7 +230,7 @@ const IconButton = styled.button`
 `;
 
 // Pushes itself and the close button after it to the end of the row. The icon follows the theme
-// through CSS, the prerendered page can't know it
+// through CSS, because the prerendered page can't know it
 const ThemeToggle = styled.button`
   ${iconButton}
   margin-left: auto;

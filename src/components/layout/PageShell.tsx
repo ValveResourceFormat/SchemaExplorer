@@ -57,9 +57,9 @@ export function PageShell({
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
   const otherSection = useOtherSection(section);
 
-  // While the mobile drawer is open, arm a CloseWatcher so the back gesture,
-  // Escape, and other close requests dismiss it instead of navigating away.
-  // Focus moves into the drawer and back to where it was when it closes.
+  // While the mobile drawer is open, a CloseWatcher lets the back gesture, Escape, and other
+  // close requests dismiss it instead of navigating away.
+  // Focus moves into the drawer and returns to where it was when the drawer closes
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -142,7 +142,7 @@ const MobileSidebarOverlay = styled.div`
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 300;
-    /* Only closes the drawer on tap, swiping on it doesn't scroll the page behind */
+    /* Only a tap closes the drawer. Swiping on it doesn't scroll the page behind */
     touch-action: none;
     opacity: 0;
     visibility: hidden;

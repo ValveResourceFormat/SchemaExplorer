@@ -1,7 +1,8 @@
 import { createContext, useDeferredValue, useMemo } from "react";
 import type { GameContext } from "../../data/derived";
 import { parseSearch, type ParsedSearch } from "../../utils/filtering";
-import { searchSchemas, type SearchResult } from "../../utils/search";
+import { searchSchemas } from "../../utils/search";
+import type { SearchResult } from "../../utils/search-types";
 import { searchForSection, type SearchMode } from "../../utils/section-search";
 
 /** The page's schema search and what it was computed for */
@@ -20,9 +21,10 @@ export const SearchResultContext = createContext<PageSearch>({
 });
 
 /**
- * Searches the game's schemas once for the page. Typing doesn't wait on it. The ConVars page only
- * lists the schemas' results as a link to them, which a search with filters of the ConVars
- * alone doesn't get, so it leaves them out then. It has no use for similar names either
+ * Searches the game's schemas once for the page. Typing does not wait for the search. The ConVars
+ * page lists the schemas' results only as a link to them. A search with filters of the ConVars
+ * alone does not get that link, so the page leaves the schemas' results out then. The ConVars
+ * page has no use for similar names either
  */
 export function useSearchResult(
   context: GameContext,

@@ -11,8 +11,6 @@ type IntrinsicDef = {
 };
 
 const types: IntrinsicDef[] = [
-  // ---- Math types ----
-
   {
     name: "Color",
     fields: [
@@ -187,8 +185,6 @@ const types: IntrinsicDef[] = [
     size: 32,
   },
 
-  // ---- Entity / Handle types ----
-
   {
     name: "CEntityHandle",
     fields: [
@@ -220,8 +216,6 @@ const types: IntrinsicDef[] = [
     fields: [{ name: "m_Data", offset: 0, type: b("int32") }],
     size: 4,
   },
-
-  // ---- String / Symbol types ----
 
   {
     name: "CBufferString",
@@ -257,7 +251,7 @@ const types: IntrinsicDef[] = [
     size: 4,
   },
   {
-    // Interned string, _MakeGlobalSymbol returns the pointer
+    // Interned string. _MakeGlobalSymbol returns the pointer
     name: "CGlobalSymbol",
     fields: [{ name: "m_pString", offset: 0, type: { category: "ptr", inner: b("char") } }],
     size: 8,
@@ -335,8 +329,6 @@ const types: IntrinsicDef[] = [
     size: 4,
   },
 
-  // ---- Container types ----
-
   {
     name: "CUtlVector",
     fields: [
@@ -368,7 +360,7 @@ const types: IntrinsicDef[] = [
     size: 24,
   },
   {
-    // Followed by N inline elements, the size depends on them
+    // Followed by N inline elements. The size depends on them
     name: "CUtlVectorFixedGrowable",
     fields: [
       { name: "m_Size", offset: 0, type: b("int32") },
@@ -388,7 +380,7 @@ const types: IntrinsicDef[] = [
     size: 16,
   },
   {
-    // Elements are inline at offset 8 until it grows, the size depends on them
+    // Elements are inline at offset 8 until it grows. The size depends on them
     name: "CUtlLeanVectorFixedGrowable",
     fields: [
       { name: "m_nCount", offset: 0, type: b("int32") },
@@ -444,8 +436,6 @@ const types: IntrinsicDef[] = [
     size: 16,
   },
 
-  // ---- KeyValues3 types ----
-
   {
     // Other aliases: CKV3MemberNameSet
     name: "KeyValues3",
@@ -486,8 +476,6 @@ const types: IntrinsicDef[] = [
     ],
     size: 192,
   },
-
-  // ---- Resource / Handle types ----
 
   {
     name: "CResourceArray",
@@ -533,8 +521,6 @@ const types: IntrinsicDef[] = [
     size: 8,
   },
 
-  // ---- Variant / Output types ----
-
   {
     name: "CNetworkedQuantizedFloat",
     fields: [
@@ -571,8 +557,6 @@ const types: IntrinsicDef[] = [
     size: 16,
   },
 
-  // ---- Misc types ----
-
   {
     name: "SndOpEventGuid_t",
     fields: [
@@ -584,7 +568,7 @@ const types: IntrinsicDef[] = [
     size: 20,
   },
   {
-    // Polymorphic, the vtable is CEmbeddedSubclass<T>'s own
+    // Polymorphic. The vtable is CEmbeddedSubclass<T>'s own
     name: "CEmbeddedSubclass",
     fields: [
       { name: "__vftable", offset: 0, type: { category: "ptr", inner: b("void") } },

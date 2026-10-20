@@ -3,6 +3,7 @@ import { Link } from "../Link";
 import { styled } from "@linaria/react";
 import { Declaration, EntityClass, SchemaClass, SchemaEnum } from "../../data/types";
 import { DeclarationsContext, declarationKey, entityPath, schemaPath } from "./DeclarationsContext";
+import { compareNames } from "../../data/schemas";
 import { entityLabel } from "../../utils/entity-format";
 import { CardBody } from "./styles";
 import { TitledCard } from "./Cards";
@@ -27,14 +28,17 @@ function buildTree(
     for (const parent of cls.parents) {
       const parentKey = declarationKey(parent.module, parent.name);
       let parentNode = allNodes.get(parentKey);
+
       if (!parentNode) {
         // Parent may be in a different module
         const parentDecl = declarations.get(parent.module)?.get(parent.name);
+
         if (parentDecl?.kind === "class") {
           parentNode = { cls: parentDecl, children: [] };
           allNodes.set(parentKey, parentNode);
         }
       }
+
       if (parentNode) {
         hasParentInTree.add(key);
         parentNode.children.push(allNodes.get(key)!);
@@ -43,21 +47,24 @@ function buildTree(
   }
 
   for (const node of allNodes.values()) {
-    if (node.children.length > 1) {
-      node.children.sort((a, b) =>
-        a.cls.name < b.cls.name ? -1 : a.cls.name > b.cls.name ? 1 : 0,
-      );
-    }
+    node.children.sort(byClassName);
   }
 
   const roots: TreeNode[] = [];
+
   for (const [key, node] of allNodes) {
     if (!hasParentInTree.has(key)) {
       roots.push(node);
     }
   }
-  roots.sort((a, b) => (a.cls.name < b.cls.name ? -1 : a.cls.name > b.cls.name ? 1 : 0));
+
+  roots.sort(byClassName);
+
   return roots;
+}
+
+function byClassName(a: TreeNode, b: TreeNode) {
+  return compareNames(a.cls, b.cls);
 }
 
 const ClassLink = styled(Link)`
@@ -130,14 +137,18 @@ export function ClassTree({ module }: { module?: string }) {
     const classes = new Map<string, SchemaClass>();
     const enums: SchemaEnum[] = [];
     const modules = module ? [declarations.get(module)] : declarations.values();
+
     for (const moduleMap of modules) {
       if (!moduleMap) continue;
+
       for (const d of moduleMap.values()) {
         if (d.kind === "class") classes.set(declarationKey(d.module, d.name), d);
         else enums.push(d);
       }
     }
-    enums.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
+    enums.sort(compareNames);
+
     return { classes, enums };
   }, [declarations, module]);
 
@@ -181,7 +192,10 @@ interface EntityNode {
 function byLabel(a: EntityNode, b: EntityNode) {
   const x = entityLabel(a.entity);
   const y = entityLabel(b.entity);
-  return x < y ? -1 : x > y ? 1 : 0;
+
+  if (x < y) return -1;
+  if (x > y) return 1;
+  return 0;
 }
 
 const EntityClassName = styled.span`
@@ -224,16 +238,21 @@ export function EntityTree({ module }: { module: string }) {
 
   const roots = useMemo(() => {
     const nodes = new Map<string, EntityNode>();
+
     for (const entity of entities) {
       if (entity.module === module) nodes.set(entity.class, { entity, children: [] });
     }
+
     const roots: EntityNode[] = [];
+
     for (const node of nodes.values()) {
       const base = node.entity.baseClass ? nodes.get(node.entity.baseClass) : undefined;
       (base ? base.children : roots).push(node);
     }
+
     for (const node of nodes.values()) node.children.sort(byLabel);
     roots.sort(byLabel);
+
     return roots;
   }, [entities, module]);
 

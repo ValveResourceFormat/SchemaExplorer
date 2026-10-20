@@ -4,11 +4,11 @@ import { Card } from "./styles";
 import { chevronBefore } from "../chevron-styles";
 import { hoverAndPress } from "../interaction-styles";
 
-// Components with props live apart from styles.tsx, the build evaluates that file for the
-// styled components other files extend and can only read plain definitions there
+// The build evaluates styles.tsx for the styled components other files extend. It can only read
+// plain definitions there, so components with props live apart from it
 
 const DetailsBox = styled(Card)`
-  /* Every detail leaves itself out when it has nothing to show, the card goes with them */
+  /* Every detail leaves itself out when it has nothing to show. The card goes with them */
   &:has(> dl:empty) {
     display: none;
   }
@@ -62,7 +62,7 @@ export interface DetailToggleState {
 }
 
 /**
- * A labelled fact. A long one collapses, its toggle sits under the label where it stays in
+ * A labelled fact. A long one collapses. Its toggle sits under the label, where it stays in
  * place however long the value gets
  */
 export function Detail({

@@ -1,6 +1,6 @@
 /**
- * Joins lists of [start, end, ...] ranges into one sorted list in which overlapping and touching
- * ranges are one
+ * Joins lists of [start, end, ...] ranges into one sorted list. Overlapping and touching ranges
+ * become one range
  */
 export function mergeRanges(lists: readonly (readonly number[])[]): number[] {
   const pairs: [number, number][] = [];

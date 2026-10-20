@@ -7,7 +7,8 @@ import {
   TIER_SUBSTRING,
   TIER_WORD_START,
 } from "./match-score";
-import { itemName, rowSides, strippedFieldName, type SearchResult } from "./search";
+import { strippedFieldName } from "./search-index";
+import { itemName, rowSides, type SearchResult } from "./search-types";
 
 const int = builtin("int32");
 const float = builtin("float32");

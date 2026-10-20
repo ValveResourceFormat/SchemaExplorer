@@ -30,8 +30,6 @@ export const AnchorName = styled(Link)`
   }
 `;
 
-// -- Page header --
-
 /** The title and what follows it share the text baseline, not the box centers */
 export const PageHeader = styled.div`
   display: flex;
@@ -58,8 +56,6 @@ export const PageTitle = styled.h1`
     align-self: center;
   }
 `;
-
-// -- Cards --
 
 export const Card = styled.section`
   margin-bottom: 16px;
@@ -191,8 +187,6 @@ export const InlineList = styled.span`
   }
 `;
 
-// -- Tables: a grid, every row is a subgrid so columns line up across rows --
-
 /** Names the class or entity the following rows come from */
 export const Band = styled.div`
   grid-column: 1 / -1;
@@ -248,7 +242,8 @@ export const BandGroup = styled.div`
 
 /**
  * Columns come from --cols. On phones every cell gets its own line, except cells marked
- * data-inline, which share a line with their neighbours, and data-end, which go to its end
+ * data-inline, which share a line with their neighbours. Cells marked data-end go to the end of
+ * the line
  */
 export const Table = styled.div`
   display: grid;
@@ -362,7 +357,7 @@ export const CollapsedText = styled.span`
 
 /**
  * Metadata and notes under a row's name, across the whole row. They line up with the name, past
- * the row's 16px icon and its 8px gap, and the metadata icons hang under the row's icon
+ * the row's 16px icon and its 8px gap. The metadata icons hang under the row's icon
  */
 export const RowNotes = styled.div`
   grid-column: 1 / -1;

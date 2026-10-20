@@ -10,7 +10,7 @@ import {
   TIER_SUBSTRING,
   TIER_WORD_START,
 } from "./match-score";
-import type { NameHit, SearchResult, SearchRow } from "./search";
+import type { NameHit, SearchResult, SearchRow } from "./search-types";
 import {
   betterMatches,
   searchForSection,

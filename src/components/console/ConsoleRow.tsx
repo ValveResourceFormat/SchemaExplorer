@@ -119,8 +119,6 @@ export function isPlainLeftClick(e: MouseEvent): boolean {
   return e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey;
 }
 
-// -- Row --
-
 /** Lines, hover and the anchored row like the schema tables */
 const Row = styled.li`
   padding: 6px 12px;
@@ -148,7 +146,7 @@ const Line = styled.div`
   min-width: 0;
 `;
 
-// The kind icon is drawn by CSS, an <svg><use> per row adds up over thousands of prerendered rows.
+// CSS draws the kind icon. An <svg><use> per row adds up over thousands of prerendered rows.
 // The masks are the convar and command icons from icons.svg
 const Name = styled.a`
   font-family: var(--font-mono);
@@ -258,7 +256,7 @@ export interface ConsoleRowProps {
   onNavigate: (name: string, e: MouseEvent) => void;
   /** Rows without it show flags and modules as plain, non-clickable badges */
   onFilter?: (tag: FilterTag, value: string) => void;
-  /** The module: filter's values, their modules are shown before the others */
+  /** The module: filter's values. Their modules are shown before the others */
   filteredModules?: readonly string[];
   /** Set by the virtualized list */
   rowRef?: (el: HTMLLIElement | null) => void;
@@ -278,10 +276,13 @@ function orderModules(
   filtered: readonly string[] = [],
 ): string[] {
   const isFiltered = (m: string) => filtered.some((f) => m.includes(f));
-  return [...modules].sort(
-    (a, b) =>
-      Number(isFiltered(b)) - Number(isFiltered(a)) || (counts.get(a) ?? 0) - (counts.get(b) ?? 0),
-  );
+
+  return [...modules].sort((a, b) => {
+    const filteredFirst = Number(isFiltered(b)) - Number(isFiltered(a));
+    if (filteredFirst !== 0) return filteredFirst;
+
+    return (counts.get(a) ?? 0) - (counts.get(b) ?? 0);
+  });
 }
 
 export const ConsoleRow = memo(function ConsoleRow({
@@ -303,7 +304,7 @@ export const ConsoleRow = memo(function ConsoleRow({
   const range = convar ? formatRange(convar.min, convar.max) : null;
   const isReference = item.modules.length === 0;
 
-  // Some are in dozens of modules, the rarest few are enough until asked for the rest
+  // Some are in dozens of modules. The rarest few are enough until the reader asks for the rest
   const { consoleItems } = useContext(DeclarationsContext);
   const [showAllModules, setShowAllModules] = useState(false);
   const manyModules = item.modules.length > MODULES_SHOWN + 1;

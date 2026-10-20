@@ -27,7 +27,7 @@ import { stringifyKV3, toEnumValue } from "../utils/format.ts";
 /**
  * MGetKV3ClassDefaults as an object. DumpSource2 writes it parsed (hidden fields omitted,
  * NaN and infinity as strings like "-nan", integers past ±(2^53 − 1) as decimal strings), or the
- * string "Could not parse KV3 Defaults".
+ * string "Could not parse KV3 Defaults"
  * @internal Exported for testing
  */
 export function parseKV3Defaults(
@@ -40,20 +40,26 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a === null || b === null || typeof a !== typeof b) return false;
   if (typeof a !== "object") return false;
+
   if (Array.isArray(a)) {
     if (!Array.isArray(b) || a.length !== b.length) return false;
+
     for (let i = 0; i < a.length; i++) {
       if (!deepEqual(a[i], b[i])) return false;
     }
+
     return true;
   }
+
   const aObj = a as Record<string, unknown>;
   const bObj = b as Record<string, unknown>;
   const aKeys = Object.keys(aObj);
   if (aKeys.length !== Object.keys(bObj).length) return false;
+
   for (const key of aKeys) {
     if (!deepEqual(aObj[key], bObj[key])) return false;
   }
+
   return true;
 }
 
@@ -64,13 +70,16 @@ export function diffObject(
 ): Record<string, unknown> | null {
   const diff: Record<string, unknown> = {};
   let hasDiff = false;
+
   for (const [k, v] of Object.entries(embedded)) {
     if (k === "_class") continue;
+
     if (!deepEqual(v, ownDefaults[k])) {
       diff[k] = v;
       hasDiff = true;
     }
   }
+
   return hasDiff ? diff : null;
 }
 
@@ -111,7 +120,7 @@ function assignDefaults(classes: SchemaClass[]) {
     ownDefaults.set(`${cls.module}/${cls.name}`, parseKV3Defaults(meta?.value));
   }
 
-  // Full defaults: the parents' merged defaults, earlier parents first, then the class's own keys.
+  // Full defaults: the parents' merged defaults, earlier parents first, then the class's own keys
   // They are shared between classes, never mutated, and only copied when there is more to merge
   const noDefaults: Record<string, unknown> = {};
   const mergedCache = new Map<string, Record<string, unknown>>();
@@ -119,32 +128,37 @@ function assignDefaults(classes: SchemaClass[]) {
     const parents = cls.parents
       .map((p) => classMap.get(`${p.module}/${p.name}`))
       .filter((p) => p !== undefined);
+
     if (parents.length === 0) return noDefaults;
     if (parents.length === 1) return getDefaults(parents[0]);
+
     return Object.assign({}, ...parents.toReversed().map(getDefaults));
   }
   function getDefaults(cls: SchemaClass): Record<string, unknown> {
     const key = `${cls.module}/${cls.name}`;
     let merged = mergedCache.get(key);
+
     if (!merged) {
       const own = ownDefaults.get(key);
       merged = own ? { ...parentDefaults(cls), ...own } : parentDefaults(cls);
       mergedCache.set(key, merged);
     }
+
     return merged;
   }
 
-  // Cache all field names (including inherited) per class
   const allFieldsCache = new Map<string, Set<string>>();
   function getAllFieldNames(cls: SchemaClass): Set<string> {
     const key = `${cls.module}/${cls.name}`;
     const cached = allFieldsCache.get(key);
     if (cached !== undefined) return cached;
+
     const names = new Set<string>();
     for (const p of cls.parents) {
       const parent = classMap.get(`${p.module}/${p.name}`);
       if (parent) for (const n of getAllFieldNames(parent)) names.add(n);
     }
+
     for (const f of cls.fields) names.add(f.name);
     allFieldsCache.set(key, names);
     return names;
@@ -199,7 +213,7 @@ function assignDefaults(classes: SchemaClass[]) {
       }
     }
 
-    // Rewrite metadata: replace MGetKV3ClassDefaults with unconsumed remainder, or remove if empty
+    // MGetKV3ClassDefaults keeps the unconsumed remainder, and is removed when nothing remains
     cls.metadata = cls.metadata.filter((m) => m.name !== "MGetKV3ClassDefaults");
     if (Object.keys(unconsumed).length > 0) {
       cls.metadata.push({ name: "MGetKV3ClassDefaults", value: unconsumed });
@@ -240,12 +254,13 @@ function collectAtomicLayouts(classes: SchemaClass[]): Map<string, AtomicLayout 
     }
   }
   for (const c of classes) for (const f of c.fields) visit(f.type);
+
   return layouts;
 }
 
 /**
- * The shared intrinsics with this game's size where all its uses agree, copied since they are
- * reused across games, plus the atomics they don't describe, with only a size
+ * The shared intrinsics, with this game's size where all its uses agree. They are copied because
+ * games reuse them. The result also has the atomics they don't describe, with only a size
  */
 function gameIntrinsics(classes: SchemaClass[]): Declaration[] {
   const layouts = collectAtomicLayouts(classes);
@@ -254,6 +269,7 @@ function gameIntrinsics(classes: SchemaClass[]): Declaration[] {
     const layout = layouts.get(d.name);
     result.push(layout && d.kind === "class" ? { ...d, ...layout } : d);
   }
+
   for (const [name, layout] of layouts) {
     if (intrinsicDeclarations.has(name)) continue;
     result.push({
@@ -267,10 +283,11 @@ function gameIntrinsics(classes: SchemaClass[]): Declaration[] {
       metadata: [],
     });
   }
+
   return result;
 }
 
-// Raw shapes of the JSON dump. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt).
+// Raw shapes of the JSON dump. If these change, update the pseudo-schema in scripts/generate-llms.ts (llms.txt)
 interface RawSchemaClass {
   name: string;
   module: string;
@@ -439,10 +456,12 @@ export function parseSchemas(data: SchemasJson) {
     c.flags ??= [];
     c.parents ??= [];
     c.metadata ??= [];
+
     for (const f of (c.fields ??= [])) {
       f.metadata ??= [];
     }
   }
+
   const enums: SchemaEnum[] = data.enums.map((e) => ({
     ...e,
     kind: "enum",
@@ -456,17 +475,18 @@ export function parseSchemas(data: SchemasJson) {
 
   assignDefaults(classes);
 
-  // Sort all declarations by module then name, build map in one pass
   const all: Declaration[] = [...classes, ...enums, ...gameIntrinsics(classes)];
   all.sort((a, b) => compareModuleNames(a.module, b.module) || compareNames(a, b));
 
   const declarations = new Map<string, Map<string, Declaration>>();
   for (const d of all) {
     let moduleMap = declarations.get(d.module);
+
     if (!moduleMap) {
       moduleMap = new Map();
       declarations.set(d.module, moduleMap);
     }
+
     moduleMap.set(d.name, d);
   }
 

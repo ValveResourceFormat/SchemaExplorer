@@ -3,22 +3,22 @@ import { isFilterPrefix, isLoneFilterTag } from "./filtering";
 import { nameMatchTier, TIER_FUZZY, TIER_PREFIX } from "./match-score";
 import { isConsoleFilterWord, isLoneConsoleTag, type ConsoleMatch } from "./console-filtering";
 import { joinLoneTags } from "./search-words";
+import { strippedFieldName } from "./search-index";
 import {
   itemName,
-  strippedFieldName,
   type FieldHit,
   type MemberHit,
   type NameHit,
   type PairableHit,
   type SearchResult,
   type SearchRow,
-} from "./search";
+} from "./search-types";
 
 export type SearchMode = "schemas" | "console";
 
 /**
- * The search as a section understands it, the other section's filter tags dropped.
- * `complete` is false when something was dropped, its results aren't for the same search then
+ * The search as a section understands it, without the filter tags of the other section.
+ * `complete` is false when the function dropped a tag. The results are then not for the same search
  */
 export function searchForSection(
   search: string,
@@ -40,8 +40,9 @@ export function searchForSection(
 type Lookups = Pick<GameContext, "designNamesByDeclaration">;
 
 /**
- * The names a hit matches by: its declaration name, for a class its design names, and for a field
- * or member its own name, a field's also without m_ and its type prefix
+ * The names a hit matches by. Every hit has its declaration name, and a class also has its design
+ * names. A field or member also has its own name, and a field also has that name without m_ and
+ * its type prefix
  */
 function hitNames(lookups: Lookups, hit: PairableHit, withStripped: boolean): string[] {
   const { declaration } = hit;
@@ -76,7 +77,7 @@ type BetterMatches =
   | ({ section: "schemas" } & SchemaRows);
 
 const MAX_BETTER_MATCHES = 5;
-/** This section's first results, the best of which the other section's have to beat */
+/** This section's first results. The results of the other section must beat the best of these */
 const OWN_COMPARED = 5;
 /** Results are ranked by their summed score, so a better tier can sit a little further down */
 const OTHER_SCANNED = 50;
@@ -89,7 +90,7 @@ function firstRows(rows: SchemaRows, count: number): SearchRow<PairableHit>[] {
   return first;
 }
 
-/** The best tier of this section's first results, worse than any tier when there are none */
+/** The best tier of this section's first results. Without results, it is worse than any tier */
 function bestOwnTier(lookups: Lookups, own: SectionItems, words: string[]): number {
   let best = Infinity;
   if (own.section === "console") {
@@ -129,10 +130,10 @@ function betterRows<T extends PairableHit>(
 }
 
 /**
- * The other section's results that match by name better than any of this section's first
- * results, like the sv_cheats convar when searching schemas. Any non-fuzzy result is better than
- * none. A schema result only counts with a whole-word match, and a field name without its type
- * prefix at best as a prefix match
+ * The results of the other section that match by name better than any of the first results of
+ * this section, like the sv_cheats convar when searching schemas. Any non-fuzzy result is better
+ * than none. A schema result counts only with a whole-word match, and a field name without its
+ * type prefix counts at best as a prefix match
  */
 export function betterMatches(
   lookups: Lookups,

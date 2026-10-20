@@ -13,10 +13,10 @@ import { GAME_LIST, getGameDef, type GameId } from "../games-list";
 import { buildInheritedGroups, type Entry } from "./entity-format";
 import { formatCount, formatHexOffset, plural } from "./format";
 
-/** Search results cut descriptions off past this */
+/** Search results truncate descriptions longer than this */
 const MAX_DESC_LENGTH = 160;
 
-/** How many fields a class description keeps before it gives up the entity summary for more */
+/** How many fields a class description keeps before it drops the entity summary to list more */
 const MIN_FIELDS_WITH_SUMMARY = 3;
 
 const SITE_SUFFIX = "Source 2 Schemas";
@@ -38,7 +38,7 @@ function locationText(module: string, gameName: string, context: GameContext): s
   return `${module}.dll (${inside})`;
 }
 
-/** The entity of a class, CEntityInstance (entity2) is the root of both client and server */
+/** The entity of a class. CEntityInstance (entity2) is the root of both client and server */
 function classEntity(d: SchemaClass, lookups: EntityLookups): EntityClass | undefined {
   const entities = lookups.entityByClass.get(declarationKey(d.module, d.name));
   return (
@@ -64,8 +64,8 @@ function entitySummary(entity: EntityClass, lookups: EntityLookups): string {
 }
 
 /**
- * The prefix and as many items as fit with the tail within the length, "…" standing in for the
- * rest. Returns how many items it listed
+ * The prefix, the tail, and as many items as fit within the length. "…" stands in for the rest.
+ * Returns how many items it listed
  */
 function fitList(prefix: string, items: string[], tail: string, maxLength: number) {
   let text = prefix;
@@ -144,7 +144,7 @@ function describeEnum(d: SchemaEnum, gameName: string, context: GameContext): st
 }
 
 export function describeDeclaration(d: Declaration, game: GameId, context: GameContext): string {
-  const gameName = getGameDef(game)!.name;
+  const gameName = getGameDef(game).name;
   if (d.kind === "class") return describeClass(d, gameName, context);
   return describeEnum(d, gameName, context);
 }
@@ -155,17 +155,17 @@ export function declarationTitle(
   context: GameContext,
   linkedDesignName?: string,
 ): string {
-  const { shortName, repo } = getGameDef(game)!;
+  const { shortName, repo } = getGameDef(game);
   const isIntrinsic = d.module === INTRINSIC_MODULE;
   const where = moduleFile(d.module);
   if (d.kind === "enum") return `${d.name} values - ${shortName} ${where} | ${SITE_SUFFIX}`;
 
-  // An entity class is titled by the design name the page was opened by, or else its first one
+  // The title of an entity class uses the design name that opened the page, or else its first one
   const designName = linkedDesignName ?? context.designNamesByDeclaration.get(d)?.[0];
   if (designName) {
     return `${designName} (${d.name}) - ${shortName} entity keyvalues, inputs & outputs`;
   }
-  // Dumps without a GameTracking repository are one-off and have no offsets, the intrinsics do
+  // Dumps without a GameTracking repository are one-off and have no offsets. The intrinsics do
   const what = repo || isIntrinsic ? "offsets & fields" : "fields";
   return `${d.name} ${what} - ${shortName} ${where} | ${SITE_SUFFIX}`;
 }
@@ -188,8 +188,8 @@ function countDeclarations(declarations: Iterable<Declaration>): DeclarationCoun
 const gameCountsCache = new WeakMap<GameContext["declarations"], DeclarationCounts>();
 
 /**
- * Every declaration of the game, the intrinsic types included as they have pages too. Cached, as
- * the root page's description counts every game
+ * Counts every declaration of the game, including the intrinsic types, because they have pages
+ * too. The result is cached, because the description of the root page counts every game
  */
 function countGameDeclarations(context: GameContext): DeclarationCounts {
   let counts = gameCountsCache.get(context.declarations);
@@ -207,7 +207,7 @@ function countsText({ classes, enums }: DeclarationCounts): string {
 }
 
 export function describeGame(game: GameId, context: GameContext): string {
-  const def = getGameDef(game)!;
+  const def = getGameDef(game);
   const build = buildText(context);
   let desc = `${def.name} schema dump`;
   if (build) desc += ` (${build})`;
@@ -218,7 +218,7 @@ export function describeGame(game: GameId, context: GameContext): string {
 }
 
 export function describeModule(game: GameId, module: string, context: GameContext): string {
-  const def = getGameDef(game)!;
+  const def = getGameDef(game);
   const declarations = context.declarations.get(module)?.values() ?? [];
   const counts = countDeclarations(declarations);
   if (module === INTRINSIC_MODULE) {

@@ -1,6 +1,6 @@
 # Source 2 Schema Explorer
 
-A schema explorer for Source 2 engine games (Counter-Strike 2, Dota 2, Deadlock). Browse classes, enums, fields, and their metadata across game schema modules.
+A [schema explorer](https://s2v.app/SchemaExplorer/) for Source 2 engine games (Counter-Strike 2, Dota 2, Deadlock). Browse classes, enums, fields, and their metadata across game schema modules.
 
 Loosely based on the [ModDota API explorer](https://github.com/ModDota/moddota.github.io/tree/source/api), but heavily rewritten.
 

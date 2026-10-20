@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 /**
  * 1. Flatten index.html files to {dir}.html
- * 2. Move SchemaExplorer/* up into build/client/ (to avoid double nesting on GH Pages)
+ * 2. Move SchemaExplorer/* into build/client/ (to avoid double nesting on GH Pages)
  */
 async function flatten(dir: string) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -11,7 +11,6 @@ async function flatten(dir: string) {
 
     const folderPath = join(dir, entry.name);
 
-    // Recurse first (depth-first)
     await flatten(folderPath);
 
     try {
@@ -49,7 +48,7 @@ await rm(spaFallback);
 // Flatten index.html → .html inside SchemaExplorer/
 await flatten(baseDir);
 
-// Move SchemaExplorer/* up into build/client/
+// Move SchemaExplorer/* into build/client/
 for (const entry of await readdir(baseDir, { withFileTypes: true })) {
   const dest = join(clientDir, entry.name);
   await rm(dest, { recursive: true, force: true });

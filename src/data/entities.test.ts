@@ -82,7 +82,7 @@ const data: SchemasJson = {
       ],
       outputs: [{ name: "OnUser1" }],
     },
-    // classModule is omitted when it's module, a key's declaredIn(Module) when it's the class
+    // classModule is omitted when it's module. A key's declaredIn(Module) is omitted when it's the class
     {
       class: "CBaseEntity",
       module: "server",
@@ -103,7 +103,7 @@ const data: SchemasJson = {
           enumModule: "client",
         },
         { name: "origin", type: "FIELD_VECTOR", procedural: true },
-        // A component key, declaredIn is the component's datamap class
+        // A component key. Its declaredIn is the component's datamap class
         {
           name: "local.origin",
           type: "FIELD_VECTOR",

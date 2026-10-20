@@ -19,17 +19,20 @@ interface CrossGameRefs {
 /** Where else a declaration exists, or null when nowhere */
 function useCrossGameRefs(declaration: Declaration): CrossGameRefs | null {
   const { hasNetwork, otherGamesLookup, crossModuleLookup } = useContext(DeclarationsContext);
+
   return useMemo(() => {
     const crossModuleMatch = crossModuleLookup.get(
       declarationKey(declaration.module, declaration.name),
     );
     const gameMatches: CrossGameRefs["gameMatches"] = [];
+
     for (const [gameId, lookup] of otherGamesLookup) {
       const match = lookup.get(declaration.name);
+
       if (match && match.kind === declaration.kind) {
         gameMatches.push({
           gameId,
-          gameName: getGameDef(gameId)?.name ?? gameId,
+          gameName: getGameDef(gameId).name,
           status: compareDeclarations(
             declaration,
             match,
@@ -39,7 +42,9 @@ function useCrossGameRefs(declaration: Declaration): CrossGameRefs | null {
         });
       }
     }
+
     if (!crossModuleMatch && gameMatches.length === 0) return null;
+
     return { crossModuleMatch, gameMatches };
   }, [declaration, hasNetwork, otherGamesLookup, crossModuleLookup]);
 }
@@ -60,11 +65,12 @@ const STATUS: Record<
   },
 };
 
-/** The same declaration in the other module and in other games, nothing when there is none */
+/** The same declaration in the other module and in other games. Renders nothing when there is none */
 export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
   const { game } = useContext(DeclarationsContext);
   const refs = useCrossGameRefs(declaration);
   if (!refs) return null;
+
   const { crossModuleMatch, gameMatches } = refs;
 
   return (
@@ -81,7 +87,7 @@ export function CrossGameDetail({ declaration }: { declaration: Declaration }) {
         )}
         {gameMatches.map(({ gameId, gameName, status, module: otherModule }) => {
           const info = status === "identical" ? null : STATUS[status];
-          // The pill sits next to the link, a link underlines everything inside it
+          // The pill sits next to the link, because a link underlines everything inside it
           return (
             <span key={gameId}>
               <Link

@@ -1,5 +1,5 @@
-// Kept apart from components: the build evaluates this module to inline it into other files' CSS,
-// and it can only do that for plain values
+// Kept apart from components: the build evaluates this module to inline it into other files' CSS.
+// It can do that only for plain values
 
 import { hover, hoverAndPress, pressScale } from "../interaction-styles";
 
@@ -48,7 +48,7 @@ export const sidebarRow = `
   white-space: nowrap;
   color: var(--text);
   cursor: pointer;
-  /* Links too, the pressed background replaces the browser's tap flash */
+  /* Links too. The pressed background replaces the browser's tap flash */
   -webkit-tap-highlight-color: transparent;
 
   > svg {

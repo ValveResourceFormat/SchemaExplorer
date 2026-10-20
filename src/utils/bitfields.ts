@@ -17,22 +17,18 @@ export function computeBitfieldInfo(fields: SchemaField[]): Map<SchemaField, Bit
       continue;
     }
 
-    // Collect consecutive bitfields at the same offset
     const groupOffset = field.offset;
     let bitPos = 0;
-    while (
-      i < fields.length &&
-      fields[i].type.category === "bitfield" &&
-      fields[i].offset === groupOffset
-    ) {
-      const f = fields[i];
-      const count = (f.type as { category: "bitfield"; count: number }).count;
-      result.set(f, { bitOffset: bitPos, bitCount: count, padding: 0, totalBits: 0 });
-      bitPos += count;
+    while (i < fields.length) {
+      const bitfield = fields[i];
+      const type = bitfield.type;
+      if (type.category !== "bitfield" || bitfield.offset !== groupOffset) break;
+
+      result.set(bitfield, { bitOffset: bitPos, bitCount: type.count, padding: 0, totalBits: 0 });
+      bitPos += type.count;
       i++;
     }
 
-    // Compute padding to next byte boundary
     const lastField = fields[i - 1];
     const info = result.get(lastField)!;
     const remainder = bitPos % 8;
@@ -41,5 +37,6 @@ export function computeBitfieldInfo(fields: SchemaField[]): Map<SchemaField, Bit
       info.padding = 8 - remainder;
     }
   }
+
   return result;
 }

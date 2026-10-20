@@ -13,6 +13,7 @@ import { subtleUnderline } from "./link-styles";
 import { INTRINSIC_MODULE } from "../../data/intrinsics";
 import { metadataValueText } from "../../utils/format";
 import { hasIntrinsicLayout } from "../../data/derived";
+import { compareNames } from "../../data/schemas";
 import { tip } from "../Tooltip";
 
 // @ts-expect-error Linaria styled() doesn't support ForwardRefExoticComponent
@@ -102,7 +103,7 @@ export function SchemaTypeView({ type }: { type: SchemaFieldType }) {
   }
 }
 
-/** Size and alignment are the instantiation's, template arguments can change them */
+/** Size and alignment are the instantiation's, because template arguments can change them */
 function IntrinsicLink({
   name,
   size,
@@ -114,9 +115,11 @@ function IntrinsicLink({
 }) {
   const { game, declarations } = useContext(DeclarationsContext);
   const to = schemaPath(game, INTRINSIC_MODULE, name);
+
   let text = hasIntrinsicLayout(declarations, name)
     ? "An engine type the schemas use but don't describe, its layout here comes from this site."
     : "An engine type the schemas use but don't describe.";
+
   if (size != null) {
     text += ` This one is ${size} bytes${alignment != null ? `, align ${alignment}` : ""}.`;
   }
@@ -282,31 +285,36 @@ function truncateGroups(
 
 type MetadataGroup = { name: string; values: (string | undefined)[] };
 
-/** Entries grouped by name, the friendly name and description first, KV3 defaults last */
+/** Groups entries by name. The friendly name and description come first, and KV3 defaults last */
 function groupMetadata(metadata: SchemaMetadataEntry[]): MetadataGroup[] {
   const groups: MetadataGroup[] = [];
   const map = new Map<string, MetadataGroup>();
+
   for (const entry of metadata) {
     let group = map.get(entry.name);
+
     if (!group) {
       group = { name: entry.name, values: [] };
       map.set(entry.name, group);
       groups.push(group);
     }
+
     group.values.push(metadataValueText(entry.value));
   }
+
   const priority = (name: string) => {
     if (name === "MPropertyFriendlyName" || name === "MPropertyDescription") return -1;
     if (name === "MGetKV3ClassDefaults") return 1;
     return 0;
   };
+
   groups.sort((a, b) => {
-    const p = priority(a.name) - priority(b.name);
-    if (p !== 0) return p;
-    if (a.name < b.name) return -1;
-    if (a.name > b.name) return 1;
-    return 0;
+    const byPriority = priority(a.name) - priority(b.name);
+    if (byPriority !== 0) return byPriority;
+
+    return compareNames(a, b);
   });
+
   return groups;
 }
 
@@ -318,11 +326,12 @@ interface MetadataState {
   toggle: () => void;
 }
 
-/** Groups metadata once and keeps whether it's expanded, collapsed again for other metadata */
+/** Groups metadata once and keeps whether it's expanded. Other metadata starts collapsed again */
 function useMetadata(metadata: SchemaMetadataEntry[]): MetadataState {
   const grouped = useMemo(() => groupMetadata(metadata), [metadata]);
   const [expanded, setExpanded] = useState(false);
   useEffect(() => setExpanded(false), [metadata]);
+
   return {
     grouped,
     hasMore: countLines(grouped) > MAX_COLLAPSED_LINES,
@@ -336,7 +345,7 @@ function metadataToggle(state: MetadataState) {
   return { expanded: state.expanded, onToggle: state.toggle, more: "Show all" };
 }
 
-/** Metadata as a details row, the expand toggle under the label where it can't be missed */
+/** Metadata as a details row. The expand toggle sits under the label, where it can't be missed */
 export function MetadataDetail({
   metadata,
   game,
@@ -346,6 +355,7 @@ export function MetadataDetail({
 }) {
   const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
+
   return (
     <Detail label="Metadata" toggle={metadataToggle(state)}>
       <MetadataEntries state={state} game={game} />
@@ -362,6 +372,7 @@ export function MetadataTags({
 }) {
   const state = useMetadata(metadata);
   if (metadata.length === 0) return null;
+
   return (
     <>
       <MetadataEntries state={state} game={game} />

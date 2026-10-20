@@ -11,8 +11,8 @@ export function formatKeyType(type: string): string {
 }
 
 /**
- * Entity field types that are a schema type under another name, every bound field of theirs has
- * that type. Worldspace, network and resource handle types have no single schema type.
+ * Entity field types that are a schema type under another name. Every bound field of these types
+ * has that schema type. Worldspace, network, and resource handle types have no single schema type
  */
 const KEY_SCHEMA_TYPES: Record<
   string,
@@ -64,8 +64,8 @@ export function formatDescription(text: string): string {
 export type Entry = { name: string; component?: string };
 
 /**
- * Keys of the same component next to each other, after the ones without a component, otherwise
- * in their order. Inputs and outputs stay as they are
+ * Puts keys of the same component next to each other, after the keys without a component. Other
+ * than that, keys keep their order. Inputs and outputs stay as they are
  */
 export function groupByComponent<T>(items: T[], entryOf: (item: T) => Entry): T[] {
   const component = (item: T) => entryOf(item).component;
@@ -85,8 +85,8 @@ export type InheritedGroup<T extends Entry> = {
 };
 
 /**
- * Entries of each base, nearest first. A name redeclared by a nearer class wins and the
- * inherited one is marked as overridden. Names are case-insensitive in the entity system.
+ * Entries of each base, nearest first. A nearer class that redeclares a name wins, and the
+ * inherited entry is marked as overridden. Names are case-insensitive in the entity system
  */
 export function buildInheritedGroups<T extends Entry>(
   entity: EntityClass,
@@ -102,11 +102,15 @@ export function buildInheritedGroups<T extends Entry>(
       entry,
       overriddenBy: declaredBy.get(entry.name.toLowerCase()),
     }));
+
     for (const { entry } of entries) {
-      if (!declaredBy.has(entry.name.toLowerCase())) declaredBy.set(entry.name.toLowerCase(), base);
+      const key = entry.name.toLowerCase();
+      if (!declaredBy.has(key)) declaredBy.set(key, base);
     }
+
     const count = entries.filter((e) => !e.overriddenBy).length;
     if (entries.length > 0) groups.push({ entity: base, entries, count });
   }
+
   return groups;
 }

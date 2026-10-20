@@ -1,7 +1,14 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import type { MetaFunction } from "react-router";
-import { isGameId, DEFAULT_GAME, getGameDef, canonicalUrl, pageMeta } from "../games-list";
+import {
+  DEFAULT_GAME,
+  SITE_NAME,
+  gameIdFrom,
+  getGameDef,
+  canonicalUrl,
+  pageMeta,
+} from "../games-list";
 import {
   sameSchemaPage,
   designNameEntity,
@@ -19,8 +26,6 @@ import { moduleLabel } from "../data/modules";
 import { schemaPath } from "../components/schema/DeclarationsContext";
 import DeclarationsPage from "../components/DeclarationsPage";
 
-const SITE_NAME = "Source 2 Schema Explorer";
-
 /**
  * The entity of a design name link, /cs2/logic_relay or /cs2/server/logic_relay, when the URL
  * isn't a module or declaration itself
@@ -34,14 +39,14 @@ function linkedEntity(context: GameContext, module?: string, scope?: string) {
 }
 
 export const meta: MetaFunction = ({ params }) => {
-  const game = params.game && isGameId(params.game) ? params.game : null;
+  const game = gameIdFrom(params.game);
   if (!game) {
     return pageMeta(SITE_NAME, describeRoot(), canonicalUrl());
   }
 
-  const gameName = getGameDef(game)!.name;
+  const gameName = getGameDef(game).name;
   const context = getGameContext(game);
-  // The redirect to the class page only happens in the browser, link previews need its meta
+  // The redirect to the class page happens only in the browser. Link previews need its meta
   const entity = linkedEntity(context, params.module, params.scope);
   const module = entity ? entity.classModule : params.module;
   const scope = entity ? entity.class : params.scope;
@@ -76,16 +81,17 @@ export default function SchemasPage() {
     module: string;
     scope: string;
   }>();
-  const game = gameParam && isGameId(gameParam) ? gameParam : DEFAULT_GAME;
+  const game = gameIdFrom(gameParam) ?? DEFAULT_GAME;
   const context = getGameContext(game);
   const { declarations } = context;
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect invalid URLs: try to find the scope in any game, otherwise strip invalid segments
+  // Redirects invalid URLs. It tries to find the scope in any game, and otherwise strips invalid
+  // segments
   useEffect(() => {
-    const validGame = gameParam && isGameId(gameParam);
+    const validGame = gameIdFrom(gameParam) !== null;
     const validModule = validGame && module && declarations.has(module);
     const validScope = validModule && scope && declarations.get(module)!.has(scope);
 

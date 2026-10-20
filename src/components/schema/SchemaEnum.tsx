@@ -12,7 +12,7 @@ import { ReferencedBy, UsedByConVars } from "./ReferencedBy";
 import { CrossGameDetail } from "./CrossGameRefs";
 import { GitHubFileLink, TitledCard } from "./Cards";
 import { searchLink, useFieldParam } from "../../utils/filtering";
-import { useAnchoredRef } from "./useAnchoredRow";
+import { useAnchoredRef } from "./useAnchoredRef";
 import { UsedByKeyvalues } from "./EntitySections";
 import { AnchorName, PageHeader, PageTitle, Pill, Row, RowNotes, Table, TableHead } from "./styles";
 import { DetailsCard } from "./Detail";
@@ -39,7 +39,7 @@ const MemberHex = styled(Link)`
   }
 `;
 
-/** The value and hex columns, on phones together at the end of the line */
+/** The value and hex columns. On phones they sit together at the end of the line */
 const MemberValues = styled.div`
   display: contents;
 
@@ -83,7 +83,7 @@ export const SchemaEnumView: React.FC<{
   );
 };
 
-/** References, metadata and other games, the card hides when there is none */
+/** References, metadata and other games. The card hides when there is none */
 function EnumDetails({ declaration }: { declaration: api.SchemaEnum }) {
   const { game } = useContext(DeclarationsContext);
   return (
@@ -104,6 +104,7 @@ function MemberTable({ declaration, declPath }: { declaration: api.SchemaEnum; d
     () => (isFlagEnum(declaration.members) ? getBaseFlags(declaration.members) : null),
     [declaration.members],
   );
+
   // Every hex value as wide as the widest, so the column lines up
   const hexes = useMemo(() => {
     const raw = declaration.members.map((m) => formatEnumHex(m.value, declaration.alignment));
@@ -152,7 +153,7 @@ function EnumMemberRow({
   const decomposed = baseFlags ? decomposeFlags(member.value, baseFlags) : null;
 
   return (
-    <Row ref={rowRef as React.Ref<HTMLDivElement>} data-anchored={anchored || undefined}>
+    <Row ref={rowRef} data-anchored={anchored || undefined}>
       {/* On phones the value and hex go on the line of the name */}
       <MemberName data-inline>
         <RowIcon kind="enum-member" />

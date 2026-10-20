@@ -31,7 +31,7 @@ const NameTail = styled.span`
 `;
 
 /**
- * Long names are cut in the middle, since many differ only at the end, like
+ * The sidebar cuts long names in the middle, since many differ only at the end, like
  * C_DOTA_Ability_Special_Bonus_Unique_Drow_Ranger_1 to _8
  */
 const NAME_TAIL = 10;
@@ -56,7 +56,7 @@ export const DeclarationSidebarElement = ({
   );
 };
 
-/** A collapsible group's header, its name lines up with the rows' names below it */
+/** A collapsible group's header. Its name lines up with the rows' names below it */
 export const SidebarGroupHeader = styled.button`
   display: flex;
   align-items: center;

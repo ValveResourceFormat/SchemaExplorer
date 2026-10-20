@@ -61,7 +61,7 @@ registerTooltip("flag", (el) => {
   const description = flagDescription(flag);
   if (!description && !tipHint) return null;
   const content = <FlagTooltipContent flag={flag} description={description} hint={tipHint} />;
-  // The host sits outside the page, the exclusive flag's icon is the badge's game
+  // The host sits outside the page. The exclusive flag's icon is the badge's game
   return tipGame && isGameId(tipGame) ? (
     <DeclarationsContext.Provider value={getGameContext(tipGame)}>
       {content}
