@@ -93,6 +93,8 @@ export interface ClassNetwork {
   structNotInNetworkUtlVectorEmbedded?: boolean;
   /** Default 2 left out */
   outOfPVSUpdates?: number;
+  /** Registered with DECLARE_NETWORKCLASS, only on server classes */
+  networkClass?: boolean;
 }
 
 export interface SchemaField {
@@ -110,6 +112,8 @@ export type SchemaClassFlag =
   | "abstract"
   | "trivial_constructor"
   | "trivial_destructor"
+  /** Only written for classes without an alignment, the ones with one are always constructible */
+  | "construct_allowed"
   | "construct_disallowed";
 
 export interface SchemaParent {
@@ -146,11 +150,15 @@ export interface SchemaEnumMember {
   metadata: SchemaMetadataEntry[];
 }
 
+/** unsigned: the storage type is unsigned, on every enum with values past the signed limit too */
+export type SchemaEnumFlag = "unsigned";
+
 export interface SchemaEnum {
   kind: "enum";
   name: string;
   module: string;
   alignment: string;
+  flags: SchemaEnumFlag[];
   members: SchemaEnumMember[];
   metadata: SchemaMetadataEntry[];
 }

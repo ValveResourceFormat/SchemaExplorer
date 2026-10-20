@@ -55,6 +55,12 @@ const FlagBreakdown = styled.div`
   color: var(--text-dim);
 `;
 
+const ENUM_FLAG_TIPS: Record<api.SchemaEnumFlag, string> = {
+  unsigned:
+    "The storage type is unsigned. Enums with values past the signed limit have it, and enums " +
+    "declared with an unsigned type.",
+};
+
 export const SchemaEnumView: React.FC<{
   declaration: api.SchemaEnum;
 }> = ({ declaration }) => {
@@ -71,6 +77,11 @@ export const SchemaEnumView: React.FC<{
         <Pill data-mono {...tip("Underlying type")}>
           {declaration.alignment}
         </Pill>
+        {declaration.flags.map((flag) => (
+          <Pill key={flag} {...tip(ENUM_FLAG_TIPS[flag])}>
+            {flag}
+          </Pill>
+        ))}
         <GitHubFileLink module={declaration.module} name={declaration.name} button />
       </PageHeader>
       <EnumDetails declaration={declaration} />

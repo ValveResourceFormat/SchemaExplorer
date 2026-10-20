@@ -3,6 +3,7 @@ import { styled } from "@linaria/react";
 import { Link } from "../Link";
 import type {
   ClassNetwork,
+  Declaration,
   FieldNetwork,
   NetworkOverride,
   SchemaClass,
@@ -10,8 +11,9 @@ import type {
 } from "../../data/types";
 import { findDeclarationByName, type InheritedBase } from "../../data/derived";
 import { isSameNetworkType, networkName, type FieldSending } from "../../data/network";
+import { isConstructible, networkClassIds, polymorphicTypes } from "../../data/network-classes";
 import { searchLink } from "../../utils/filtering";
-import { formatFieldType } from "../../utils/format";
+import { formatFieldType, plural } from "../../utils/format";
 import { formatRange } from "../../utils/console-format";
 import { KindIcon } from "../kind-icon/KindIcon";
 import { DeclarationsContext, fieldLink, schemaPath } from "./DeclarationsContext";
@@ -113,6 +115,18 @@ function ClassName({ name, module }: { name: string; module: string }) {
   );
 }
 
+/** The types a polymorphic pointer can hold, each after the id it's sent as */
+function PolymorphicTypes({ field }: { field: SchemaField }) {
+  const { references } = useContext(DeclarationsContext);
+
+  return polymorphicTypes(references, field).map((type) => (
+    <React.Fragment key={type.name}>
+      {type.id > 0 && ", "}
+      {type.id} <ClassName name={type.name} module={type.module} />
+    </React.Fragment>
+  ));
+}
+
 /**
  * The properties, shown as they are, in this order. Names that others search for link to a
  * search with the network: tag, and numbers and types are plain
@@ -195,7 +209,14 @@ export function fieldNetworkAttrs(field: SchemaField, module: string): FieldAttr
   }
 
   if (network.polymorphic) {
-    attrs.push({ key: "polymorphic", label: "polymorphic", tip: "A polymorphic pointer." });
+    attrs.push({
+      key: "polymorphic",
+      label: "polymorphic",
+      tip:
+        "A polymorphic pointer, sent with the id of the type it holds: 0 for the field's class, " +
+        "then its direct children in the same module in caseless order.",
+      value: <PolymorphicTypes field={field} />,
+    });
   }
 
   if (network.typeAlias && network.typeAlias !== network.alias) {
@@ -424,11 +445,13 @@ export function ClassNetworkDetail({
   declaration: SchemaClass;
   bases: InheritedBase[];
 }) {
+  const { declarations } = useContext(DeclarationsContext);
   if (!declaration.network) return null;
 
   // The class's own fields say on their rows whether it sends them. The lists name them by alias
   const own = new Set(declaration.fields.flatMap((f) => [f.name, networkName(f)]));
   const rows = networkRows(declaration, declaration.network, bases, own);
+  if (declaration.network.networkClass) rows.unshift(networkClassRow(declarations, declaration));
   if (rows.length === 0) return null;
 
   return (
@@ -449,6 +472,43 @@ function RowList({ rows }: { rows: Row[] }) {
       ))}
     </NetworkList>
   );
+}
+
+const NETWORK_CLASS_TIP =
+  "Registered with DECLARE_NETWORKCLASS. The server sends the constructible entity classes " +
+  "among these in the class info of demos, with ids in the caseless order of their names.";
+
+/** The class id the server sends the class with, or why it doesn't send it */
+function networkClassRow(
+  declarations: Map<string, Map<string, Declaration>>,
+  declaration: SchemaClass,
+): Row {
+  const { ids, bits } = networkClassIds(declarations);
+  const id = ids.get(declaration);
+
+  if (id == null) {
+    let reason = "not an entity class";
+    if (!isConstructible(declaration)) {
+      reason = declaration.flags.includes("abstract") ? "abstract" : "not constructible";
+    }
+
+    return {
+      label: "Network class",
+      tip: NETWORK_CLASS_TIP,
+      items: <span>Not sent in the class info, {reason}</span>,
+    };
+  }
+
+  return {
+    label: "Network class",
+    tip: NETWORK_CLASS_TIP,
+    items: (
+      <span>
+        Class id <Value>{id}</Value> of {ids.size}, sent in {plural(bits, "bit")}. Ids change
+        between builds, they're only valid for demos from this one
+      </span>
+    ),
+  };
 }
 
 /** A row for each setting of the network data */

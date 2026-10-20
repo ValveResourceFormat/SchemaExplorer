@@ -79,6 +79,7 @@ function compareClasses(a: SchemaClass, b: SchemaClass, compareNetwork: boolean)
 
 function areEnumsEqual(a: SchemaEnum, b: SchemaEnum): boolean {
   if (a.alignment !== b.alignment) return false;
+  if (a.flags.join() !== b.flags.join()) return false;
   if (a.members.length !== b.members.length) return false;
   for (let i = 0; i < a.members.length; i++) {
     if (a.members[i].name !== b.members[i].name || a.members[i].value !== b.members[i].value)

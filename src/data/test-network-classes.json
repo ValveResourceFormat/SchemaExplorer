@@ -1,0 +1,3601 @@
+{
+  "classIds": [
+    "CAK47",
+    "CBarnLight",
+    "CBaseAnimGraph",
+    "CBaseButton",
+    "CBaseCombatCharacter",
+    "CBaseCSGrenadeProjectile",
+    "CBaseDoor",
+    "CBaseEntity",
+    "CBaseGrenade",
+    "CBaseModelEntity",
+    "CBasePlayerController",
+    "CBasePlayerPawn",
+    "CBasePlayerWeapon",
+    "CBaseToggle",
+    "CBaseTrigger",
+    "CBeam",
+    "CBombTarget",
+    "CBreakable",
+    "CBreakableProp",
+    "CBrokenGlassTrap",
+    "CC4",
+    "CCashStack",
+    "CChicken",
+    "CCitadelSoundOpvarSetOBB",
+    "CColorCorrection",
+    "CColorCorrectionVolume",
+    "CCSCustomHudLayout",
+    "CCSCustomPlayerCamera",
+    "CCSGameRulesProxy",
+    "CCSGO_EndOfMatchLineupEnd",
+    "CCSGO_EndOfMatchLineupStart",
+    "CCSGO_RushIntroCounterTerroristPosition",
+    "CCSGO_RushIntroTerroristPosition",
+    "CCSGO_TeamIntroCounterTerroristPosition",
+    "CCSGO_TeamIntroTerroristPosition",
+    "CCSGO_TeamSelectCounterTerroristPosition",
+    "CCSGO_TeamSelectTerroristPosition",
+    "CCSGO_WingmanIntroCounterTerroristPosition",
+    "CCSGO_WingmanIntroTerroristPosition",
+    "CCSMinimapBoundary",
+    "CCSMinimapVolume",
+    "CCSObservableElement",
+    "CCSObserverPawn",
+    "CCSPetPlacement",
+    "CCSPlayerController",
+    "CCSPlayerPawn",
+    "CCSPlayerPawnBase",
+    "CCSPlayerResource",
+    "CCSRadarElement",
+    "CCSTeam",
+    "CCSWeaponBaseGun",
+    "CCSWeaponBaseShotgun",
+    "CDEagle",
+    "CDecoyGrenade",
+    "CDecoyProjectile",
+    "CDynamicLight",
+    "CDynamicProp",
+    "CEconEntity",
+    "CEconWearable",
+    "CEntityDissolve",
+    "CEntityFlame",
+    "CEnvCombinedLightProbeVolume",
+    "CEnvCubemap",
+    "CEnvCubemapBox",
+    "CEnvCubemapFog",
+    "CEnvDecal",
+    "CEnvDetailController",
+    "CEnvLightProbeVolume",
+    "CEnvParticleGlow",
+    "CEnvSky",
+    "CEnvVolumetricFogController",
+    "CEnvVolumetricFogVolume",
+    "CEnvWind",
+    "CFireCrackerBlast",
+    "CFish",
+    "CFlashbang",
+    "CFlashbangProjectile",
+    "CFogController",
+    "CFootstepControl",
+    "CFuncBrush",
+    "CFuncConveyor",
+    "CFuncElectrifiedVolume",
+    "CFuncLadder",
+    "CFuncMonitor",
+    "CFuncMoveLinear",
+    "CFuncMover",
+    "CFuncRetakeBarrier",
+    "CFuncRotating",
+    "CFuncTrackTrain",
+    "CFuncWater",
+    "CGameRulesProxy",
+    "CGradientFog",
+    "CHandleTest",
+    "CHEGrenade",
+    "CHEGrenadeProjectile",
+    "CHostage",
+    "CHostageCarriableProp",
+    "CHostageRescueZone",
+    "CIncendiaryGrenade",
+    "CInferno",
+    "CInfoFan",
+    "CInfoInstructorHintHostageRescueZone",
+    "CInfoLadderDismount",
+    "CInfoOffscreenPanoramaTexture",
+    "CInfoVisibilityBox",
+    "CInfoWorldLayer",
+    "CItem_Healthshot",
+    "CItemDogtags",
+    "CKnife",
+    "CLightDirectionalEntity",
+    "CLightEntity",
+    "CLightEnvironmentEntity",
+    "CLightOrthoEntity",
+    "CLightSpotEntity",
+    "CMapVetoPickController",
+    "CModelPointEntity",
+    "CMolotovGrenade",
+    "CMolotovProjectile",
+    "COmniLight",
+    "CParticleSystem",
+    "CPathNode",
+    "CPathParticleRope",
+    "CPathSimple",
+    "CPathWithDynamicNodes",
+    "CPhysBox",
+    "CPhysicsProp",
+    "CPhysicsPropMultiplayer",
+    "CPhysMagnet",
+    "CPlantedC4",
+    "CPlayerPing",
+    "CPlayerSprayDecal",
+    "CPlayerVisibility",
+    "CPointCamera",
+    "CPointClientUIDialog",
+    "CPointClientUIWorldPanel",
+    "CPointClientUIWorldTextPanel",
+    "CPointCommentaryNode",
+    "CPointEntity",
+    "CPointOrient",
+    "CPointValueRemapper",
+    "CPointWorldText",
+    "CPostProcessingVolume",
+    "CPrecipitation",
+    "CPrecipitationBlocker",
+    "CPropDoorRotating",
+    "CPulseGameBlackboard",
+    "CRagdollManager",
+    "CRagdollProp",
+    "CRagdollPropAttached",
+    "CRectLight",
+    "CRopeKeyframe",
+    "CSceneEntity",
+    "CShatterGlassShardPhysics",
+    "CSkyCamera",
+    "CSkyCameraVolume",
+    "CSkyCameraVolumeTarget",
+    "CSmokeGrenade",
+    "CSmokeGrenadeProjectile",
+    "CSoundAreaEntityOrientedBox",
+    "CSoundAreaEntitySphere",
+    "CSoundEventAABBEntity",
+    "CSoundEventBoxEntity",
+    "CSoundEventBoxHelper",
+    "CSoundEventConeEntity",
+    "CSoundEventEntity",
+    "CSoundEventOBBEntity",
+    "CSoundEventPathCornerEntity",
+    "CSoundEventSphereEntity",
+    "CSoundOpvarSetAABBEntity",
+    "CSoundOpvarSetAutoRoomEntity",
+    "CSoundOpvarSetDomeEntity",
+    "CSoundOpvarSetOBBEntity",
+    "CSoundOpvarSetOBBWindEntity",
+    "CSoundOpvarSetPathCornerEntity",
+    "CSoundOpvarSetPointBase",
+    "CSoundOpvarSetPointEntity",
+    "CSpotlightEnd",
+    "CSprite",
+    "CSpriteOriented",
+    "CTeam",
+    "CTextureBasedAnimatable",
+    "CTonemapController2",
+    "CTriggerBuoyancy",
+    "CTriggerFan",
+    "CTriggerPhysics",
+    "CTriggerVolume",
+    "CVoteController",
+    "CWaterBullet",
+    "CWeaponAug",
+    "CWeaponAWP",
+    "CWeaponBizon",
+    "CWeaponCZ75a",
+    "CWeaponElite",
+    "CWeaponFamas",
+    "CWeaponFiveSeven",
+    "CWeaponG3SG1",
+    "CWeaponGalilAR",
+    "CWeaponGlock",
+    "CWeaponHKP2000",
+    "CWeaponM249",
+    "CWeaponM4A1",
+    "CWeaponM4A1Silencer",
+    "CWeaponMAC10",
+    "CWeaponMag7",
+    "CWeaponMP5SD",
+    "CWeaponMP7",
+    "CWeaponMP9",
+    "CWeaponNegev",
+    "CWeaponNOVA",
+    "CWeaponP250",
+    "CWeaponP90",
+    "CWeaponRevolver",
+    "CWeaponSawedoff",
+    "CWeaponSCAR20",
+    "CWeaponSG556",
+    "CWeaponSSG08",
+    "CWeaponTaser",
+    "CWeaponTec9",
+    "CWeaponUMP45",
+    "CWeaponUSPSilencer",
+    "CWeaponXM1014",
+    "CWorld"
+  ],
+  "schemas": {
+    "classes": [
+      {
+        "name": "IHasAttributes",
+        "module": "client",
+        "flags": ["abstract", "trivial_destructor"]
+      },
+      {
+        "name": "CEntityInstance",
+        "module": "entity2",
+        "flags": ["construct_disallowed"]
+      },
+      {
+        "name": "CAK47",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBarnLight",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseAnimGraph",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseButton",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseToggle",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseCSGrenade",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseCSGrenadeProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseClientUIEntity",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseCombatCharacter",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseDoor",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseToggle",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CEntityInstance",
+            "module": "entity2"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseModelEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBasePlayerController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBasePlayerPawn",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCombatCharacter",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBasePlayerWeapon",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CEconEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ]
+      },
+      {
+        "name": "CBasePropDoor",
+        "module": "server",
+        "flags": ["abstract", "construct_disallowed"],
+        "parents": [
+          {
+            "name": "CDynamicProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseToggle",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBaseTrigger",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseToggle",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBeam",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBombTarget",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBreakable",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBreakableProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CBrokenGlassTrap",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CC4",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSCustomHudLayout",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSCustomPlayerCamera",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_EndOfMatchLineupEnd",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_EndOfMatchLineupEndpoint",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_EndOfMatchLineupEndpoint",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_EndOfMatchLineupStart",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_EndOfMatchLineupEndpoint",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_RushIntroCharacterPosition",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSGO_TeamIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_RushIntroCounterTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_RushIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_RushIntroTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_RushIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamIntroCharacterPosition",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSGO_TeamPreviewCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamIntroCounterTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_TeamIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamIntroTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_TeamIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamPreviewCharacterPosition",
+        "module": "server",
+        "flags": ["abstract", "construct_disallowed"],
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamSelectCharacterPosition",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSGO_TeamPreviewCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamSelectCounterTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_TeamSelectCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_TeamSelectTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_TeamSelectCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_WingmanIntroCharacterPosition",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSGO_TeamIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_WingmanIntroCounterTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_WingmanIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGO_WingmanIntroTerroristPosition",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CCSGO_WingmanIntroCharacterPosition",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSGameRulesProxy",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CGameRulesProxy",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSMinimapBoundary",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSMinimapVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSObservableElement",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSObserverPawn",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSPlayerPawnBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSPetPlacement",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSPlayerController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBasePlayerController",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSPlayerPawn",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSPlayerPawnBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSPlayerPawnBase",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBasePlayerPawn",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSPlayerResource",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSRadarElement",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSTeam",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CTeam",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSWeaponBase",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CBasePlayerWeapon",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSWeaponBaseGun",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCSWeaponBaseShotgun",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCashStack",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CChicken",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CDynamicProp",
+            "module": "server"
+          },
+          {
+            "name": "IHasAttributes",
+            "module": "client"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CCitadelSoundOpvarSetOBB",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CColorCorrection",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CColorCorrectionVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CDEagle",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CDecoyGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CDecoyProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenadeProjectile",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CDynamicLight",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CDynamicProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBreakableProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEconEntity",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          },
+          {
+            "name": "IHasAttributes",
+            "module": "client"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEconWearable",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CEconEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEntityDissolve",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEntityFlame",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvCombinedLightProbeVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvCubemap",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvCubemapBox",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CEnvCubemap",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvCubemapFog",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvDecal",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvDetailController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvLightProbeVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvParticleGlow",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CParticleSystem",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvSky",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvVolumetricFogController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvVolumetricFogVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CEnvWind",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFireCrackerBlast",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CInferno",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFish",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFlashbang",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFlashbangProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenadeProjectile",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFogController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFootstepControl",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncBrush",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncConveyor",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncElectrifiedVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CFuncBrush",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncLadder",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncMonitor",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CFuncBrush",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncMoveLinear",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseToggle",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncMover",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncRetakeBarrier",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CDynamicProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncRotating",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncTrackTrain",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CFuncWater",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CGameRulesProxy",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CGradientFog",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHEGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHEGrenadeProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenadeProjectile",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHandleTest",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHostage",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CHostageExpresserShim",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHostageCarriableProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHostageExpresserShim",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCombatCharacter",
+            "module": "server"
+          }
+        ]
+      },
+      {
+        "name": "CHostageRescueZone",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CHostageRescueZoneShim",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CHostageRescueZoneShim",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ]
+      },
+      {
+        "name": "CIncendiaryGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CMolotovGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInferno",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoFan",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoInstructorHintHostageRescueZone",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoLadderDismount",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoOffscreenPanoramaTexture",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoVisibilityBox",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CInfoWorldLayer",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CItem",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ]
+      },
+      {
+        "name": "CItemDogtags",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CItem",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CItem_Healthshot",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CWeaponBaseItem",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CKnife",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CLightDirectionalEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CLightEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CLightEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CLightEnvironmentEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CLightDirectionalEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CLightOrthoEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CLightEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CLightSpotEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CLightEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CMapVetoPickController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CModelPointEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CMolotovGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CMolotovProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenadeProjectile",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "COmniLight",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBarnLight",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CParticleSystem",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPathNode",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPathParticleRope",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPathSimple",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPathWithDynamicNodes",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CPathSimple",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPhysBox",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBreakable",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPhysMagnet",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPhysicsProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBreakableProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPhysicsPropMultiplayer",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CPhysicsProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPlantedC4",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          },
+          {
+            "name": "IHasAttributes",
+            "module": "client"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPlayerPing",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPlayerSprayDecal",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CModelPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPlayerVisibility",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointCamera",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointClientUIDialog",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseClientUIEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointClientUIWorldPanel",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseClientUIEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointClientUIWorldTextPanel",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CPointClientUIWorldPanel",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointCommentaryNode",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointOrient",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointValueRemapper",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPointWorldText",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CModelPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPostProcessingVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPrecipitation",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPrecipitationBlocker",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPropDoorRotating",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBasePropDoor",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CPulseGameBlackboard",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CRagdollManager",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CRagdollProp",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CRagdollPropAttached",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CRagdollProp",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CRectLight",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBarnLight",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CRopeKeyframe",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSceneEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CShatterGlassShardPhysics",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSkyCamera",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSkyCameraVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSkyCameraVolumeTarget",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSmokeGrenade",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenade",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSmokeGrenadeProjectile",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseCSGrenadeProjectile",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundAreaEntityBase",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundAreaEntityOrientedBox",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundAreaEntityBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundAreaEntitySphere",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundAreaEntityBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventAABBEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventBoxEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventMultiPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventBoxHelper",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventConeEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventMultiPointEntity",
+        "module": "server",
+        "flags": ["abstract", "construct_disallowed"],
+        "parents": [
+          {
+            "name": "CSoundEventEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventOBBEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventPathCornerEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventMultiPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundEventSphereEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundEventEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetAABBEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetBoxEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetAutoRoomEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetBoxEntity",
+        "module": "server",
+        "flags": ["abstract", "construct_disallowed"],
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetDomeEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetOBBEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetAABBEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetOBBWindEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetPathCornerEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetPointBase",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSoundOpvarSetPointEntity",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSoundOpvarSetPointBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSpotlightEnd",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSprite",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CSpriteOriented",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CSprite",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTeam",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTextureBasedAnimatable",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTonemapController2",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTriggerBuoyancy",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTriggerFan",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTriggerPhysics",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseTrigger",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CTriggerVolume",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CVoteController",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWaterBullet",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CBaseAnimGraph",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponAWP",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponAug",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponBaseItem",
+        "module": "server",
+        "flags": ["construct_disallowed"],
+        "parents": [
+          {
+            "name": "CCSWeaponBase",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponBizon",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponCZ75a",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponElite",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponFamas",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponFiveSeven",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponG3SG1",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponGalilAR",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponGlock",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponHKP2000",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponM249",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponM4A1",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponM4A1Silencer",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponMAC10",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponMP5SD",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponMP7",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponMP9",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponMag7",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponNOVA",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseShotgun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponNegev",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponP250",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponP90",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponRevolver",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponSCAR20",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponSG556",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponSSG08",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponSawedoff",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseShotgun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponTaser",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponTec9",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponUMP45",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponUSPSilencer",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseGun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWeaponXM1014",
+        "module": "server",
+        "alignment": 16,
+        "parents": [
+          {
+            "name": "CCSWeaponBaseShotgun",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      },
+      {
+        "name": "CWorld",
+        "module": "server",
+        "alignment": 8,
+        "parents": [
+          {
+            "name": "CBaseModelEntity",
+            "module": "server"
+          }
+        ],
+        "network": {
+          "networkClass": true
+        }
+      }
+    ],
+    "enums": []
+  }
+}

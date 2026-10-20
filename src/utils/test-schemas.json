@@ -2848,6 +2848,9 @@
       ],
       "module": "server",
       "name": "CEnvSoundscape",
+      "network": {
+        "networkClass": true
+      },
       "parents": [
         {
           "module": "server",
@@ -4960,7 +4963,7 @@
           }
         }
       ],
-      "flags": ["trivial_destructor"],
+      "flags": ["trivial_destructor", "construct_allowed"],
       "module": "server",
       "name": "CEffectData",
       "size": 112
@@ -7498,6 +7501,7 @@
     },
     {
       "alignment": "uint64_t",
+      "flags": ["unsigned"],
       "members": [
         {
           "name": "TEST_WIDE_ALL",
@@ -7518,6 +7522,11 @@
         {
           "name": "TEST_WIDE_BIT60_LOW",
           "value": "1152921504606846977"
+        }
+      ],
+      "metadata": [
+        {
+          "name": "MGlobalTypeScope"
         }
       ],
       "module": "test",

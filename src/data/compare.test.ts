@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { compareDeclarations } from "./compare";
-import type { SchemaClass, SchemaField } from "./types";
+import type { SchemaClass, SchemaEnum, SchemaField } from "./types";
 
 const int = { category: "builtin", name: "int32" } as const;
 
@@ -41,5 +41,26 @@ describe("compareDeclarations network data", () => {
   it("ignores network data when a game has none", () => {
     const a = cls([{ network: { type: "int" } }], { varsAtomic: true });
     expect(compareDeclarations(a, cls([{}]), false)).toBe("identical");
+  });
+});
+
+describe("compareDeclarations enums", () => {
+  function enumWith(flags: SchemaEnum["flags"]): SchemaEnum {
+    return {
+      kind: "enum",
+      name: "E",
+      module: "client",
+      alignment: "uint8_t",
+      flags,
+      members: [],
+      metadata: [],
+    };
+  }
+
+  it("differs when the flags differ", () => {
+    expect(compareDeclarations(enumWith(["unsigned"]), enumWith(["unsigned"]), true)).toBe(
+      "identical",
+    );
+    expect(compareDeclarations(enumWith(["unsigned"]), enumWith([]), true)).toBe("differs");
   });
 });

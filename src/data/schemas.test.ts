@@ -356,6 +356,24 @@ describe("parseSchemas", () => {
     ]);
   });
 
+  it("keeps enum flags and the MGlobalTypeScope tag, flags default to none", () => {
+    const wide = findDecl("TestWideEnum_t");
+    const color = findDecl("PulseTestEnumColor_t");
+    if (wide?.kind !== "enum" || color?.kind !== "enum") throw new Error("Expected enums");
+    expect(wide.flags).toEqual(["unsigned"]);
+    expect(wide.metadata).toEqual([{ name: "MGlobalTypeScope" }]);
+    expect(color.flags).toEqual([]);
+  });
+
+  it("keeps construct_allowed and a network made of only networkClass", () => {
+    const effect = parsedSchemas.declarations.get("server")!.get("CEffectData") as SchemaClass;
+    const soundscape = parsedSchemas.declarations
+      .get("server")!
+      .get("CEnvSoundscape") as SchemaClass;
+    expect(effect.flags).toEqual(["trivial_destructor", "construct_allowed"]);
+    expect(soundscape.network).toEqual({ networkClass: true });
+  });
+
   it("finds enum values past 2^53 by enumvalue:, in decimal and hex", () => {
     for (const value of ["1152921504606846977", "0x1000000000000001"]) {
       const result = searchSchemas(

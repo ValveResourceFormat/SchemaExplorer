@@ -12,6 +12,7 @@ import type {
   EntityParam,
   FieldNetwork,
   SchemaEnum,
+  SchemaEnumFlag,
   SchemaClass,
   SchemaClassFlag,
   SchemaParent,
@@ -310,6 +311,7 @@ interface RawSchemaEnum {
   name: string;
   module: string;
   alignment: string;
+  flags?: SchemaEnumFlag[];
   members?: {
     name: string;
     /** Past ±(2^53 − 1) a decimal string, which JSON numbers can't hold exactly */
@@ -465,6 +467,7 @@ export function parseSchemas(data: SchemasJson) {
   const enums: SchemaEnum[] = data.enums.map((e) => ({
     ...e,
     kind: "enum",
+    flags: e.flags ?? [],
     metadata: e.metadata ?? [],
     members: (e.members ?? []).map((m) => ({
       ...m,
