@@ -259,8 +259,9 @@ export function FieldNetworkLine({ attrs }: { attrs: FieldAttr[] }) {
   return (
     <NetworkLine>
       {attrs.map((a) => (
-        <Attr key={a.key} {...tip(a.tip)}>
-          {a.label}
+        <Attr key={a.key}>
+          {/* On the label only, since a searchable value has a tooltip of its own */}
+          <span {...tip(a.tip)}>{a.label}</span>
           {a.value != null && <> {a.value}</>}
         </Attr>
       ))}
@@ -503,8 +504,7 @@ function networkClassRow(
     tip: NETWORK_CLASS_TIP,
     items: (
       <span>
-        Class id <Value>{id}</Value> of {ids.size}, sent in {plural(bits, "bit")}. Ids change
-        between builds, they're only valid for demos from this one
+        Class id <Value>{id}</Value> of {ids.size}, sent in {plural(bits, "bit")}
       </span>
     ),
   };
