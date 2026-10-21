@@ -217,12 +217,11 @@ function HomepageContent() {
           compiled resource files like models, maps, and particles. Modders and tool developers use
           them for everything from custom game modes to spectator overlays and replay parsers.
           Community tools like{" "}
-          <InfoLink href="https://github.com/neverlosecc/source2gen">source2gen</InfoLink>,{" "}
-          <InfoLink href="https://github.com/a2x/cs2-dumper">cs2-dumper</InfoLink>, and{" "}
           <InfoLink href="https://github.com/GAMMACASE/Source2SchemaDumper">
             Source2SchemaDumper
           </InfoLink>{" "}
-          generate C++, C#, Rust, JSON, and KV3 SDKs from schema data.
+          and <InfoLink href="https://github.com/a2x/cs2-dumper">cs2-dumper</InfoLink> generate C++,
+          C#, Rust, JSON, and KV3 SDKs from schema data.
         </p>
         <p>
           Schemas change with every game update. This site pulls from{" "}
