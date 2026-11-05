@@ -152,7 +152,7 @@ Type   builtin {name} | declared_class {module?,name} | declared_enum {module,na
        // bitfield: the dump does not encode the bit position.
        // declared_class without module: the class is in no schema scope.
 ConVar  { name, type, default?, min?, max?, enum?, enumModule?, flags: string[], modules: string[], help? }
-       // type: bool, (u)int16/32/64, float32/64, string, color, vector2/3/4, qangle, or
+       // type: bool, (u)int8/16/32/64, float32/64, string, color, vector2/3/4, qangle, or
        // vector_ws. In some games, the type is always string and the flags use Source 1 names.
        // All values are strings. Vector values look like "[0.707, 0.707, 0]".
        // modules: the modules that declare the convar. modules is empty when flags has
