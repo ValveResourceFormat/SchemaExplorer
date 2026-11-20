@@ -119,6 +119,34 @@ const types: IntrinsicDef[] = [
     size: 8,
   },
   {
+    // Spline points are x, y, m_flSlopeIncoming, m_flSlopeOutgoing.
+    // Tangents are m_nIncomingTangent, m_nOutgoingTangent, each a CURVE_TANGENT_* value
+    name: "CPiecewiseCurve",
+    fields: [
+      {
+        name: "m_spline",
+        offset: 0,
+        type: {
+          category: "atomic",
+          name: "CUtlVector",
+          inner: { category: "fixed_array", inner: b("float32"), count: 4 },
+        },
+      },
+      {
+        name: "m_tangents",
+        offset: 24,
+        type: {
+          category: "atomic",
+          name: "CUtlVector",
+          inner: { category: "fixed_array", inner: b("int32"), count: 2 },
+        },
+      },
+      { name: "m_vDomainMins", offset: 48, type: { category: "atomic", name: "Vector2D" } },
+      { name: "m_vDomainMaxs", offset: 56, type: { category: "atomic", name: "Vector2D" } },
+    ],
+    size: 64,
+  },
+  {
     name: "Vector",
     fields: [
       { name: "x", offset: 0, type: b("float32") },

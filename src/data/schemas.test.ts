@@ -594,28 +594,28 @@ describe("atomic sizes", () => {
 
   it("adds atomics intrinsics.ts doesn't describe, with only a size", () => {
     const declarations = intrinsics(
-      atomic("CPiecewiseCurve", { size: 64, alignment: 8 }),
+      atomic("CColorGradient", { size: 24, alignment: 8 }),
       atomic("CBitVec", { size: 4, alignment: 4 }),
       atomic("CBitVec", { size: 8, alignment: 4 }),
     );
-    expect(cls(declarations, "CPiecewiseCurve")).toMatchObject({
+    expect(cls(declarations, "CColorGradient")).toMatchObject({
       module: INTRINSIC_MODULE,
-      size: 64,
+      size: 24,
       alignment: 8,
       fields: [],
     });
     expect(cls(declarations, "CBitVec")).toMatchObject({ module: INTRINSIC_MODULE, fields: [] });
     expect(cls(declarations, "CBitVec")!.size).toBeUndefined();
     const all = new Map([[INTRINSIC_MODULE, declarations]]);
-    expect(hasIntrinsicLayout(all, "CPiecewiseCurve")).toBe(false);
+    expect(hasIntrinsicLayout(all, "CColorGradient")).toBe(false);
     expect(hasIntrinsicLayout(all, "CUtlVector")).toBe(true);
   });
 
   it("keeps every intrinsic as is in dumps without sizes", () => {
-    const declarations = intrinsics(atomic("CUtlVector"), atomic("CPiecewiseCurve"));
+    const declarations = intrinsics(atomic("CUtlVector"), atomic("CColorGradient"));
     expect(declarations.size).toBe(intrinsicDeclarations.size);
     for (const [name, d] of intrinsicDeclarations) expect(declarations.get(name)).toBe(d);
-    expect(declarations.has("CPiecewiseCurve")).toBe(false);
+    expect(declarations.has("CColorGradient")).toBe(false);
   });
 });
 
