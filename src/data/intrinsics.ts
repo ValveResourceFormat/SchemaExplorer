@@ -586,6 +586,7 @@ const types: IntrinsicDef[] = [
   },
 
   {
+    // Packed to 4 bytes, so m_nRecipients is unaligned
     name: "SndOpEventGuid_t",
     fields: [
       { name: "m_nGuid", offset: 0, type: b("uint32") },
